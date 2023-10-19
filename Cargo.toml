@@ -1,0 +1,2 @@
+[workspace]
+members = [ "lt-core", "lt-cli"]
