@@ -1,5 +1,4 @@
 mod lexer;
-mod line_col;
 mod lint;
 mod span;
 mod token;

@@ -1,7 +1,7 @@
-use crate::line_col::LineCol;
+use serde::{Deserialize, Serialize};
 
-/// A window in an [char].
-#[derive(Debug, Clone, Copy)]
+/// A window in a [char].
+#[derive(Debug, Clone, Copy, Serialize, Deserialize)]
 pub struct Span {
     pub start: usize,
     pub end: usize,
