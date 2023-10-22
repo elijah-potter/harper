@@ -205,7 +205,16 @@ mod tests {
     fn sentence() {
         assert_tokens_eq(
             "hello world, my friend",
-            &[Word, Word, Punctuation(Comma), Word, Word],
+            &[
+                Word,
+                Space(1),
+                Word,
+                Punctuation(Comma),
+                Space(1),
+                Word,
+                Space(1),
+                Word,
+            ],
         )
     }
 }

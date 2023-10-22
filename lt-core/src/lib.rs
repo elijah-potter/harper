@@ -1,3 +1,4 @@
+mod fuzzy;
 mod lexer;
 mod lint;
 mod span;
