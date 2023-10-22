@@ -1,15 +1,15 @@
 <script lang="ts">
 	import Suggestion from '$lib/Suggestion.svelte';
-	import { onMount } from 'svelte';
 	import alice from '../../../alice.txt?raw';
-	import { position, offset } from 'caret-pos';
+	import { position } from 'caret-pos';
+	import { highlightText } from '$lib/parse';
 
 	let content = alice;
 	let editor: HTMLDivElement;
 
 	function updateContent() {
 		if (editor !== null) {
-			content = editor.textContent;
+			content = editor.innerText;
 		}
 	}
 
@@ -17,8 +17,14 @@
 		function action(text: string) {
 			if (editor) {
 				const pos = position(editor);
-				if (text) node.innerHTML = text.replaceAll('Duchess', `<b class="text-bold">Duchess</b>`);
-				position(editor, pos.pos);
+				highlightText(text).then((highlighted) => {
+					node.innerHTML = highlighted;
+					position(editor, pos.pos);
+				});
+			} else {
+				highlightText(text).then((highlighted) => {
+					node.innerHTML = highlighted;
+				});
 			}
 		}
 		action(text);
@@ -39,9 +45,10 @@
 		contenteditable="true"
 		use:highlight={content}
 		bind:this={editor}
+		placeholder="Tell your story..."
 		on:input={updateContent}
 	/>
-	<div class="flex flex-col">
+	<div class="flex flex-col flex-none">
 		<Suggestion category="grammar" title="Word Repeated">
 			<p>The word "the" was repeated twice</p>
 		</Suggestion>

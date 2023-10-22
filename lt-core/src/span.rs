@@ -15,4 +15,8 @@ impl Span {
     pub fn get_content<'a>(&self, source: &'a [char]) -> &'a [char] {
         &source[self.start..self.end]
     }
+
+    pub fn get_content_string(&self, source: &[char]) -> String {
+        String::from_iter(self.get_content(source))
+    }
 }

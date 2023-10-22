@@ -9,14 +9,18 @@ pub struct Token {
     pub kind: TokenKind,
 }
 
-#[derive(Debug, Is, Clone, Serialize, Deserialize)]
+#[derive(Debug, Is, Clone, Serialize, Deserialize, PartialEq)]
 pub enum TokenKind {
     Word,
     Punctuation(Punctuation),
     Number(f64),
+    /// A sequence of " " spaces.
+    Space(usize),
+    /// A sequence of "\n" newlines
+    Newline(usize),
 }
 
-#[derive(Debug, Is, Clone, Serialize, Deserialize)]
+#[derive(Debug, Is, Clone, Serialize, Deserialize, PartialEq)]
 pub enum Punctuation {
     /// .
     Period,

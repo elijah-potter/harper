@@ -34,14 +34,48 @@ async fn root() -> &'static str {
     "Hello, World!"
 }
 
-async fn parse_text(Query(payload): Query<ParseRequest>) -> (StatusCode, Json<Vec<Token>>) {
-    info!("Parse request for: \"{}\"", payload.text);
+async fn parse_text(Query(payload): Query<ParseRequest>) -> (StatusCode, String) {
+    info!("Parse request for: {:?}", payload.text);
 
-    let chars: Vec<_> = payload.text.chars().collect();
+    let chars: Vec<_> = payload
+        .text
+        .replace('\u{a0}', " ")
+        .replace("<br>", "\n")
+        .chars()
+        .collect();
 
     let lexed = lex_to_end(&chars);
 
-    (StatusCode::ACCEPTED, Json(lexed))
+    let mut html = String::new();
+
+    for token in lexed {
+        let chunk = match token.kind {
+            lt_core::TokenKind::Word => {
+                format!(
+                    r#"<span style="background-color: #F0CEA0; border-radius: 2px;">{}</span>"#,
+                    token.span.get_content_string(&chars)
+                )
+            }
+            lt_core::TokenKind::Punctuation(_) => {
+                format!(
+                    r#"<span style="background-color: #DB2B39; border-radius: 2px;">{}</span>"#,
+                    token.span.get_content_string(&chars)
+                )
+            }
+            lt_core::TokenKind::Number(_) => {
+                format!(
+                    r#"<span style="background-color: #F3A712; border-radius: 2px;">{}</span>"#,
+                    token.span.get_content_string(&chars)
+                )
+            }
+            lt_core::TokenKind::Space(count) => "\u{a0}".repeat(count),
+            lt_core::TokenKind::Newline(count) => "<br>".repeat(count),
+        };
+
+        html.push_str(&chunk);
+    }
+
+    (StatusCode::ACCEPTED, html)
 }
 
 #[derive(Deserialize)]

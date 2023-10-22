@@ -10,14 +10,20 @@ pub struct FoundToken {
     pub token: TokenKind,
 }
 
+pub fn lex_to_end_str(source: impl AsRef<str>) -> Vec<Token> {
+    let r = source.as_ref();
+
+    let chars: Vec<_> = r.chars().collect();
+
+    lex_to_end(&chars)
+}
+
 /// Lex all tokens, if possible.
 pub fn lex_to_end(source: &[char]) -> Vec<Token> {
     let mut cursor = 0;
     let mut tokens = Vec::new();
 
     loop {
-        cursor += lex_ignorables(&source[cursor..]);
-
         if cursor == source.len() {
             return tokens;
         }
@@ -29,13 +35,19 @@ pub fn lex_to_end(source: &[char]) -> Vec<Token> {
             });
             cursor += next_index;
         } else {
-            cursor += 1;
+            panic!()
         }
     }
 }
 
 fn lex_token(source: &[char]) -> Option<FoundToken> {
-    let lexers = [lex_punctuation, lex_number, lex_word];
+    let lexers = [
+        lex_spaces,
+        lex_newlines,
+        lex_punctuation,
+        lex_number,
+        lex_word,
+    ];
 
     for lexer in lexers {
         if let Some(f) = lexer(source) {
@@ -49,7 +61,10 @@ fn lex_word(source: &[char]) -> Option<FoundToken> {
     let mut end = 0;
 
     while end < source.len() {
-        if lex_punctuation(&source[end + 1..]).is_none() && lex_ignorables(&source[end + 1..]) == 0
+        if lex_punctuation(&source[end + 1..]).is_none()
+            && lex_spaces(&source[end + 1..]).is_none()
+            && lex_newlines(&source[end + 1..]).is_none()
+            && end + 1 != source.len()
         {
             end += 1;
         } else {
@@ -95,32 +110,30 @@ pub fn lex_number(source: &[char]) -> Option<FoundToken> {
     lex_number(&source[0..end])
 }
 
-/// Find the first token _after_ any characters that can be ignored (whitespace, mostly).
-fn lex_ignorables(source: &[char]) -> usize {
-    let mut cursor = 0;
+fn lex_newlines(source: &[char]) -> Option<FoundToken> {
+    let count = source.iter().take_while(|c| **c == '\n').count();
 
-    loop {
-        let last_cursor = cursor;
-
-        cursor += lex_whitespace(&source[cursor..]);
-
-        if last_cursor == cursor {
-            break;
-        }
+    if count > 0 {
+        Some(FoundToken {
+            token: TokenKind::Newline(count),
+            next_index: count,
+        })
+    } else {
+        None
     }
-
-    cursor
 }
 
-/// Find the first token _after_ whitespace.
-fn lex_whitespace(source: &[char]) -> usize {
-    for (index, c) in source.iter().enumerate() {
-        if !c.is_whitespace() {
-            return index;
-        }
-    }
+fn lex_spaces(source: &[char]) -> Option<FoundToken> {
+    let count = source.iter().take_while(|c| **c == ' ').count();
 
-    source.len()
+    if count > 0 {
+        Some(FoundToken {
+            token: TokenKind::Space(count),
+            next_index: count,
+        })
+    } else {
+        None
+    }
 }
 
 fn lex_characters(source: &[char], cs: &str, token: TokenKind) -> Option<FoundToken> {
@@ -166,4 +179,33 @@ lex_punctuation! {
     "(" =>  OpenRound,
     ")" =>  CloseRound,
     "#" => Hash
+}
+
+#[cfg(test)]
+mod tests {
+    use crate::{
+        lex_to_end_str,
+        token::Punctuation::{self, *},
+        TokenKind::{self, *},
+    };
+
+    fn assert_tokens_eq(test_str: impl AsRef<str>, expected: &[TokenKind]) {
+        let tokens = lex_to_end_str(test_str);
+        let kinds: Vec<_> = tokens.into_iter().map(|v| v.kind).collect();
+
+        assert_eq!(&kinds, expected)
+    }
+
+    #[test]
+    fn single_letter() {
+        assert_tokens_eq("a", &[Word])
+    }
+
+    #[test]
+    fn sentence() {
+        assert_tokens_eq(
+            "hello world, my friend",
+            &[Word, Word, Punctuation(Comma), Word, Word],
+        )
+    }
 }
