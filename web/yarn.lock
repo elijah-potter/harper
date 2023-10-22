@@ -620,11 +620,6 @@ caniuse-lite@^1.0.30001538, caniuse-lite@^1.0.30001541:
   resolved "https://registry.yarnpkg.com/caniuse-lite/-/caniuse-lite-1.0.30001551.tgz#1f2cfa8820bd97c971a57349d7fd8f6e08664a3e"
   integrity sha512-vtBAez47BoGMMzlbYhfXrMV1kvRF2WP/lqiMuDu1Sb4EE4LKEgjopFDSRtZfdVnslNRpOqV/woE+Xgrwj6VQlg==
 
-caret-pos@^2.0.0:
-  version "2.0.0"
-  resolved "https://registry.yarnpkg.com/caret-pos/-/caret-pos-2.0.0.tgz#f4a222a14951a1f5fa6543d73f79ec6892223326"
-  integrity sha512-cOIiBS1SjzXg+LXSiQAzGg89dHDKq/y4c30+tB5hkVN7GbtXh1BNypOmjti4LwAWQrvP4y+bNG7RJFxLGoL3bA==
-
 chalk@^4.0.0:
   version "4.1.2"
   resolved "https://registry.yarnpkg.com/chalk/-/chalk-4.1.2.tgz#aac4e2b7734a740867aeb16bf02aad556a1e7a01"
