@@ -2,8 +2,18 @@
 name = "lt-core"
 version = "0.1.0"
 edition = "2021"
+build = "build.rs"
 
 [dependencies]
 is-macro = "0.3.0"
 serde = { version = "1.0.189", features = ["derive"] }
 
+[build-dependencies]
+regex = "1.10.2"
+
+[dev-dependencies]
+criterion = { version = "0.5.1", features = ["html_reports"] }
+
+[[bench]]
+name = "spellcheck"
+harness = false

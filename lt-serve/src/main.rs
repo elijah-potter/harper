@@ -1,24 +1,19 @@
-use lt_core::{lex_to_end, Token};
+use lt_core::{lex_to_end, suggest_correct_spelling_str, Token};
 use std::net::SocketAddr;
 use tracing::info;
 
 use axum::{extract::Query, http::StatusCode, routing::get, Json, Router};
-use serde::Deserialize;
+use serde::{Deserialize, Serialize};
 
 #[tokio::main]
 async fn main() {
-    // initialize tracing
     tracing_subscriber::fmt::init();
 
-    // build our application with a route
     let app = Router::new()
-        // `GET /` goes to `root`
         .route("/", get(root))
-        // `POST /users` goes to `create_user`
-        .route("/parse", get(parse_text));
+        .route("/parse", get(parse_text))
+        .route("/spellcheck", get(spellcheck));
 
-    // run our app with hyper
-    // `axum::Server` is a re-export of `hyper::Server`
     let addr = SocketAddr::from(([127, 0, 0, 1], 3001));
     tracing::debug!("listening on {}", addr);
     axum::Server::bind(&addr)
@@ -27,7 +22,6 @@ async fn main() {
         .unwrap();
 }
 
-// basic handler that responds with a static string
 async fn root() -> &'static str {
     info!("Hello world");
 
@@ -46,25 +40,36 @@ async fn parse_text(Query(payload): Query<ParseRequest>) -> (StatusCode, String)
 
     let lexed = lex_to_end(&chars);
 
-    let mut html = String::new();
+    let mut html = "
+        <style>
+	        mark {
+	        	background-color: none;
+	        }
+
+	        .word {
+	        	border-bottom: 1px solid black;
+	        }
+        </style>
+        "
+    .to_string();
 
     for token in lexed {
         let chunk = match token.kind {
             lt_core::TokenKind::Word => {
                 format!(
-                    r#"<span style="background-color: #F0CEA0; border-radius: 2px;">{}</span>"#,
+                    r#"<mark class="word">{}</mark>"#,
                     token.span.get_content_string(&chars)
                 )
             }
             lt_core::TokenKind::Punctuation(_) => {
                 format!(
-                    r#"<span style="background-color: #DB2B39; border-radius: 2px;">{}</span>"#,
+                    r#"<mark class="punct">{}</mark>"#,
                     token.span.get_content_string(&chars)
                 )
             }
             lt_core::TokenKind::Number(_) => {
                 format!(
-                    r#"<span style="background-color: #F3A712; border-radius: 2px;">{}</span>"#,
+                    r#"<mark class="number">{}</mark>"#,
                     token.span.get_content_string(&chars)
                 )
             }
@@ -81,4 +86,27 @@ async fn parse_text(Query(payload): Query<ParseRequest>) -> (StatusCode, String)
 #[derive(Deserialize)]
 struct ParseRequest {
     pub text: String,
+}
+
+async fn spellcheck(
+    Query(payload): Query<SpellcheckRequest>,
+) -> (StatusCode, Json<SpellcheckResponse>) {
+    info!("Spellcheck request for {:?}", payload.word);
+
+    let results = suggest_correct_spelling_str(payload.word, 5);
+
+    (
+        StatusCode::ACCEPTED,
+        axum::Json(SpellcheckResponse { words: results }),
+    )
+}
+
+#[derive(Deserialize)]
+struct SpellcheckRequest {
+    pub word: String,
+}
+
+#[derive(Serialize)]
+struct SpellcheckResponse {
+    pub words: Vec<String>,
 }
