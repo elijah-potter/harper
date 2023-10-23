@@ -1,23 +1,23 @@
-use crate::words::english_words;
+pub use self::dictionary::Dictionary;
+
+mod dictionary;
 
 /// Suggest a correct spelling for a given misspelled word.
 /// [misspelled_word] is assumed to be quite small (n < 100)
 /// [max_edit_dist] relates to an optimization that allows the search algorithm to prune large portions of the search.
-pub fn suggest_correct_spelling(
+pub fn suggest_correct_spelling<'a>(
     misspelled_word: &[char],
     result_limit: usize,
     max_edit_dist: u8,
-) -> Vec<&[char]> {
-    let words = english_words();
-
+    dictionary: &'a Dictionary,
+) -> Vec<&'a [char]> {
     // 53 is the length of the longest word.
     let mut buf_a = Vec::with_capacity(53);
     let mut buf_b = Vec::with_capacity(53);
 
-    let pruned_words = words
-        .iter()
+    let pruned_words = dictionary
+        .words_iter()
         .filter(|word| word.len().abs_diff(misspelled_word.len()) <= max_edit_dist as usize)
-        .cloned()
         .filter_map(|word| {
             let dist = edit_distance_min_alloc(misspelled_word, word, &mut buf_a, &mut buf_b);
 
@@ -51,10 +51,11 @@ pub fn suggest_correct_spelling_str(
     misspelled_word: impl AsRef<str>,
     result_limit: usize,
     max_edit_dist: u8,
+    dictionary: &Dictionary,
 ) -> Vec<String> {
     let chars: Vec<char> = misspelled_word.as_ref().chars().collect();
 
-    suggest_correct_spelling(&chars, result_limit, max_edit_dist)
+    suggest_correct_spelling(&chars, result_limit, max_edit_dist, dictionary)
         .into_iter()
         .map(|word| word.iter().collect())
         .collect()

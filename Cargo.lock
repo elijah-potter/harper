@@ -518,7 +518,6 @@ version = "0.1.0"
 dependencies = [
  "criterion",
  "is-macro",
- "regex",
  "serde",
 ]
 

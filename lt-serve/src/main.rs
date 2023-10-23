@@ -1,4 +1,4 @@
-use lt_core::{lex_to_end, suggest_correct_spelling_str, Token};
+use lt_core::{lex_to_end, suggest_correct_spelling_str, Dictionary, Token};
 use std::net::SocketAddr;
 use tracing::info;
 
@@ -93,7 +93,9 @@ async fn spellcheck(
 ) -> (StatusCode, Json<SpellcheckResponse>) {
     info!("Spellcheck request for {:?}", payload.word);
 
-    let results = suggest_correct_spelling_str(payload.word, 5, 3);
+    let dictionary = Dictionary::create_from_static();
+
+    let results = suggest_correct_spelling_str(payload.word, 5, 3, &dictionary);
 
     (
         StatusCode::ACCEPTED,
