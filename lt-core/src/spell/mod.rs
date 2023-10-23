@@ -1,29 +1,44 @@
 use crate::words::english_words;
 
-pub fn suggest_correct_spelling(misspelled_word: &[char], result_limit: usize) -> Vec<&[char]> {
+/// Suggest a correct spelling for a given misspelled word.
+/// [misspelled_word] is assumed to be quite small (n < 100)
+/// [max_edit_dist] relates to an optimization that allows the search algorithm to prune large portions of the search.
+pub fn suggest_correct_spelling(
+    misspelled_word: &[char],
+    result_limit: usize,
+    max_edit_dist: u8,
+) -> Vec<&[char]> {
     let words = english_words();
 
-    let mut buf_a = Vec::new();
-    let mut buf_b = Vec::new();
+    // 53 is the length of the longest word.
+    let mut buf_a = Vec::with_capacity(53);
+    let mut buf_b = Vec::with_capacity(53);
 
-    let word_dist: Vec<_> = words
+    let pruned_words = words
         .iter()
-        .map(|word| edit_distance_min_alloc(misspelled_word, word, &mut buf_a, &mut buf_b))
-        .collect();
+        .filter(|word| word.len().abs_diff(misspelled_word.len()) <= max_edit_dist as usize)
+        .cloned()
+        .filter_map(|word| {
+            let dist = edit_distance_min_alloc(misspelled_word, word, &mut buf_a, &mut buf_b);
+
+            if dist <= max_edit_dist {
+                Some((word, dist))
+            } else {
+                None
+            }
+        });
 
     let mut found: Vec<(&[char], u8)> = Vec::with_capacity(result_limit);
-    found.extend(
-        words[0..result_limit]
-            .iter()
-            .copied()
-            .zip(word_dist[0..result_limit].iter().copied()),
-    );
 
-    found.sort_by(|a, b| a.1.cmp(&b.1));
+    for (word, dist) in pruned_words {
+        if found.len() < result_limit {
+            found.push((word, dist));
+            found.sort_by(|a, b| a.1.cmp(&b.1));
+            continue;
+        }
 
-    for (word, score) in words.iter().zip(&word_dist) {
-        if *score < found[result_limit - 1].1 {
-            found[result_limit - 1] = (word, *score);
+        if dist < found[result_limit - 1].1 {
+            found[result_limit - 1] = (word, dist);
             found.sort_by(|a, b| a.1.cmp(&b.1));
         }
     }
@@ -31,13 +46,15 @@ pub fn suggest_correct_spelling(misspelled_word: &[char], result_limit: usize) -
     found.into_iter().map(|(word, _dist)| word).collect()
 }
 
+/// Convenience function over [suggest_correct_spelling] that does conversions for you.
 pub fn suggest_correct_spelling_str(
     misspelled_word: impl AsRef<str>,
     result_limit: usize,
+    max_edit_dist: u8,
 ) -> Vec<String> {
     let chars: Vec<char> = misspelled_word.as_ref().chars().collect();
 
-    suggest_correct_spelling(&chars, result_limit)
+    suggest_correct_spelling(&chars, result_limit, max_edit_dist)
         .into_iter()
         .map(|word| word.iter().collect())
         .collect()

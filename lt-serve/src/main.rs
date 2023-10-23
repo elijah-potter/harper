@@ -93,7 +93,7 @@ async fn spellcheck(
 ) -> (StatusCode, Json<SpellcheckResponse>) {
     info!("Spellcheck request for {:?}", payload.word);
 
-    let results = suggest_correct_spelling_str(payload.word, 5);
+    let results = suggest_correct_spelling_str(payload.word, 5, 3);
 
     (
         StatusCode::ACCEPTED,
