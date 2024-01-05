@@ -1,11 +1,16 @@
-mod lexer;
-mod lint;
+#![allow(dead_code)]
+
+mod document;
+mod linting;
+mod parsing;
 mod span;
 mod spell;
-mod token;
 
-pub use lexer::{lex_to_end, lex_to_end_str};
-pub use lint::{Lint, LintKind};
+pub use document::Document;
+pub use linting::all_linters;
+pub use linting::{Lint, LintKind, Suggestion};
+pub use parsing::{lex_to_end, lex_to_end_str};
+pub use parsing::{FatToken, Punctuation, Token, TokenKind};
+pub use span::Span;
 pub use spell::Dictionary;
 pub use spell::{suggest_correct_spelling, suggest_correct_spelling_str};
-pub use token::{Token, TokenKind};

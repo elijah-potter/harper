@@ -1,4 +1,4 @@
-use criterion::{black_box, criterion_group, criterion_main, Criterion};
+use criterion::{criterion_group, criterion_main, Criterion};
 use lt_core::{suggest_correct_spelling_str, Dictionary};
 
 fn spellcheck(dictionary: &Dictionary) {

@@ -1,0 +1,74 @@
+use is_macro::Is;
+use serde::{Deserialize, Serialize};
+
+use crate::span::Span;
+
+#[derive(Debug, Clone, Copy, Serialize, Deserialize)]
+pub struct Token {
+    pub span: Span,
+    pub kind: TokenKind,
+}
+
+impl Token {
+    /// Convert to an allocated [`FatToken`].
+    pub fn to_fat(&self, source: &[char]) -> FatToken {
+        let content = self.span.get_content(source).to_vec();
+
+        FatToken {
+            content,
+            kind: self.kind,
+        }
+    }
+}
+
+/// A [`Token`] that holds its content as a fat [`Vec<char>`] rather than as a [`Span`].
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct FatToken {
+    pub content: Vec<char>,
+    pub kind: TokenKind,
+}
+
+#[derive(Debug, Is, Clone, Copy, Serialize, Deserialize, PartialEq)]
+#[serde(tag = "kind", content = "value")]
+pub enum TokenKind {
+    Word,
+    Punctuation(Punctuation),
+    Number(f64),
+    /// A sequence of " " spaces.
+    Space(usize),
+    /// A sequence of "\n" newlines
+    Newline(usize),
+}
+
+#[derive(Debug, Is, Clone, Copy, Serialize, Deserialize, PartialEq, Eq)]
+#[serde(tag = "kind")]
+pub enum Punctuation {
+    /// .
+    Period,
+    /// !
+    Bang,
+    /// ?
+    Question,
+    /// :
+    Colon,
+    /// ;
+    Semicolon,
+    /// "
+    Quote,
+    /// ,
+    Comma,
+    /// -
+    Hyphen,
+    /// ' or ’
+    Apostrophe,
+    /// [
+    OpenSquare,
+    /// ]
+    CloseSquare,
+    /// (
+    OpenRound,
+    /// )
+    CloseRound,
+    /// "
+    Hash,
+}

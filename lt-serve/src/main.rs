@@ -1,4 +1,6 @@
-use lt_core::{lex_to_end, suggest_correct_spelling_str, Dictionary, Token};
+#![allow(dead_code)]
+
+use lt_core::{all_linters, Document, FatToken, Lint, Span, Suggestion};
 use std::net::SocketAddr;
 use tracing::info;
 
@@ -12,7 +14,8 @@ async fn main() {
     let app = Router::new()
         .route("/", get(root))
         .route("/parse", get(parse_text))
-        .route("/spellcheck", get(spellcheck));
+        .route("/lint", get(lint))
+        .route("/apply", get(apply_suggestion));
 
     let addr = SocketAddr::from(([127, 0, 0, 1], 3001));
     tracing::debug!("listening on {}", addr);
@@ -28,59 +31,13 @@ async fn root() -> &'static str {
     "Hello, World!"
 }
 
-async fn parse_text(Query(payload): Query<ParseRequest>) -> (StatusCode, String) {
-    info!("Parse request for: {:?}", payload.text);
+async fn parse_text(Query(payload): Query<ParseRequest>) -> (StatusCode, Json<ParseResponse>) {
+    let text = payload.text;
 
-    let chars: Vec<_> = payload
-        .text
-        .replace('\u{a0}', " ")
-        .replace("<br>", "\n")
-        .chars()
-        .collect();
+    let document = Document::new(&text);
+    let tokens: Vec<_> = document.fat_tokens().collect();
 
-    let lexed = lex_to_end(&chars);
-
-    let mut html = "
-        <style>
-	        mark {
-	        	background-color: none;
-	        }
-
-	        .word {
-	        	border-bottom: 1px solid black;
-	        }
-        </style>
-        "
-    .to_string();
-
-    for token in lexed {
-        let chunk = match token.kind {
-            lt_core::TokenKind::Word => {
-                format!(
-                    r#"<mark class="word">{}</mark>"#,
-                    token.span.get_content_string(&chars)
-                )
-            }
-            lt_core::TokenKind::Punctuation(_) => {
-                format!(
-                    r#"<mark class="punct">{}</mark>"#,
-                    token.span.get_content_string(&chars)
-                )
-            }
-            lt_core::TokenKind::Number(_) => {
-                format!(
-                    r#"<mark class="number">{}</mark>"#,
-                    token.span.get_content_string(&chars)
-                )
-            }
-            lt_core::TokenKind::Space(count) => "\u{a0}".repeat(count),
-            lt_core::TokenKind::Newline(count) => "<br>".repeat(count),
-        };
-
-        html.push_str(&chunk);
-    }
-
-    (StatusCode::ACCEPTED, html)
+    (StatusCode::ACCEPTED, Json(ParseResponse { tokens }))
 }
 
 #[derive(Deserialize)]
@@ -88,27 +45,70 @@ struct ParseRequest {
     pub text: String,
 }
 
-async fn spellcheck(
-    Query(payload): Query<SpellcheckRequest>,
-) -> (StatusCode, Json<SpellcheckResponse>) {
-    info!("Spellcheck request for {:?}", payload.word);
+#[derive(Serialize)]
+struct ParseResponse {
+    pub tokens: Vec<FatToken>,
+}
 
-    let dictionary = Dictionary::create_from_static();
+async fn lint(Query(payload): Query<LintRequest>) -> (StatusCode, Json<LintResponse>) {
+    let text = payload.text;
 
-    let results = suggest_correct_spelling_str(payload.word, 5, 3, &dictionary);
+    let document = Document::new(&text);
+
+    let lints = all_linters(&document);
+
+    (StatusCode::ACCEPTED, Json(LintResponse { lints }))
+}
+
+#[derive(Deserialize)]
+struct LintRequest {
+    pub text: String,
+}
+
+#[derive(Serialize)]
+struct LintResponse {
+    pub lints: Vec<Lint>,
+}
+
+async fn apply_suggestion(
+    Query(payload): Query<ApplySuggestionRequest>,
+) -> (StatusCode, Json<ApplySuggestionResponse>) {
+    let text = payload.text;
+
+    let Ok(SuggestionData { suggestion, span }) = serde_json::from_str(&payload.data) else {
+        return (
+            StatusCode::BAD_REQUEST,
+            Json(ApplySuggestionResponse {
+                text: "".to_string(),
+            }),
+        );
+    };
+
+    let mut document = Document::new(&text);
+
+    document.apply_suggestion(&suggestion, span);
 
     (
         StatusCode::ACCEPTED,
-        axum::Json(SpellcheckResponse { words: results }),
+        Json(ApplySuggestionResponse {
+            text: document.get_full_string(),
+        }),
     )
 }
 
 #[derive(Deserialize)]
-struct SpellcheckRequest {
-    pub word: String,
+struct ApplySuggestionRequest {
+    pub text: String,
+    pub data: String,
+}
+
+#[derive(Deserialize)]
+struct SuggestionData {
+    suggestion: Suggestion,
+    span: Span,
 }
 
 #[derive(Serialize)]
-struct SpellcheckResponse {
-    pub words: Vec<String>,
+struct ApplySuggestionResponse {
+    pub text: String,
 }

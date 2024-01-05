@@ -2,17 +2,17 @@
 	import { Badge, Card } from 'flowbite-svelte';
 	import { startCase } from 'lodash-es';
 
-	type Category = 'grammar' | 'spelling';
+	type Category = 'mild' | 'moderate';
 
 	export let category: Category;
 	export let title: string;
 
 	function categoryToColor(category: Category): string {
 		switch (category) {
-			case 'grammar':
+			case 'mild':
 				return 'green';
-			case 'spelling':
-				return 'purple';
+			case 'moderate':
+				return 'orange';
 		}
 	}
 </script>

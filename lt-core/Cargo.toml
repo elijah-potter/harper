@@ -5,10 +5,11 @@ edition = "2021"
 
 [dependencies]
 is-macro = "0.3.0"
-serde = { version = "1.0.189", features = ["derive"] }
+itertools = "0.11.0"
+serde = { version = "1.0.190", features = ["derive"] }
 
 [dev-dependencies]
-criterion = { version = "0.5.1", features = ["html_reports"] }
+criterion = { version = "0.5.1", features = ["html_reports", "plotters", "cargo_bench_support"], default_features = false }
 
 [[bench]]
 name = "spellcheck"
