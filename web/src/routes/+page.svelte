@@ -3,53 +3,22 @@
 	import alice from '../../../alice.txt?raw';
 	import Highlights from '$lib/Highlights.svelte';
 	import { Button } from 'flowbite-svelte';
+	import { lintText, applySuggestion } from '$lib/analysis';
+	import type { Lint } from '$lib/analysis';
 
 	let content = alice;
 	let editor: HTMLTextAreaElement;
 
-	interface LintResponse {
-		lints: Lint[];
-	}
-
-	interface Lint {
-		span: Span;
-		lint_kind: 'Capitalization' | 'Spelling';
-		suggestions: Suggestion[];
-	}
-
-	interface Suggestion {
-		ReplaceWith: string[];
-	}
-
-	interface Span {
-		start: number;
-		end: number;
-	}
-
-	async function lintText(text: string): Promise<Lint[]> {
-		const req = await fetch(`/lint?text=${encodeURIComponent(text)}`);
-
-		const res: LintResponse = await req.json();
-
-		return res.lints;
-	}
-
-	async function applySuggestion(
-		text: string,
-		suggestion: Suggestion,
-		span: Span
-	): Promise<string> {
-		const req = await fetch(
-			`/apply?text=${encodeURIComponent(text)}&data=${JSON.stringify({ span, suggestion })}`
-		);
-
-		const res = await req.json();
-		return res.text;
-	}
-
 	let lints: Lint[] = [];
 
 	$: lintText(content).then((newLints) => (lints = newLints));
+
+	function ping() {
+		lintText(content).then((newLints) => (lints = newLints));
+		setTimeout(ping, 1000);
+	}
+
+	ping();
 </script>
 
 <div class="flex flex-row w-full h-screen">

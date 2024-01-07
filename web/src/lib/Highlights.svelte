@@ -1,49 +1,7 @@
 <script lang="ts">
+	import type { Lint, Token, TokenKind } from '$lib/analysis';
+	import { parseText, contentToString } from '$lib/analysis';
 	export let content: string;
-
-	interface ParseResponse {
-		tokens: Token[];
-	}
-
-	interface Token {
-		content: string[];
-		kind: TokenKind;
-	}
-
-	type TokenKind =
-		| { kind: 'Word' }
-		| { kind: 'Punctuation'; value: Punctuation }
-		| { kind: 'Number'; value: number }
-		| { kind: 'Space'; value: number }
-		| { kind: 'Newline'; value: number };
-
-	type Punctuation =
-		| 'Period'
-		| 'Bang'
-		| 'Question'
-		| 'Colon'
-		| 'Semicolon'
-		| 'Quote'
-		| 'Comma'
-		| 'Hyphen'
-		| 'Apostrophe'
-		| 'OpenSquare'
-		| 'CloseSquare'
-		| 'OpenRound'
-		| 'CloseRound'
-		| 'Hash';
-
-	async function parseText(text: string): Promise<Token[]> {
-		const req = await fetch(`/parse?text=${encodeURIComponent(text)}`);
-
-		const res: ParseResponse = await req.json();
-
-		return res.tokens;
-	}
-
-	function contentToString(content: string[]): string {
-		return content.reduce((p, c) => p + c, '');
-	}
 
 	let tokens: Token[] = [];
 

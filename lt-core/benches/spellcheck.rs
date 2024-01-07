@@ -6,9 +6,12 @@ fn spellcheck(dictionary: &Dictionary) {
 }
 
 fn criterion_benchmark(c: &mut Criterion) {
-    let dictionary = Dictionary::create_from_static();
+    let mut group = c.benchmark_group("spellcheck");
+    group.sample_size(10000);
 
-    c.bench_function("hello 5", |b| b.iter(|| spellcheck(&dictionary)));
+    let dictionary = Dictionary::new();
+
+    group.bench_function("hello 5", |b| b.iter(|| spellcheck(&dictionary)));
 }
 
 criterion_group!(benches, criterion_benchmark);

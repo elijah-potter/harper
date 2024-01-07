@@ -59,8 +59,6 @@ pub enum Punctuation {
     Comma,
     /// -
     Hyphen,
-    /// ' or ’
-    Apostrophe,
     /// [
     OpenSquare,
     /// ]
@@ -71,4 +69,14 @@ pub enum Punctuation {
     CloseRound,
     /// "
     Hash,
+}
+
+pub trait TokenStringExt {
+    fn first_word(&self) -> Option<Token>;
+}
+
+impl TokenStringExt for [Token] {
+    fn first_word(&self) -> Option<Token> {
+        self.iter().find(|v| v.kind.is_word()).copied()
+    }
 }

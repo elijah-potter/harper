@@ -5,7 +5,7 @@ use super::lint::Suggestion;
 pub fn spell_check(document: &Document) -> Vec<Lint> {
     let mut lints = Vec::new();
 
-    let dictionary = Dictionary::create_from_static();
+    let dictionary = Dictionary::new();
 
     for word in document.words() {
         let word_chars = document.get_span_content(word.span);

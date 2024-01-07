@@ -172,8 +172,6 @@ lex_punctuation! {
     "\"" => Quote,
     "," => Comma,
     "-" => Hyphen,
-    "’" => Apostrophe,
-    "'" => Apostrophe,
     "[" =>  OpenSquare,
     "]" =>  CloseSquare,
     "(" =>  OpenRound,

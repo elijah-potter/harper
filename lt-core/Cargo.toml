@@ -4,6 +4,7 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
+cached = "0.47.0"
 is-macro = "0.3.0"
 itertools = "0.11.0"
 serde = { version = "1.0.190", features = ["derive"] }

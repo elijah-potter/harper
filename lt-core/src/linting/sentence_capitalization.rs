@@ -1,6 +1,6 @@
 use itertools::Itertools;
 
-use crate::{document::Document, Lint, LintKind};
+use crate::{document::Document, parsing::TokenStringExt, Lint, LintKind};
 
 use super::lint::Suggestion;
 
@@ -9,7 +9,12 @@ pub fn sentence_capitalization_lint(document: &Document) -> Vec<Lint> {
     let mut lints = Vec::new();
 
     for sentence in document.sentences() {
-        if let Some(first_word) = sentence.first() {
+        dbg!(document.get_content_string(crate::Span {
+            start: sentence.first().unwrap().span.start,
+            end: sentence.last().unwrap().span.start,
+        }));
+
+        if let Some(first_word) = sentence.first_word() {
             let letters = document.get_span_content(first_word.span);
 
             if let Some(first_letter) = letters.first() {

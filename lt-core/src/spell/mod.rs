@@ -15,31 +15,38 @@ pub fn suggest_correct_spelling<'a>(
     let mut buf_a = Vec::with_capacity(53);
     let mut buf_b = Vec::with_capacity(53);
 
-    let pruned_words = dictionary
-        .words_iter()
-        .filter(|word| word.len().abs_diff(misspelled_word.len()) <= max_edit_dist as usize)
-        .filter_map(|word| {
-            let dist = edit_distance_min_alloc(misspelled_word, word, &mut buf_a, &mut buf_b);
+    // The length of the shortest word to look at.
+    let shortest_word_len = if misspelled_word.len() < max_edit_dist as usize {
+        1
+    } else {
+        misspelled_word.len() - max_edit_dist as usize
+    };
 
-            if dist <= max_edit_dist {
-                Some((word, dist))
-            } else {
-                None
-            }
-        });
+    let words_to_search = (shortest_word_len..misspelled_word.len() + max_edit_dist as usize)
+        .flat_map(|len| dictionary.words_with_len_iter(len));
+
+    let pruned_words = words_to_search.filter_map(|word| {
+        let dist = edit_distance_min_alloc(misspelled_word, word, &mut buf_a, &mut buf_b);
+
+        if dist <= max_edit_dist {
+            Some((word, dist))
+        } else {
+            None
+        }
+    });
 
     let mut found: Vec<(&[char], u8)> = Vec::with_capacity(result_limit);
 
     for (word, dist) in pruned_words {
         if found.len() < result_limit {
             found.push((word, dist));
-            found.sort_by(|a, b| a.1.cmp(&b.1));
+            found.sort_by_key(|a| a.1);
             continue;
         }
 
         if dist < found[result_limit - 1].1 {
             found[result_limit - 1] = (word, dist);
-            found.sort_by(|a, b| a.1.cmp(&b.1));
+            found.sort_by_key(|a| a.1);
         }
     }
 
@@ -71,13 +78,16 @@ fn edit_distance_min_alloc(
     previous_row: &mut Vec<u8>,
     current_row: &mut Vec<u8>,
 ) -> u8 {
-    assert!(source.len() <= 255 && target.len() <= 255);
+    if cfg!(debug) {
+        assert!(source.len() <= 255 && target.len() <= 255);
+    }
 
     let row_width = source.len();
     let col_height = target.len();
 
     previous_row.clear();
     previous_row.extend(0u8..=row_width as u8);
+    // Alright if not zeroed, since we overwrite it anyway
     current_row.resize(row_width + 1, 0);
 
     for j in 1..=col_height {

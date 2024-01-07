@@ -2,27 +2,62 @@
 
 use lt_core::{all_linters, Document, FatToken, Lint, Span, Suggestion};
 use std::net::SocketAddr;
-use tracing::info;
+use tokio::time::Instant;
+use tracing::{debug, info, Level};
+use tracing_subscriber::FmtSubscriber;
 
-use axum::{extract::Query, http::StatusCode, routing::get, Json, Router};
+use axum::{
+    body::Body,
+    http::Request,
+    http::StatusCode,
+    middleware::{self, Next},
+    response::Response,
+    routing::{get, post},
+    Json, Router,
+};
 use serde::{Deserialize, Serialize};
 
 #[tokio::main]
 async fn main() {
-    tracing_subscriber::fmt::init();
+    let subscriber = FmtSubscriber::builder()
+        .with_max_level(Level::DEBUG)
+        .finish();
+
+    tracing::subscriber::set_global_default(subscriber).expect("setting default subscriber failed");
 
     let app = Router::new()
-        .route("/", get(root))
-        .route("/parse", get(parse_text))
-        .route("/lint", get(lint))
-        .route("/apply", get(apply_suggestion));
+        .route("/", post(root))
+        .route("/parse", post(parse_text))
+        .route("/lint", post(lint))
+        .route("/apply", post(apply_suggestion))
+        .layer(middleware::from_fn(timing_middleware));
 
     let addr = SocketAddr::from(([127, 0, 0, 1], 3001));
-    tracing::debug!("listening on {}", addr);
+    info!("listening on {}", addr);
     axum::Server::bind(&addr)
         .serve(app.into_make_service())
         .await
         .unwrap();
+}
+
+async fn timing_middleware(request: Request<Body>, next: Next<Body>) -> Response {
+    let uri = request.uri().clone();
+
+    let start = Instant::now();
+
+    let res = next.run(request).await;
+
+    let end = Instant::now();
+
+    let diff = end - start;
+
+    info!(
+        "Took {} ms to process request at endpoint: {}",
+        diff.as_millis(),
+        uri.path(),
+    );
+
+    res
 }
 
 async fn root() -> &'static str {
@@ -31,7 +66,7 @@ async fn root() -> &'static str {
     "Hello, World!"
 }
 
-async fn parse_text(Query(payload): Query<ParseRequest>) -> (StatusCode, Json<ParseResponse>) {
+async fn parse_text(Json(payload): Json<ParseRequest>) -> (StatusCode, Json<ParseResponse>) {
     let text = payload.text;
 
     let document = Document::new(&text);
@@ -50,7 +85,7 @@ struct ParseResponse {
     pub tokens: Vec<FatToken>,
 }
 
-async fn lint(Query(payload): Query<LintRequest>) -> (StatusCode, Json<LintResponse>) {
+async fn lint(Json(payload): Json<LintRequest>) -> (StatusCode, Json<LintResponse>) {
     let text = payload.text;
 
     let document = Document::new(&text);
@@ -71,22 +106,11 @@ struct LintResponse {
 }
 
 async fn apply_suggestion(
-    Query(payload): Query<ApplySuggestionRequest>,
+    Json(payload): Json<ApplySuggestionRequest>,
 ) -> (StatusCode, Json<ApplySuggestionResponse>) {
     let text = payload.text;
-
-    let Ok(SuggestionData { suggestion, span }) = serde_json::from_str(&payload.data) else {
-        return (
-            StatusCode::BAD_REQUEST,
-            Json(ApplySuggestionResponse {
-                text: "".to_string(),
-            }),
-        );
-    };
-
     let mut document = Document::new(&text);
-
-    document.apply_suggestion(&suggestion, span);
+    document.apply_suggestion(&payload.suggestion, payload.span);
 
     (
         StatusCode::ACCEPTED,
@@ -99,13 +123,8 @@ async fn apply_suggestion(
 #[derive(Deserialize)]
 struct ApplySuggestionRequest {
     pub text: String,
-    pub data: String,
-}
-
-#[derive(Deserialize)]
-struct SuggestionData {
-    suggestion: Suggestion,
-    span: Span,
+    pub suggestion: Suggestion,
+    pub span: Span,
 }
 
 #[derive(Serialize)]
