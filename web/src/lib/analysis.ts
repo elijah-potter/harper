@@ -67,6 +67,10 @@ export interface Span {
 	end: number;
 }
 
+export function spanContent(span: Span, source: string): string {
+	return source.substring(span.start, span.end);
+}
+
 export async function lintText(text: string): Promise<Lint[]> {
 	const req = await fetch(`/lint`, {
 		method: 'POST',

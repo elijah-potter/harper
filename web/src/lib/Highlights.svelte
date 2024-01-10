@@ -1,6 +1,7 @@
 <script lang="ts">
 	import type { Lint, Token, TokenKind } from '$lib/analysis';
-	import { parseText, contentToString } from '$lib/analysis';
+	import { parseText, contentToString, lintText } from '$lib/analysis';
+
 	export let content: string;
 
 	let tokens: Token[] = [];
@@ -35,8 +36,5 @@
 				<p class={`inline ${kindToClass(token.kind)}`}>{contentToString(token.content)}</p>
 			{/if}
 		{/each}
-	</div>
-	<div class="whitespace-pre-line p-0 m-0 indent-0" style="grid-row: 1; grid-column: 1">
-		{content}
 	</div>
 </div>

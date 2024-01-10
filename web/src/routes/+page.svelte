@@ -2,6 +2,7 @@
 	import Suggestion from '$lib/Suggestion.svelte';
 	import alice from '../../../alice.txt?raw';
 	import Highlights from '$lib/Highlights.svelte';
+	import Underlines from '$lib/Underlines.svelte';
 	import { Button } from 'flowbite-svelte';
 	import { lintText, applySuggestion } from '$lib/analysis';
 	import type { Lint } from '$lib/analysis';
@@ -24,10 +25,14 @@
 <div class="flex flex-row w-full h-screen">
 	<div class="flex-auto h-full p-5 grid z-10">
 		<div class="overflow-auto p-0" style="grid-row: 1; grid-column: 1">
+			<Underlines {content}></Underlines>
+		</div>
+		<div class="overflow-auto p-0" style="grid-row: 1; grid-column: 1">
 			<Highlights {content}></Highlights>
 		</div>
 		<textarea
 			class="w-full h-full m-0 rounded-none p-0 z-0 bg-transparent border-none"
+			spellcheck="false"
 			style="grid-row: 1; grid-column: 1"
 			bind:value={content}
 			bind:this={editor}
