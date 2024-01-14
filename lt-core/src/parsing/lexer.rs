@@ -1,6 +1,9 @@
 use crate::span::Span;
 
-use super::token::{Punctuation, Token, TokenKind};
+use super::{
+    token::{Punctuation, Token, TokenKind},
+    Quote,
+};
 
 #[derive(Debug)]
 pub struct FoundToken {
@@ -152,6 +155,10 @@ fn lex_characters(source: &[char], cs: &str, token: TokenKind) -> Option<FoundTo
 macro_rules! lex_punctuation {
     ($($text:literal => $res:ident),*) => {
         fn lex_punctuation(source: &[char]) -> Option<FoundToken> {
+            if let Some(found) = lex_quote(source){
+                return Some(found);
+            }
+
             $(
                 if let Some(found) = lex_characters(source, $text, TokenKind::Punctuation(Punctuation::$res)){
                     return Some(found);
@@ -169,7 +176,6 @@ lex_punctuation! {
     "?" => Question,
     ":" => Colon,
     ";" => Semicolon,
-    "\"" => Quote,
     "," => Comma,
     "-" => Hyphen,
     "[" =>  OpenSquare,
@@ -177,6 +183,19 @@ lex_punctuation! {
     "(" =>  OpenRound,
     ")" =>  CloseRound,
     "#" => Hash
+}
+
+fn lex_quote(source: &[char]) -> Option<FoundToken> {
+    let c = *source.first()?;
+
+    if c == '\"' || c == '“' || c == '”' {
+        Some(FoundToken {
+            next_index: 1,
+            token: TokenKind::Punctuation(Punctuation::Quote(Quote { twin_loc: None })),
+        })
+    } else {
+        None
+    }
 }
 
 #[cfg(test)]

@@ -1,6 +1,6 @@
 <script lang="ts">
-	import type { Lint, Token, TokenKind } from '$lib/analysis';
-	import { contentToString, lintText, spanContent } from '$lib/analysis';
+	import type { Lint } from '$lib/analysis';
+	import { lintText, spanContent } from '$lib/analysis';
 
 	export let content: string;
 	export let focusLintIndex: number | undefined;
@@ -53,7 +53,7 @@
 				let lintContent = [
 					spanContent(lint.span, content).replaceAll(' ', '\u00A0'),
 					'red',
-					lintIndex === focusLintIndex ? '3px' : '1px'
+					lintIndex === focusLintIndex ? '4px' : '2px'
 				];
 
 				return [...prevContent, lintContent];
@@ -80,7 +80,7 @@
 </script>
 
 <div class="grid">
-	<div class="p-0 m-0 indent-0" style="grid-row: 1; grid-column: 1; color: transparent;">
+	<div class="p-0 m-0 indent-0 text-transparent" style="grid-row: 1; grid-column: 1">
 		{#each modified as chunk}
 			{#if chunk == null}
 				<br />
@@ -88,7 +88,10 @@
 				<span class="">{chunk}</span>
 			{:else}
 				<span style={`margin-right: -4px;`}>
-					<span class="transition-all" style={`border-bottom: ${chunk[2]} solid ${chunk[1]};`}>
+					<span
+						class="underlinespecial"
+						style={`--bg-color: ${chunk[1]}; --line-width: ${chunk[2]};`}
+					>
 						{chunk[0]}
 					</span>
 				</span>

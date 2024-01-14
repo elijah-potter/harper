@@ -20,6 +20,7 @@ pub fn sentence_capitalization_lint(document: &Document) -> Vec<Lint> {
                         suggestions: vec![Suggestion::ReplaceWith(
                             first_letter.to_uppercase().collect_vec(),
                         )],
+                        message: "This sentance does not start with a capital letter".to_string(),
                     })
                 }
             }

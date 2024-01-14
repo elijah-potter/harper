@@ -1,7 +1,6 @@
 <script lang="ts">
 	import { Card } from 'flowbite-svelte';
 	import alice from '../../../alice.txt?raw';
-	import Highlights from '$lib/Highlights.svelte';
 	import Underlines from '$lib/Underlines.svelte';
 	import { Button } from 'flowbite-svelte';
 	import { lintText, applySuggestion, spanContent } from '$lib/analysis';
@@ -36,13 +35,10 @@
 	$: console.log(focused);
 </script>
 
-<div class="flex flex-row w-full h-screen">
-	<div class="flex-auto h-full p-5 grid z-10 text-lg">
+<div class="flex flex-row w-full h-screen [&>*]:m-5">
+	<Card class="flex-auto max-w-full h-full p-5 grid z-10 text-lg">
 		<div class="overflow-auto p-0" style="grid-row: 1; grid-column: 1">
 			<Underlines {content} focusLintIndex={focused} />
-		</div>
-		<div class="overflow-auto p-0" style="grid-row: 1; grid-column: 1">
-			<Highlights {content} />
 		</div>
 		<textarea
 			class="w-full h-full m-0 rounded-none p-0 z-0 bg-transparent border-none text-lg"
@@ -51,24 +47,30 @@
 			bind:value={content}
 			bind:this={editor}
 		></textarea>
-	</div>
-	<div class="flex flex-col flex-grow">
+	</Card>
+	<Card class="flex flex-col flex-grow">
 		{#each lints as lint, i}
-			<Card
-				class="m-1 hover:translate-x-3 transition-all"
-				on:mouseenter={() => (focused = i)}
-				on:mouseleave={() => (focused = undefined)}
-			>
-				<div style={`border-left: 3px solid ${categoryToColor('mild')}`}>
+			<Card class="m-1 hover:translate-x-3 transition-all" on:click={() => (focused = i)}>
+				<div class="pl-2" style={`border-left: 3px solid ${categoryToColor('mild')}`}>
 					<div class="flex flex-row">
-						<div class="rounded-full w-2 aspect-square"></div>
-						<h3 class="font-bold">{`${lint.lint_kind} - "${spanContent(lint.span, content)}"`}</h3>
+						<h3 class="font-bold">
+							{lint.lint_kind} - “<span class="italic">
+								{spanContent(lint.span, content)}
+							</span> ”
+						</h3>
 					</div>
-					<div>
+					<div
+						class="transition-all overflow-hidden"
+						style={`height: ${
+							focused === i ? `calc(55px * ${lint.suggestions.length + 1})` : '0px'
+						}`}
+					>
+						<p style="height: 50px">{lint.message}</p>
 						{#each lint.suggestions as suggestion}
 							<Button
 								color="alternative"
-								class="w-full h-full m-1 "
+								class="w-full mb-1"
+								style="height: 40px; margin: 5px 0px;"
 								on:click={() =>
 									applySuggestion(content, suggestion, lint.span).then(
 										(edited) => (content = edited)
@@ -83,5 +85,5 @@
 				</div>
 			</Card>
 		{/each}
-	</div>
+	</Card>
 </div>

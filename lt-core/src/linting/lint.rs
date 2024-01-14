@@ -7,12 +7,14 @@ pub struct Lint {
     pub span: Span,
     pub lint_kind: LintKind,
     pub suggestions: Vec<Suggestion>,
+    pub message: String,
 }
 
 #[derive(Debug, Clone, Copy, Serialize, Deserialize)]
 pub enum LintKind {
     Spelling,
     Capitalization,
+    UnmatchedQuote,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]

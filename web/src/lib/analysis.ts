@@ -56,6 +56,7 @@ export interface Lint {
 	span: Span;
 	lint_kind: 'Capitalization' | 'Spelling';
 	suggestions: Suggestion[];
+	message: string;
 }
 
 export interface Suggestion {

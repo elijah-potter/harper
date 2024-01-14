@@ -17,11 +17,48 @@ pub struct Document {
 }
 
 impl Document {
+    // Lexes and parses text to produce a document.
     pub fn new(text: &str) -> Self {
         let source: Vec<_> = text.chars().collect();
         let tokens = lex_to_end(&source);
 
-        Self { source, tokens }
+        let mut doc = Self { source, tokens };
+        doc.match_quotes();
+
+        doc
+    }
+
+    fn iter_quote_indices(&self) -> impl Iterator<Item = usize> + '_ {
+        self.tokens.iter().enumerate().filter_map(|(idx, token)| {
+            if let TokenKind::Punctuation(Punctuation::Quote(_)) = &token.kind {
+                Some(idx)
+            } else {
+                None
+            }
+        })
+    }
+
+    /// Searches for quotation marks and fills the [`Punctuation::Quote::twin_loc`] field.
+    /// This is on a best effort basis.
+    ///
+    /// Current algorithm is very basic and could use some work.
+    fn match_quotes(&mut self) {
+        let quote_indices: Vec<usize> = self.iter_quote_indices().collect();
+
+        for i in 0..quote_indices.len() / 2 {
+            let a_i = quote_indices[i * 2];
+            let b_i = quote_indices[i * 2 + 1];
+
+            {
+                let a = self.tokens[a_i].kind.as_mut_quote().unwrap();
+                a.twin_loc = Some(b_i);
+            }
+
+            {
+                let b = self.tokens[b_i].kind.as_mut_quote().unwrap();
+                b.twin_loc = Some(a_i);
+            }
+        }
     }
 
     pub fn tokens(&self) -> impl Iterator<Item = Token> + '_ {
@@ -32,7 +69,7 @@ impl Document {
         self.tokens().map(|token| token.to_fat(&self.source))
     }
 
-    /// Create a list of the sentence terminators in the document.
+    /// Iterate over the locations of the sentence terminators in the document.
     fn sentence_terminators(&self) -> impl Iterator<Item = usize> + '_ {
         self.tokens.iter().enumerate().filter_map(|(index, token)| {
             if let Token {
@@ -55,7 +92,7 @@ impl Document {
         let first_sentence = self
             .sentence_terminators()
             .next()
-            .map(|first_term| &self.tokens[0..=first_term]);
+            .map(|first_term| &self.tokens[1..=first_term]);
 
         let rest = self
             .sentence_terminators()

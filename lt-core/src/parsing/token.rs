@@ -40,6 +40,16 @@ pub enum TokenKind {
     Newline(usize),
 }
 
+impl TokenKind {
+    pub fn as_mut_quote(&mut self) -> Option<&mut Quote> {
+        self.as_mut_punctuation()?.as_mut_quote()
+    }
+
+    pub fn as_quote(&self) -> Option<&Quote> {
+        self.as_punctuation()?.as_quote()
+    }
+}
+
 #[derive(Debug, Is, Clone, Copy, Serialize, Deserialize, PartialEq, Eq)]
 #[serde(tag = "kind")]
 pub enum Punctuation {
@@ -54,7 +64,7 @@ pub enum Punctuation {
     /// ;
     Semicolon,
     /// "
-    Quote,
+    Quote(Quote),
     /// ,
     Comma,
     /// -
@@ -69,6 +79,12 @@ pub enum Punctuation {
     CloseRound,
     /// "
     Hash,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+pub struct Quote {
+    /// The location of the matching quote, if it exists.
+    pub twin_loc: Option<usize>,
 }
 
 pub trait TokenStringExt {

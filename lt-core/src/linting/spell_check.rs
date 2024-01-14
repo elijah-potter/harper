@@ -23,6 +23,7 @@ pub fn spell_check(document: &Document) -> Vec<Lint> {
             span: word.span,
             lint_kind: LintKind::Spelling,
             suggestions: suggestions.collect(),
+            message: "Did you mean to spell it this way?".to_string(),
         })
     }
 

@@ -12,3 +12,21 @@
   src: url('/fonts/outfit.ttf');
 }
 
+.underlinespecial {
+  position: relative;
+}
+
+.underlinespecial:after {
+  transition-property: all;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  transition-duration: 150ms;
+  content: '';
+  display: block;
+  width: 100%;
+  height: var(--line-width);
+  border-radius: 1000px;
+  background: var(--bg-color);
+  position: absolute;
+  bottom: -3px;
+  left: 0;
+}
