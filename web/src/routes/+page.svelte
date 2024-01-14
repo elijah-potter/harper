@@ -1,16 +1,17 @@
 <script lang="ts">
-	import Suggestion from '$lib/Suggestion.svelte';
+	import { Card } from 'flowbite-svelte';
 	import alice from '../../../alice.txt?raw';
 	import Highlights from '$lib/Highlights.svelte';
 	import Underlines from '$lib/Underlines.svelte';
 	import { Button } from 'flowbite-svelte';
-	import { lintText, applySuggestion } from '$lib/analysis';
+	import { lintText, applySuggestion, spanContent } from '$lib/analysis';
 	import type { Lint } from '$lib/analysis';
 
 	let content = alice;
 	let editor: HTMLTextAreaElement;
 
 	let lints: Lint[] = [];
+	let focused: number | undefined;
 
 	$: lintText(content).then((newLints) => (lints = newLints));
 
@@ -19,13 +20,26 @@
 		setTimeout(ping, 1000);
 	}
 
+	type Category = 'mild' | 'moderate';
+
+	function categoryToColor(category: Category): string {
+		switch (category) {
+			case 'mild':
+				return '#708b75';
+			case 'moderate':
+				return '#f3a712';
+		}
+	}
+
 	ping();
+
+	$: console.log(focused);
 </script>
 
 <div class="flex flex-row w-full h-screen">
 	<div class="flex-auto h-full p-5 grid z-10 text-lg">
 		<div class="overflow-auto p-0" style="grid-row: 1; grid-column: 1">
-			<Underlines {content} />
+			<Underlines {content} focusLintIndex={focused} />
 		</div>
 		<div class="overflow-auto p-0" style="grid-row: 1; grid-column: 1">
 			<Highlights {content} />
@@ -39,21 +53,35 @@
 		></textarea>
 	</div>
 	<div class="flex flex-col flex-grow">
-		{#each lints as lint}
-			{#each lint.suggestions as suggestion}
-				<Suggestion category={'mild'} title={lint.lint_kind}>
-					<Button
-						color="alternative"
-						class="w-full h-full m-3"
-						on:click={() =>
-							applySuggestion(content, suggestion, lint.span).then((edited) => (content = edited))}
-					>
-						Replace "{content.substring(lint.span.start, lint.span.end)}" with "{suggestion.ReplaceWith.reduce(
-							(p, c) => p + c
-						)}"
-					</Button>
-				</Suggestion>
-			{/each}
+		{#each lints as lint, i}
+			<Card
+				class="m-1 hover:translate-x-3 transition-all"
+				on:mouseenter={() => (focused = i)}
+				on:mouseleave={() => (focused = undefined)}
+			>
+				<div style={`border-left: 3px solid ${categoryToColor('mild')}`}>
+					<div class="flex flex-row">
+						<div class="rounded-full w-2 aspect-square"></div>
+						<h3 class="font-bold">{`${lint.lint_kind} - "${spanContent(lint.span, content)}"`}</h3>
+					</div>
+					<div>
+						{#each lint.suggestions as suggestion}
+							<Button
+								color="alternative"
+								class="w-full h-full m-1 "
+								on:click={() =>
+									applySuggestion(content, suggestion, lint.span).then(
+										(edited) => (content = edited)
+									)}
+							>
+								Replace "{content.substring(lint.span.start, lint.span.end)}" with "{suggestion.ReplaceWith.reduce(
+									(p, c) => p + c
+								)}"
+							</Button>
+						{/each}
+					</div>
+				</div>
+			</Card>
 		{/each}
 	</div>
 </div>

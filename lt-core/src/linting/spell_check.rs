@@ -13,7 +13,7 @@ pub fn spell_check(document: &Document) -> Vec<Lint> {
             continue;
         }
 
-        let possibilities = suggest_correct_spelling(word_chars, 1, 3, &dictionary);
+        let possibilities = suggest_correct_spelling(word_chars, 3, 3, &dictionary);
 
         let suggestions = possibilities
             .into_iter()

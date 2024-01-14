@@ -9,11 +9,6 @@ pub fn sentence_capitalization_lint(document: &Document) -> Vec<Lint> {
     let mut lints = Vec::new();
 
     for sentence in document.sentences() {
-        dbg!(document.get_content_string(crate::Span {
-            start: sentence.first().unwrap().span.start,
-            end: sentence.last().unwrap().span.start,
-        }));
-
         if let Some(first_word) = sentence.first_word() {
             let letters = document.get_span_content(first_word.span);
 

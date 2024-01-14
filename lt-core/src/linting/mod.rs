@@ -4,7 +4,7 @@ mod spell_check;
 
 pub use lint::{Lint, LintKind, Suggestion};
 
-use crate::{document, Document};
+use crate::Document;
 
 use self::lint::Linter;
 
