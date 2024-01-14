@@ -23,12 +23,15 @@
 </script>
 
 <div class="flex flex-row w-full h-screen">
-	<div class="flex-auto h-full p-5 grid z-10">
+	<div class="flex-auto h-full p-5 grid z-10 text-lg">
 		<div class="overflow-auto p-0" style="grid-row: 1; grid-column: 1">
-			<Underlines {content}></Underlines>
+			<Underlines {content} />
+		</div>
+		<div class="overflow-auto p-0" style="grid-row: 1; grid-column: 1">
+			<Highlights {content} />
 		</div>
 		<textarea
-			class="w-full h-full m-0 rounded-none p-0 z-0 bg-transparent border-none"
+			class="w-full h-full m-0 rounded-none p-0 z-0 bg-transparent border-none text-lg"
 			spellcheck="false"
 			style="grid-row: 1; grid-column: 1"
 			bind:value={content}

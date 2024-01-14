@@ -59,8 +59,10 @@
 			{:else if typeof chunk == 'string'}
 				<span class="">{chunk}</span>
 			{:else}
-				<span style={`border-bottom: 3px solid ${chunk[1]}; margin-right: -4px;`}>
-					{chunk[0]}
+				<span style={`margin-right: -4px;`}>
+					<span style={`border-bottom: 3px solid ${chunk[1]};`}>
+						{chunk[0]}
+					</span>
 				</span>
 			{/if}
 		{/each}

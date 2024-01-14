@@ -4,4 +4,11 @@
 
 * {
   user-select: none;
+  font-family: Outfit;
 }
+
+@font-face {
+  font-family: Outfit;
+  src: url('/fonts/outfit.ttf');
+}
+
