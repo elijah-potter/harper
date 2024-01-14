@@ -27,9 +27,6 @@
 		<div class="overflow-auto p-0" style="grid-row: 1; grid-column: 1">
 			<Underlines {content}></Underlines>
 		</div>
-		<div class="overflow-auto p-0" style="grid-row: 1; grid-column: 1">
-			<Highlights {content}></Highlights>
-		</div>
 		<textarea
 			class="w-full h-full m-0 rounded-none p-0 z-0 bg-transparent border-none"
 			spellcheck="false"
