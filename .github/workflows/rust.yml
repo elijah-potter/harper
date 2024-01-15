@@ -18,5 +18,9 @@ jobs:
     - uses: actions/checkout@v3
     - name: Build
       run: cargo build --verbose
-    - name: Run tests
+    - name: Build Release
+      run: cargo build --verbose --release
+    - name: Run Tests
       run: cargo test --verbose
+    - name: Run Tests in Release
+      run: cargo test --verbose --release

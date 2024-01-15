@@ -25,7 +25,6 @@
 			if (output.length > 0) {
 				output.push(undefined);
 			}
-			console.log(chunk);
 			output.push(chunk);
 		}
 
