@@ -6,6 +6,7 @@
 	export let focusLintIndex: number | undefined;
 
 	let lints: [Lint, number][] = [];
+	let lintHighlights: HTMLSpanElement[] = [];
 
 	$: lintText(content).then(
 		(newLints) =>
@@ -13,6 +14,8 @@
 				.map<[Lint, number]>((lint, index) => [lint, index])
 				.toSorted(([a], [b]) => a.span.start - b.span.end))
 	);
+	$: if (focusLintIndex != null && lintHighlights[focusLintIndex] != null)
+		lintHighlights[focusLintIndex].scrollIntoView({ behavior: 'smooth' });
 
 	function reOrgString(text: string): (string | undefined)[] {
 		if (text.trim().length == 0) {
@@ -90,6 +93,7 @@
 				<span class="pointer-events-auto" style={`margin-right: -4px;`}>
 					<span
 						class={`underlinespecial transition-all rounded-sm ${chunk[2] ? 'animate-after-bigbounce text-white' : ''}`}
+						bind:this={lintHighlights[chunk[3]]}
 						on:click={() => (focusLintIndex = chunk[3]) && console.log('hit')}
 						style={`--line-color: ${chunk[1]}; --line-width: ${chunk[2] ? '4px' : '2px'}; --bg-color: ${chunk[2] ? '#8DA9C4' : 'transparent'};`}
 					>
