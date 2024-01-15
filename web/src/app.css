@@ -16,7 +16,7 @@
   position: relative;
 }
 
-.underlinespecial:after {
+.underlinespecial::after {
   transition-property: all;
   transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
   transition-duration: 150ms;
@@ -29,4 +29,27 @@
   position: absolute;
   bottom: -3px;
   left: 0;
+}
+
+textarea {
+  --tw-ring-shadow: 0 0 #000 !important;
+}
+
+.animate-bigbounce{
+  animation: bigbounce 1s infinite;
+}
+
+.animate-after-bigbounce::after {
+  animation: bigbounce 1s infinite;
+}
+
+@keyframes bigbounce {
+	0%, 100% {
+		transform: translateY(-40%);
+		animation-timing-function: cubic-bezier(0.8,0,1,1);
+	}
+	50% {
+		transform: none;
+		animation-timing-function: cubic-bezier(0,0,0.2,1);
+  }
 }

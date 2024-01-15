@@ -52,7 +52,7 @@
 				let lintContent = [
 					spanContent(lint.span, content).replaceAll(' ', '\u00A0'),
 					'red',
-					lintIndex === focusLintIndex ? '4px' : '2px'
+					lintIndex === focusLintIndex
 				];
 
 				return [...prevContent, lintContent];
@@ -88,8 +88,8 @@
 			{:else}
 				<span style={`margin-right: -4px;`}>
 					<span
-						class="underlinespecial"
-						style={`--bg-color: ${chunk[1]}; --line-width: ${chunk[2]};`}
+						class={`underlinespecial ${chunk[2] ? 'animate-after-bigbounce' : ''}`}
+						style={`--bg-color: ${chunk[1]}; --line-width: ${chunk[2] ? '4px' : '2px'};`}
 					>
 						{chunk[0]}
 					</span>

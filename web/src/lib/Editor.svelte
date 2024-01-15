@@ -10,26 +10,36 @@
 
 	let lints: Lint[] = [];
 	let focused: number | undefined;
+	let editor: HTMLTextAreaElement | null;
 
 	$: lintText(content).then((newLints) => (lints = newLints));
+	$: boxHeight = calcHeight(content);
 
-	$: console.log(focused);
+	function calcHeight(boxContent: string): number {
+		let numberOfLineBreaks = (boxContent.match(/\n/g) || []).length;
+		let newHeight = 20 + numberOfLineBreaks * 30 + 12 + 2;
+		console.log(newHeight);
+		return newHeight;
+	}
 </script>
 
-<div class="flex flex-row w-full h-full [&>*]:m-5">
-	<Card class="flex-auto max-w-full p-5 grid z-10 text-lg overflow-auto">
+<div class="flex flex-row w-full h-full p-5">
+	<Card
+		class="flex-grow h-full p-5 grid z-10 max-w-full text-lg overflow-auto mr-5"
+		on:click={() => editor && editor.focus()}
+	>
 		<div class="m-0 p-0" style="grid-row: 1; grid-column: 1">
 			<Underlines {content} focusLintIndex={focused} />
 		</div>
 		<textarea
-			class="w-full m-0 rounded-none p-0 z-0 bg-transparent border-none text-lg resize-none"
-			rows={content.length - content.replaceAll('\n', '').length + 1}
+			bind:this={editor}
+			class="w-full m-0 rounded-none p-0 z-0 bg-transparent border-none text-lg resize-none focus:border-0"
 			spellcheck="false"
-			style="grid-row: 1; grid-column: 1"
+			style={`grid-row: 1; grid-column: 1; height: ${boxHeight}px`}
 			bind:value={content}
 		></textarea>
 	</Card>
-	<Card class="flex flex-col flex-grow overflow-auto h-full">
+	<Card class="flex flex-col flex-none basis-[400px] overflow-auto h-full">
 		<h2 class="text-2xl font-bold m-1">Suggestions</h2>
 		{#each lints as lint, i}
 			<Card class="m-1 hover:translate-x-3 transition-all" on:click={() => (focused = i)}>
@@ -49,19 +59,21 @@
 					>
 						<p style="height: 50px">{lint.message}</p>
 						{#each lint.suggestions as suggestion}
-							<Button
-								color="primary"
-								class="w-full mb-1"
-								style="height: 40px; margin: 5px 0px;"
-								on:click={() =>
-									applySuggestion(content, suggestion, lint.span).then(
-										(edited) => (content = edited)
-									)}
-							>
-								Replace "{content.substring(lint.span.start, lint.span.end)}" with "{suggestion.ReplaceWith.reduce(
-									(p, c) => p + c
-								)}"
-							</Button>
+							<div class="w-full p-[4px]">
+								<Button
+									color="primary"
+									class="w-full"
+									style="height: 40px; margin: 5px 0px;"
+									on:click={() =>
+										applySuggestion(content, suggestion, lint.span).then(
+											(edited) => (content = edited)
+										)}
+								>
+									Replace "{content.substring(lint.span.start, lint.span.end)}" with "{suggestion.ReplaceWith.reduce(
+										(p, c) => p + c
+									)}"
+								</Button>
+							</div>
 						{/each}
 					</div>
 				</div>

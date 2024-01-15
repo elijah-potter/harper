@@ -6,6 +6,10 @@ edition = "2021"
 [lib]
 crate-type = ["cdylib", "rlib"]
 
+[profile.release]
+opt-level = "s" 
+strip = true
+
 [dependencies]
 console_error_panic_hook = "0.1.7"
 tracing = "0.1.40"
