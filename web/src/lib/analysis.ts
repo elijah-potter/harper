@@ -30,18 +30,24 @@ export type Punctuation =
 	| 'CloseRound'
 	| 'Hash';
 
-export async function parseText(text: string): Promise<Token[]> {
-	const req = await fetch('/parse', {
-		method: 'POST',
-		body: JSON.stringify({ text }),
-		headers: {
-			'CONTENT-TYPE': 'application/json'
-		}
-	});
+export async function parseText(text: string, use_wasm = true): Promise<Token[]> {
+	if (use_wasm) {
+		const wasm = await import('wasm');
 
-	const res: ParseResponse = await req.json();
+		const tokens = wasm.parse(text);
+		return tokens;
+	} else {
+		const req = await fetch('/parse', {
+			method: 'POST',
+			body: JSON.stringify({ text }),
+			headers: {
+				'CONTENT-TYPE': 'application/json'
+			}
+		});
 
-	return res.tokens;
+		const res: ParseResponse = await req.json();
+		return res.tokens;
+	}
 }
 
 export function contentToString(content: string[]): string {
@@ -72,33 +78,47 @@ export function spanContent(span: Span, source: string): string {
 	return source.substring(span.start, span.end);
 }
 
-export async function lintText(text: string): Promise<Lint[]> {
-	const req = await fetch(`/lint`, {
-		method: 'POST',
-		body: JSON.stringify({ text }),
-		headers: {
-			'CONTENT-TYPE': 'application/json'
-		}
-	});
+export async function lintText(text: string, use_wasm = true): Promise<Lint[]> {
+	if (use_wasm) {
+		const wasm = await import('wasm');
 
-	const res: LintResponse = await req.json();
+		const lints = wasm.lint(text);
+		return lints;
+	} else {
+		const req = await fetch(`/lint`, {
+			method: 'POST',
+			body: JSON.stringify({ text }),
+			headers: {
+				'CONTENT-TYPE': 'application/json'
+			}
+		});
 
-	return res.lints;
+		const res: LintResponse = await req.json();
+		return res.lints;
+	}
 }
 
 export async function applySuggestion(
 	text: string,
 	suggestion: Suggestion,
-	span: Span
+	span: Span,
+	use_wasm = true
 ): Promise<string> {
-	const req = await fetch(`/apply`, {
-		method: 'POST',
-		body: JSON.stringify({ text, suggestion, span }),
-		headers: {
-			'CONTENT-TYPE': 'application/json'
-		}
-	});
+	if (use_wasm) {
+		const wasm = await import('wasm');
 
-	const res = await req.json();
-	return res.text;
+		const applied = wasm.apply_suggestion(text, span, suggestion);
+		return applied;
+	} else {
+		const req = await fetch(`/apply`, {
+			method: 'POST',
+			body: JSON.stringify({ text, suggestion, span }),
+			headers: {
+				'CONTENT-TYPE': 'application/json'
+			}
+		});
+
+		const res = await req.json();
+		return res.text;
+	}
 }
