@@ -1,5 +1,11 @@
 <script>
 	import Editor from '$lib/Editor.svelte';
+
+	let width = window.innerWidth;
+
+	window.addEventListener('resize', () => {
+		width = window.innerWidth;
+	});
 </script>
 
 <div class="w-full h-screen flex flex-col items-center m-0 p-0">
@@ -17,6 +23,12 @@
 		</div>
 	</div>
 	<div class="w-full 2xl:w-3/4 flex-shrink flex-grow overflow-hidden">
-		<Editor />
+		{#if width > 768}
+			<Editor />
+		{:else}
+			<p class="italic text-lg w-full text-center">
+				Open this page on a bigger screen to start checking your work.
+			</p>
+		{/if}
 	</div>
 </div>
