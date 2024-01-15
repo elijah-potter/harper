@@ -15,6 +15,12 @@
 	$: lintText(content).then((newLints) => (lints = newLints));
 	$: boxHeight = calcHeight(content);
 
+	$: if (editor != null && focused != null) {
+		let p = lints[focused].span.end;
+		editor.selectionStart = p;
+		editor.selectionEnd = p;
+	}
+
 	function calcHeight(boxContent: string): number {
 		let numberOfLineBreaks = (boxContent.match(/\n/g) || []).length;
 		let newHeight = 20 + numberOfLineBreaks * 30 + 12 + 2;
@@ -28,16 +34,17 @@
 		class="flex-grow h-full p-5 grid z-10 max-w-full text-lg overflow-auto mr-5"
 		on:click={() => editor && editor.focus()}
 	>
-		<div class="m-0 p-0" style="grid-row: 1; grid-column: 1">
-			<Underlines {content} focusLintIndex={focused} />
-		</div>
 		<textarea
 			bind:this={editor}
 			class="w-full m-0 rounded-none p-0 z-0 bg-transparent border-none text-lg resize-none focus:border-0"
 			spellcheck="false"
 			style={`grid-row: 1; grid-column: 1; height: ${boxHeight}px`}
+			on:keydown={() => (focused = undefined)}
 			bind:value={content}
 		></textarea>
+		<div class="m-0 p-0 z-10 pointer-events-none" style="grid-row: 1; grid-column: 1">
+			<Underlines {content} bind:focusLintIndex={focused} />
+		</div>
 	</Card>
 	<Card class="flex flex-col flex-none basis-[400px] overflow-auto h-full">
 		<h2 class="text-2xl font-bold m-1">Suggestions</h2>

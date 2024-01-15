@@ -51,8 +51,9 @@
 
 				let lintContent = [
 					spanContent(lint.span, content).replaceAll(' ', '\u00A0'),
-					'red',
-					lintIndex === focusLintIndex
+					'#0B2545',
+					lintIndex === focusLintIndex,
+					lintIndex
 				];
 
 				return [...prevContent, lintContent];
@@ -74,7 +75,7 @@
 		return results;
 	}
 
-	// string | [string, string, string] | null
+	// string | [string, string, string, index] | null
 	$: modified = processString(lints, focusLintIndex);
 </script>
 
@@ -86,10 +87,11 @@
 			{:else if typeof chunk == 'string'}
 				<span class="">{chunk}</span>
 			{:else}
-				<span style={`margin-right: -4px;`}>
+				<span class="pointer-events-auto" style={`margin-right: -4px;`}>
 					<span
-						class={`underlinespecial ${chunk[2] ? 'animate-after-bigbounce' : ''}`}
-						style={`--bg-color: ${chunk[1]}; --line-width: ${chunk[2] ? '4px' : '2px'};`}
+						class={`underlinespecial transition-all rounded-sm ${chunk[2] ? 'animate-after-bigbounce text-white' : ''}`}
+						on:click={() => (focusLintIndex = chunk[3]) && console.log('hit')}
+						style={`--line-color: ${chunk[1]}; --line-width: ${chunk[2] ? '4px' : '2px'}; --bg-color: ${chunk[2] ? '#8DA9C4' : 'transparent'};`}
 					>
 						{chunk[0]}
 					</span>

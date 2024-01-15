@@ -24,5 +24,7 @@ pub fn all_linters(document: &Document, dictionary: &Dictionary) -> Vec<Lint> {
         lints.append(&mut linter(document, dictionary));
     }
 
+    lints.sort_by_key(|lint| lint.span.start);
+
     lints
 }
