@@ -1,6 +1,6 @@
 #![allow(dead_code)]
 
-use lt_core::{all_linters, Document, FatToken, Lint, Span, Suggestion};
+use lt_core::{all_linters, Dictionary, Document, FatToken, Lint, Span, Suggestion};
 use std::net::SocketAddr;
 use tokio::time::Instant;
 use tracing::{debug, info, Level};
@@ -88,9 +88,10 @@ struct ParseResponse {
 async fn lint(Json(payload): Json<LintRequest>) -> (StatusCode, Json<LintResponse>) {
     let text = payload.text;
 
+    let dictionary = Dictionary::new();
     let document = Document::new(&text);
 
-    let lints = all_linters(&document);
+    let lints = all_linters(&document, dictionary);
 
     (StatusCode::ACCEPTED, Json(LintResponse { lints }))
 }

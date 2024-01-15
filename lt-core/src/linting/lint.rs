@@ -1,6 +1,6 @@
 use serde::{Deserialize, Serialize};
 
-use crate::{document::Document, span::Span};
+use crate::{document::Document, span::Span, Dictionary};
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Lint {
@@ -23,4 +23,4 @@ pub enum Suggestion {
     ReplaceWith(Vec<char>),
 }
 
-pub type Linter = fn(document: &Document) -> Vec<Lint>;
+pub type Linter = fn(document: &Document, dictionary: &Dictionary) -> Vec<Lint>;

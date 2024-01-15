@@ -6,11 +6,11 @@ mod wrong_quotes;
 
 pub use lint::{Lint, LintKind, Suggestion};
 
-use crate::Document;
+use crate::{Dictionary, Document};
 
 use self::lint::Linter;
 
-pub fn all_linters(document: &Document) -> Vec<Lint> {
+pub fn all_linters(document: &Document, dictionary: &Dictionary) -> Vec<Lint> {
     let mut lints = Vec::new();
 
     let linters: [Linter; 4] = [
@@ -21,7 +21,7 @@ pub fn all_linters(document: &Document) -> Vec<Lint> {
     ];
 
     for linter in linters {
-        lints.append(&mut linter(document));
+        lints.append(&mut linter(document, dictionary));
     }
 
     lints

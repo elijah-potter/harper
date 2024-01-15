@@ -1,6 +1,8 @@
-use crate::{document::Document, parsing::Quote, Lint, LintKind, Punctuation, TokenKind};
+use crate::{
+    document::Document, parsing::Quote, Dictionary, Lint, LintKind, Punctuation, TokenKind,
+};
 
-pub fn unclosed_quotes(document: &Document) -> Vec<Lint> {
+pub fn unclosed_quotes(document: &Document, _dictionary: &Dictionary) -> Vec<Lint> {
     let mut lints = Vec::new();
 
     // TODO: Try zipping quote positions

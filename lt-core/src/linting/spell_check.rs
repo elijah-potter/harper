@@ -2,7 +2,7 @@ use crate::{document::Document, suggest_correct_spelling, Dictionary, Lint, Lint
 
 use super::lint::Suggestion;
 
-pub fn spell_check(document: &Document) -> Vec<Lint> {
+pub fn spell_check(document: &Document, _dictionary: &Dictionary) -> Vec<Lint> {
     let mut lints = Vec::new();
 
     let dictionary = Dictionary::new();

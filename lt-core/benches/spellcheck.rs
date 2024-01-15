@@ -7,10 +7,10 @@ fn spellcheck(dictionary: &Dictionary) {
 
 fn criterion_benchmark(c: &mut Criterion) {
     let mut group = c.benchmark_group("spellcheck");
-    group.sample_size(10000);
 
     let dictionary = Dictionary::new();
 
+    group.bench_function("dict create", |b| b.iter(Dictionary::new));
     group.bench_function("hello 5", |b| b.iter(|| spellcheck(&dictionary)));
 }
 

@@ -1,8 +1,9 @@
 use crate::{
-    document::Document, parsing::Quote, Lint, LintKind, Punctuation, Suggestion, Token, TokenKind,
+    document::Document, parsing::Quote, Dictionary, Lint, LintKind, Punctuation, Suggestion, Token,
+    TokenKind,
 };
 
-pub fn wrong_quotes(document: &Document) -> Vec<Lint> {
+pub fn wrong_quotes(document: &Document, _dictionary: &Dictionary) -> Vec<Lint> {
     document
         .iter_quote_indices()
         .zip(document.iter_quotes())

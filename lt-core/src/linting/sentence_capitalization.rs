@@ -1,11 +1,11 @@
 use itertools::Itertools;
 
-use crate::{document::Document, parsing::TokenStringExt, Lint, LintKind};
+use crate::{document::Document, parsing::TokenStringExt, Dictionary, Lint, LintKind};
 
 use super::lint::Suggestion;
 
 /// A linter that checks to make sure the first word of each sentence is capitalized.
-pub fn sentence_capitalization_lint(document: &Document) -> Vec<Lint> {
+pub fn sentence_capitalization_lint(document: &Document, _dictionary: &Dictionary) -> Vec<Lint> {
     let mut lints = Vec::new();
 
     for sentence in document.sentences() {
