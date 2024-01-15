@@ -1,5 +1,5 @@
 {
-  "name": "web",
+  "name": "harper-web",
   "version": "0.0.1",
   "private": true,
   "scripts": {
@@ -34,7 +34,7 @@
     "vite": "^4.4.2",
     "vite-plugin-top-level-await": "^1.4.1",
     "vite-plugin-wasm": "^3.3.0",
-    "wasm": "link:../wasm/pkg"
+    "wasm": "link:../harper-wasm/pkg"
   },
   "type": "module",
   "dependencies": {

@@ -1,4 +1,4 @@
-use lt_core::{all_linters, Dictionary, Document, Span, Suggestion};
+use harper_core::{all_linters, Dictionary, Document, Span, Suggestion};
 use serde::Serialize;
 use wasm_bindgen::{prelude::wasm_bindgen, JsValue};
 

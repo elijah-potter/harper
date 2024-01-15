@@ -1,6 +1,6 @@
 #![allow(dead_code)]
 
-use lt_core::{all_linters, Dictionary, Document, FatToken, Lint, Span, Suggestion};
+use harper_core::{all_linters, Dictionary, Document, FatToken, Lint, Span, Suggestion};
 use std::net::SocketAddr;
 use tokio::time::Instant;
 use tracing::{debug, info, Level};

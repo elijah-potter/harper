@@ -1,5 +1,5 @@
 [package]
-name = "wasm"
+name = "harper-wasm"
 version = "0.1.0"
 edition = "2021"
 
@@ -11,7 +11,7 @@ console_error_panic_hook = "0.1.7"
 tracing = "0.1.40"
 tracing-wasm = "0.2.1"
 wasm-bindgen = "0.2.90"
-lt-core = { path = "../lt-core" }
+harper-core = { path = "../harper-core" }
 serde = "1.0.195"
 serde-wasm-bindgen = "0.6.3"
 getrandom = { version = "0.2.12", features = ["js"] }
