@@ -28,7 +28,7 @@ impl Document {
         doc
     }
 
-    fn iter_quote_indices(&self) -> impl Iterator<Item = usize> + '_ {
+    pub fn iter_quote_indices(&self) -> impl Iterator<Item = usize> + '_ {
         self.tokens.iter().enumerate().filter_map(|(idx, token)| {
             if let TokenKind::Punctuation(Punctuation::Quote(_)) = &token.kind {
                 Some(idx)
@@ -36,6 +36,10 @@ impl Document {
                 None
             }
         })
+    }
+
+    pub fn iter_quotes(&self) -> impl Iterator<Item = Token> + '_ {
+        self.iter_quote_indices().map(|idx| self.tokens[idx])
     }
 
     /// Searches for quotation marks and fills the [`Punctuation::Quote::twin_loc`] field.
@@ -92,7 +96,7 @@ impl Document {
         let first_sentence = self
             .sentence_terminators()
             .next()
-            .map(|first_term| &self.tokens[1..=first_term]);
+            .map(|first_term| &self.tokens[0..=first_term]);
 
         let rest = self
             .sentence_terminators()
