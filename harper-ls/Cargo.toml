@@ -7,3 +7,5 @@ edition = "2021"
 harper-core = { path = "../harper-core" }
 tower-lsp = "0.20.0"
 tokio = { version = "1.35.1", features = ["full"] }
+clap = { version = "4.4.18", features = ["derive"] }
+cached = "0.47.0"

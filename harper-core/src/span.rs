@@ -54,8 +54,9 @@ mod tests {
 
     #[test]
     fn overlaps() {
-        assert!(Span::new(0, 5).overlaps_with(&Span::new(3, 6)));
-        assert!(Span::new(0, 5).overlaps_with(&Span::new(2, 3)));
-        assert!(Span::new(0, 5).overlaps_with(&Span::new(4, 5)));
+        assert!(Span::new(0, 5).overlaps_with(Span::new(3, 6)));
+        assert!(Span::new(0, 5).overlaps_with(Span::new(2, 3)));
+        assert!(Span::new(0, 5).overlaps_with(Span::new(4, 5)));
+        assert!(Span::new(0, 5).overlaps_with(Span::new(4, 4)));
     }
 }

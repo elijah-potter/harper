@@ -1,14 +1,15 @@
 use harper_core::{all_linters, Dictionary, Document, Lint, Span, Suggestion};
-use std::{fs::read, io::Read};
+use std::collections::HashMap;
+use std::fs::read;
 use tower_lsp::jsonrpc::{ErrorCode, Result};
 use tower_lsp::lsp_types::{
-    CodeAction, CodeActionKind, Diagnostic, Location, Position, Range, Url,
+    CodeAction, CodeActionKind, Diagnostic, Position, Range, TextEdit, Url, WorkspaceEdit,
 };
 
 pub fn generate_diagnostics(file_url: &Url) -> Result<Vec<Diagnostic>> {
     let file_str = open_url(file_url)?;
     let source_chars: Vec<_> = file_str.chars().collect();
-    let lints = lint_string(&file_str);
+    let lints = lint_string(file_str);
 
     let diagnostics = lints
         .into_iter()
@@ -21,7 +22,7 @@ pub fn generate_diagnostics(file_url: &Url) -> Result<Vec<Diagnostic>> {
 pub fn generate_code_actions(url: &Url, range: Range) -> Result<Vec<CodeAction>> {
     let file_str = open_url(url)?;
     let source_chars: Vec<_> = file_str.chars().collect();
-    let lints = lint_string(&file_str);
+    let lints = lint_string(file_str);
 
     // Find lints whose span overlaps with range
     let span = range_to_span(&source_chars, range);
@@ -29,22 +30,42 @@ pub fn generate_code_actions(url: &Url, range: Range) -> Result<Vec<CodeAction>>
     let actions = lints
         .into_iter()
         .filter(|lint| lint.span.overlaps_with(span))
-        .flat_map(|lint| lint_to_code_actions(&lint).collect::<Vec<_>>())
+        .flat_map(|lint| lint_to_code_actions(&lint, url, &source_chars).collect::<Vec<_>>())
         .collect();
 
     Ok(actions)
 }
 
-fn lint_to_code_actions(lint: &Lint) -> impl Iterator<Item = CodeAction> + '_ {
-    lint.suggestions.iter().map(|suggestion| CodeAction {
-        title: suggestion.to_string(),
-        kind: Some(CodeActionKind::QUICKFIX),
-        diagnostics: None,
-        edit: None,
-        command: None,
-        is_preferred: None,
-        disabled: None,
-        data: None,
+fn lint_to_code_actions<'a>(
+    lint: &'a Lint,
+    url: &'a Url,
+    source: &'a [char],
+) -> impl Iterator<Item = CodeAction> + 'a {
+    lint.suggestions.iter().flat_map(|suggestion| {
+        let range = span_to_range(source, lint.span);
+
+        let Suggestion::ReplaceWith(with) = suggestion;
+        Some(CodeAction {
+            title: suggestion.to_string(),
+            kind: Some(CodeActionKind::QUICKFIX),
+            diagnostics: None,
+            edit: Some(WorkspaceEdit {
+                changes: Some(HashMap::from([(
+                    url.clone(),
+                    vec![TextEdit {
+                        range,
+
+                        new_text: with.iter().collect(),
+                    }],
+                )])),
+                document_changes: None,
+                change_annotations: None,
+            }),
+            command: None,
+            is_preferred: None,
+            disabled: None,
+            data: None,
+        })
     })
 }
 
@@ -54,8 +75,9 @@ fn open_url(url: &Url) -> Result<String> {
     Ok(String::from_utf8(file).unwrap())
 }
 
-fn lint_string(text: &str) -> Vec<Lint> {
-    let document = Document::new(text);
+#[cached::proc_macro::cached]
+fn lint_string(text: String) -> Vec<Lint> {
+    let document = Document::new(&text);
     let dictionary = Dictionary::new();
     all_linters(&document, dictionary)
 }
@@ -109,9 +131,10 @@ fn position_to_index(source: &[char], position: Position) -> usize {
 
     let line_start_idx = newline_indices
         .take(position.line as usize)
-        .next()
+        .last()
         .unwrap_or(0);
-    line_start_idx + position.character as usize
+
+    line_start_idx + position.character as usize + 1
 }
 
 fn range_to_span(source: &[char], range: Range) -> Span {
@@ -119,4 +142,34 @@ fn range_to_span(source: &[char], range: Range) -> Span {
     let end = position_to_index(source, range.end);
 
     Span::new(start, end)
+}
+
+#[cfg(test)]
+mod tests {
+    use tower_lsp::lsp_types::Position;
+
+    use super::{index_to_position, position_to_index};
+
+    #[test]
+    fn reversible_position_conv() {
+        let source: Vec<_> = "There was a man,\n his voice had timbre,\n unlike a boy."
+            .chars()
+            .collect();
+
+        let a = Position {
+            line: 2,
+            character: 3,
+        };
+
+        let b = position_to_index(&source, a);
+
+        assert_eq!(b, 43);
+
+        let c = index_to_position(&source, b);
+
+        let d = position_to_index(&source, a);
+
+        assert_eq!(a, c);
+        assert_eq!(b, d);
+    }
 }
