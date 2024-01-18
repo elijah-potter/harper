@@ -1,8 +1,11 @@
 use harper_core::{all_linters, Dictionary, Document, Lint, Span, Suggestion};
-use lsp_types::{CodeAction, CodeActionKind, Diagnostic, Location, Position, Range, Url};
 use std::{fs::read, io::Read};
+use tower_lsp::jsonrpc::{ErrorCode, Result};
+use tower_lsp::lsp_types::{
+    CodeAction, CodeActionKind, Diagnostic, Location, Position, Range, Url,
+};
 
-pub fn generate_diagnostics(file_url: &Url) -> anyhow::Result<Vec<Diagnostic>> {
+pub fn generate_diagnostics(file_url: &Url) -> Result<Vec<Diagnostic>> {
     let file_str = open_url(file_url)?;
     let source_chars: Vec<_> = file_str.chars().collect();
     let lints = lint_string(&file_str);
@@ -15,7 +18,7 @@ pub fn generate_diagnostics(file_url: &Url) -> anyhow::Result<Vec<Diagnostic>> {
     Ok(diagnostics)
 }
 
-pub fn generate_code_actions(url: &Url, range: Range) -> anyhow::Result<Vec<CodeAction>> {
+pub fn generate_code_actions(url: &Url, range: Range) -> Result<Vec<CodeAction>> {
     let file_str = open_url(url)?;
     let source_chars: Vec<_> = file_str.chars().collect();
     let lints = lint_string(&file_str);
@@ -45,9 +48,10 @@ fn lint_to_code_actions(lint: &Lint) -> impl Iterator<Item = CodeAction> + '_ {
     })
 }
 
-fn open_url(url: &Url) -> anyhow::Result<String> {
-    let file = read(url.path())?;
-    Ok(String::from_utf8(file)?)
+fn open_url(url: &Url) -> Result<String> {
+    let file =
+        read(url.path()).map_err(|err| tower_lsp::jsonrpc::Error::new(ErrorCode::InternalError))?;
+    Ok(String::from_utf8(file).unwrap())
 }
 
 fn lint_string(text: &str) -> Vec<Lint> {

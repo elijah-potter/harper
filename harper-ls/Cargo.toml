@@ -4,13 +4,6 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-anyhow = "1.0.79"
-ctrlc = "3.4.2"
-lsp-server = "0.7.6"
-lsp-types = "0.95.0"
-serde = "1.0.195"
-serde_json = "1.0.111"
-tracing = "0.1.40"
-tracing-subscriber = "0.3.18"
 harper-core = { path = "../harper-core" }
-clap = { version = "4.4.18", features = ["derive"] }
+tower-lsp = "0.20.0"
+tokio = { version = "1.35.1", features = ["full"] }
