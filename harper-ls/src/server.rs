@@ -3,17 +3,19 @@ use lsp_server::{
 };
 use lsp_types::{
     notification::{
-        DidChangeTextDocument, DidOpenTextDocument, DidSaveTextDocument,
-        Notification as NotificationTrait, PublishDiagnostics,
+        DidOpenTextDocument, DidSaveTextDocument, Notification as NotificationTrait,
+        PublishDiagnostics,
     },
-    request::GotoDefinition,
-    CodeActionProviderCapability, Diagnostic, DiagnosticOptions, GotoDefinitionResponse,
-    InitializedParams, Location, Position, PublishDiagnosticsParams, Range, ServerCapabilities,
-    Url,
+    request::{CodeActionRequest, GotoDefinition},
+    CodeAction, CodeActionKind, CodeActionOrCommand, CodeActionProviderCapability,
+    CodeActionResponse, Diagnostic, DiagnosticOptions, GotoDefinitionResponse, InitializedParams,
+    Location, OneOf, Position, PublishDiagnosticsParams, Range, ServerCapabilities, Url,
+    WorkDoneProgressOptions,
 };
+use serde::Serialize;
 use tracing::{error, info};
 
-use crate::generate_diagnostics::generate_diagnostics;
+use crate::diagnostics::{generate_code_actions, generate_diagnostics};
 
 pub struct Server {
     connection: Connection,
@@ -30,7 +32,14 @@ impl Server {
             diagnostic_provider: Some(lsp_types::DiagnosticServerCapabilities::Options(
                 DiagnosticOptions::default(),
             )),
-            code_action_provider: Some(CodeActionProviderCapability::Simple(true)),
+            definition_provider: Some(OneOf::Left(true)),
+            code_action_provider: Some(CodeActionProviderCapability::Options(
+                lsp_types::CodeActionOptions {
+                    code_action_kinds: Some(vec![CodeActionKind::QUICKFIX]),
+                    work_done_progress_options: WorkDoneProgressOptions::default(),
+                    resolve_provider: None,
+                },
+            )),
             ..Default::default()
         })
         .unwrap();
@@ -53,9 +62,11 @@ impl Server {
                     if self.connection.handle_shutdown(&req)? {
                         return Ok(());
                     }
+
                     info!("Got request: {req:?}");
 
-                    let handlers: [RequestHandler; 1] = [Self::handle_goto];
+                    let handlers: [RequestHandler; 2] =
+                        [Self::handle_goto, Self::handle_code_action];
 
                     for handler in handlers {
                         let res = handler(self, &req);
@@ -144,12 +155,38 @@ impl Server {
                 },
             },
         }]));
+
+        self.send_response(result, id)?;
+
+        Ok(())
+    }
+
+    fn handle_code_action(&self, req: &Request) -> anyhow::Result<()> {
+        let (id, params) = cast_request::<CodeActionRequest>(req.clone())?;
+
+        info!("Got code action request request #{id}: {params:?}");
+
+        let actions = generate_code_actions(&params.text_document.uri, params.range)?;
+        let response: CodeActionResponse = actions
+            .into_iter()
+            .map(CodeActionOrCommand::CodeAction)
+            .collect();
+
+        let result = Some(response);
+
+        self.send_response(result, id)?;
+
+        Ok(())
+    }
+
+    fn send_response<V: Serialize>(&self, result: V, id: RequestId) -> anyhow::Result<()> {
         let result = serde_json::to_value(result).unwrap();
         let resp = Response {
             id,
             result: Some(result),
             error: None,
         };
+
         self.connection.sender.send(Message::Response(resp))?;
 
         Ok(())

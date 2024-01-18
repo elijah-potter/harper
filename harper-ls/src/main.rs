@@ -1,4 +1,4 @@
-mod generate_diagnostics;
+mod diagnostics;
 mod server;
 use clap::Parser;
 use lsp_server::Connection;
