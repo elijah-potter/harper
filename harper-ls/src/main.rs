@@ -1,3 +1,4 @@
+mod generate_diagnostics;
 mod server;
 
 use lsp_server::Connection;
@@ -12,7 +13,7 @@ fn main() -> anyhow::Result<()> {
 
     tracing::subscriber::set_global_default(subscriber)?;
 
-    let (connection, io_threads) = Connection::listen("127.0.0.1:4000")?;
+    let (connection, io_threads) = Connection::stdio();
     let mut server = Server::new(connection, io_threads)?;
     server.main_loop()?;
     server.join()?;

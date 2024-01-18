@@ -439,6 +439,7 @@ version = "0.1.0"
 dependencies = [
  "anyhow",
  "ctrlc",
+ "harper-core",
  "lsp-server",
  "lsp-types",
  "serde",

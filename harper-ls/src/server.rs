@@ -8,10 +8,12 @@ use lsp_types::{
         PublishDiagnostics,
     },
     request::GotoDefinition,
-    Diagnostic, GotoDefinitionResponse, InitializedParams, Location, OneOf, Position,
+    Diagnostic, DiagnosticOptions, GotoDefinitionResponse, InitializedParams, Location, Position,
     PublishDiagnosticsParams, Range, ServerCapabilities,
 };
 use tracing::{error, info};
+
+use crate::generate_diagnostics::generate_diagnostics;
 
 pub struct Server {
     connection: Connection,
@@ -25,7 +27,9 @@ type NotificationHandler = fn(server: &Server, notif: &Notification) -> anyhow::
 impl Server {
     pub fn new(connection: Connection, io_threads: IoThreads) -> anyhow::Result<Self> {
         let server_capabilities = serde_json::to_value(ServerCapabilities {
-            definition_provider: Some(OneOf::Left(true)),
+            diagnostic_provider: Some(lsp_types::DiagnosticServerCapabilities::Options(
+                DiagnosticOptions::default(),
+            )),
             ..Default::default()
         })
         .unwrap();
@@ -97,30 +101,11 @@ impl Server {
     fn handle_save(&self, req: &Notification) -> anyhow::Result<()> {
         let params = cast_notif::<DidSaveTextDocument>(req.clone())?;
 
-        dbg!(&params);
+        let diagnostics = generate_diagnostics(params.text_document.uri.clone())?;
 
         let result = PublishDiagnosticsParams {
             uri: params.text_document.uri,
-            diagnostics: vec![Diagnostic {
-                range: Range {
-                    start: Position {
-                        line: 0,
-                        character: 0,
-                    },
-                    end: Position {
-                        line: 0,
-                        character: 0,
-                    },
-                },
-                severity: None,
-                code: None,
-                code_description: None,
-                source: Some("Harper".to_string()),
-                message: "Testing testing 123".to_string(),
-                related_information: None,
-                tags: None,
-                data: None,
-            }],
+            diagnostics,
             version: None,
         };
 
