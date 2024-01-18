@@ -2,7 +2,7 @@ use harper_core::{all_linters, Dictionary, Document, Lint, Span};
 use lsp_types::{Diagnostic, Position, Range, Url};
 use std::fs::read;
 
-pub fn generate_diagnostics(file_uri: Url) -> anyhow::Result<Vec<Diagnostic>> {
+pub fn generate_diagnostics(file_uri: &Url) -> anyhow::Result<Vec<Diagnostic>> {
     let file = read(file_uri.path())?;
     let file_str = String::from_utf8(file)?;
 
@@ -52,7 +52,7 @@ fn index_to_position(source: &[char], index: usize) -> Position {
         .collect();
 
     let lines = newline_indices.len();
-    let cols = index - newline_indices.last().copied().unwrap_or(0);
+    let cols = index - newline_indices.last().copied().unwrap_or(1) - 1;
 
     Position {
         line: lines as u32,

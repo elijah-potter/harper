@@ -23,9 +23,16 @@ impl Document {
         let tokens = lex_to_end(&source);
 
         let mut doc = Self { source, tokens };
-        doc.match_quotes();
+        doc.parse();
 
         doc
+    }
+
+    /// Re-parse important language constructs.
+    ///
+    /// Should be run after every change to the underlying [`Self::source`].
+    fn parse(&mut self) {
+        self.match_quotes();
     }
 
     pub fn iter_quote_indices(&self) -> impl Iterator<Item = usize> + '_ {
@@ -145,6 +152,8 @@ impl Document {
                 }
             }
         }
+
+        self.parse();
     }
 }
 

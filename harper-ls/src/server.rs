@@ -1,15 +1,15 @@
-use anyhow::Ok;
 use lsp_server::{
     Connection, ExtractError, IoThreads, Message, Notification, Request, RequestId, Response,
 };
 use lsp_types::{
     notification::{
-        DidOpenTextDocument, DidSaveTextDocument, Notification as NotificationTrait,
-        PublishDiagnostics,
+        DidChangeTextDocument, DidOpenTextDocument, DidSaveTextDocument,
+        Notification as NotificationTrait, PublishDiagnostics,
     },
     request::GotoDefinition,
-    Diagnostic, DiagnosticOptions, GotoDefinitionResponse, InitializedParams, Location, Position,
-    PublishDiagnosticsParams, Range, ServerCapabilities,
+    CodeActionProviderCapability, Diagnostic, DiagnosticOptions, GotoDefinitionResponse,
+    InitializedParams, Location, Position, PublishDiagnosticsParams, Range, ServerCapabilities,
+    Url,
 };
 use tracing::{error, info};
 
@@ -30,6 +30,7 @@ impl Server {
             diagnostic_provider: Some(lsp_types::DiagnosticServerCapabilities::Options(
                 DiagnosticOptions::default(),
             )),
+            code_action_provider: Some(CodeActionProviderCapability::Simple(true)),
             ..Default::default()
         })
         .unwrap();
@@ -90,21 +91,27 @@ impl Server {
         Ok(self.io_threads.join()?)
     }
 
-    fn handle_open(&self, req: &Notification) -> anyhow::Result<()> {
-        let params = cast_notif::<DidOpenTextDocument>(req.clone())?;
+    fn handle_save(&self, notif: &Notification) -> anyhow::Result<()> {
+        let params = cast_notif::<DidSaveTextDocument>(notif.clone())?;
 
-        dbg!(params);
+        self.publish_diagnostics(&params.text_document.uri)?;
 
         Ok(())
     }
 
-    fn handle_save(&self, req: &Notification) -> anyhow::Result<()> {
-        let params = cast_notif::<DidSaveTextDocument>(req.clone())?;
+    fn handle_open(&self, req: &Notification) -> anyhow::Result<()> {
+        let params = cast_notif::<DidOpenTextDocument>(req.clone())?;
 
-        let diagnostics = generate_diagnostics(params.text_document.uri.clone())?;
+        self.publish_diagnostics(&params.text_document.uri)?;
+
+        Ok(())
+    }
+
+    fn publish_diagnostics(&self, uri: &Url) -> anyhow::Result<()> {
+        let diagnostics = generate_diagnostics(uri)?;
 
         let result = PublishDiagnosticsParams {
-            uri: params.text_document.uri,
+            uri: uri.clone(),
             diagnostics,
             version: None,
         };
@@ -137,7 +144,7 @@ impl Server {
                 },
             },
         }]));
-        let result = serde_json::to_value(&result).unwrap();
+        let result = serde_json::to_value(result).unwrap();
         let resp = Response {
             id,
             result: Some(result),
