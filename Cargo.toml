@@ -1,3 +1,3 @@
 [workspace]
-members = [ "harper-core", "harper-serve", "harper-wasm"]
+members = [ "harper-core", "harper-ls", "harper-serve", "harper-wasm"]
 resolver = "2"
