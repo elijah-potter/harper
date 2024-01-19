@@ -66,19 +66,23 @@ impl LanguageServer for Backend {
         self.publish_diagnostics(&params.text_document.uri).await;
     }
 
-    async fn did_open(&self, _: DidOpenTextDocumentParams) {
+    async fn did_open(&self, params: DidOpenTextDocumentParams) {
         self.client
             .log_message(MessageType::INFO, "File opened!")
             .await;
+
+        self.publish_diagnostics(&params.text_document.uri).await;
     }
 
-    async fn did_change(&self, _: DidChangeTextDocumentParams) {
+    async fn did_change(&self, params: DidChangeTextDocumentParams) {
         self.client
             .log_message(MessageType::INFO, "File changed!")
             .await;
+
+        self.publish_diagnostics(&params.text_document.uri).await;
     }
 
-    async fn did_close(&self, _: DidCloseTextDocumentParams) {
+    async fn did_close(&self, params: DidCloseTextDocumentParams) {
         self.client
             .log_message(MessageType::INFO, "File closed!")
             .await;

@@ -125,12 +125,12 @@ impl Document {
         span.get_content(&self.source)
     }
 
-    pub fn get_content_string(&self, span: Span) -> String {
+    pub fn get_span_content_str(&self, span: Span) -> String {
         String::from_iter(self.get_span_content(span))
     }
 
     pub fn get_full_string(&self) -> String {
-        self.get_content_string(Span {
+        self.get_span_content_str(Span {
             start: 0,
             end: self.source.len(),
         })
@@ -160,7 +160,7 @@ impl Document {
 impl Display for Document {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         for token in &self.tokens {
-            write!(f, "{}", self.get_content_string(token.span))?;
+            write!(f, "{}", self.get_span_content_str(token.span))?;
         }
 
         Ok(())
