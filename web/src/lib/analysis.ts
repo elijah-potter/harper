@@ -1,3 +1,5 @@
+const defaultUseWasm = true;
+
 export interface ParseResponse {
 	tokens: Token[];
 }
@@ -30,8 +32,8 @@ export type Punctuation =
 	| 'CloseRound'
 	| 'Hash';
 
-export async function parseText(text: string, use_wasm = true): Promise<Token[]> {
-	if (use_wasm) {
+export async function parseText(text: string, useWasm = defaultUseWasm): Promise<Token[]> {
+	if (useWasm) {
 		const wasm = await import('wasm');
 
 		const tokens = wasm.parse(text);
@@ -78,8 +80,8 @@ export function spanContent(span: Span, source: string): string {
 	return source.substring(span.start, span.end);
 }
 
-export async function lintText(text: string, use_wasm = true): Promise<Lint[]> {
-	if (use_wasm) {
+export async function lintText(text: string, useWasm = defaultUseWasm): Promise<Lint[]> {
+	if (useWasm) {
 		const wasm = await import('wasm');
 
 		const lints = wasm.lint(text);
@@ -102,9 +104,9 @@ export async function applySuggestion(
 	text: string,
 	suggestion: Suggestion,
 	span: Span,
-	use_wasm = true
+	useWasm = defaultUseWasm
 ): Promise<string> {
-	if (use_wasm) {
+	if (useWasm) {
 		const wasm = await import('wasm');
 
 		const applied = wasm.apply_suggestion(text, span, suggestion);

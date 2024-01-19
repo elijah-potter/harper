@@ -8,6 +8,7 @@ ahash = "0.8.7"
 is-macro = "0.3.0"
 itertools = "0.11.0"
 once_cell = "1.19.0"
+pulldown-cmark = "0.9.3"
 serde = { version = "1.0.190", features = ["derive"] }
 smallvec = "1.12.0"
 

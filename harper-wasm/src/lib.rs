@@ -1,4 +1,4 @@
-use harper_core::{all_linters, Dictionary, Document, Span, Suggestion};
+use harper_core::{all_linters, Dictionary, Document};
 use serde::Serialize;
 use wasm_bindgen::{prelude::wasm_bindgen, JsValue};
 
@@ -20,7 +20,7 @@ pub fn setup() {
 #[wasm_bindgen]
 pub fn lint(text: String) -> Vec<JsValue> {
     let dictionary = Dictionary::new();
-    let document = Document::new(&text);
+    let document = Document::new(&text, true);
 
     let lints = all_linters(&document, dictionary);
 
@@ -32,7 +32,7 @@ pub fn lint(text: String) -> Vec<JsValue> {
 
 #[wasm_bindgen]
 pub fn parse(text: String) -> Vec<JsValue> {
-    let document = Document::new(&text);
+    let document = Document::new(&text, true);
 
     document
         .fat_tokens()
@@ -49,7 +49,7 @@ pub fn apply_suggestion(
     let span = serde_wasm_bindgen::from_value(span).map_err(|e| e.to_string())?;
     let suggestion = serde_wasm_bindgen::from_value(suggestion).map_err(|e| e.to_string())?;
 
-    let mut document = Document::new(&text);
+    let mut document = Document::new(&text, true);
     document.apply_suggestion(&suggestion, span);
 
     Ok(document.get_full_string())

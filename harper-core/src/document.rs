@@ -5,6 +5,7 @@ use itertools::Itertools;
 use crate::{
     lex_to_end,
     linting::Suggestion,
+    parsing::lex_to_end_md,
     span::Span,
     FatToken,
     Punctuation::{self},
@@ -14,15 +15,21 @@ use crate::{
 pub struct Document {
     source: Vec<char>,
     tokens: Vec<Token>,
+    markdown: bool,
 }
 
 impl Document {
     // Lexes and parses text to produce a document.
-    pub fn new(text: &str) -> Self {
+    //
+    // Choosing to parse with markdown may have a performance penalty
+    pub fn new(text: &str, markdown: bool) -> Self {
         let source: Vec<_> = text.chars().collect();
-        let tokens = lex_to_end(&source);
 
-        let mut doc = Self { source, tokens };
+        let mut doc = Self {
+            source,
+            tokens: Vec::new(),
+            markdown,
+        };
         doc.parse();
 
         doc
@@ -32,6 +39,12 @@ impl Document {
     ///
     /// Should be run after every change to the underlying [`Self::source`].
     fn parse(&mut self) {
+        if self.markdown {
+            self.tokens = lex_to_end_md(&self.source);
+        } else {
+            self.tokens = lex_to_end(&self.source);
+        }
+
         self.match_quotes();
     }
 
@@ -182,21 +195,26 @@ mod tests {
     use crate::Token;
 
     impl Document {
-        fn from_raw_parts(source: Vec<char>, tokens: Vec<Token>) -> Self {
-            Self { source, tokens }
+        fn from_raw_parts(source: Vec<char>, tokens: Vec<Token>, markdown: bool) -> Self {
+            Self {
+                source,
+                tokens,
+                markdown,
+            }
         }
     }
 
     #[test]
-    fn parses_sentances_correctly() {
+    fn parses_sentences_correctly() {
         let text = "There were three little pigs. They built three little homes.";
-        let document = Document::new(text);
+        let document = Document::new(text, false);
 
         let mut sentence_strs = vec![];
 
         for sentence in document.sentences() {
             sentence_strs.push(
-                Document::from_raw_parts(document.source.clone(), sentence.to_vec()).to_string(),
+                Document::from_raw_parts(document.source.clone(), sentence.to_vec(), false)
+                    .to_string(),
             );
         }
 

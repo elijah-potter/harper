@@ -3,7 +3,7 @@
 use harper_core::{all_linters, Dictionary, Document, FatToken, Lint, Span, Suggestion};
 use std::net::SocketAddr;
 use tokio::time::Instant;
-use tracing::{debug, info, Level};
+use tracing::{info, Level};
 use tracing_subscriber::FmtSubscriber;
 
 use axum::{
@@ -12,7 +12,7 @@ use axum::{
     http::StatusCode,
     middleware::{self, Next},
     response::Response,
-    routing::{get, post},
+    routing::post,
     Json, Router,
 };
 use serde::{Deserialize, Serialize};
@@ -41,6 +41,8 @@ async fn main() {
 }
 
 async fn timing_middleware(request: Request<Body>, next: Next<Body>) -> Response {
+    info!("Handling request at endpoint: {}", request.uri().path());
+
     let uri = request.uri().clone();
 
     let start = Instant::now();
@@ -69,7 +71,7 @@ async fn root() -> &'static str {
 async fn parse_text(Json(payload): Json<ParseRequest>) -> (StatusCode, Json<ParseResponse>) {
     let text = payload.text;
 
-    let document = Document::new(&text);
+    let document = Document::new(&text, true);
     let tokens: Vec<_> = document.fat_tokens().collect();
 
     (StatusCode::ACCEPTED, Json(ParseResponse { tokens }))
@@ -89,7 +91,7 @@ async fn lint(Json(payload): Json<LintRequest>) -> (StatusCode, Json<LintRespons
     let text = payload.text;
 
     let dictionary = Dictionary::new();
-    let document = Document::new(&text);
+    let document = Document::new(&text, true);
 
     let lints = all_linters(&document, dictionary);
 
@@ -110,7 +112,7 @@ async fn apply_suggestion(
     Json(payload): Json<ApplySuggestionRequest>,
 ) -> (StatusCode, Json<ApplySuggestionResponse>) {
     let text = payload.text;
-    let mut document = Document::new(&text);
+    let mut document = Document::new(&text, true);
     document.apply_suggestion(&payload.suggestion, payload.span);
 
     (

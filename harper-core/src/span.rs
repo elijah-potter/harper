@@ -27,6 +27,7 @@ impl Span {
     pub fn get_content<'a>(&self, source: &'a [char]) -> &'a [char] {
         if cfg!(debug_assertions) {
             assert!(self.start < self.end);
+            assert!(self.start < source.len());
             assert!(self.end <= source.len());
         }
 
@@ -45,6 +46,12 @@ impl Span {
         let mut cloned = *self;
         cloned.set_len(length);
         cloned
+    }
+
+    // Add an amount to both [`Self::start`] and [`Self::end`]
+    pub fn offset(&mut self, by: usize) {
+        self.start += by;
+        self.end += by;
     }
 }
 

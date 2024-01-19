@@ -13,6 +13,52 @@ pub struct FoundToken {
     pub token: TokenKind,
 }
 
+/// Same as [`lex_to_end`], but with additional infrastructure to intelligently ignore Markdown.
+pub fn lex_to_end_md(source: &[char]) -> Vec<Token> {
+    let source_str: String = source.iter().collect();
+    let md_parser = pulldown_cmark::Parser::new(&source_str);
+
+    let mut tokens = Vec::new();
+
+    let mut traversed_bytes = 0;
+    let mut traversed_chars = 0;
+
+    // NOTE: the range spits out __byte__ indices, not char indices.
+    // This is why we keep track above.
+    for (event, range) in md_parser.into_offset_iter() {
+        if let pulldown_cmark::Event::Text(text) = event {
+            traversed_chars += source_str[traversed_bytes..range.start].chars().count();
+            traversed_bytes = range.start;
+
+            let mut new_tokens = lex_to_end_str(text);
+
+            new_tokens
+                .iter_mut()
+                .for_each(|token| token.span.offset(traversed_chars));
+
+            for token in new_tokens.iter() {
+                dbg!(token.span);
+            }
+
+            tokens.append(&mut new_tokens);
+        }
+    }
+
+    tokens
+}
+
+/// Same as [`lex_to_end_str`], but with additional infrastructure to intelligently ignore Markdown.
+///
+/// Yes, I am aware this implementation is doubly redundant, but I prefer to have a consistent API.
+/// If its an issue, we can use a different markdown parser.
+pub fn lex_to_end_md_str(source: impl AsRef<str>) -> Vec<Token> {
+    let r = source.as_ref();
+
+    let chars: Vec<_> = r.chars().collect();
+
+    lex_to_end_md(&chars)
+}
+
 pub fn lex_to_end_str(source: impl AsRef<str>) -> Vec<Token> {
     let r = source.as_ref();
 
@@ -200,13 +246,21 @@ fn lex_quote(source: &[char]) -> Option<FoundToken> {
 
 #[cfg(test)]
 mod tests {
+    use super::{lex_to_end_md_str, lex_to_end_str};
     use crate::{
-        lex_to_end_str, Punctuation,
+        Punctuation,
         TokenKind::{self, *},
     };
 
-    fn assert_tokens_eq(test_str: impl AsRef<str>, expected: &[TokenKind]) {
+    fn assert_tokens_eq_plain(test_str: impl AsRef<str>, expected: &[TokenKind]) {
         let tokens = lex_to_end_str(test_str);
+        let kinds: Vec<_> = tokens.into_iter().map(|v| v.kind).collect();
+
+        assert_eq!(&kinds, expected)
+    }
+
+    fn assert_tokens_eq_md(test_str: impl AsRef<str>, expected: &[TokenKind]) {
+        let tokens = lex_to_end_md_str(test_str);
         let kinds: Vec<_> = tokens.into_iter().map(|v| v.kind).collect();
 
         assert_eq!(&kinds, expected)
@@ -214,12 +268,12 @@ mod tests {
 
     #[test]
     fn single_letter() {
-        assert_tokens_eq("a", &[Word])
+        assert_tokens_eq_plain("a", &[Word])
     }
 
     #[test]
     fn sentence() {
-        assert_tokens_eq(
+        assert_tokens_eq_plain(
             "hello world, my friend",
             &[
                 Word,
@@ -232,5 +286,22 @@ mod tests {
                 Word,
             ],
         )
+    }
+
+    #[test]
+    fn sentence_md() {
+        assert_tokens_eq_md(
+            "__hello__ world, [my]() friend",
+            &[
+                Word,
+                Space(1),
+                Word,
+                Punctuation(Punctuation::Comma),
+                Space(1),
+                Word,
+                Space(1),
+                Word,
+            ],
+        );
     }
 }

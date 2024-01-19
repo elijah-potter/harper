@@ -77,7 +77,7 @@ fn open_url(url: &Url) -> Result<String> {
 
 #[cached::proc_macro::cached]
 fn lint_string(text: String) -> Vec<Lint> {
-    let document = Document::new(&text);
+    let document = Document::new(&text, true);
     let dictionary = Dictionary::new();
     all_linters(&document, dictionary)
 }
