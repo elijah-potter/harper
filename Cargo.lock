@@ -622,6 +622,7 @@ dependencies = [
  "pulldown-cmark",
  "serde",
  "smallvec",
+ "thiserror",
 ]
 
 [[package]]

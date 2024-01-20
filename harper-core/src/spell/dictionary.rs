@@ -1,4 +1,4 @@
-use std::{borrow::Borrow, hash::Hasher};
+use std::hash::Hasher;
 
 use ahash::{AHashSet, AHasher};
 use once_cell::sync::Lazy;

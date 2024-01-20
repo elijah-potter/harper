@@ -79,6 +79,8 @@ pub enum Punctuation {
     CloseRound,
     /// "
     Hash,
+    /// '
+    Apostrophe,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]

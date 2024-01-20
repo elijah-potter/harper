@@ -1,6 +1,5 @@
 use crate::{
-    document::Document, parsing::Quote, Dictionary, Lint, LintKind, Punctuation, Suggestion, Token,
-    TokenKind,
+    document::Document, Dictionary, Lint, LintKind, Punctuation, Suggestion, Token, TokenKind,
 };
 
 pub fn wrong_quotes(document: &Document, _dictionary: &Dictionary) -> Vec<Lint> {

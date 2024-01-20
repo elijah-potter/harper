@@ -1,6 +1,7 @@
 pub use self::dictionary::Dictionary;
 
 mod dictionary;
+mod hunspell;
 
 /// Suggest a correct spelling for a given misspelled word.
 /// [misspelled_word] is assumed to be quite small (n < 100)
