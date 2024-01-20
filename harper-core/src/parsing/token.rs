@@ -91,10 +91,23 @@ pub struct Quote {
 
 pub trait TokenStringExt {
     fn first_word(&self) -> Option<Token>;
+    fn iter_word_indices(&self) -> impl Iterator<Item = usize> + '_;
+    fn iter_words(&self) -> impl Iterator<Item = &Token> + '_;
 }
 
 impl TokenStringExt for [Token] {
     fn first_word(&self) -> Option<Token> {
         self.iter().find(|v| v.kind.is_word()).copied()
+    }
+
+    fn iter_word_indices(&self) -> impl Iterator<Item = usize> + '_ {
+        self.iter()
+            .enumerate()
+            .filter(|(_, t)| t.kind.is_word())
+            .map(|(i, _)| i)
+    }
+
+    fn iter_words(&self) -> impl Iterator<Item = &Token> + '_ {
+        self.iter().filter(|t| t.kind.is_word())
     }
 }

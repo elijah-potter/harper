@@ -19,6 +19,7 @@ pub enum LintKind {
     Capitalization,
     UnmatchedQuote,
     WrongQuotes,
+    Repetition,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize, Is)]
