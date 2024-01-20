@@ -5,10 +5,6 @@ pub struct MarkedWord {
     pub attributes: Vec<char>,
 }
 
-pub struct Dictionary {
-    pub(self) words: Vec<MarkedWord>,
-}
-
 /// Parse a hunspell word list
 ///
 /// Returns [`None`] if the given string is invalid.

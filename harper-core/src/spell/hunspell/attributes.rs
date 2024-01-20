@@ -113,7 +113,9 @@ impl AttributeList {
         let mut words = Vec::with_capacity(word.attributes.len() + 1);
 
         for attr in &word.attributes {
-            let expansion = self.affixes.get(attr).ok_or(Error::UndefinedAttribute)?;
+            let Some(expansion) = self.affixes.get(attr) else {
+                continue;
+            };
 
             let mut new_words = Vec::new();
 
@@ -129,7 +131,9 @@ impl AttributeList {
                 let mut opp_attr = Vec::new();
 
                 for attr in &word.attributes {
-                    let attr_def = self.affixes.get(&attr).ok_or(Error::UndefinedAttribute)?;
+                    let Some(attr_def) = self.affixes.get(attr) else {
+                        continue;
+                    };
                     if attr_def.suffix != expansion.suffix {
                         opp_attr.push(*attr);
                     }

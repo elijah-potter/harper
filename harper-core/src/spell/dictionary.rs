@@ -4,7 +4,9 @@ use ahash::{AHashSet, AHasher};
 use once_cell::sync::Lazy;
 use smallvec::SmallVec;
 
-type DictWord = SmallVec<[char; 16]>;
+use super::hunspell::{parse_default_attribute_list, parse_default_word_list};
+
+type DictWord = Vec<char>;
 
 #[derive(Debug, Clone)]
 pub struct Dictionary {
@@ -23,19 +25,16 @@ pub struct Dictionary {
 }
 
 fn uncached_inner_new() -> Dictionary {
-    let english_words_raw = include_str!("../../../english_words.txt").replace('\r', "");
+    let word_list = parse_default_word_list().unwrap();
+    let attr_list = parse_default_attribute_list().unwrap();
 
-    let mut words: Vec<DictWord> = english_words_raw
-        .split('\n')
-        .filter(|word| !word.is_empty())
-        .map(|word| word.chars().collect())
-        .collect();
+    let mut words: Vec<Vec<char>> = attr_list.expand_marked_words(word_list).unwrap();
 
     words.sort_by_key(|a| a.len());
 
     let mut word_len_starts = vec![0, 0];
 
-    for (index, len) in words.iter().map(SmallVec::len).enumerate() {
+    for (index, len) in words.iter().map(Vec::len).enumerate() {
         if word_len_starts.len() == len {
             word_len_starts.push(index);
         }

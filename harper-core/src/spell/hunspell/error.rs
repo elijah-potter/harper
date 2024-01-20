@@ -13,7 +13,5 @@ pub enum Error {
     #[error("Could not parse because we encountered the end of the line.")]
     UnexpectedEndOfLine,
     #[error("An error occured with a condition: {0}")]
-    MatcherError(#[from] matcher::Error),
-    #[error("An attribute was added to a word that was never defined in the attribute list.")]
-    UndefinedAttribute,
+    Matcher(#[from] matcher::Error),
 }
