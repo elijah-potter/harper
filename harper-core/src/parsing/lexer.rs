@@ -36,10 +36,6 @@ pub fn lex_to_end_md(source: &[char]) -> Vec<Token> {
                 .iter_mut()
                 .for_each(|token| token.span.offset(traversed_chars));
 
-            for token in new_tokens.iter() {
-                dbg!(token.span);
-            }
-
             tokens.append(&mut new_tokens);
         }
     }

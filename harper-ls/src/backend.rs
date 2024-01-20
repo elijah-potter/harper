@@ -1,3 +1,4 @@
+use tokio::time::Instant;
 use tower_lsp::{
     jsonrpc::Result,
     lsp_types::{
@@ -22,6 +23,7 @@ impl Backend {
     }
 
     async fn publish_diagnostics(&self, url: &Url) {
+        let start_time = Instant::now();
         let diagnostics = generate_diagnostics(url).unwrap();
 
         let result = PublishDiagnosticsParams {
@@ -32,6 +34,20 @@ impl Backend {
 
         self.client
             .send_notification::<PublishDiagnostics>(result)
+            .await;
+
+        let end_time = Instant::now();
+
+        let duration = end_time - start_time;
+
+        self.client
+            .log_message(
+                MessageType::LOG,
+                format!(
+                    "Took {} ms to generate and publish diagnostics.",
+                    duration.as_millis()
+                ),
+            )
             .await;
     }
 }

@@ -1,5 +1,5 @@
 use itertools::Itertools;
-use std::{mem::replace, usize};
+use std::usize;
 
 use ahash::HashMap;
 
@@ -89,9 +89,7 @@ impl AttributeList {
             expansion.replacements.push(replacement)
         } else {
             let cross_product = parser.parse_bool_arg()?;
-            dbg!(cross_product);
             let count = parser.parse_usize_arg()?;
-            dbg!(count);
 
             self.affixes.insert(
                 flag,

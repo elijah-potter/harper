@@ -31,8 +31,6 @@ mod tests {
         let words = parse_word_list(TEST_WORD_LIST).unwrap();
         let attributes = AttributeList::parse(ATTR_LIST).unwrap();
 
-        dbg!(&attributes);
-
         let expanded = attributes.expand_marked_words(words).unwrap();
         let expanded: Vec<String> = expanded
             .into_iter()
@@ -60,8 +58,6 @@ mod tests {
     fn build_expanded() -> Vec<Vec<char>> {
         let words = parse_default_word_list().unwrap();
         let attributes = parse_default_attribute_list().unwrap();
-
-        dbg!(&attributes);
 
         attributes.expand_marked_words(words).unwrap()
     }

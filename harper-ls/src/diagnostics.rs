@@ -1,3 +1,4 @@
+use cached::proc_macro::cached;
 use harper_core::{all_linters, Dictionary, Document, Lint, Span, Suggestion};
 use std::collections::HashMap;
 use std::fs::read;
@@ -75,7 +76,7 @@ fn open_url(url: &Url) -> Result<String> {
     Ok(String::from_utf8(file).unwrap())
 }
 
-#[cached::proc_macro::cached]
+#[cached]
 fn lint_string(text: String) -> Vec<Lint> {
     let document = Document::new(&text, true);
     let dictionary = Dictionary::new();
