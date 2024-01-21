@@ -11,7 +11,7 @@ fn criterion_benchmark(c: &mut Criterion) {
     let dictionary = Dictionary::new();
 
     group.bench_function("dict create", |b| b.iter(Dictionary::new));
-    group.bench_function("hello 5", |b| b.iter(|| spellcheck(dictionary)));
+    group.bench_function("hellw 5", |b| b.iter(|| spellcheck(dictionary)));
 }
 
 criterion_group!(benches, criterion_benchmark);
