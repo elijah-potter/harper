@@ -224,8 +224,7 @@ lex_punctuation! {
     "]" =>  CloseSquare,
     "(" =>  OpenRound,
     ")" =>  CloseRound,
-    "#" => Hash,
-    "'" => Apostrophe
+    "#" => Hash
 }
 
 fn lex_quote(source: &[char]) -> Option<FoundToken> {

@@ -1,4 +1,4 @@
-const defaultUseWasm = true;
+const defaultUseWasm = false;
 
 export interface ParseResponse {
 	tokens: Token[];
@@ -96,7 +96,9 @@ export async function lintText(text: string, useWasm = defaultUseWasm): Promise<
 		});
 
 		const res: LintResponse = await req.json();
-		return res.lints;
+
+		// We only want to show fixable errors.
+		return res.lints.filter((lint) => lint.suggestions.length > 0);
 	}
 }
 
