@@ -98,7 +98,7 @@ impl LanguageServer for Backend {
         self.publish_diagnostics(&params.text_document.uri).await;
     }
 
-    async fn did_close(&self, params: DidCloseTextDocumentParams) {
+    async fn did_close(&self, _params: DidCloseTextDocumentParams) {
         self.client
             .log_message(MessageType::INFO, "File closed!")
             .await;

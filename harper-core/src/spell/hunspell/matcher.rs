@@ -56,7 +56,7 @@ impl Matcher {
             return false;
         }
 
-        for (c, op) in chars.into_iter().zip(self.operators.iter()) {
+        for (c, op) in chars.iter().zip(self.operators.iter()) {
             if !op.matches(*c) {
                 return false;
             }

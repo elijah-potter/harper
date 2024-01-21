@@ -1,7 +1,4 @@
-use super::{
-    lint::Linter, long_sentences, repeated_words, sentence_capitalization, spell_check,
-    unclosed_quotes, wrong_quotes,
-};
+use super::lint::Linter;
 use paste::paste;
 
 use super::{

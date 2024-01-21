@@ -3,9 +3,8 @@ use std::fmt::Display;
 use itertools::Itertools;
 
 use crate::{
-    lex_to_end,
     linting::{LintSet, Suggestion},
-    parsing::lex_to_end_md,
+    parsing::{lex_to_end, lex_to_end_md},
     run_lint_set,
     span::Span,
     Dictionary, FatToken, Lint,

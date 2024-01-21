@@ -1,6 +1,4 @@
-use crate::{
-    document::Document, Dictionary, Lint, LintKind, Punctuation, Suggestion, Token, TokenKind,
-};
+use crate::{document::Document, Dictionary, Lint, LintKind, Suggestion, Token};
 
 pub fn wrong_quotes(document: &Document, _dictionary: &Dictionary) -> Vec<Lint> {
     document

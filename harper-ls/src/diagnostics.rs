@@ -71,8 +71,8 @@ fn lint_to_code_actions<'a>(
 }
 
 fn open_url(url: &Url) -> Result<String> {
-    let file =
-        read(url.path()).map_err(|err| tower_lsp::jsonrpc::Error::new(ErrorCode::InternalError))?;
+    let file = read(url.path())
+        .map_err(|_err| tower_lsp::jsonrpc::Error::new(ErrorCode::InternalError))?;
     Ok(String::from_utf8(file).unwrap())
 }
 

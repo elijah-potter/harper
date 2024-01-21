@@ -10,7 +10,6 @@ pub use document::Document;
 pub use linting::run_lint_set;
 pub use linting::LintSet;
 pub use linting::{Lint, LintKind, Suggestion};
-pub use parsing::{lex_to_end, lex_to_end_str};
 pub use parsing::{FatToken, Punctuation, Token, TokenKind};
 pub use span::Span;
 pub use spell::Dictionary;
