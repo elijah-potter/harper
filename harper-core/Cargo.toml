@@ -2,6 +2,8 @@
 name = "harper-core"
 version = "0.1.0"
 edition = "2021"
+description = "The language checker for artists."
+license = "MIT OR Apache-2.0"
 
 [dependencies]
 ahash = "0.8.7"
