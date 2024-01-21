@@ -2,6 +2,7 @@
 name = "harper-wasm"
 version = "0.1.0"
 edition = "2021"
+private = true
 
 [lib]
 crate-type = ["cdylib", "rlib"]

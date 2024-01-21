@@ -9,11 +9,11 @@ pub use attributes::AttributeList;
 pub use error::Error;
 
 pub fn parse_default_word_list() -> Result<Vec<MarkedWord>, Error> {
-    parse_word_list(include_str!("../../../../dictionary.dict"))
+    parse_word_list(include_str!("../../../dictionary.dict"))
 }
 
 pub fn parse_default_attribute_list() -> Result<AttributeList, Error> {
-    AttributeList::parse(include_str!("../../../../dictionary.aff"))
+    AttributeList::parse(include_str!("../../../dictionary.aff"))
 }
 
 #[cfg(test)]
