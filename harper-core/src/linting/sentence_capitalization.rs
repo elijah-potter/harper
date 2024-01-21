@@ -5,7 +5,7 @@ use crate::{document::Document, parsing::TokenStringExt, Dictionary, Lint, LintK
 use super::lint::Suggestion;
 
 /// A linter that checks to make sure the first word of each sentence is capitalized.
-pub fn sentence_capitalization_lint(document: &Document, _dictionary: &Dictionary) -> Vec<Lint> {
+pub fn sentence_capitalization(document: &Document, _dictionary: &Dictionary) -> Vec<Lint> {
     let mut lints = Vec::new();
 
     for sentence in document.sentences() {

@@ -1,7 +1,7 @@
 use serde::{Deserialize, Serialize};
 
 /// A window in a [char].
-#[derive(Debug, Clone, Copy, Serialize, Deserialize)]
+#[derive(Debug, Clone, Copy, Serialize, Deserialize, Default)]
 pub struct Span {
     pub start: usize,
     pub end: usize,

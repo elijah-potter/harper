@@ -6,7 +6,7 @@ use crate::{
 };
 
 /// A linter that checks to make sure the first word of each sentence is capitalized.
-pub fn repeated_words_lint(document: &Document, _dictionary: &Dictionary) -> Vec<Lint> {
+pub fn repeated_words(document: &Document, _dictionary: &Dictionary) -> Vec<Lint> {
     let mut lints = Vec::new();
     let set = create_match_set();
 
@@ -49,6 +49,7 @@ pub fn repeated_words_lint(document: &Document, _dictionary: &Dictionary) -> Vec
     lints
 }
 
+/// The set of words that can be considered for repetition checking.
 fn create_match_set() -> HashSet<Vec<char>> {
     let mut output = HashSet::default();
 
@@ -56,20 +57,41 @@ fn create_match_set() -> HashSet<Vec<char>> {
     output.insert(vec!['T', 'h', 'e']);
     output.insert(vec!['a']);
     output.insert(vec!['A']);
+    output.insert(vec!['a', 'n']);
+    output.insert(vec!['A', 'n']);
+    output.insert(vec!['i', 's']);
+    output.insert(vec!['I', 's']);
+    output.insert(vec!['w', 'i', 'l', 'l']);
+    output.insert(vec!['W', 'i', 'l', 'l']);
+    output.insert(vec!['l', 'i', 'k', 'e']);
+    output.insert(vec!['L', 'i', 'k', 'e']);
+    output.insert(vec!['t', 'h', 'a', 't']);
+    output.insert(vec!['T', 'h', 'a', 't']);
+    output.insert(vec!['w', 'h', 'a', 't']);
+    output.insert(vec!['W', 'h', 'a', 't']);
+    output.insert(vec!['w', 'h', 'i', 'c', 'h']);
+    output.insert(vec!['W', 'h', 'i', 'c', 'h']);
+    output.insert(vec!['b', 'e']);
+    output.insert(vec!['B', 'e']);
+    output.insert(vec!['a', 'n', 'd']);
+    output.insert(vec!['A', 'n', 'd']);
+    output.insert(vec!['I']);
+    output.insert(vec!['a', 't']);
+    output.insert(vec!['A', 't']);
 
     output
 }
 
 #[cfg(test)]
 mod tests {
-    use super::repeated_words_lint;
+    use super::repeated_words;
     use crate::{Dictionary, Document};
 
     #[test]
     fn catches_basic() {
         let dictionary = Dictionary::new();
         let test = Document::new("I wanted the the banana.", false);
-        let lints = repeated_words_lint(&test, dictionary);
+        let lints = repeated_words(&test, dictionary);
         assert!(lints.len() == 1);
     }
 }

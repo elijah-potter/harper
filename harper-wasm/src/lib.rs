@@ -1,4 +1,4 @@
-use harper_core::{all_linters, Dictionary, Document};
+use harper_core::{Dictionary, Document, LintSet};
 use serde::Serialize;
 use wasm_bindgen::{prelude::wasm_bindgen, JsValue};
 
@@ -22,7 +22,7 @@ pub fn lint(text: String) -> Vec<JsValue> {
     let dictionary = Dictionary::new();
     let document = Document::new(&text, true);
 
-    let lints = all_linters(&document, dictionary);
+    let lints = document.run_lint_set(&LintSet::default(), dictionary);
 
     lints
         .into_iter()

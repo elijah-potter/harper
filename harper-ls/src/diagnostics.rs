@@ -1,5 +1,5 @@
 use cached::proc_macro::cached;
-use harper_core::{all_linters, Dictionary, Document, Lint, Span, Suggestion};
+use harper_core::{Dictionary, Document, Lint, LintSet, Span, Suggestion};
 use std::collections::HashMap;
 use std::fs::read;
 use tower_lsp::jsonrpc::{ErrorCode, Result};
@@ -80,7 +80,7 @@ fn open_url(url: &Url) -> Result<String> {
 fn lint_string(text: String) -> Vec<Lint> {
     let document = Document::new(&text, true);
     let dictionary = Dictionary::new();
-    all_linters(&document, dictionary)
+    document.run_lint_set(&LintSet::default(), dictionary)
 }
 
 fn lint_to_diagnostic(lint: Lint, source: &[char]) -> Diagnostic {

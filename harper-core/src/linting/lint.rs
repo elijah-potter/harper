@@ -5,7 +5,7 @@ use serde::{Deserialize, Serialize};
 
 use crate::{document::Document, span::Span, Dictionary};
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize, Default)]
 pub struct Lint {
     pub span: Span,
     pub lint_kind: LintKind,
@@ -13,13 +13,16 @@ pub struct Lint {
     pub message: String,
 }
 
-#[derive(Debug, Clone, Copy, Serialize, Deserialize, Is)]
+#[derive(Debug, Clone, Copy, Serialize, Deserialize, Is, Default)]
 pub enum LintKind {
     Spelling,
     Capitalization,
     UnmatchedQuote,
     WrongQuotes,
     Repetition,
+    Readability,
+    #[default]
+    Miscellaneous,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize, Is)]

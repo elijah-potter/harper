@@ -1,6 +1,6 @@
 #![allow(dead_code)]
 
-use harper_core::{all_linters, Dictionary, Document, FatToken, Lint, Span, Suggestion};
+use harper_core::{Dictionary, Document, FatToken, Lint, LintSet, Span, Suggestion};
 use std::net::SocketAddr;
 use tokio::time::Instant;
 use tracing::{info, Level};
@@ -92,8 +92,7 @@ async fn lint(Json(payload): Json<LintRequest>) -> (StatusCode, Json<LintRespons
 
     let dictionary = Dictionary::new();
     let document = Document::new(&text, true);
-
-    let lints = all_linters(&document, dictionary);
+    let lints = document.run_lint_set(&LintSet::default(), dictionary);
 
     (StatusCode::ACCEPTED, Json(LintResponse { lints }))
 }

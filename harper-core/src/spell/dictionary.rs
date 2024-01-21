@@ -2,7 +2,6 @@ use std::hash::Hasher;
 
 use ahash::{AHashSet, AHasher};
 use once_cell::sync::Lazy;
-use smallvec::SmallVec;
 
 use super::hunspell::{parse_default_attribute_list, parse_default_word_list};
 
