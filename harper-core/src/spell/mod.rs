@@ -1,7 +1,11 @@
+use smallvec::SmallVec;
+
 pub use self::dictionary::Dictionary;
 
 mod dictionary;
 mod hunspell;
+
+type DictWord = SmallVec<[char; 6]>;
 
 /// Suggest a correct spelling for a given misspelled word.
 /// [misspelled_word] is assumed to be quite small (n < 100)

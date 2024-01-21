@@ -18,6 +18,8 @@ pub fn parse_default_attribute_list() -> Result<AttributeList, Error> {
 
 #[cfg(test)]
 mod tests {
+    use crate::spell::DictWord;
+
     use super::{
         attributes::AttributeList, parse_default_attribute_list, parse_default_word_list,
         word_list::parse_word_list,
@@ -55,7 +57,7 @@ mod tests {
         assert!(expanded.contains(&split("giants")))
     }
 
-    fn build_expanded() -> Vec<Vec<char>> {
+    fn build_expanded() -> Vec<DictWord> {
         let words = parse_default_word_list().unwrap();
         let attributes = parse_default_attribute_list().unwrap();
 
@@ -72,7 +74,7 @@ mod tests {
         assert!(build_expanded().contains(&split("giants")));
     }
 
-    fn split(text: &str) -> Vec<char> {
+    fn split(text: &str) -> DictWord {
         text.chars().collect()
     }
 }

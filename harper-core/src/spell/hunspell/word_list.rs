@@ -1,7 +1,9 @@
+use crate::spell::DictWord;
+
 use super::Error;
 
 pub struct MarkedWord {
-    pub letters: Vec<char>,
+    pub letters: DictWord,
     pub attributes: Vec<char>,
 }
 

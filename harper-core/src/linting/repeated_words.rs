@@ -1,4 +1,4 @@
-use ahash::HashSet;
+use hashbrown::HashSet;
 
 use crate::{
     parsing::TokenStringExt, Dictionary, Document, Lint, LintKind, Span, Suggestion, Token,
@@ -51,7 +51,7 @@ pub fn repeated_words(document: &Document, _dictionary: &Dictionary) -> Vec<Lint
 
 /// The set of words that can be considered for repetition checking.
 fn create_match_set() -> HashSet<Vec<char>> {
-    let mut output = HashSet::default();
+    let mut output = HashSet::new();
 
     output.insert(vec!['t', 'h', 'e']);
     output.insert(vec!['T', 'h', 'e']);

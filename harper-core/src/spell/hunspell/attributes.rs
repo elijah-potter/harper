@@ -1,9 +1,10 @@
 use itertools::Itertools;
+use smallvec::ToSmallVec;
 use std::usize;
 
-use ahash::HashMap;
+use hashbrown::HashMap;
 
-use crate::Span;
+use crate::{spell::DictWord, Span};
 
 use super::{matcher::Matcher, word_list::MarkedWord, Error};
 
@@ -107,7 +108,7 @@ impl AttributeList {
     /// Expand [`MarkedWord`] into a list of full words, including itself.
     ///
     /// In the future, I want to make this function cleaner and faster.
-    pub fn expand_marked_word(&self, word: MarkedWord) -> Result<Vec<Vec<char>>, Error> {
+    pub fn expand_marked_word(&self, word: MarkedWord) -> Result<Vec<DictWord>, Error> {
         let mut words = Vec::with_capacity(word.attributes.len() + 1);
 
         for attr in &word.attributes {
@@ -160,7 +161,7 @@ impl AttributeList {
     pub fn expand_marked_words(
         &self,
         words: impl IntoIterator<Item = MarkedWord>,
-    ) -> Result<Vec<Vec<char>>, Error> {
+    ) -> Result<Vec<DictWord>, Error> {
         let mut output = Vec::new();
 
         for word in words {
@@ -174,7 +175,7 @@ impl AttributeList {
         replacement: &AffixReplacement,
         letters: &[char],
         suffix: bool,
-    ) -> Option<Vec<char>> {
+    ) -> Option<DictWord> {
         if replacement.condition.len() > letters.len() {
             return None;
         }
@@ -188,8 +189,8 @@ impl AttributeList {
         let target_segment = target_span.get_content(letters);
 
         if replacement.condition.matches(target_segment) {
-            let mut replaced_segment = letters.to_vec();
-            let mut remove = replacement.remove.to_vec();
+            let mut replaced_segment = letters.to_smallvec();
+            let mut remove: DictWord = replacement.remove.to_smallvec();
 
             if !suffix {
                 replaced_segment.reverse();

@@ -1,11 +1,11 @@
-use std::hash::Hasher;
-
-use ahash::{AHashSet, AHasher};
+use hashbrown::HashSet;
 use once_cell::sync::Lazy;
+use smallvec::SmallVec;
 
-use super::hunspell::{parse_default_attribute_list, parse_default_word_list};
-
-type DictWord = Vec<char>;
+use super::{
+    hunspell::{parse_default_attribute_list, parse_default_word_list},
+    DictWord,
+};
 
 #[derive(Debug, Clone)]
 pub struct Dictionary {
@@ -20,38 +20,31 @@ pub struct Dictionary {
     /// Each index of this list will return the first index of [`Self::words`] that has a word
     /// whose index is that length.
     word_len_starts: Vec<usize>,
-    word_set: AHashSet<u64>,
+    word_set: HashSet<DictWord>,
 }
 
 fn uncached_inner_new() -> Dictionary {
     let word_list = parse_default_word_list().unwrap();
     let attr_list = parse_default_attribute_list().unwrap();
 
-    let mut words: Vec<Vec<char>> = attr_list.expand_marked_words(word_list).unwrap();
+    let words = attr_list.expand_marked_words(word_list).unwrap();
+    let mut words: Vec<DictWord> = words.into_iter().collect();
 
     words.sort_by_key(|a| a.len());
 
     let mut word_len_starts = vec![0, 0];
 
-    for (index, len) in words.iter().map(Vec::len).enumerate() {
+    for (index, len) in words.iter().map(SmallVec::len).enumerate() {
         if word_len_starts.len() == len {
             word_len_starts.push(index);
         }
     }
 
     Dictionary {
-        word_set: AHashSet::from_iter(words.iter().map(|v| hash_word(v.as_slice()))),
+        word_set: HashSet::from_iter(words.iter().cloned()),
         word_len_starts,
         words,
     }
-}
-
-fn hash_word(word: &[char]) -> u64 {
-    let mut hasher = AHasher::default();
-    for c in word {
-        hasher.write_u32(*c as u32);
-    }
-    hasher.finish()
 }
 
 static DICT: Lazy<Dictionary> = Lazy::new(uncached_inner_new);
@@ -82,8 +75,8 @@ impl Dictionary {
     }
 
     pub fn contains_word(&self, word: &[char]) -> bool {
-        let lowercase: Vec<_> = word.iter().flat_map(|c| c.to_lowercase()).collect();
+        let lowercase: SmallVec<_> = word.iter().flat_map(|c| c.to_lowercase()).collect();
 
-        self.word_set.contains(&hash_word(word)) || self.word_set.contains(&hash_word(&lowercase))
+        self.word_set.contains(word) || self.word_set.contains(&lowercase)
     }
 }
