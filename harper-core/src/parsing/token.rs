@@ -3,7 +3,7 @@ use serde::{Deserialize, Serialize};
 
 use crate::span::Span;
 
-#[derive(Debug, Clone, Copy, Serialize, Deserialize)]
+#[derive(Debug, Clone, Copy, Serialize, Deserialize, PartialEq, Default)]
 pub struct Token {
     pub span: Span,
     pub kind: TokenKind,
@@ -28,9 +28,10 @@ pub struct FatToken {
     pub kind: TokenKind,
 }
 
-#[derive(Debug, Is, Clone, Copy, Serialize, Deserialize, PartialEq)]
+#[derive(Debug, Is, Clone, Copy, Serialize, Deserialize, PartialEq, Default)]
 #[serde(tag = "kind", content = "value")]
 pub enum TokenKind {
+    #[default]
     Word,
     Punctuation(Punctuation),
     Number(f64),
@@ -47,6 +48,10 @@ impl TokenKind {
 
     pub fn as_quote(&self) -> Option<&Quote> {
         self.as_punctuation()?.as_quote()
+    }
+
+    pub fn is_apostrophe(&self) -> bool {
+        matches!(self, TokenKind::Punctuation(Punctuation::Apostrophe))
     }
 }
 
@@ -95,6 +100,8 @@ pub trait TokenStringExt {
     fn iter_words(&self) -> impl Iterator<Item = &Token> + '_;
     fn iter_space_indices(&self) -> impl Iterator<Item = usize> + '_;
     fn iter_spaces(&self) -> impl Iterator<Item = &Token> + '_;
+    fn iter_apostrophe_indices(&self) -> impl Iterator<Item = usize> + '_;
+    fn iter_apostrophes(&self) -> impl Iterator<Item = &Token> + '_;
 }
 
 impl TokenStringExt for [Token] {
@@ -122,5 +129,16 @@ impl TokenStringExt for [Token] {
 
     fn iter_spaces(&self) -> impl Iterator<Item = &Token> + '_ {
         self.iter_space_indices().map(|i| &self[i])
+    }
+
+    fn iter_apostrophe_indices(&self) -> impl Iterator<Item = usize> + '_ {
+        self.iter()
+            .enumerate()
+            .filter(|(_, t)| t.kind.is_apostrophe())
+            .map(|(i, _)| i)
+    }
+
+    fn iter_apostrophes(&self) -> impl Iterator<Item = &Token> + '_ {
+        self.iter_apostrophe_indices().map(|i| &self[i])
     }
 }

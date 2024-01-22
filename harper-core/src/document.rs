@@ -44,6 +44,8 @@ impl Document {
             self.tokens = lex_to_end(&self.source);
         }
 
+        self.condense_contractions();
+        // Since quote matches depend on token indices.
         self.match_quotes();
     }
 
@@ -82,6 +84,73 @@ impl Document {
                 b.twin_loc = Some(a_i);
             }
         }
+    }
+
+    /// Searches for contractions and condenses them down into single tokens
+    fn condense_contractions(&mut self) {
+        if self.tokens.len() < 3 {
+            return;
+        }
+
+        // Indices of the three token stretches we are going to condense.
+        let mut replace_starts = Vec::new();
+
+        for idx in 0..self.tokens.len() - 2 {
+            let a = self.tokens[idx];
+            let b = self.tokens[idx + 1];
+            let c = self.tokens[idx + 2];
+
+            if matches!(
+                (a.kind, b.kind, c.kind),
+                (
+                    TokenKind::Word,
+                    TokenKind::Punctuation(Punctuation::Apostrophe),
+                    TokenKind::Word
+                )
+            ) {
+                // Ensure there is no overlapping between replacements
+                let should_replace = if let Some(last_idx) = replace_starts.last() {
+                    *last_idx < idx - 2
+                } else {
+                    true
+                };
+
+                if should_replace {
+                    replace_starts.push(idx);
+                    self.tokens[idx].span.end = c.span.end;
+                }
+            }
+        }
+
+        // Trim
+        let old = self.tokens.clone();
+        self.tokens.clear();
+
+        // Keep first chunk.
+        self.tokens.extend_from_slice(
+            &old[0..replace_starts
+                .first()
+                .copied()
+                .unwrap_or(replace_starts.len())],
+        );
+
+        let mut iter = replace_starts.iter().peekable();
+
+        while let (Some(a_idx), b) = (iter.next(), iter.peek()) {
+            self.tokens.push(old[*a_idx]);
+
+            if let Some(b_idx) = b {
+                self.tokens.extend_from_slice(&old[a_idx + 3..**b_idx]);
+            }
+        }
+
+        // Keep last chunk.
+        self.tokens.extend_from_slice(
+            &old[replace_starts
+                .last()
+                .map(|v| v + 3)
+                .unwrap_or(replace_starts.len())..],
+        )
     }
 
     pub fn tokens(&self) -> impl Iterator<Item = Token> + '_ {
@@ -218,7 +287,7 @@ fn is_sentence_terminator(punctuation: &Punctuation) -> bool {
 #[cfg(test)]
 mod tests {
     use super::Document;
-    use crate::Token;
+    use crate::{Span, Token, TokenKind};
 
     impl Document {
         fn from_raw_parts(source: Vec<char>, tokens: Vec<Token>, markdown: bool) -> Self {
@@ -228,6 +297,45 @@ mod tests {
                 markdown,
             }
         }
+    }
+
+    fn assert_condensed_contractions(text: &str, final_tok_count: usize) {
+        let mut document = Document::new(text, false);
+        dbg!(&document.tokens);
+        document.condense_contractions();
+
+        assert_eq!(document.tokens.len(), final_tok_count);
+
+        let mut document = Document::new(text, true);
+        dbg!(&document.tokens);
+        document.condense_contractions();
+
+        assert_eq!(document.tokens.len(), final_tok_count);
+    }
+
+    #[test]
+    fn simple_contraction() {
+        assert_condensed_contractions("isn't", 1);
+    }
+
+    #[test]
+    fn simple_contraction2() {
+        assert_condensed_contractions("wasn't", 1);
+    }
+
+    #[test]
+    fn simple_contraction3() {
+        assert_condensed_contractions("There's", 1);
+    }
+
+    #[test]
+    fn medium_contraction() {
+        assert_condensed_contractions("isn't wasn't", 3);
+    }
+
+    #[test]
+    fn medium_contraction2() {
+        assert_condensed_contractions("There's no way", 5);
     }
 
     #[test]

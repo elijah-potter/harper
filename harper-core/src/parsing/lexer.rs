@@ -26,20 +26,21 @@ pub fn lex_to_end_md(source: &[char]) -> Vec<Token> {
     // NOTE: the range spits out __byte__ indices, not char indices.
     // This is why we keep track above.
     for (event, range) in md_parser.into_offset_iter() {
-        match event {
-            pulldown_cmark::Event::Text(text) => {
-                traversed_chars += source_str[traversed_bytes..range.start].chars().count();
-                traversed_bytes = range.start;
+        if let pulldown_cmark::Event::Text(text) = event {
+            traversed_chars += source_str[traversed_bytes..range.start].chars().count();
+            traversed_bytes = range.start;
 
-                let mut new_tokens = lex_to_end_str(text);
+            dbg!(text.to_string());
 
-                new_tokens
-                    .iter_mut()
-                    .for_each(|token| token.span.offset(traversed_chars));
+            let mut new_tokens = lex_to_end_str(text);
 
-                tokens.append(&mut new_tokens);
-            }
-            _ => (),
+            dbg!(&new_tokens);
+
+            new_tokens
+                .iter_mut()
+                .for_each(|token| token.span.offset(traversed_chars));
+
+            tokens.append(&mut new_tokens);
         }
     }
 
@@ -90,9 +91,9 @@ pub fn lex_to_end(source: &[char]) -> Vec<Token> {
 
 fn lex_token(source: &[char]) -> Option<FoundToken> {
     let lexers = [
+        lex_punctuation,
         lex_spaces,
         lex_newlines,
-        lex_punctuation,
         lex_number,
         lex_word,
     ];
@@ -102,6 +103,7 @@ fn lex_token(source: &[char]) -> Option<FoundToken> {
             return Some(f);
         }
     }
+
     None
 }
 
@@ -184,50 +186,37 @@ fn lex_spaces(source: &[char]) -> Option<FoundToken> {
     }
 }
 
-fn lex_characters(source: &[char], cs: &str, token: TokenKind) -> Option<FoundToken> {
-    let sep: Vec<_> = cs.chars().collect();
-
-    if source.get(0..cs.len())? == sep {
-        Some(FoundToken {
-            token,
-            next_index: cs.len(),
-        })
-    } else {
-        None
+fn lex_punctuation(source: &[char]) -> Option<FoundToken> {
+    if let Some(found) = lex_quote(source) {
+        return Some(found);
     }
-}
 
-macro_rules! lex_punctuation {
-    ($($text:literal => $res:ident),*) => {
-        fn lex_punctuation(source: &[char]) -> Option<FoundToken> {
-            if let Some(found) = lex_quote(source){
-                return Some(found);
-            }
+    let c = source.first()?;
 
-            $(
-                if let Some(found) = lex_characters(source, $text, TokenKind::Punctuation(Punctuation::$res)){
-                    return Some(found);
-                }
-            )*
+    use Punctuation::*;
 
-            None
-        }
+    let punct = match c {
+        '’' => Apostrophe,
+        '\'' => Apostrophe,
+        '.' => Period,
+        '!' => Bang,
+        '?' => Question,
+        ':' => Colon,
+        ';' => Semicolon,
+        ',' => Comma,
+        '-' => Hyphen,
+        '[' => OpenSquare,
+        ']' => CloseSquare,
+        '(' => OpenRound,
+        ')' => CloseRound,
+        '#' => Hash,
+        _ => return None,
     };
-}
 
-lex_punctuation! {
-    "." => Period,
-    "!" => Bang,
-    "?" => Question,
-    ":" => Colon,
-    ";" => Semicolon,
-    "," => Comma,
-    "-" => Hyphen,
-    "[" =>  OpenSquare,
-    "]" =>  CloseSquare,
-    "(" =>  OpenRound,
-    ")" =>  CloseRound,
-    "#" => Hash
+    Some(FoundToken {
+        next_index: 1,
+        token: TokenKind::Punctuation(punct),
+    })
 }
 
 fn lex_quote(source: &[char]) -> Option<FoundToken> {

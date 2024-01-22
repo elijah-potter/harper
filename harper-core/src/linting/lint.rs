@@ -3,7 +3,7 @@ use std::fmt::Display;
 use is_macro::Is;
 use serde::{Deserialize, Serialize};
 
-use crate::{document::Document, span::Span};
+use crate::span::Span;
 
 #[derive(Debug, Clone, Serialize, Deserialize, Default)]
 pub struct Lint {
