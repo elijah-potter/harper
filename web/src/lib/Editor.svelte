@@ -30,7 +30,6 @@
 	function calcHeight(boxContent: string): number {
 		let numberOfLineBreaks = (boxContent.match(/\n/g) || []).length;
 		let newHeight = 20 + numberOfLineBreaks * 30 + 12 + 2;
-		console.log(newHeight);
 		return newHeight;
 	}
 </script>

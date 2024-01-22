@@ -81,11 +81,12 @@ export function spanContent(span: Span, source: string): string {
 }
 
 export async function lintText(text: string, useWasm = defaultUseWasm): Promise<Lint[]> {
+	let lints;
+
 	if (useWasm) {
 		const wasm = await import('wasm');
 
-		const lints = wasm.lint(text);
-		return lints;
+		lints = wasm.lint(text);
 	} else {
 		const req = await fetch(`/lint`, {
 			method: 'POST',
@@ -97,11 +98,12 @@ export async function lintText(text: string, useWasm = defaultUseWasm): Promise<
 
 		const res: LintResponse = await req.json();
 
-		// We only want to show fixable errors.
-		const lints = res.lints.filter((lint) => lint.suggestions.length > 0);
-		console.log(lints);
-		return lints;
+		lints = res.lints;
 	}
+
+	// We only want to show fixable errors.
+	lints = lints.filter((lint) => lint.suggestions.length > 0);
+	return lints;
 }
 
 export async function applySuggestion(

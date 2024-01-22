@@ -16,7 +16,7 @@ pub struct FoundToken {
 /// Same as [`lex_to_end`], but with additional infrastructure to intelligently ignore Markdown.
 pub fn lex_to_end_md(source: &[char]) -> Vec<Token> {
     let source_str: String = source.iter().collect();
-    let md_parser = pulldown_cmark::Parser::new(&source_str);
+    let md_parser = pulldown_cmark::Parser::new_ext(&source_str, pulldown_cmark::Options::all());
 
     let mut tokens = Vec::new();
 
