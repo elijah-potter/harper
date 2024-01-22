@@ -1,34 +1,48 @@
-use crate::{document::Document, suggest_correct_spelling, Dictionary, Lint, LintKind};
+use super::{Lint, LintKind, Linter};
+use crate::{
+    document::Document,
+    spell::{suggest_correct_spelling, Dictionary},
+};
 
 use super::lint::Suggestion;
 
-pub fn spell_check(document: &Document, _dictionary: &Dictionary) -> Vec<Lint> {
-    let mut lints = Vec::new();
+pub struct SpellCheck {
+    dictionary: Dictionary,
+}
 
-    let dictionary = Dictionary::new();
+impl SpellCheck {
+    pub fn new(dictionary: Dictionary) -> Self {
+        Self { dictionary }
+    }
+}
 
-    for word in document.words() {
-        let word_chars = document.get_span_content(word.span);
-        if dictionary.contains_word(word_chars) {
-            continue;
+impl Linter for SpellCheck {
+    fn lint(&mut self, document: &Document) -> Vec<Lint> {
+        let mut lints = Vec::new();
+
+        for word in document.words() {
+            let word_chars = document.get_span_content(word.span);
+            if self.dictionary.contains_word(word_chars) {
+                continue;
+            }
+
+            let possibilities = suggest_correct_spelling(word_chars, 3, 3, &self.dictionary);
+
+            let suggestions = possibilities
+                .into_iter()
+                .map(|word| Suggestion::ReplaceWith(word.to_vec()));
+
+            lints.push(Lint {
+                span: word.span,
+                lint_kind: LintKind::Spelling,
+                suggestions: suggestions.collect(),
+                message: format!(
+                    "Did you mean to spell “{}” this way?",
+                    document.get_span_content_str(word.span)
+                ),
+            })
         }
 
-        let possibilities = suggest_correct_spelling(word_chars, 3, 3, dictionary);
-
-        let suggestions = possibilities
-            .into_iter()
-            .map(|word| Suggestion::ReplaceWith(word.to_vec()));
-
-        lints.push(Lint {
-            span: word.span,
-            lint_kind: LintKind::Spelling,
-            suggestions: suggestions.collect(),
-            message: format!(
-                "Did you mean to spell “{}” this way?",
-                document.get_span_content_str(word.span)
-            ),
-        })
+        lints
     }
-
-    lints
 }

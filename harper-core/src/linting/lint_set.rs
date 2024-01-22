@@ -1,15 +1,30 @@
-use super::lint::Linter;
+use crate::{Dictionary, Lint};
+
+use super::Linter;
 use paste::paste;
 
 use super::{
-    long_sentences::long_sentences, repeated_words::repeated_words,
-    sentence_capitalization::sentence_capitalization, spell_check::spell_check,
-    unclosed_quotes::unclosed_quotes, wrong_quotes::wrong_quotes,
+    long_sentences::LongSentences, repeated_words::RepeatedWords,
+    sentence_capitalization::SentenceCapitalization, spell_check::SpellCheck,
+    unclosed_quotes::UnclosedQuotes, wrong_quotes::WrongQuotes,
 };
 
-#[derive(Debug, Clone)]
 pub struct LintSet {
-    pub(super) linters: Vec<Linter>,
+    pub(super) linters: Vec<Box<dyn Linter>>,
+}
+
+impl Linter for LintSet {
+    fn lint(&mut self, document: &crate::Document) -> Vec<Lint> {
+        let mut lints = Vec::new();
+
+        for linter in &mut self.linters {
+            lints.append(&mut linter.lint(document));
+        }
+
+        lints.sort_by_key(|lint| lint.span.start);
+
+        lints
+    }
 }
 
 impl LintSet {
@@ -18,37 +33,41 @@ impl LintSet {
             linters: Vec::new(),
         }
     }
-}
 
-impl Default for LintSet {
-    fn default() -> Self {
-        Self::new()
-            .with_spell_check()
-            .with_repeated_words()
-            .with_long_sentences()
-            .with_unclosed_quotes()
-            .with_sentence_capitalization()
+    pub fn add_standard(&mut self, dictionary: Dictionary) -> &mut Self {
+        self.add_repeated_words()
+            .add_long_sentences()
+            .add_unclosed_quotes()
+            .add_sentence_capitalization()
+            .add_spell_check(dictionary);
+        self
+    }
+
+    pub fn with_standard(mut self, dictionary: Dictionary) -> Self {
+        self.add_standard(dictionary);
+        self
+    }
+
+    pub fn add_spell_check(&mut self, dictionary: Dictionary) -> &mut Self {
+        self.linters.push(Box::new(SpellCheck::new(dictionary)));
+        self
+    }
+
+    pub fn with_spell_check(mut self, dictionary: Dictionary) -> Self {
+        self.add_spell_check(dictionary);
+        self
     }
 }
 
-macro_rules! create_builder {
+/// Create builder methods for the linters that do not take any arguments.
+macro_rules! create_simple_builder_methods {
     ($($linter:ident),*) => {
         impl LintSet {
-            pub fn add_all(&mut self) -> &mut Self {
-                self.linters.extend_from_slice(&[
-                    $(
-                        $linter
-                    ),*
-                ]);
-
-                self
-            }
-
             paste! {
                 $(
                     #[doc = "Modifies self, adding the `" $linter "` linter to the set."]
-                    pub fn [<add_$linter>](&mut self) -> &mut Self{
-                        self.linters.push($linter);
+                    pub fn [<add_$linter:snake>](&mut self) -> &mut Self{
+                        self.linters.push(Box::new($linter::default()));
                         self
                     }
                 )*
@@ -57,8 +76,8 @@ macro_rules! create_builder {
             paste! {
                 $(
                     #[doc = "Consumes self, adding the `" $linter "` linter to the set."]
-                    pub fn [<with_$linter>](mut self) -> Self{
-                        self.linters.push($linter);
+                    pub fn [<with_$linter:snake>](mut self) -> Self{
+                        self.[<add_$linter:snake>]();
                         self
                     }
                 )*
@@ -67,11 +86,10 @@ macro_rules! create_builder {
     };
 }
 
-create_builder!(
-    spell_check,
-    sentence_capitalization,
-    unclosed_quotes,
-    wrong_quotes,
-    repeated_words,
-    long_sentences
+create_simple_builder_methods!(
+    SentenceCapitalization,
+    UnclosedQuotes,
+    WrongQuotes,
+    LongSentences,
+    RepeatedWords
 );

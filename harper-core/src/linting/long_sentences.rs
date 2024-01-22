@@ -1,21 +1,27 @@
-use crate::{parsing::TokenStringExt, Dictionary, Document, Lint, LintKind, Span};
+use super::{Lint, LintKind, Linter};
+use crate::{parsing::TokenStringExt, Document, Span};
 
 /// Detect and warn that the sentence is too long.
-pub fn long_sentences(document: &Document, _dictionary: &Dictionary) -> Vec<Lint> {
-    let mut output = Vec::new();
+#[derive(Debug, Clone, Copy, Default)]
+pub struct LongSentences;
 
-    for sentence in document.sentences() {
-        let word_count = sentence.iter_words().count();
+impl Linter for LongSentences {
+    fn lint(&mut self, document: &Document) -> Vec<Lint> {
+        let mut output = Vec::new();
 
-        if word_count > 40 {
-            output.push(Lint {
-                span: Span::new(sentence[0].span.start, sentence.last().unwrap().span.end),
-                lint_kind: LintKind::Readability,
-                message: format!("This sentence is {} words long.", word_count),
-                ..Default::default()
-            })
+        for sentence in document.sentences() {
+            let word_count = sentence.iter_words().count();
+
+            if word_count > 40 {
+                output.push(Lint {
+                    span: Span::new(sentence[0].span.start, sentence.last().unwrap().span.end),
+                    lint_kind: LintKind::Readability,
+                    message: format!("This sentence is {} words long.", word_count),
+                    ..Default::default()
+                })
+            }
         }
-    }
 
-    output
+        output
+    }
 }

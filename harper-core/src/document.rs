@@ -3,11 +3,10 @@ use std::fmt::Display;
 use itertools::Itertools;
 
 use crate::{
-    linting::{LintSet, Suggestion},
+    linting::Suggestion,
     parsing::{lex_to_end, lex_to_end_md},
-    run_lint_set,
     span::Span,
-    Dictionary, FatToken, Lint,
+    FatToken,
     Punctuation::{self},
     Token, TokenKind,
 };
@@ -46,10 +45,6 @@ impl Document {
         }
 
         self.match_quotes();
-    }
-
-    pub fn run_lint_set(&self, lint_set: &LintSet, dictionary: &Dictionary) -> Vec<Lint> {
-        run_lint_set(lint_set, self, dictionary)
     }
 
     pub fn iter_quote_indices(&self) -> impl Iterator<Item = usize> + '_ {

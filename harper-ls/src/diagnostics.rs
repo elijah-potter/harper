@@ -1,5 +1,4 @@
-use cached::proc_macro::cached;
-use harper_core::{Dictionary, Document, Lint, LintSet, Span, Suggestion};
+use harper_core::{Document, Lint, LintSet, Linter, Span, Suggestion};
 use std::collections::HashMap;
 use std::fs::read;
 use tower_lsp::jsonrpc::{ErrorCode, Result};
@@ -7,10 +6,15 @@ use tower_lsp::lsp_types::{
     CodeAction, CodeActionKind, Diagnostic, Position, Range, TextEdit, Url, WorkspaceEdit,
 };
 
-pub fn generate_diagnostics(file_url: &Url) -> Result<Vec<Diagnostic>> {
+fn lint_file(file_url: &Url, linter: &mut impl Linter) -> Result<(Vec<Lint>, Vec<char>)> {
     let file_str = open_url(file_url)?;
     let source_chars: Vec<_> = file_str.chars().collect();
-    let lints = lint_string(file_str);
+    let document = Document::new(&file_str, true);
+    Ok((linter.lint(&document), source_chars))
+}
+
+pub fn generate_diagnostics(file_url: &Url, linter: &mut impl Linter) -> Result<Vec<Diagnostic>> {
+    let (lints, source_chars) = lint_file(file_url, linter)?;
 
     let diagnostics = lints
         .into_iter()
@@ -20,10 +24,12 @@ pub fn generate_diagnostics(file_url: &Url) -> Result<Vec<Diagnostic>> {
     Ok(diagnostics)
 }
 
-pub fn generate_code_actions(url: &Url, range: Range) -> Result<Vec<CodeAction>> {
-    let file_str = open_url(url)?;
-    let source_chars: Vec<_> = file_str.chars().collect();
-    let lints = lint_string(file_str);
+pub fn generate_code_actions(
+    url: &Url,
+    range: Range,
+    linter: &mut impl Linter,
+) -> Result<Vec<CodeAction>> {
+    let (lints, source_chars) = lint_file(url, linter)?;
 
     // Find lints whose span overlaps with range
     let span = range_to_span(&source_chars, range);
@@ -74,13 +80,6 @@ fn open_url(url: &Url) -> Result<String> {
     let file = read(url.path())
         .map_err(|_err| tower_lsp::jsonrpc::Error::new(ErrorCode::InternalError))?;
     Ok(String::from_utf8(file).unwrap())
-}
-
-#[cached]
-fn lint_string(text: String) -> Vec<Lint> {
-    let document = Document::new(&text, true);
-    let dictionary = Dictionary::new();
-    document.run_lint_set(&LintSet::default(), dictionary)
 }
 
 fn lint_to_diagnostic(lint: Lint, source: &[char]) -> Diagnostic {

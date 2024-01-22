@@ -50,8 +50,8 @@ fn uncached_inner_new() -> Dictionary {
 static DICT: Lazy<Dictionary> = Lazy::new(uncached_inner_new);
 
 impl Dictionary {
-    pub fn new() -> &'static Self {
-        &DICT
+    pub fn new() -> Self {
+        DICT.clone()
     }
 
     /// Iterate over all the words in the dicitonary of a given length

@@ -1,4 +1,7 @@
-use tokio::time::Instant;
+use std::{borrow::BorrowMut, ops::DerefMut};
+
+use harper_core::{Dictionary, LintSet};
+use tokio::{sync::Mutex, time::Instant};
 use tower_lsp::{
     jsonrpc::Result,
     lsp_types::{
@@ -15,16 +18,22 @@ use crate::diagnostics::{generate_code_actions, generate_diagnostics};
 
 pub struct Backend {
     client: Client,
+    linter: Mutex<LintSet>,
 }
 
 impl Backend {
     pub fn new(client: Client) -> Self {
-        Self { client }
+        let dictionary = Dictionary::new();
+        let linter = Mutex::new(LintSet::new().with_standard(dictionary));
+
+        Self { client, linter }
     }
 
     async fn publish_diagnostics(&self, url: &Url) {
         let start_time = Instant::now();
-        let diagnostics = generate_diagnostics(url).unwrap();
+        let mut linter = self.linter.lock().await;
+
+        let diagnostics = generate_diagnostics(url, linter.deref_mut()).unwrap();
 
         let result = PublishDiagnosticsParams {
             uri: url.clone(),
@@ -105,7 +114,9 @@ impl LanguageServer for Backend {
     }
 
     async fn code_action(&self, params: CodeActionParams) -> Result<Option<CodeActionResponse>> {
-        let actions = generate_code_actions(&params.text_document.uri, params.range)?;
+        let mut linter = self.linter.lock().await;
+        let actions =
+            generate_code_actions(&params.text_document.uri, params.range, linter.deref_mut())?;
 
         self.client
             .log_message(MessageType::INFO, format!("{:?}", actions))

@@ -26,17 +26,20 @@ pub fn lex_to_end_md(source: &[char]) -> Vec<Token> {
     // NOTE: the range spits out __byte__ indices, not char indices.
     // This is why we keep track above.
     for (event, range) in md_parser.into_offset_iter() {
-        if let pulldown_cmark::Event::Text(text) = event {
-            traversed_chars += source_str[traversed_bytes..range.start].chars().count();
-            traversed_bytes = range.start;
+        match event {
+            pulldown_cmark::Event::Text(text) => {
+                traversed_chars += source_str[traversed_bytes..range.start].chars().count();
+                traversed_bytes = range.start;
 
-            let mut new_tokens = lex_to_end_str(text);
+                let mut new_tokens = lex_to_end_str(text);
 
-            new_tokens
-                .iter_mut()
-                .for_each(|token| token.span.offset(traversed_chars));
+                new_tokens
+                    .iter_mut()
+                    .for_each(|token| token.span.offset(traversed_chars));
 
-            tokens.append(&mut new_tokens);
+                tokens.append(&mut new_tokens);
+            }
+            _ => (),
         }
     }
 

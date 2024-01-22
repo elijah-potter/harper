@@ -3,7 +3,7 @@ use std::fmt::Display;
 use is_macro::Is;
 use serde::{Deserialize, Serialize};
 
-use crate::{document::Document, span::Span, Dictionary};
+use crate::{document::Document, span::Span};
 
 #[derive(Debug, Clone, Serialize, Deserialize, Default)]
 pub struct Lint {
@@ -39,5 +39,3 @@ impl Display for Suggestion {
         }
     }
 }
-
-pub type Linter = fn(document: &Document, dictionary: &Dictionary) -> Vec<Lint>;

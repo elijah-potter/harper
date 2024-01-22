@@ -1,11 +1,18 @@
-use crate::{document::Document, Dictionary, Lint, LintKind, Suggestion, Token};
+use crate::{document::Document, Suggestion, Token};
 
-pub fn wrong_quotes(document: &Document, _dictionary: &Dictionary) -> Vec<Lint> {
-    document
-        .iter_quote_indices()
-        .zip(document.iter_quotes())
-        .filter_map(|(quote_idx, quote_token)| lint_quote(document, quote_idx, quote_token))
-        .collect()
+use super::{Lint, LintKind, Linter};
+
+#[derive(Debug, Clone, Copy, Default)]
+pub struct WrongQuotes;
+
+impl Linter for WrongQuotes {
+    fn lint(&mut self, document: &Document) -> Vec<Lint> {
+        document
+            .iter_quote_indices()
+            .zip(document.iter_quotes())
+            .filter_map(|(quote_idx, quote_token)| lint_quote(document, quote_idx, quote_token))
+            .collect()
+    }
 }
 
 fn lint_quote(document: &Document, quote_idx: usize, quote_token: Token) -> Option<Lint> {
