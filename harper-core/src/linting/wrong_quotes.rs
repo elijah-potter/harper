@@ -28,9 +28,9 @@ fn lint_quote(document: &Document, quote_idx: usize, quote_token: Token) -> Opti
     if quote_char != should_be {
         Some(Lint {
             span: quote_token.span,
-            lint_kind: LintKind::WrongQuotes,
             suggestions: vec![Suggestion::ReplaceWith(vec![should_be])],
             message: "Use the better-formatted quote character.".to_string(),
+            ..Default::default()
         })
     } else {
         None

@@ -14,6 +14,7 @@ impl Linter for SentenceCapitalization {
         let mut lints = Vec::new();
 
         for sentence in document.sentences() {
+            dbg!(sentence);
             if let Some(first_word) = sentence.first_word() {
                 let letters = document.get_span_content(first_word.span);
 
@@ -34,5 +35,30 @@ impl Linter for SentenceCapitalization {
         }
 
         lints
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::super::tests::assert_lint_count;
+    use super::SentenceCapitalization;
+
+    #[test]
+    fn catches_basic() {
+        assert_lint_count("there is no way.", SentenceCapitalization::default(), 1)
+    }
+
+    #[test]
+    fn no_period() {
+        assert_lint_count("there is no way", SentenceCapitalization::default(), 1)
+    }
+
+    #[test]
+    fn two_sentence() {
+        assert_lint_count(
+            "i have complete conviction. she is guilty",
+            SentenceCapitalization::default(),
+            2,
+        )
     }
 }

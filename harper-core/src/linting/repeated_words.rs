@@ -94,15 +94,11 @@ impl Linter for RepeatedWords {
 
 #[cfg(test)]
 mod tests {
-    use super::super::Linter;
+    use super::super::tests::assert_lint_count;
     use super::RepeatedWords;
-    use crate::Document;
 
     #[test]
     fn catches_basic() {
-        let test = Document::new("I wanted the the banana.", false);
-        let mut linter = RepeatedWords::new();
-        let lints = linter.lint(&test);
-        assert!(lints.len() == 1);
+        assert_lint_count("I wanted the the banana.", RepeatedWords::new(), 1)
     }
 }

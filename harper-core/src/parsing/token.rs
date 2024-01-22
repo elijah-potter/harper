@@ -93,6 +93,8 @@ pub trait TokenStringExt {
     fn first_word(&self) -> Option<Token>;
     fn iter_word_indices(&self) -> impl Iterator<Item = usize> + '_;
     fn iter_words(&self) -> impl Iterator<Item = &Token> + '_;
+    fn iter_space_indices(&self) -> impl Iterator<Item = usize> + '_;
+    fn iter_spaces(&self) -> impl Iterator<Item = &Token> + '_;
 }
 
 impl TokenStringExt for [Token] {
@@ -108,6 +110,17 @@ impl TokenStringExt for [Token] {
     }
 
     fn iter_words(&self) -> impl Iterator<Item = &Token> + '_ {
-        self.iter().filter(|t| t.kind.is_word())
+        self.iter_word_indices().map(|i| &self[i])
+    }
+
+    fn iter_space_indices(&self) -> impl Iterator<Item = usize> + '_ {
+        self.iter()
+            .enumerate()
+            .filter(|(_, t)| t.kind.is_space())
+            .map(|(i, _)| i)
+    }
+
+    fn iter_spaces(&self) -> impl Iterator<Item = &Token> + '_ {
+        self.iter_space_indices().map(|i| &self[i])
     }
 }

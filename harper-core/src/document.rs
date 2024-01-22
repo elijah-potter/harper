@@ -101,14 +101,31 @@ impl Document {
             } = token
             {
                 if is_sentence_terminator(punct) {
-                    Some(index)
-                } else {
-                    None
+                    return Some(index);
                 }
-            } else {
-                None
             }
+            None
         })
+    }
+
+    /// Get the index of the last sentence terminator.
+    fn last_sentence_terminator(&self) -> Option<usize> {
+        self.tokens
+            .iter()
+            .enumerate()
+            .rev()
+            .find_map(|(index, token)| {
+                if let Token {
+                    kind: TokenKind::Punctuation(punct),
+                    ..
+                } = token
+                {
+                    if is_sentence_terminator(punct) {
+                        return Some(index);
+                    }
+                }
+                None
+            })
     }
 
     pub fn sentences(&self) -> impl Iterator<Item = &'_ [Token]> + '_ {
@@ -122,7 +139,17 @@ impl Document {
             .tuple_windows()
             .map(move |(a, b)| &self.tokens[a + 1..=b]);
 
-        first_sentence.into_iter().chain(rest)
+        let last = if let Some(last_i) = self.last_sentence_terminator() {
+            if last_i + 1 < self.tokens.len() {
+                Some(&self.tokens[last_i + 1..])
+            } else {
+                None
+            }
+        } else {
+            Some(self.tokens.as_slice())
+        };
+
+        first_sentence.into_iter().chain(rest).chain(last)
     }
 
     /** Returns all tokens whose `kind` is [`Punctuation::Word`] */

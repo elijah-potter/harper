@@ -1,4 +1,4 @@
-use std::{borrow::BorrowMut, ops::DerefMut};
+use std::ops::DerefMut;
 
 use harper_core::{Dictionary, LintSet};
 use tokio::{sync::Mutex, time::Instant};

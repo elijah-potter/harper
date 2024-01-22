@@ -17,8 +17,7 @@ pub struct Lint {
 pub enum LintKind {
     Spelling,
     Capitalization,
-    UnmatchedQuote,
-    WrongQuotes,
+    Formatting,
     Repetition,
     Readability,
     #[default]

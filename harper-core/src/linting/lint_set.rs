@@ -1,6 +1,6 @@
 use crate::{Dictionary, Lint};
 
-use super::Linter;
+use super::{spaces::Spaces, Linter};
 use paste::paste;
 
 use super::{
@@ -39,7 +39,8 @@ impl LintSet {
             .add_long_sentences()
             .add_unclosed_quotes()
             .add_sentence_capitalization()
-            .add_spell_check(dictionary);
+            .add_spell_check(dictionary)
+            .add_spaces();
         self
     }
 
@@ -91,5 +92,6 @@ create_simple_builder_methods!(
     UnclosedQuotes,
     WrongQuotes,
     LongSentences,
-    RepeatedWords
+    RepeatedWords,
+    Spaces
 );

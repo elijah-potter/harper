@@ -98,7 +98,9 @@ export async function lintText(text: string, useWasm = defaultUseWasm): Promise<
 		const res: LintResponse = await req.json();
 
 		// We only want to show fixable errors.
-		return res.lints.filter((lint) => lint.suggestions.length > 0);
+		const lints = res.lints.filter((lint) => lint.suggestions.length > 0);
+		console.log(lints);
+		return lints;
 	}
 }
 

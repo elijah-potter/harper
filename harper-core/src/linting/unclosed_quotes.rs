@@ -15,7 +15,7 @@ impl Linter for UnclosedQuotes {
             {
                 lints.push(Lint {
                     span: token.span,
-                    lint_kind: LintKind::UnmatchedQuote,
+                    lint_kind: LintKind::Formatting,
                     suggestions: vec![],
                     message: "This quote has no termination.".to_string(),
                 })
