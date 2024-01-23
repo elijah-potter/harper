@@ -26,7 +26,10 @@ impl Linter for SpellCheck {
                 continue;
             }
 
-            let possibilities = suggest_correct_spelling(word_chars, 3, 3, &self.dictionary);
+            let mut possibilities = suggest_correct_spelling(word_chars, 10, 3, &self.dictionary);
+
+            // People more likely to misspell words by omission, so show the longest words first.
+            possibilities.sort_by_key(|p| usize::MAX - p.len());
 
             let suggestions = possibilities
                 .into_iter()
