@@ -1,4 +1,4 @@
-use hashbrown::{HashMap, HashSet};
+use hashbrown::HashMap;
 
 use super::{Lint, LintKind, Linter};
 use crate::{

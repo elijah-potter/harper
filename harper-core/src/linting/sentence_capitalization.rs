@@ -1,6 +1,6 @@
 use itertools::Itertools;
 
-use crate::{document::Document, parsing::TokenStringExt, Dictionary};
+use crate::{document::Document, parsing::TokenStringExt};
 
 use super::lint::Suggestion;
 use super::{Lint, LintKind, Linter};
@@ -45,19 +45,19 @@ mod tests {
 
     #[test]
     fn catches_basic() {
-        assert_lint_count("there is no way.", SentenceCapitalization::default(), 1)
+        assert_lint_count("there is no way.", SentenceCapitalization, 1)
     }
 
     #[test]
     fn no_period() {
-        assert_lint_count("there is no way", SentenceCapitalization::default(), 1)
+        assert_lint_count("there is no way", SentenceCapitalization, 1)
     }
 
     #[test]
     fn two_sentence() {
         assert_lint_count(
             "i have complete conviction. she is guilty",
-            SentenceCapitalization::default(),
+            SentenceCapitalization,
             2,
         )
     }

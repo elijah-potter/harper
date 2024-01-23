@@ -1,8 +1,6 @@
-use harper_core::{Lint, Span, Suggestion};
+use harper_core::{Lint, Suggestion};
 use std::collections::HashMap;
-use tower_lsp::lsp_types::{
-    CodeAction, CodeActionKind, Diagnostic, Position, Range, TextEdit, Url, WorkspaceEdit,
-};
+use tower_lsp::lsp_types::{CodeAction, CodeActionKind, Diagnostic, TextEdit, Url, WorkspaceEdit};
 
 use crate::pos_conv::span_to_range;
 

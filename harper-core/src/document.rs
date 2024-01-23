@@ -291,7 +291,7 @@ fn is_sentence_terminator(punctuation: &Punctuation) -> bool {
 #[cfg(test)]
 mod tests {
     use super::Document;
-    use crate::{Span, Token, TokenKind};
+    use crate::Token;
 
     impl Document {
         fn from_raw_parts(source: Vec<char>, tokens: Vec<Token>, markdown: bool) -> Self {

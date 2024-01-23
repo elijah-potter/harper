@@ -68,7 +68,7 @@ macro_rules! create_simple_builder_methods {
                 $(
                     #[doc = "Modifies self, adding the `" $linter "` linter to the set."]
                     pub fn [<add_$linter:snake>](&mut self) -> &mut Self{
-                        self.linters.push(Box::new($linter::default()));
+                        self.linters.push(Box::<$linter>::default());
                         self
                     }
                 )*

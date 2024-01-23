@@ -1,7 +1,7 @@
-use std::{collections::HashMap, fs, ops::DerefMut};
+use std::{collections::HashMap, fs};
 
 use harper_core::{Dictionary, Document, LintSet, Linter};
-use tokio::{sync::Mutex, time::Instant};
+use tokio::sync::Mutex;
 use tower_lsp::{
     jsonrpc::Result,
     lsp_types::{
