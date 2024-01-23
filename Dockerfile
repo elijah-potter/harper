@@ -19,7 +19,7 @@ RUN mkdir harper-wasm
 
 COPY --from=wasm-build /usr/build/harper-wasm/pkg /usr/build/harper-wasm/pkg
 COPY web web
-COPY alice.txt .
+COPY demo.md .
 
 WORKDIR /usr/build/web
 

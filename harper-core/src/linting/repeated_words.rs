@@ -7,7 +7,7 @@ use crate::{
 
 use super::{Lint, LintKind, Linter};
 
-#[derive(Debug, Clone, Default)]
+#[derive(Debug, Clone)]
 pub struct RepeatedWords {
     /// The set of words that can be considered for repetition checking.
     set: HashSet<Vec<char>>,
@@ -44,6 +44,12 @@ impl RepeatedWords {
         set.insert(vec!['A', 't']);
 
         Self { set }
+    }
+}
+
+impl Default for RepeatedWords {
+    fn default() -> Self {
+        Self::new()
     }
 }
 

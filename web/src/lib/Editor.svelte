@@ -1,12 +1,12 @@
 <script lang="ts">
 	import { Card } from 'flowbite-svelte';
-	import alice from '../../../alice.txt?raw';
+	import demo from '../../../demo.md?raw';
 	import Underlines from '$lib/Underlines.svelte';
 	import { Button } from 'flowbite-svelte';
 	import { lintText, applySuggestion, spanContent } from '$lib/analysis';
 	import type { Lint } from '$lib/analysis';
 
-	let content = alice;
+	let content = demo;
 
 	let lints: Lint[] = [];
 	let lintCards: HTMLDivElement[] = [];
