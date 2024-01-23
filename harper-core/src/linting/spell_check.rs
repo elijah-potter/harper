@@ -63,7 +63,7 @@ impl Linter for SpellCheck {
                 }
 
                 // The error is likely by omission
-                if key_dist > 4 {
+                if key_dist > 2 {
                     usize::MAX - v.len()
                 }
                 // The error is likely by replacement

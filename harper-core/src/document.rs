@@ -244,6 +244,10 @@ impl Document {
         })
     }
 
+    pub fn get_full_content(&self) -> &[char] {
+        &self.source
+    }
+
     pub fn apply_suggestion(&mut self, suggestion: &Suggestion, span: Span) {
         match suggestion {
             Suggestion::ReplaceWith(chars) => {

@@ -30,11 +30,7 @@ pub fn lex_to_end_md(source: &[char]) -> Vec<Token> {
             traversed_chars += source_str[traversed_bytes..range.start].chars().count();
             traversed_bytes = range.start;
 
-            dbg!(text.to_string());
-
             let mut new_tokens = lex_to_end_str(text);
-
-            dbg!(&new_tokens);
 
             new_tokens
                 .iter_mut()
@@ -196,6 +192,7 @@ fn lex_punctuation(source: &[char]) -> Option<FoundToken> {
     use Punctuation::*;
 
     let punct = match c {
+        '%' => Percent,
         '’' => Apostrophe,
         '\'' => Apostrophe,
         '.' => Period,
