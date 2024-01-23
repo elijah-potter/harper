@@ -20,7 +20,10 @@ pub struct Dictionary {
     /// Each index of this list will return the first index of [`Self::words`] that has a word
     /// whose index is that length.
     word_len_starts: Vec<usize>,
+    /// All English words
     word_set: HashSet<DictWord>,
+    /// Most common English words
+    common_set: HashSet<DictWord>,
 }
 
 fn uncached_inner_new() -> Dictionary {
@@ -40,10 +43,16 @@ fn uncached_inner_new() -> Dictionary {
         }
     }
 
+    let common_set = include_str!("../../common_words.txt")
+        .lines()
+        .map(|v| v.chars().collect())
+        .collect();
+
     Dictionary {
         word_set: HashSet::from_iter(words.iter().cloned()),
         word_len_starts,
         words,
+        common_set,
     }
 }
 
@@ -78,5 +87,11 @@ impl Dictionary {
         let lowercase: SmallVec<_> = word.iter().flat_map(|c| c.to_lowercase()).collect();
 
         self.word_set.contains(word) || self.word_set.contains(&lowercase)
+    }
+
+    pub fn is_common_word(&self, word: &[char]) -> bool {
+        let lowercase: SmallVec<_> = word.iter().flat_map(|c| c.to_lowercase()).collect();
+
+        self.common_set.contains(word) || self.common_set.contains(&lowercase)
     }
 }
