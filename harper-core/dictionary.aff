@@ -112,6 +112,9 @@ SFX B   e     able       [^aeiou]e
 SFX L Y 1
 SFX L   0     ment       .
 
+SFX O Y 1
+SFX O   0     ful         .
+
 REP 90
 REP a ei
 REP ei a

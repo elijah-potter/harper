@@ -88,6 +88,10 @@ pub enum Punctuation {
     Apostrophe,
     /// %
     Percent,
+    /// /
+    ForwardSlash,
+    /// \
+    Backslash,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]

@@ -87,7 +87,8 @@
 											)}
 									>
 										Replace "{content.substring(lint.span.start, lint.span.end)}" with "{suggestion.ReplaceWith.reduce(
-											(p, c) => p + c
+											(p, c) => p + c,
+											''
 										)}"
 									</Button>
 								</div>

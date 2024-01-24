@@ -14,7 +14,6 @@ impl Linter for SentenceCapitalization {
         let mut lints = Vec::new();
 
         for sentence in document.sentences() {
-            dbg!(sentence);
             if let Some(first_word) = sentence.first_word() {
                 let letters = document.get_span_content(first_word.span);
 
@@ -26,7 +25,7 @@ impl Linter for SentenceCapitalization {
                             suggestions: vec![Suggestion::ReplaceWith(
                                 first_letter.to_uppercase().collect_vec(),
                             )],
-                            message: "This sentance does not start with a capital letter"
+                            message: "This sentence does not start with a capital letter"
                                 .to_string(),
                         })
                     }

@@ -23,20 +23,41 @@ pub fn lex_to_end_md(source: &[char]) -> Vec<Token> {
     let mut traversed_bytes = 0;
     let mut traversed_chars = 0;
 
+    let mut stack = Vec::new();
+
     // NOTE: the range spits out __byte__ indices, not char indices.
     // This is why we keep track above.
     for (event, range) in md_parser.into_offset_iter() {
-        if let pulldown_cmark::Event::Text(text) = event {
-            traversed_chars += source_str[traversed_bytes..range.start].chars().count();
-            traversed_bytes = range.start;
+        match event {
+            pulldown_cmark::Event::Start(tag) => stack.push(tag),
+            pulldown_cmark::Event::End(_) => {
+                stack.pop();
+            }
+            pulldown_cmark::Event::Text(text) => {
+                traversed_chars += source_str[traversed_bytes..range.start].chars().count();
+                traversed_bytes = range.start;
 
-            let mut new_tokens = lex_to_end_str(text);
+                if let Some(tag) = stack.last() {
+                    use pulldown_cmark::Tag;
 
-            new_tokens
-                .iter_mut()
-                .for_each(|token| token.span.offset(traversed_chars));
+                    if !(matches!(tag, Tag::Paragraph)
+                        || matches!(tag, Tag::Heading(_, _, _))
+                        || matches!(tag, Tag::Item))
+                        || matches!(tag, Tag::TableCell)
+                    {
+                        continue;
+                    }
+                }
 
-            tokens.append(&mut new_tokens);
+                let mut new_tokens = lex_to_end_str(text);
+
+                new_tokens
+                    .iter_mut()
+                    .for_each(|token| token.span.offset(traversed_chars));
+
+                tokens.append(&mut new_tokens);
+            }
+            _ => (),
         }
     }
 
@@ -192,6 +213,8 @@ fn lex_punctuation(source: &[char]) -> Option<FoundToken> {
     use Punctuation::*;
 
     let punct = match c {
+        '/' => ForwardSlash,
+        '\\' => Backslash,
         '%' => Percent,
         '’' => Apostrophe,
         '\'' => Apostrophe,

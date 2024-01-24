@@ -40,22 +40,54 @@ pub fn suggest_correct_spelling<'a>(
         }
     });
 
-    let mut found: Vec<(&[char], u8)> = Vec::with_capacity(result_limit);
+    let mut found_dist: Vec<(&[char], u8)> = Vec::with_capacity(result_limit);
 
     for (word, dist) in pruned_words {
-        if found.len() < result_limit {
-            found.push((word, dist));
-            found.sort_by_key(|a| a.1);
+        if found_dist.len() < result_limit {
+            found_dist.push((word, dist));
+            found_dist.sort_by_key(|a| a.1);
             continue;
         }
 
-        if dist < found[result_limit - 1].1 {
-            found[result_limit - 1] = (word, dist);
-            found.sort_by_key(|a| a.1);
+        if dist < found_dist[result_limit - 1].1 {
+            found_dist[result_limit - 1] = (word, dist);
+            found_dist.sort_by_key(|a| a.1);
         }
     }
 
-    found.into_iter().map(|(word, _dist)| word).collect()
+    // Remove edit dist
+    let mut found: Vec<&[char]> = found_dist.into_iter().map(|(word, _dist)| word).collect();
+
+    found.sort_by_cached_key(|v| {
+        let mut key_dist = usize::MAX;
+
+        // The error may be by omission at the end of the word.
+        if v.len() > misspelled_word.len() {
+            return edit_distance_min_alloc(v, misspelled_word, &mut buf_a, &mut buf_b) as usize;
+        }
+
+        for (o, n) in v.iter().zip(misspelled_word.iter()) {
+            if o != n {
+                key_dist = key_distance(*o, *n)
+                    .map(|v| v as usize)
+                    .unwrap_or(usize::MAX);
+                break;
+            }
+        }
+
+        // The error is likely by omission somewhere inside the word
+        if key_dist > 2 {
+            usize::MAX - v.len()
+        }
+        // The error is likely by replacement
+        else {
+            key_dist
+        }
+    });
+
+    found.sort_by_key(|v| if dictionary.is_common_word(v) { 0 } else { 1 });
+
+    found
 }
 
 /// Convenience function over [suggest_correct_spelling] that does conversions for you.
@@ -116,6 +148,40 @@ fn edit_distance(source: &[char], target: &[char]) -> u8 {
     edit_distance_min_alloc(source, target, &mut Vec::new(), &mut Vec::new())
 }
 
+/// Calculate the approximate distance between two letters on a querty keyboard
+fn key_distance(key_a: char, key_b: char) -> Option<f32> {
+    let a = key_location(key_a)?;
+    let b = key_location(key_b)?;
+
+    Some(((a.0 - b.0) * (a.1 - b.1)).sqrt())
+}
+
+/// Calculate the approximate position of a letter on a querty keyboard
+fn key_location(key: char) -> Option<(f32, f32)> {
+    let keys = "1234567890qwertyuiopasdfghjklzxcvbnm";
+
+    let idx = keys.find(key)?;
+
+    // The starting index of each row of the keyboard
+    let mut resets = [0, 10, 20, 29].into_iter().enumerate().peekable();
+    // The amount each row is offset (on my keyboard at least)
+    let offsets = [0.0, 0.5, 0.75, 1.25];
+
+    while let Some((r_idx, reset)) = resets.next() {
+        if idx >= reset {
+            if let Some((_, n_reset)) = resets.peek() {
+                if idx < *n_reset {
+                    return Some(((idx - reset) as f32 + offsets[r_idx], r_idx as f32));
+                }
+            } else {
+                return Some(((idx - reset) as f32 + offsets[r_idx], r_idx as f32));
+            }
+        }
+    }
+
+    None
+}
+
 #[cfg(test)]
 mod tests {
     use super::edit_distance;
@@ -132,8 +198,26 @@ mod tests {
     fn simple1() {
         assert_edit_dist("kitten", "sitting", 3)
     }
+
     #[test]
     fn simple2() {
         assert_edit_dist("saturday", "sunday", 3)
+    }
+
+    use super::key_location;
+
+    #[test]
+    fn correct_q_pos() {
+        assert_eq!(key_location('q'), Some((0.5, 1.0)))
+    }
+
+    #[test]
+    fn correct_a_pos() {
+        assert_eq!(key_location('a'), Some((0.75, 2.0)))
+    }
+
+    #[test]
+    fn correct_g_pos() {
+        assert_eq!(key_location('g'), Some((4.75, 2.0)))
     }
 }
