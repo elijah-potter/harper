@@ -21,7 +21,7 @@ use tower_lsp::{
 use crate::{
     diagnostics::{lint_to_code_actions, lints_to_diagnostics},
     pos_conv::range_to_span,
-    rust_parser::RustParser,
+    tree_sitter_parser::TreeSitterParser,
 };
 
 pub struct Backend {
@@ -40,9 +40,9 @@ impl Backend {
         let mut parser: Box<dyn Parser> = Box::new(MarkdownParser);
 
         if let Some(extension) = url.to_file_path().unwrap().extension() {
-            if extension == "rs" {
-                parser = Box::new(RustParser)
-            }
+            parser = TreeSitterParser::new_from_extension(&extension.to_string_lossy())
+                .map::<Box<dyn Parser>, _>(|v| Box::new(v))
+                .unwrap_or(Box::new(MarkdownParser));
         }
 
         let doc = Document::new(text, parser);

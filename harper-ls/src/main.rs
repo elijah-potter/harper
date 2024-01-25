@@ -2,7 +2,7 @@ use tokio::net::TcpListener;
 mod backend;
 mod diagnostics;
 mod pos_conv;
-mod rust_parser;
+mod tree_sitter_parser;
 
 use backend::Backend;
 use clap::Parser;
