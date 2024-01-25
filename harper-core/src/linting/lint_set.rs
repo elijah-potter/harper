@@ -60,6 +60,12 @@ impl LintSet {
     }
 }
 
+impl Default for LintSet {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 /// Create builder methods for the linters that do not take any arguments.
 macro_rules! create_simple_builder_methods {
     ($($linter:ident),*) => {

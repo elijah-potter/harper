@@ -2,10 +2,11 @@ use std::fmt::Display;
 
 use itertools::Itertools;
 
+use crate::parsers::{MarkdownParser, Parser, PlainEnglishParser};
 use crate::{
     linting::Suggestion,
     span::Span,
-    FatToken, MarkdownParser, Parser, PlainEnglishParser,
+    FatToken,
     Punctuation::{self},
     Token, TokenKind,
 };
@@ -18,7 +19,6 @@ pub struct Document {
 
 impl Document {
     /// Lexes and parses text to produce a document.
-    ///
     /// Choosing to parse with markdown may have a performance penalty
     pub fn new(text: &str, parser: Box<dyn Parser>) -> Self {
         let source: Vec<_> = text.chars().collect();

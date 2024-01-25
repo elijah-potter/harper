@@ -1,8 +1,8 @@
 use tokio::net::TcpListener;
 mod backend;
-mod comments;
 mod diagnostics;
 mod pos_conv;
+mod rust_parser;
 
 use backend::Backend;
 use clap::Parser;

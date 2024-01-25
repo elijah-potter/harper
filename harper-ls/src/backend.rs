@@ -1,6 +1,9 @@
-use std::{borrow::Borrow, collections::HashMap, fs};
+use std::{collections::HashMap, fs};
 
-use harper_core::{Dictionary, Document, Lint, LintSet, Linter, MarkdownParser};
+use harper_core::{
+    parsers::{MarkdownParser, Parser},
+    Dictionary, Document, LintSet, Linter,
+};
 use tokio::sync::Mutex;
 use tower_lsp::{
     jsonrpc::Result,
@@ -18,6 +21,7 @@ use tower_lsp::{
 use crate::{
     diagnostics::{lint_to_code_actions, lints_to_diagnostics},
     pos_conv::range_to_span,
+    rust_parser::RustParser,
 };
 
 pub struct Backend {
@@ -33,17 +37,17 @@ impl Backend {
     }
 
     async fn update_document(&self, url: &Url, text: &str) {
-        let doc = Document::new(text, Box::new(MarkdownParser));
+        let mut parser: Box<dyn Parser> = Box::new(MarkdownParser);
+
+        if let Some(extension) = url.to_file_path().unwrap().extension() {
+            if extension == "rs" {
+                parser = Box::new(RustParser)
+            }
+        }
+
+        let doc = Document::new(text, parser);
         let mut files = self.files.lock().await;
         files.insert(url.clone(), doc);
-    }
-
-    async fn generate_lints_for_url(&self, url: &Url) -> Option<Vec<Lint>> {
-        let files = self.files.lock().await;
-        let file_contents = files.get(url)?;
-
-        let mut linter = self.linter.lock().await;
-        Some(linter.lint(file_contents))
     }
 
     async fn generate_code_actions(&self, url: &Url, range: Range) -> Result<Vec<CodeAction>> {

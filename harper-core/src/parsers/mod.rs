@@ -25,9 +25,9 @@ where
 
 #[cfg(test)]
 mod tests {
-    use super::{MarkdownParser, PlainEnglishParser};
+    use super::{MarkdownParser, Parser, PlainEnglishParser};
     use crate::{
-        Parser, Punctuation,
+        Punctuation,
         TokenKind::{self, *},
     };
 

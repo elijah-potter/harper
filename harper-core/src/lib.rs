@@ -3,7 +3,7 @@
 mod document;
 mod lexing;
 mod linting;
-mod parsers;
+pub mod parsers;
 mod span;
 mod spell;
 mod token;
@@ -11,7 +11,6 @@ mod token;
 pub use document::Document;
 pub use linting::LintSet;
 pub use linting::{Lint, LintKind, Linter, Suggestion};
-pub use parsers::{MarkdownParser, Parser, PlainEnglishParser};
 pub use span::Span;
 pub use spell::Dictionary;
 pub use token::{FatToken, Punctuation, Token, TokenKind, TokenStringExt};
