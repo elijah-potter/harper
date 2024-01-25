@@ -1,5 +1,6 @@
 use tokio::net::TcpListener;
 mod backend;
+mod comments;
 mod diagnostics;
 mod pos_conv;
 

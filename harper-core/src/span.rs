@@ -1,3 +1,5 @@
+use std::ops::Range;
+
 use serde::{Deserialize, Serialize};
 
 /// A window in a [char].
@@ -52,6 +54,12 @@ impl Span {
     pub fn offset(&mut self, by: usize) {
         self.start += by;
         self.end += by;
+    }
+}
+
+impl From<Range<usize>> for Span {
+    fn from(value: Range<usize>) -> Self {
+        Self::new(value.start, value.end)
     }
 }
 

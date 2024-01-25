@@ -4,9 +4,8 @@ use itertools::Itertools;
 
 use crate::{
     linting::Suggestion,
-    parsing::{lex_to_end, lex_to_end_md},
     span::Span,
-    FatToken,
+    FatToken, MarkdownParser, Parser, PlainEnglishParser,
     Punctuation::{self},
     Token, TokenKind,
 };
@@ -14,35 +13,39 @@ use crate::{
 pub struct Document {
     source: Vec<char>,
     tokens: Vec<Token>,
-    markdown: bool,
+    parser: Box<dyn Parser>,
 }
 
 impl Document {
-    // Lexes and parses text to produce a document.
-    //
-    // Choosing to parse with markdown may have a performance penalty
-    pub fn new(text: &str, markdown: bool) -> Self {
+    /// Lexes and parses text to produce a document.
+    ///
+    /// Choosing to parse with markdown may have a performance penalty
+    pub fn new(text: &str, parser: Box<dyn Parser>) -> Self {
         let source: Vec<_> = text.chars().collect();
 
         let mut doc = Self {
             source,
             tokens: Vec::new(),
-            markdown,
+            parser,
         };
         doc.parse();
 
         doc
     }
 
+    pub fn new_plain_english(text: &str) -> Self {
+        Self::new(text, Box::new(PlainEnglishParser))
+    }
+
+    pub fn new_markdown(text: &str) -> Self {
+        Self::new(text, Box::new(MarkdownParser))
+    }
+
     /// Re-parse important language constructs.
     ///
     /// Should be run after every change to the underlying [`Self::source`].
     fn parse(&mut self) {
-        if self.markdown {
-            self.tokens = lex_to_end_md(&self.source);
-        } else {
-            self.tokens = lex_to_end(&self.source);
-        }
+        self.tokens = self.parser.parse(&self.source);
 
         self.condense_contractions();
         // Since quote matches depend on token indices.
@@ -291,26 +294,19 @@ fn is_sentence_terminator(punctuation: &Punctuation) -> bool {
 #[cfg(test)]
 mod tests {
     use super::Document;
-    use crate::Token;
-
-    impl Document {
-        fn from_raw_parts(source: Vec<char>, tokens: Vec<Token>, markdown: bool) -> Self {
-            Self {
-                source,
-                tokens,
-                markdown,
-            }
-        }
-    }
+    use crate::{
+        parsers::{MarkdownParser, PlainEnglishParser},
+        token::TokenStringExt,
+    };
 
     fn assert_condensed_contractions(text: &str, final_tok_count: usize) {
-        let mut document = Document::new(text, false);
+        let mut document = Document::new(text, Box::new(PlainEnglishParser));
         dbg!(&document.tokens);
         document.condense_contractions();
 
         assert_eq!(document.tokens.len(), final_tok_count);
 
-        let mut document = Document::new(text, true);
+        let mut document = Document::new(text, Box::new(MarkdownParser));
         dbg!(&document.tokens);
         document.condense_contractions();
 
@@ -345,15 +341,14 @@ mod tests {
     #[test]
     fn parses_sentences_correctly() {
         let text = "There were three little pigs. They built three little homes.";
-        let document = Document::new(text, false);
+        let document = Document::new(text, Box::new(PlainEnglishParser));
 
         let mut sentence_strs = vec![];
 
         for sentence in document.sentences() {
-            sentence_strs.push(
-                Document::from_raw_parts(document.source.clone(), sentence.to_vec(), false)
-                    .to_string(),
-            );
+            if let Some(span) = sentence.span() {
+                sentence_strs.push(document.get_span_content_str(span));
+            }
         }
 
         assert_eq!(

@@ -1,7 +1,7 @@
 use hashbrown::HashSet;
 
 use crate::{
-    parsing::{Token, TokenKind, TokenStringExt},
+    token::{Token, TokenKind, TokenStringExt},
     Document, Span, Suggestion,
 };
 

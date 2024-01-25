@@ -20,7 +20,7 @@ pub fn setup() {
 #[wasm_bindgen]
 pub fn lint(text: String) -> Vec<JsValue> {
     let dictionary = Dictionary::new();
-    let document = Document::new(&text, true);
+    let document = Document::new_markdown(&text);
 
     let mut linter = LintSet::new().with_standard(dictionary);
     let lints = linter.lint(&document);
@@ -33,7 +33,7 @@ pub fn lint(text: String) -> Vec<JsValue> {
 
 #[wasm_bindgen]
 pub fn parse(text: String) -> Vec<JsValue> {
-    let document = Document::new(&text, true);
+    let document = Document::new_markdown(&text);
 
     document
         .fat_tokens()
@@ -50,7 +50,7 @@ pub fn apply_suggestion(
     let span = serde_wasm_bindgen::from_value(span).map_err(|e| e.to_string())?;
     let suggestion = serde_wasm_bindgen::from_value(suggestion).map_err(|e| e.to_string())?;
 
-    let mut document = Document::new(&text, true);
+    let mut document = Document::new_markdown(&text);
     document.apply_suggestion(&suggestion, span);
 
     Ok(document.get_full_string())

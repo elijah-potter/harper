@@ -108,6 +108,9 @@ pub trait TokenStringExt {
     fn iter_spaces(&self) -> impl Iterator<Item = &Token> + '_;
     fn iter_apostrophe_indices(&self) -> impl Iterator<Item = usize> + '_;
     fn iter_apostrophes(&self) -> impl Iterator<Item = &Token> + '_;
+    /// Grab the span that represents the beginning of the first element and the end of the last
+    /// element.
+    fn span(&self) -> Option<Span>;
 }
 
 impl TokenStringExt for [Token] {
@@ -146,5 +149,9 @@ impl TokenStringExt for [Token] {
 
     fn iter_apostrophes(&self) -> impl Iterator<Item = &Token> + '_ {
         self.iter_apostrophe_indices().map(|i| &self[i])
+    }
+
+    fn span(&self) -> Option<Span> {
+        Some(Span::new(self.first()?.span.start, self.last()?.span.end))
     }
 }

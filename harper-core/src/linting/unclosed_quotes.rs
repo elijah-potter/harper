@@ -1,4 +1,4 @@
-use crate::{document::Document, parsing::Quote, Punctuation, TokenKind};
+use crate::{document::Document, token::Quote, Punctuation, TokenKind};
 
 use super::{Lint, LintKind, Linter};
 

@@ -1,6 +1,6 @@
 use itertools::Itertools;
 
-use crate::{document::Document, parsing::TokenStringExt};
+use crate::{document::Document, TokenStringExt};
 
 use super::lint::Suggestion;
 use super::{Lint, LintKind, Linter};

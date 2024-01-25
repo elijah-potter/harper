@@ -1,14 +1,17 @@
 #![allow(dead_code)]
 
 mod document;
+mod lexing;
 mod linting;
-mod parsing;
+mod parsers;
 mod span;
 mod spell;
+mod token;
 
 pub use document::Document;
 pub use linting::LintSet;
 pub use linting::{Lint, LintKind, Linter, Suggestion};
-pub use parsing::{FatToken, Punctuation, Token, TokenKind};
+pub use parsers::{MarkdownParser, Parser, PlainEnglishParser};
 pub use span::Span;
 pub use spell::Dictionary;
+pub use token::{FatToken, Punctuation, Token, TokenKind, TokenStringExt};

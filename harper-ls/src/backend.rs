@@ -1,6 +1,6 @@
-use std::{collections::HashMap, fs};
+use std::{borrow::Borrow, collections::HashMap, fs};
 
-use harper_core::{Dictionary, Document, LintSet, Linter};
+use harper_core::{Dictionary, Document, Lint, LintSet, Linter, MarkdownParser};
 use tokio::sync::Mutex;
 use tower_lsp::{
     jsonrpc::Result,
@@ -33,9 +33,17 @@ impl Backend {
     }
 
     async fn update_document(&self, url: &Url, text: &str) {
-        let doc = Document::new(text, true);
+        let doc = Document::new(text, Box::new(MarkdownParser));
         let mut files = self.files.lock().await;
         files.insert(url.clone(), doc);
+    }
+
+    async fn generate_lints_for_url(&self, url: &Url) -> Option<Vec<Lint>> {
+        let files = self.files.lock().await;
+        let file_contents = files.get(url)?;
+
+        let mut linter = self.linter.lock().await;
+        Some(linter.lint(file_contents))
     }
 
     async fn generate_code_actions(&self, url: &Url, range: Range) -> Result<Vec<CodeAction>> {

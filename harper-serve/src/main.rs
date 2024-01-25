@@ -1,7 +1,7 @@
 #![allow(dead_code)]
 
 use harper_core::{Dictionary, Document, FatToken, Lint, LintSet, Linter, Span, Suggestion};
-use std::net::SocketAddr;
+use std::{marker, net::SocketAddr};
 use tokio::time::Instant;
 use tracing::{info, Level};
 use tracing_subscriber::FmtSubscriber;
@@ -71,7 +71,7 @@ async fn root() -> &'static str {
 async fn parse_text(Json(payload): Json<ParseRequest>) -> (StatusCode, Json<ParseResponse>) {
     let text = payload.text;
 
-    let document = Document::new(&text, true);
+    let document = Document::new_markdown(&text);
     let tokens: Vec<_> = document.fat_tokens().collect();
 
     (StatusCode::ACCEPTED, Json(ParseResponse { tokens }))
@@ -90,7 +90,7 @@ struct ParseResponse {
 async fn lint(Json(payload): Json<LintRequest>) -> (StatusCode, Json<LintResponse>) {
     let text = payload.text;
 
-    let document = Document::new(&text, true);
+    let document = Document::new_markdown(&text);
 
     let dictionary = Dictionary::new();
     let mut linter = LintSet::new().with_standard(dictionary);
@@ -113,7 +113,7 @@ async fn apply_suggestion(
     Json(payload): Json<ApplySuggestionRequest>,
 ) -> (StatusCode, Json<ApplySuggestionResponse>) {
     let text = payload.text;
-    let mut document = Document::new(&text, true);
+    let mut document = Document::new_markdown(&text);
     document.apply_suggestion(&payload.suggestion, payload.span);
 
     (
