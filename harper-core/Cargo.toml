@@ -17,4 +17,3 @@ pulldown-cmark = "0.9.3"
 serde = { version = "1.0.190", features = ["derive"] }
 smallvec = "1.12.0"
 thiserror = "1.0.56"
-

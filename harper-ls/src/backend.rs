@@ -8,12 +8,13 @@ use tokio::sync::Mutex;
 use tower_lsp::{
     jsonrpc::Result,
     lsp_types::{
-        notification::PublishDiagnostics, CodeAction, CodeActionOrCommand, CodeActionParams,
-        CodeActionProviderCapability, CodeActionResponse, Diagnostic, DidChangeTextDocumentParams,
-        DidCloseTextDocumentParams, DidOpenTextDocumentParams, DidSaveTextDocumentParams,
-        InitializeParams, InitializeResult, InitializedParams, MessageType,
-        PublishDiagnosticsParams, Range, ServerCapabilities, TextDocumentSyncCapability,
-        TextDocumentSyncKind, TextDocumentSyncOptions, TextDocumentSyncSaveOptions, Url,
+        notification::{PublishDiagnostics, ShowMessage},
+        CodeAction, CodeActionOrCommand, CodeActionParams, CodeActionProviderCapability,
+        CodeActionResponse, Diagnostic, DidChangeTextDocumentParams, DidCloseTextDocumentParams,
+        DidOpenTextDocumentParams, DidSaveTextDocumentParams, InitializeParams, InitializeResult,
+        InitializedParams, MessageType, PublishDiagnosticsParams, Range, ServerCapabilities,
+        ShowMessageParams, TextDocumentSyncCapability, TextDocumentSyncKind,
+        TextDocumentSyncOptions, TextDocumentSyncSaveOptions, Url,
     },
     Client, LanguageServer,
 };
@@ -97,6 +98,17 @@ impl Backend {
     }
 
     async fn publish_diagnostics(&self, url: &Url) {
+        let client = self.client.clone();
+
+        tokio::spawn(async move {
+            client
+                .send_notification::<ShowMessage>(ShowMessageParams {
+                    typ: MessageType::INFO,
+                    message: "Linting...".to_string(),
+                })
+                .await
+        });
+
         let diagnostics = self.generate_diagnostics(url).await;
 
         let result = PublishDiagnosticsParams {

@@ -1,4 +1,5 @@
 use is_macro::Is;
+use itertools::Itertools;
 use serde::{Deserialize, Serialize};
 
 use crate::span::Span;
@@ -39,6 +40,9 @@ pub enum TokenKind {
     Space(usize),
     /// A sequence of "\n" newlines
     Newline(usize),
+    /// A special token used for things like inline code blocks that should be ignored by all
+    /// linters.
+    Unlintable,
 }
 
 impl TokenKind {
@@ -92,6 +96,12 @@ pub enum Punctuation {
     ForwardSlash,
     /// \
     Backslash,
+    /// <
+    LessThan,
+    /// >
+    GreaterThan,
+    /// Equal
+    Equal,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
@@ -102,6 +112,10 @@ pub struct Quote {
 
 pub trait TokenStringExt {
     fn first_word(&self) -> Option<Token>;
+    /// Grabs the first word in the sentence.
+    /// Will also return [`None`] if there is an unlintable token in the position of the first
+    /// word.
+    fn first_sentence_word(&self) -> Option<Token>;
     fn iter_word_indices(&self) -> impl Iterator<Item = usize> + '_;
     fn iter_words(&self) -> impl Iterator<Item = &Token> + '_;
     fn iter_space_indices(&self) -> impl Iterator<Item = usize> + '_;
@@ -116,6 +130,20 @@ pub trait TokenStringExt {
 impl TokenStringExt for [Token] {
     fn first_word(&self) -> Option<Token> {
         self.iter().find(|v| v.kind.is_word()).copied()
+    }
+
+    fn first_sentence_word(&self) -> Option<Token> {
+        let (w_idx, word) = self.iter().find_position(|v| v.kind.is_word())?;
+
+        let Some(u_idx) = self.iter().position(|v| v.kind.is_unlintable()) else {
+            return Some(*word);
+        };
+
+        if w_idx > u_idx {
+            Some(*word)
+        } else {
+            None
+        }
     }
 
     fn iter_word_indices(&self) -> impl Iterator<Item = usize> + '_ {

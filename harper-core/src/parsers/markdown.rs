@@ -1,5 +1,5 @@
 use super::{Parser, PlainEnglish, StrParser};
-use crate::Token;
+use crate::{Span, Token, TokenKind};
 
 /// A parser that wraps the [`PlainEnglish`] parser that allows one to parse CommonMark files.
 ///
@@ -35,6 +35,14 @@ impl Parser for Markdown {
 
                     if let Some(tag) = stack.last() {
                         use pulldown_cmark::Tag;
+
+                        if matches!(tag, Tag::CodeBlock(..)) {
+                            tokens.push(Token {
+                                span: Span::new(traversed_chars, text.chars().count()),
+                                kind: TokenKind::Unlintable,
+                            });
+                            continue;
+                        }
 
                         if !(matches!(tag, Tag::Paragraph)
                             || matches!(tag, Tag::Heading(_, _, _))

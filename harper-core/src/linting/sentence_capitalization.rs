@@ -14,7 +14,11 @@ impl Linter for SentenceCapitalization {
         let mut lints = Vec::new();
 
         for sentence in document.sentences() {
-            if let Some(first_word) = sentence.first_word() {
+            if let Some(first_word) = sentence.first() {
+                if !first_word.kind.is_word() {
+                    break;
+                }
+
                 let letters = document.get_span_content(first_word.span);
 
                 if let Some(first_letter) = letters.first() {

@@ -30417,7 +30417,7 @@ lino
 linoleum/M
 linseed/M
 lint's
-lint/CDG
+lint/CDGR
 lintel/MS
 lints
 linty/TR
@@ -49583,3 +49583,5 @@ zymurgy/M
 StackOverflow/M
 CommonMark/M
 lex/D
+Levenshtein/M
+QUERTY
