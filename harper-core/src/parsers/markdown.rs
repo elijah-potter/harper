@@ -1,3 +1,6 @@
+use itertools::Itertools;
+use pulldown_cmark::LinkType;
+
 use super::{Parser, PlainEnglish, StrParser};
 use crate::{Span, Token, TokenKind};
 
@@ -29,9 +32,22 @@ impl Parser for Markdown {
                 pulldown_cmark::Event::End(_) => {
                     stack.pop();
                 }
+                pulldown_cmark::Event::Code(code) => {
+                    traversed_chars += source_str[traversed_bytes..range.start].chars().count();
+                    traversed_bytes = range.start;
+
+                    let chunk_len = code.chars().count();
+
+                    tokens.push(Token {
+                        span: Span::new(traversed_chars, chunk_len),
+                        kind: TokenKind::Unlintable,
+                    });
+                }
                 pulldown_cmark::Event::Text(text) => {
                     traversed_chars += source_str[traversed_bytes..range.start].chars().count();
                     traversed_bytes = range.start;
+
+                    let chunk_len = text.chars().count();
 
                     if let Some(tag) = stack.last() {
                         use pulldown_cmark::Tag;
@@ -45,19 +61,20 @@ impl Parser for Markdown {
                         }
 
                         if !(matches!(tag, Tag::Paragraph)
-                            || matches!(tag, Tag::Heading(_, _, _))
+                            || matches!(tag, Tag::Link(..))
+                            || matches!(tag, Tag::Heading(..))
                             || matches!(tag, Tag::Item)
                             || matches!(tag, Tag::TableCell)
                             || matches!(tag, Tag::Emphasis)
                             || matches!(tag, Tag::Strong)
-                            || matches!(tag, Tag::Link(..))
                             || matches!(tag, Tag::Strikethrough))
                         {
                             continue;
                         }
                     }
 
-                    let mut new_tokens = english_parser.parse_str(text);
+                    let mut new_tokens =
+                        english_parser.parse(&source[traversed_chars..traversed_chars + chunk_len]);
 
                     new_tokens
                         .iter_mut()

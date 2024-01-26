@@ -301,13 +301,11 @@ mod tests {
 
     fn assert_condensed_contractions(text: &str, final_tok_count: usize) {
         let mut document = Document::new(text, Box::new(PlainEnglish));
-        dbg!(&document.tokens);
         document.condense_contractions();
 
         assert_eq!(document.tokens.len(), final_tok_count);
 
         let mut document = Document::new(text, Box::new(Markdown));
-        dbg!(&document.tokens);
         document.condense_contractions();
 
         assert_eq!(document.tokens.len(), final_tok_count);

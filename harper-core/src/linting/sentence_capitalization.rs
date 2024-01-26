@@ -14,11 +14,7 @@ impl Linter for SentenceCapitalization {
         let mut lints = Vec::new();
 
         for sentence in document.sentences() {
-            if let Some(first_word) = sentence.first() {
-                if !first_word.kind.is_word() {
-                    break;
-                }
-
+            if let Some(first_word) = sentence.first_sentence_word() {
                 let letters = document.get_span_content(first_word.span);
 
                 if let Some(first_letter) = letters.first() {
@@ -62,6 +58,24 @@ mod tests {
             "i have complete conviction. she is guilty",
             SentenceCapitalization,
             2,
+        )
+    }
+
+    #[test]
+    fn ignores_unlintable() {
+        assert_lint_count(
+            "[`misspelled_word`] is assumed to be quite small (n < 100). ",
+            SentenceCapitalization,
+            0,
+        )
+    }
+
+    #[test]
+    fn unphased_unlintable() {
+        assert_lint_count(
+            "the linter should not be affected by `this` unlintable.",
+            SentenceCapitalization,
+            1,
         )
     }
 }

@@ -19,11 +19,12 @@ pub trait Linter: Send + Sync {
 
 #[cfg(test)]
 mod tests {
-    use crate::{parsers::PlainEnglish, Document, Linter};
+    use crate::{parsers::Markdown, Document, Linter};
 
     pub fn assert_lint_count(text: &str, mut linter: impl Linter, count: usize) {
-        let test = Document::new(text, Box::new(PlainEnglish));
+        let test = Document::new(text, Box::new(Markdown));
         let lints = linter.lint(&test);
+        dbg!(&lints);
         assert_eq!(lints.len(), count);
     }
 }

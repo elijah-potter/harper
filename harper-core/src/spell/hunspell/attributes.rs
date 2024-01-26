@@ -245,7 +245,6 @@ impl<'a> AttributeArgParser<'a> {
             .char_indices()
             .find(|(_i, c)| !c.is_whitespace())
         else {
-            dbg!(self.cursor);
             return Err(Error::UnexpectedEndOfLine);
         };
 

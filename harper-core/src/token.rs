@@ -139,7 +139,7 @@ impl TokenStringExt for [Token] {
             return Some(*word);
         };
 
-        if w_idx > u_idx {
+        if w_idx < u_idx {
             Some(*word)
         } else {
             None

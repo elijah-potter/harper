@@ -58,17 +58,32 @@ impl Parser for TreeSitterParser {
         let mut tokens = Vec::new();
 
         for span in comments_spans {
-            let mut new_tokens = markdown_parser.parse(&source[span.start..span.end]);
+            // Skip over the comment start characters
+            let actual_start = source[span.start..span.end]
+                .iter()
+                .position(|c| !is_comment_character(*c))
+                .unwrap_or(0)
+                + span.start;
+
+            if span.end <= actual_start {
+                continue;
+            }
+
+            let mut new_tokens = markdown_parser.parse(&source[actual_start..span.end]);
 
             new_tokens
                 .iter_mut()
-                .for_each(|t| t.span.offset(span.start));
+                .for_each(|t| t.span.offset(actual_start));
 
             tokens.append(&mut new_tokens);
         }
 
         tokens
     }
+}
+
+fn is_comment_character(c: char) -> bool {
+    matches!(c, '#' | '-' | '/')
 }
 
 /// Converts a set of byte-indexed [`Span`]s to char-index Spans, in-place.
