@@ -4,9 +4,11 @@ use crate::{
     Span, Token,
 };
 
-pub struct PlainEnglishParser;
+/// A parser that will attempt to lex as many tokens a possible,
+/// without discrimination and until the end of input.
+pub struct PlainEnglish;
 
-impl Parser for PlainEnglishParser {
+impl Parser for PlainEnglish {
     fn parse(&mut self, source: &[char]) -> Vec<Token> {
         let mut cursor = 0;
         let mut tokens = Vec::new();

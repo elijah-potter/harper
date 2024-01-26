@@ -2,7 +2,7 @@ use std::fmt::Display;
 
 use itertools::Itertools;
 
-use crate::parsers::{MarkdownParser, Parser, PlainEnglishParser};
+use crate::parsers::{Markdown, Parser, PlainEnglish};
 use crate::{
     linting::Suggestion,
     span::Span,
@@ -34,11 +34,11 @@ impl Document {
     }
 
     pub fn new_plain_english(text: &str) -> Self {
-        Self::new(text, Box::new(PlainEnglishParser))
+        Self::new(text, Box::new(PlainEnglish))
     }
 
     pub fn new_markdown(text: &str) -> Self {
-        Self::new(text, Box::new(MarkdownParser))
+        Self::new(text, Box::new(Markdown))
     }
 
     /// Re-parse important language constructs.
@@ -295,18 +295,18 @@ fn is_sentence_terminator(punctuation: &Punctuation) -> bool {
 mod tests {
     use super::Document;
     use crate::{
-        parsers::{MarkdownParser, PlainEnglishParser},
+        parsers::{Markdown, PlainEnglish},
         token::TokenStringExt,
     };
 
     fn assert_condensed_contractions(text: &str, final_tok_count: usize) {
-        let mut document = Document::new(text, Box::new(PlainEnglishParser));
+        let mut document = Document::new(text, Box::new(PlainEnglish));
         dbg!(&document.tokens);
         document.condense_contractions();
 
         assert_eq!(document.tokens.len(), final_tok_count);
 
-        let mut document = Document::new(text, Box::new(MarkdownParser));
+        let mut document = Document::new(text, Box::new(Markdown));
         dbg!(&document.tokens);
         document.condense_contractions();
 
@@ -341,7 +341,7 @@ mod tests {
     #[test]
     fn parses_sentences_correctly() {
         let text = "There were three little pigs. They built three little homes.";
-        let document = Document::new(text, Box::new(PlainEnglishParser));
+        let document = Document::new(text, Box::new(PlainEnglish));
 
         let mut sentence_strs = vec![];
 

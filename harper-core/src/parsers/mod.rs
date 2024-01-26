@@ -2,8 +2,8 @@ mod markdown;
 mod plain_english;
 
 pub use crate::token::{Quote, Token, TokenKind, TokenStringExt};
-pub use markdown::MarkdownParser;
-pub use plain_english::PlainEnglishParser;
+pub use markdown::Markdown;
+pub use plain_english::PlainEnglish;
 
 pub trait Parser: Send + Sync {
     fn parse(&mut self, source: &[char]) -> Vec<Token>;
@@ -25,7 +25,7 @@ where
 
 #[cfg(test)]
 mod tests {
-    use super::{MarkdownParser, Parser, PlainEnglishParser};
+    use super::{Markdown, Parser, PlainEnglish};
     use crate::{
         Punctuation,
         TokenKind::{self, *},
@@ -44,12 +44,12 @@ mod tests {
     }
 
     fn assert_tokens_eq_plain(test_str: impl AsRef<str>, expected: &[TokenKind]) {
-        let mut parser = PlainEnglishParser;
+        let mut parser = PlainEnglish;
         assert_tokens_eq(test_str, expected, &mut parser);
     }
 
     fn assert_tokens_eq_md(test_str: impl AsRef<str>, expected: &[TokenKind]) {
-        let mut parser = MarkdownParser;
+        let mut parser = Markdown;
 
         assert_tokens_eq(test_str, expected, &mut parser)
     }

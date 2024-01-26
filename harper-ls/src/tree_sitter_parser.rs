@@ -1,9 +1,11 @@
 use harper_core::{
-    parsers::{Parser, PlainEnglishParser},
+    parsers::{Markdown, Parser},
     Span,
 };
 use tree_sitter::{Language, TreeCursor};
 
+/// A Harper parser that wraps the standard [`Markdown`] parser that exclusively parses
+/// comments in any language supported by [`tree_sitter`].
 pub struct TreeSitterParser {
     language: Language,
 }
@@ -39,7 +41,7 @@ impl Parser for TreeSitterParser {
     fn parse(&mut self, source: &[char]) -> Vec<harper_core::Token> {
         let text: String = source.iter().collect();
 
-        let mut english_parser = PlainEnglishParser;
+        let mut markdown_parser = Markdown;
         let mut parser = tree_sitter::Parser::new();
         parser.set_language(self.language).unwrap();
 
@@ -56,7 +58,7 @@ impl Parser for TreeSitterParser {
         let mut tokens = Vec::new();
 
         for span in comments_spans {
-            let mut new_tokens = english_parser.parse(&source[span.start..span.end]);
+            let mut new_tokens = markdown_parser.parse(&source[span.start..span.end]);
 
             new_tokens
                 .iter_mut()

@@ -1,10 +1,14 @@
-use super::{Parser, PlainEnglishParser, StrParser};
+use super::{Parser, PlainEnglish, StrParser};
 use crate::Token;
-pub struct MarkdownParser;
 
-impl Parser for MarkdownParser {
+/// A parser that wraps the [`PlainEnglish`] parser that allows one to parse CommonMark files.
+///
+/// Will ignore code blocks and tables.
+pub struct Markdown;
+
+impl Parser for Markdown {
     fn parse(&mut self, source: &[char]) -> Vec<Token> {
-        let mut english_parser = PlainEnglishParser;
+        let mut english_parser = PlainEnglish;
 
         let source_str: String = source.iter().collect();
         let md_parser =

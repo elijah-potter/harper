@@ -1,7 +1,7 @@
 use std::{collections::HashMap, fs};
 
 use harper_core::{
-    parsers::{MarkdownParser, Parser},
+    parsers::{Markdown, Parser},
     Dictionary, Document, LintSet, Linter,
 };
 use tokio::sync::Mutex;
@@ -37,12 +37,12 @@ impl Backend {
     }
 
     async fn update_document(&self, url: &Url, text: &str) {
-        let mut parser: Box<dyn Parser> = Box::new(MarkdownParser);
+        let mut parser: Box<dyn Parser> = Box::new(Markdown);
 
         if let Some(extension) = url.to_file_path().unwrap().extension() {
             parser = TreeSitterParser::new_from_extension(&extension.to_string_lossy())
                 .map::<Box<dyn Parser>, _>(|v| Box::new(v))
-                .unwrap_or(Box::new(MarkdownParser));
+                .unwrap_or(Box::new(Markdown));
         }
 
         let doc = Document::new(text, parser);
