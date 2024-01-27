@@ -1,6 +1,7 @@
 mod lint;
 mod lint_set;
 mod long_sentences;
+mod matcher;
 mod repeated_words;
 mod sentence_capitalization;
 mod spaces;

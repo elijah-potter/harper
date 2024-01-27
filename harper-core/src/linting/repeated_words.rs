@@ -1,6 +1,8 @@
 use hashbrown::HashSet;
+use smallvec::smallvec;
 
 use crate::{
+    spell::DictWord,
     token::{Token, TokenKind, TokenStringExt},
     Document, Span, Suggestion,
 };
@@ -10,38 +12,35 @@ use super::{Lint, LintKind, Linter};
 #[derive(Debug, Clone)]
 pub struct RepeatedWords {
     /// The set of words that can be considered for repetition checking.
-    set: HashSet<Vec<char>>,
+    set: HashSet<DictWord>,
 }
 
 impl RepeatedWords {
     pub fn new() -> Self {
         let mut set = HashSet::new();
 
-        set.insert(vec!['t', 'h', 'e']);
-        set.insert(vec!['T', 'h', 'e']);
-        set.insert(vec!['a']);
-        set.insert(vec!['A']);
-        set.insert(vec!['a', 'n']);
-        set.insert(vec!['A', 'n']);
-        set.insert(vec!['i', 's']);
-        set.insert(vec!['I', 's']);
-        set.insert(vec!['w', 'i', 'l', 'l']);
-        set.insert(vec!['W', 'i', 'l', 'l']);
-        set.insert(vec!['l', 'i', 'k', 'e']);
-        set.insert(vec!['L', 'i', 'k', 'e']);
-        set.insert(vec!['t', 'h', 'a', 't']);
-        set.insert(vec!['T', 'h', 'a', 't']);
-        set.insert(vec!['w', 'h', 'a', 't']);
-        set.insert(vec!['W', 'h', 'a', 't']);
-        set.insert(vec!['w', 'h', 'i', 'c', 'h']);
-        set.insert(vec!['W', 'h', 'i', 'c', 'h']);
-        set.insert(vec!['b', 'e']);
-        set.insert(vec!['B', 'e']);
-        set.insert(vec!['a', 'n', 'd']);
-        set.insert(vec!['A', 'n', 'd']);
-        set.insert(vec!['I']);
-        set.insert(vec!['a', 't']);
-        set.insert(vec!['A', 't']);
+        macro_rules! add_set {
+            ($lit:literal) => {
+                set.insert($lit.chars().collect());
+            };
+            ($($lit:literal),*) => {
+                $(
+                    add_set!($lit);
+                )*
+            }
+        }
+
+        add_set!(
+            "the", "be", "to", "of", "and", "a", "in", "that", "have", "I", "it", "for", "not",
+            "on", "with", "he", "as", "you", "do", "at", "this", "but", "his", "by", "from",
+            "they", "we", "say", "her", "she", "or", "an", "will", "my", "one", "all", "would",
+            "there", "their", "what", "so", "up", "out", "if", "about", "who", "get", "which",
+            "go", "me", "when", "make", "can", "like", "time", "no", "just", "him", "know", "take",
+            "people", "into", "year", "your", "good", "some", "could", "them", "see", "other",
+            "than", "then", "now", "look", "only", "come", "its", "over", "think", "also", "back",
+            "after", "use", "two", "how", "our", "work", "first", "well", "way", "even", "new",
+            "want", "because", "any", "these", "give", "day", "most", "us"
+        );
 
         Self { set }
     }

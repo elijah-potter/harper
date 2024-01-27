@@ -23,13 +23,13 @@ impl Token {
 }
 
 /// A [`Token`] that holds its content as a fat [`Vec<char>`] rather than as a [`Span`].
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, PartialOrd)]
 pub struct FatToken {
     pub content: Vec<char>,
     pub kind: TokenKind,
 }
 
-#[derive(Debug, Is, Clone, Copy, Serialize, Deserialize, PartialEq, Default)]
+#[derive(Debug, Is, Clone, Copy, Serialize, Deserialize, PartialEq, Default, PartialOrd)]
 #[serde(tag = "kind", content = "value")]
 pub enum TokenKind {
     #[default]
@@ -59,7 +59,7 @@ impl TokenKind {
     }
 }
 
-#[derive(Debug, Is, Clone, Copy, Serialize, Deserialize, PartialEq, Eq)]
+#[derive(Debug, Is, Clone, Copy, Serialize, Deserialize, PartialEq, Eq, PartialOrd)]
 #[serde(tag = "kind")]
 pub enum Punctuation {
     /// .
@@ -104,7 +104,7 @@ pub enum Punctuation {
     Equal,
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, PartialOrd)]
 pub struct Quote {
     /// The location of the matching quote, if it exists.
     pub twin_loc: Option<usize>,

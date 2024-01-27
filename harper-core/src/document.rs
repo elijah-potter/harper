@@ -156,6 +156,11 @@ impl Document {
         )
     }
 
+    /// Defensively attempt to grab a specific token.
+    pub fn get_token(&self, index: usize) -> Option<Token> {
+        self.tokens.get(index).copied()
+    }
+
     pub fn tokens(&self) -> impl Iterator<Item = Token> + '_ {
         self.tokens.iter().copied()
     }

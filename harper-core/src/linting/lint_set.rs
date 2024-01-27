@@ -4,7 +4,7 @@ use super::{spaces::Spaces, Linter};
 use paste::paste;
 
 use super::{
-    long_sentences::LongSentences, repeated_words::RepeatedWords,
+    long_sentences::LongSentences, matcher::Matcher, repeated_words::RepeatedWords,
     sentence_capitalization::SentenceCapitalization, spell_check::SpellCheck,
     unclosed_quotes::UnclosedQuotes, wrong_quotes::WrongQuotes,
 };
@@ -40,6 +40,7 @@ impl LintSet {
             .add_unclosed_quotes()
             .add_sentence_capitalization()
             .add_spell_check(dictionary)
+            .add_matcher()
             .add_spaces();
         self
     }
@@ -99,5 +100,6 @@ create_simple_builder_methods!(
     WrongQuotes,
     LongSentences,
     RepeatedWords,
-    Spaces
+    Spaces,
+    Matcher
 );
