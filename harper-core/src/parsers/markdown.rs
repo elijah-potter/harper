@@ -1,7 +1,4 @@
-use itertools::Itertools;
-use pulldown_cmark::LinkType;
-
-use super::{Parser, PlainEnglish, StrParser};
+use super::{Parser, PlainEnglish};
 use crate::{Span, Token, TokenKind};
 
 /// A parser that wraps the [`PlainEnglish`] parser that allows one to parse CommonMark files.

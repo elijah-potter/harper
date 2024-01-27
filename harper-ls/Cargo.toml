@@ -1,12 +1,12 @@
 [package]
 name = "harper-ls"
-version = "0.3.0"
+version = "0.4.0"
 edition = "2021"
 description = "The language checker for artists."
 license = "MIT OR Apache-2.0"
 
 [dependencies]
-harper-core = { path = "../harper-core", version = "0.3.0" }
+harper-core = { path = "../harper-core", version = "0.4.0" }
 tower-lsp = "0.20.0"
 tokio = { version = "1.35.1", features = ["full"] }
 clap = { version = "4.4.18", features = ["derive"] }
