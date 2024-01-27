@@ -127,7 +127,8 @@ impl Matcher {
             "then","her" => "than her",
             "then","hers" => "than hers",
             "then","him" => "than him",
-            "then","his" => "than his"
+            "then","his" => "than his",
+            "simply","grammatical" => "simple grammatical"
         };
 
         triggers.push(Rule {

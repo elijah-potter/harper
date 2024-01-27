@@ -26,6 +26,7 @@ impl TreeSitterParser {
             "c" => tree_sitter_c::language(),
             "cpp" => tree_sitter_cpp::language(),
             "h" => tree_sitter_cpp::language(),
+            "hpp" => tree_sitter_cpp::language(),
             "rb" => tree_sitter_ruby::language(),
             "swift" => tree_sitter_ruby::language(),
             "cs" => tree_sitter_c_sharp::language(),
