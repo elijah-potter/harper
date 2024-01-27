@@ -169,6 +169,9 @@ impl LanguageServer for Backend {
             .log_message(MessageType::INFO, "File opened!")
             .await;
 
+        self.update_document_from_file(&params.text_document.uri)
+            .await;
+
         self.publish_diagnostics(&params.text_document.uri).await;
     }
 
