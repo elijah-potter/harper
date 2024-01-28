@@ -540,7 +540,7 @@ dependencies = [
 
 [[package]]
 name = "harper-core"
-version = "0.5.1"
+version = "0.5.2"
 dependencies = [
  "criterion",
  "hashbrown",
@@ -556,7 +556,7 @@ dependencies = [
 
 [[package]]
 name = "harper-ls"
-version = "0.5.1"
+version = "0.5.2"
 dependencies = [
  "clap",
  "harper-core",
