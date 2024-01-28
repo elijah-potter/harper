@@ -1,4 +1,4 @@
-use std::{collections::HashMap, fs};
+use std::collections::HashMap;
 
 use harper_core::{
     parsers::{Markdown, Parser},
@@ -33,7 +33,7 @@ pub struct Backend {
 
 impl Backend {
     async fn update_document_from_file(&self, url: &Url) {
-        let content = fs::read_to_string(url.path()).unwrap();
+        let content = tokio::fs::read_to_string(url.path()).await.unwrap();
         self.update_document(url, &content).await;
     }
 

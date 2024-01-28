@@ -25,7 +25,9 @@ async fn main() {
         let stdout = tokio::io::stdout();
         Server::new(stdin, stdout, socket).serve(service).await;
     } else {
-        let listener = TcpListener::bind("127.0.0.1:4000").await.unwrap();
+        let address = "127.0.0.1:4000";
+        let listener = TcpListener::bind(address).await.unwrap();
+        println!("Listening on {}", address);
         let (stream, _) = listener.accept().await.unwrap();
         let (read, write) = tokio::io::split(stream);
         Server::new(read, write, socket).serve(service).await;
