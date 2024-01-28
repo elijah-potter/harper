@@ -9,7 +9,7 @@ publish = false
 crate-type = ["cdylib", "rlib"]
 
 [profile.release]
-opt-level = "s" 
+opt-level = 3 
 strip = true
 
 [dependencies]

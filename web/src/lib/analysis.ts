@@ -81,7 +81,6 @@ export function spanContent(span: Span, source: string): string {
 }
 
 export async function lintText(text: string, useWasm = defaultUseWasm): Promise<Lint[]> {
-	console.time('lint');
 	let lints;
 
 	if (useWasm) {
@@ -107,7 +106,6 @@ export async function lintText(text: string, useWasm = defaultUseWasm): Promise<
 	// The `Underlines` component assumes the lints do not overlap.
 	lints = removeOverlaps(lints);
 
-	console.timeEnd('lint');
 	return lints;
 }
 

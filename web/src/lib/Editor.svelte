@@ -41,7 +41,7 @@
 	>
 		<textarea
 			bind:this={editor}
-			class="w-full m-0 rounded-none p-0 z-0 bg-transparent border-none text-lg resize-none focus:border-0"
+			class="w-full text-nowrap m-0 rounded-none p-0 z-0 bg-transparent overflow-hidden border-none text-lg resize-none focus:border-0"
 			spellcheck="false"
 			style={`grid-row: 1; grid-column: 1; height: ${boxHeight}px`}
 			on:keydown={() => (focused = undefined)}

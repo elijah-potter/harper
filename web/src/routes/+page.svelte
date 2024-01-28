@@ -1,5 +1,6 @@
 <script>
 	import Editor from '$lib/Editor.svelte';
+	import Graph from '$lib/Graph.svelte';
 
 	let width = window.innerWidth;
 

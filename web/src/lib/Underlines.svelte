@@ -83,7 +83,7 @@
 </script>
 
 <div class="grid">
-	<div class="p-0 m-0 indent-0 text-transparent" style="grid-row: 1; grid-column: 1">
+	<div class="p-0 m-0 text-nowrap indent-0 text-transparent" style="grid-row: 1; grid-column: 1">
 		{#each modified as chunk}
 			{#if chunk == null}
 				<br />

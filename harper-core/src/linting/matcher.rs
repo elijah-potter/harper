@@ -38,6 +38,12 @@ macro_rules! pt {
             content: Some($str.chars().collect()),
         }
     };
+    (Period) => {
+        PatternToken {
+            kind: TokenKind::Punctuation(Punctuation::Period),
+            content: None,
+        }
+    };
     (Hyphen) => {
         PatternToken {
             kind: TokenKind::Punctuation(Punctuation::Hyphen),
@@ -122,18 +128,45 @@ impl Matcher {
             "more","then" => "more than",
             "gong","to" => "going to",
             "then","others" => "than others",
+            "Then","others" => "than others",
             "then","before" => "than before",
+            "Then","before" => "than before",
             "then","last","week" => "than last week",
             "then","her" => "than her",
             "then","hers" => "than hers",
             "then","him" => "than him",
             "then","his" => "than his",
-            "simply","grammatical" => "simple grammatical"
+            "simply","grammatical" => "simple grammatical",
+            "you","r" => "your",
+            "that","s" => "that's",
+            "That","s" => "that's",
+            "that","s" => "that is",
+            "That","s" => "that is",
+            "ms" => "milliseconds",
+            "LLM" => "large language model",
+            "LLMs" => "large language models"
         };
 
         triggers.push(Rule {
             pattern: vec![pt!("break"), pt!(Hyphen), pt!("up")],
             replace_with: vecword!("break-up"),
+        });
+
+        triggers.push(Rule {
+            pattern: vec![pt!("L"), pt!(Period), pt!("L"), pt!(Period), pt!("M")],
+            replace_with: vecword!("large language model"),
+        });
+
+        triggers.push(Rule {
+            pattern: vec![
+                pt!("L"),
+                pt!(Period),
+                pt!("L"),
+                pt!(Period),
+                pt!("M"),
+                pt!(Period),
+            ],
+            replace_with: vecword!("large language model"),
         });
 
         Self { triggers }
