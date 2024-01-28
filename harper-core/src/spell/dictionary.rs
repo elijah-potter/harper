@@ -9,7 +9,7 @@ use super::{
 
 #[derive(Debug, Clone)]
 pub struct Dictionary {
-    /// Storing a separate [Vec] for iterations speeds up spellchecking by ~16% at the cost of
+    /// Storing a separate [`Vec`] for iterations speeds up spellchecking by ~16% at the cost of
     /// additional memory.
     ///
     /// This is likely due to increased locality :shrug:.
@@ -63,7 +63,7 @@ impl Dictionary {
         DICT.clone()
     }
 
-    /// Iterate over all the words in the dicitonary of a given length
+    /// Iterate over all the words in the dictionary of a given length
     pub fn words_with_len_iter(&self, len: usize) -> Box<dyn Iterator<Item = &'_ [char]> + '_> {
         if len == 0 || len >= self.word_len_starts.len() {
             return Box::new(std::iter::empty());

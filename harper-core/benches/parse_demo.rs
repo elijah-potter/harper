@@ -1,4 +1,4 @@
-use criterion::{black_box, criterion_group, criterion_main, Criterion};
+use criterion::{criterion_group, criterion_main, Criterion};
 use harper_core::{Dictionary, Document, LintSet, Linter};
 
 fn parse_demo(c: &mut Criterion) {

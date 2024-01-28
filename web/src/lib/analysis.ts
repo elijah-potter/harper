@@ -81,6 +81,7 @@ export function spanContent(span: Span, source: string): string {
 }
 
 export async function lintText(text: string, useWasm = defaultUseWasm): Promise<Lint[]> {
+	console.time('lint');
 	let lints;
 
 	if (useWasm) {
@@ -103,6 +104,10 @@ export async function lintText(text: string, useWasm = defaultUseWasm): Promise<
 
 	// We only want to show fixable errors.
 	lints = lints.filter((lint) => lint.suggestions.length > 0);
+	// The `Underlines` component assumes the lints do not overlap.
+	lints = removeOverlaps(lints);
+
+	console.timeEnd('lint');
 	return lints;
 }
 
@@ -128,5 +133,30 @@ export async function applySuggestion(
 
 		const res = await req.json();
 		return res.text;
+	}
+}
+
+/** Removes lints whose spans overlap.
+ * NOTE: __Will__ reorder the lints. */
+function removeOverlaps(lints: Lint[]) {
+	const sorted = lints.sort((a, b) => a.span.start - b.span.start);
+
+	let overlapsFound = false;
+
+	const filtered = sorted.filter((value, idx, arr) => {
+		const next = arr[idx + 1];
+
+		if (next != null && next.span.start < value.span.end) {
+			overlapsFound = true;
+			return false;
+		} else {
+			return true;
+		}
+	});
+
+	if (overlapsFound) {
+		return removeOverlaps(filtered);
+	} else {
+		return filtered;
 	}
 }

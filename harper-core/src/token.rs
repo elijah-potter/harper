@@ -100,8 +100,10 @@ pub enum Punctuation {
     LessThan,
     /// >
     GreaterThan,
-    /// Equal
+    /// =
     Equal,
+    /// *
+    Star,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, PartialOrd)]

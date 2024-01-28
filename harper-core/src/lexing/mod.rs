@@ -137,6 +137,7 @@ fn lex_punctuation(source: &[char]) -> Option<FoundToken> {
         '(' => OpenRound,
         ')' => CloseRound,
         '#' => Hash,
+        '*' => Star,
         _ => return None,
     };
 

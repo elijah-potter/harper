@@ -1,7 +1,7 @@
 #![allow(dead_code)]
 
 use harper_core::{Dictionary, Document, FatToken, Lint, LintSet, Linter, Span, Suggestion};
-use std::{marker, net::SocketAddr};
+use std::net::SocketAddr;
 use tokio::time::Instant;
 use tracing::{info, Level};
 use tracing_subscriber::FmtSubscriber;

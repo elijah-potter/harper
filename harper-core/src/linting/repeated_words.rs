@@ -1,5 +1,4 @@
 use hashbrown::HashSet;
-use smallvec::smallvec;
 
 use crate::{
     spell::DictWord,
