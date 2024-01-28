@@ -75,17 +75,22 @@ pub fn suggest_correct_spelling<'a>(
         if a == b {
             found.push(found_dist.remove(a).0);
         } else {
-            found.push(found_dist[b].0);
-            found.push(found_dist.remove(a).0);
+            found.push(found_dist[a].0);
+            found.push(found_dist.remove(b).0);
             if a < b {
-                found_dist.remove(b - 1);
+                found_dist.remove(a - 1);
             } else {
-                found_dist.remove(b);
+                found_dist.remove(a);
             }
         }
     }
 
     found.extend(found_dist.into_iter().map(|v| v.0));
+
+    // Finally, swap the lowest edit distance word with the shortest.
+    if found.len() >= 2 {
+        found.swap(0, 2);
+    }
 
     found
 }
