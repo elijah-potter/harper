@@ -1,6 +1,12 @@
+use std::sync::Mutex;
+
 use harper_core::{Dictionary, Document, LintSet, Linter};
+use once_cell::sync::Lazy;
 use serde::Serialize;
 use wasm_bindgen::{prelude::wasm_bindgen, JsValue};
+
+static LINTER: Lazy<Mutex<LintSet>> =
+    Lazy::new(|| Mutex::new(LintSet::new().with_standard(Dictionary::new())));
 
 /// Create the serializer that preserves types across the JavaScript barrier
 fn glue_serializer() -> serde_wasm_bindgen::Serializer {
@@ -19,11 +25,9 @@ pub fn setup() {
 
 #[wasm_bindgen]
 pub fn lint(text: String) -> Vec<JsValue> {
-    let dictionary = Dictionary::new();
     let document = Document::new_markdown(&text);
 
-    let mut linter = LintSet::new().with_standard(dictionary);
-    let lints = linter.lint(&document);
+    let lints = LINTER.lock().unwrap().lint(&document);
 
     lints
         .into_iter()

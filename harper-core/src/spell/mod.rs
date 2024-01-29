@@ -78,9 +78,9 @@ pub fn suggest_correct_spelling<'a>(
             found.push(found_dist[a].0);
             found.push(found_dist.remove(b).0);
             if a < b {
-                found_dist.remove(a - 1);
+                found_dist.remove(b - 1);
             } else {
-                found_dist.remove(a);
+                found_dist.remove(b);
             }
         }
     }

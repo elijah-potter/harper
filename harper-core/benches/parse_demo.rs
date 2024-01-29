@@ -1,32 +1,38 @@
-use criterion::{criterion_group, criterion_main, Criterion};
+use divan::{black_box, AllocProfiler, Bencher};
 use harper_core::{Dictionary, Document, LintSet, Linter};
 
-fn parse_demo(c: &mut Criterion) {
-    let demo = include_str!("../../demo.md");
+#[global_allocator]
+static ALLOC: AllocProfiler = AllocProfiler::system();
 
-    c.bench_function("parse_demo", |b| {
-        b.iter(|| {
-            let _document = Document::new_markdown(demo);
-        })
-    });
+static DEMO: &str = include_str!("../../demo.md");
 
-    let dictionary = Dictionary::new();
-
-    c.bench_function("create_lint_set", |b| {
-        b.iter(|| {
-            let _lint_set = LintSet::new().with_standard(dictionary.clone());
-        })
-    });
-
-    let mut lint_set = LintSet::new().with_standard(dictionary);
-    let document = Document::new_markdown(demo);
-
-    c.bench_function("lint_demo", |b| {
-        b.iter(|| {
-            lint_set.lint(&document);
-        })
+#[divan::bench]
+fn parse_demo(bencher: Bencher) {
+    bencher.bench_local(|| {
+        let _document = Document::new_markdown(black_box(DEMO));
     });
 }
 
-criterion_group!(benches, parse_demo);
-criterion_main!(benches);
+#[divan::bench]
+fn create_lint_set(bencher: Bencher) {
+    let dictionary = Dictionary::new();
+
+    bencher.bench_local(|| {
+        let _lint_set = LintSet::new().with_standard(dictionary.clone());
+    });
+}
+
+#[divan::bench]
+fn lint_demo(bencher: Bencher) {
+    let dictionary = Dictionary::new();
+    let mut lint_set = LintSet::new().with_standard(dictionary);
+    let document = Document::new_markdown(black_box(DEMO));
+
+    bencher.bench_local(|| {
+        lint_set.lint(&document);
+    });
+}
+
+fn main() {
+    divan::main();
+}

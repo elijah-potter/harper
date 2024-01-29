@@ -1,4 +1,4 @@
-use crate::{Dictionary, Lint};
+use crate::{Dictionary, Document, Lint};
 
 use super::{spaces::Spaces, Linter};
 use paste::paste;
@@ -14,7 +14,7 @@ pub struct LintSet {
 }
 
 impl Linter for LintSet {
-    fn lint(&mut self, document: &crate::Document) -> Vec<Lint> {
+    fn lint(&mut self, document: &Document) -> Vec<Lint> {
         let mut lints = Vec::new();
 
         for linter in &mut self.linters {

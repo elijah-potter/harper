@@ -20,3 +20,4 @@ wasm-bindgen = "0.2.90"
 harper-core = { path = "../harper-core" }
 serde = "1.0.195"
 serde-wasm-bindgen = "0.6.3"
+once_cell = "1.19.0"
