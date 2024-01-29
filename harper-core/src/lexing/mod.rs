@@ -117,6 +117,7 @@ fn lex_punctuation(source: &[char]) -> Option<FoundToken> {
     use Punctuation::*;
 
     let punct = match c {
+        '~' => Tilde,
         '=' => Equal,
         '<' => LessThan,
         '>' => GreaterThan,

@@ -57,6 +57,15 @@ impl TokenKind {
     pub fn is_apostrophe(&self) -> bool {
         matches!(self, TokenKind::Punctuation(Punctuation::Apostrophe))
     }
+
+    /// Checks whether the token is whitespace.
+    pub fn is_whitespace(&self) -> bool {
+        match self {
+            TokenKind::Space(_) => true,
+            TokenKind::Newline(_) => true,
+            _ => false,
+        }
+    }
 }
 
 #[derive(Debug, Is, Clone, Copy, Serialize, Deserialize, PartialEq, Eq, PartialOrd)]
@@ -104,6 +113,8 @@ pub enum Punctuation {
     Equal,
     /// *
     Star,
+    /// ~
+    Tilde,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, PartialOrd)]
@@ -118,6 +129,8 @@ pub trait TokenStringExt {
     /// Will also return [`None`] if there is an unlintable token in the position of the first
     /// word.
     fn first_sentence_word(&self) -> Option<Token>;
+    /// Grabs the first token that isn't whitespace from the token string.
+    fn first_non_whitespace(&self) -> Option<Token>;
     fn iter_word_indices(&self) -> impl Iterator<Item = usize> + '_;
     fn iter_words(&self) -> impl Iterator<Item = &Token> + '_;
     fn iter_space_indices(&self) -> impl Iterator<Item = usize> + '_;
@@ -132,6 +145,10 @@ pub trait TokenStringExt {
 impl TokenStringExt for [Token] {
     fn first_word(&self) -> Option<Token> {
         self.iter().find(|v| v.kind.is_word()).copied()
+    }
+
+    fn first_non_whitespace(&self) -> Option<Token> {
+        self.iter().find(|t| !t.kind.is_whitespace()).copied()
     }
 
     fn first_sentence_word(&self) -> Option<Token> {
