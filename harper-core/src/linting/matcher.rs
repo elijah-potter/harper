@@ -93,6 +93,8 @@ pub struct Matcher {
 impl Matcher {
     pub fn new() -> Self {
         let mut triggers = pt! {
+            "ngram" => "n-gram",
+            "grammer" => "grammar",
             "There","fore" => "Therefore",
             "south","America" => "South America",
             "South","america" => "South America",
