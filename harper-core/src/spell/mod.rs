@@ -88,7 +88,7 @@ pub fn suggest_correct_spelling<'a>(
     found.extend(found_dist.into_iter().map(|v| v.0));
 
     // Finally, swap the lowest edit distance word with the shortest.
-    if found.len() >= 2 {
+    if found.len() >= 3 {
         found.swap(0, 2);
     }
 

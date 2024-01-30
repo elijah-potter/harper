@@ -144,7 +144,15 @@ impl Matcher {
             "That","s" => "that is",
             "ms" => "milliseconds",
             "LLM" => "large language model",
-            "LLMs" => "large language models"
+            "LLMs" => "large language models",
+            "t","he" => "the",
+            "the","hing" => "the thing",
+            "The","hing" => "The thing",
+            "need","helps" => "need help",
+            "all","though" => "although",
+            "All","though" => "although",
+            "al","though" => "although",
+            "Al","though" => "although"
         };
 
         triggers.push(Rule {
