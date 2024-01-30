@@ -11632,7 +11632,7 @@ algebra/SM
 algebraic
 algebraically
 algorithm/SM
-algorithmic
+algorithmic/Q
 alias/GMDS
 alibi/GMDS
 alien/BGMDS
@@ -49591,3 +49591,4 @@ raytracer
 viewport
 backend
 frontend
+automata

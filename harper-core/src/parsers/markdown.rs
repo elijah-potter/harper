@@ -24,15 +24,28 @@ impl Parser for Markdown {
         // NOTE: the range spits out __byte__ indices, not char indices.
         // This is why we keep track above.
         for (event, range) in md_parser.into_offset_iter() {
+            if range.start > traversed_bytes {
+                traversed_chars += source_str[traversed_bytes..range.start].chars().count();
+                traversed_bytes = range.start;
+            }
+
             match event {
+                pulldown_cmark::Event::HardBreak => {
+                    tokens.push(Token {
+                        span: Span::new_with_len(traversed_chars, 1),
+                        kind: TokenKind::Newline(1),
+                    });
+                }
                 pulldown_cmark::Event::Start(tag) => stack.push(tag),
+                pulldown_cmark::Event::End(pulldown_cmark::Tag::Paragraph)
+                | pulldown_cmark::Event::End(pulldown_cmark::Tag::Item) => tokens.push(Token {
+                    span: Span::new_with_len(traversed_chars, 1),
+                    kind: TokenKind::Newline(1),
+                }),
                 pulldown_cmark::Event::End(_) => {
                     stack.pop();
                 }
                 pulldown_cmark::Event::Code(code) => {
-                    traversed_chars += source_str[traversed_bytes..range.start].chars().count();
-                    traversed_bytes = range.start;
-
                     let chunk_len = code.chars().count();
 
                     tokens.push(Token {
@@ -41,9 +54,6 @@ impl Parser for Markdown {
                     });
                 }
                 pulldown_cmark::Event::Text(text) => {
-                    traversed_chars += source_str[traversed_bytes..range.start].chars().count();
-                    traversed_bytes = range.start;
-
                     let chunk_len = text.chars().count();
 
                     if let Some(tag) = stack.last() {

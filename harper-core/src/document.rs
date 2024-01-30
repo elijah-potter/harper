@@ -172,14 +172,8 @@ impl Document {
     /// Iterate over the locations of the sentence terminators in the document.
     fn sentence_terminators(&self) -> impl Iterator<Item = usize> + '_ {
         self.tokens.iter().enumerate().filter_map(|(index, token)| {
-            if let Token {
-                kind: TokenKind::Punctuation(punct),
-                ..
-            } = token
-            {
-                if is_sentence_terminator(punct) {
-                    return Some(index);
-                }
+            if is_sentence_terminator(&token.kind) {
+                return Some(index);
             }
             None
         })
@@ -192,14 +186,8 @@ impl Document {
             .enumerate()
             .rev()
             .find_map(|(index, token)| {
-                if let Token {
-                    kind: TokenKind::Punctuation(punct),
-                    ..
-                } = token
-                {
-                    if is_sentence_terminator(punct) {
-                        return Some(index);
-                    }
+                if is_sentence_terminator(&token.kind) {
+                    return Some(index);
                 }
                 None
             })
@@ -287,13 +275,17 @@ impl Display for Document {
     }
 }
 
-fn is_sentence_terminator(punctuation: &Punctuation) -> bool {
-    [
-        Punctuation::Period,
-        Punctuation::Bang,
-        Punctuation::Question,
-    ]
-    .contains(punctuation)
+fn is_sentence_terminator(token: &TokenKind) -> bool {
+    match token {
+        TokenKind::Punctuation(punct) => [
+            Punctuation::Period,
+            Punctuation::Bang,
+            Punctuation::Question,
+        ]
+        .contains(punct),
+        TokenKind::Newline(_) => true,
+        _ => false,
+    }
 }
 
 #[cfg(test)]
@@ -313,7 +305,8 @@ mod tests {
         let mut document = Document::new(text, Box::new(Markdown));
         document.condense_contractions();
 
-        assert_eq!(document.tokens.len(), final_tok_count);
+        // We add one because the Markdown parser inserts a newline at end-of-input.
+        assert_eq!(document.tokens.len(), final_tok_count + 1);
     }
 
     #[test]

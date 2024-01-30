@@ -113,7 +113,10 @@ SFX L Y 1
 SFX L   0     ment       .
 
 SFX O Y 1
-SFX O   0     ful         .
+SFX O   0     ful        .
+
+SFX Q Y 1
+SFX Q   0     ally       .
 
 REP 90
 REP a ei

@@ -89,6 +89,25 @@ mod tests {
                 Word,
                 Space(1),
                 Word,
+                Newline(1),
+            ],
+        );
+    }
+
+    #[test]
+    fn inserts_newlines() {
+        assert_tokens_eq_md(
+            "__hello__ world,\n\n[my]() friend",
+            &[
+                Word,
+                Space(1),
+                Word,
+                Punctuation(Punctuation::Comma),
+                Newline(1),
+                Word,
+                Space(1),
+                Word,
+                Newline(1),
             ],
         );
     }

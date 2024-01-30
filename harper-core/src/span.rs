@@ -14,6 +14,13 @@ impl Span {
         Self { start, end }
     }
 
+    pub fn new_with_len(start: usize, len: usize) -> Self {
+        Self {
+            start,
+            end: start + len,
+        }
+    }
+
     pub fn len(&self) -> usize {
         self.end - self.start
     }
