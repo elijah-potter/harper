@@ -59,7 +59,7 @@ impl Parser for TreeSitterParser {
 
         let mut tokens = Vec::new();
 
-        for span in comments_spans {
+        for (s_index, span) in comments_spans.iter().enumerate() {
             // Skip over the comment start characters
             let actual_start = source[span.start..span.end]
                 .iter()
@@ -73,6 +73,14 @@ impl Parser for TreeSitterParser {
 
             let mut new_tokens = markdown_parser.parse(&source[actual_start..span.end]);
 
+            // The markdown parser will insert a newline at end-of-input.
+            // If the next treesitter chunk is a comment, we want to remove that.
+            if let Some(next_start) = comments_spans.get(s_index + 1).map(|v| v.start) {
+                if is_span_whitespace(Span::new(span.end, next_start), source) {
+                    new_tokens.pop();
+                }
+            }
+
             new_tokens
                 .iter_mut()
                 .for_each(|t| t.span.offset(actual_start));
@@ -82,6 +90,15 @@ impl Parser for TreeSitterParser {
 
         tokens
     }
+}
+
+/// Check if the contents of a span is just white-space.
+fn is_span_whitespace(span: Span, source: &[char]) -> bool {
+    span.get_content(source)
+        .iter()
+        .filter(|c| !c.is_whitespace())
+        .count()
+        == 0
 }
 
 fn is_comment_character(c: char) -> bool {
