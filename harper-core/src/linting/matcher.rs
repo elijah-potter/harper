@@ -144,7 +144,7 @@ impl Matcher {
             "simply","grammatical" => "simple grammatical",
             "you","r" => "your",
             "that","s" => "that's",
-            "That","s" => "that's",
+            "That","s" => "That's",
             "that","s" => "that is",
             "That","s" => "that is",
             "ms" => "milliseconds",
@@ -228,6 +228,7 @@ impl Linter for Matcher {
                             "Did you mean “{}”?",
                             trigger.replace_with.iter().collect::<String>()
                         ),
+                        priority: 15,
                     })
                 }
             }

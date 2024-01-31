@@ -75,6 +75,7 @@ impl Linter for SpellCheck {
                     "Did you mean to spell “{}” this way?",
                     document.get_span_content_str(word.span)
                 ),
+                priority: 63,
             })
         }
 

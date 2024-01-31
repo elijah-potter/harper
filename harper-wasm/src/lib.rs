@@ -1,6 +1,6 @@
 use std::sync::Mutex;
 
-use harper_core::{Dictionary, Document, LintSet, Linter};
+use harper_core::{remove_overlaps, Dictionary, Document, LintSet, Linter};
 use once_cell::sync::Lazy;
 use serde::Serialize;
 use wasm_bindgen::{prelude::wasm_bindgen, JsValue};
@@ -27,7 +27,9 @@ pub fn setup() {
 pub fn lint(text: String) -> Vec<JsValue> {
     let document = Document::new_markdown(&text);
 
-    let lints = LINTER.lock().unwrap().lint(&document);
+    let mut lints = LINTER.lock().unwrap().lint(&document);
+
+    remove_overlaps(&mut lints);
 
     lints
         .into_iter()

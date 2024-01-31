@@ -29,6 +29,7 @@ impl Linter for SentenceCapitalization {
                             suggestions: vec![Suggestion::ReplaceWith(
                                 first_letter.to_uppercase().collect_vec(),
                             )],
+                            priority: 31,
                             message: "This sentence does not start with a capital letter"
                                 .to_string(),
                         })

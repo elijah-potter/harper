@@ -87,6 +87,7 @@ impl Linter for RepeatedWords {
                         lint_kind: LintKind::Repetition,
                         suggestions: vec![Suggestion::ReplaceWith(Vec::new())],
                         message: "Did you mean to repeat this word?".to_string(),
+                        ..Default::default()
                     })
                 }
             }

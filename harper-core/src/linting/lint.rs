@@ -5,12 +5,27 @@ use serde::{Deserialize, Serialize};
 
 use crate::span::Span;
 
-#[derive(Debug, Clone, Serialize, Deserialize, Default)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Lint {
     pub span: Span,
     pub lint_kind: LintKind,
     pub suggestions: Vec<Suggestion>,
     pub message: String,
+    /// A numerical value for the importance of a lint.
+    /// Lower = more important.
+    pub priority: u8,
+}
+
+impl Default for Lint {
+    fn default() -> Self {
+        Self {
+            span: Default::default(),
+            lint_kind: Default::default(),
+            suggestions: Default::default(),
+            message: Default::default(),
+            priority: 127,
+        }
+    }
 }
 
 #[derive(Debug, Clone, Copy, Serialize, Deserialize, Is, Default)]

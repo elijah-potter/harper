@@ -23,6 +23,7 @@ impl Linter for Spaces {
                             "There are {} spaces where there should be only one.",
                             count
                         ),
+                        priority: 15,
                     })
                 }
             }

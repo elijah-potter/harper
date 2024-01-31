@@ -39,8 +39,8 @@ impl LintSet {
             .add_long_sentences()
             .add_unclosed_quotes()
             .add_sentence_capitalization()
-            .add_spell_check(dictionary)
             .add_matcher()
+            .add_spell_check(dictionary)
             .add_spaces();
         self
     }
