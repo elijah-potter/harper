@@ -7,7 +7,7 @@ I created it after years of dealing with the shortcomings of the competition.
 
 Grammarly was too expensive and too overbearing. 
 It's suggestions lacked context, and were often just plain _wrong_.
-No to mention: it's a privacy nightmare.
+Not to mention: it's a privacy nightmare.
 Everything you write with Grammarly is sent to their servers.
 Their privacy policy claims they don't sell the data, but that doesn't mean they don't use it to train large language models god knows what else.
 Not only that, but the round-trip-time of the network request makes revising your work all the more tedious.

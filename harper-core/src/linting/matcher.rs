@@ -93,6 +93,9 @@ pub struct Matcher {
 impl Matcher {
     pub fn new() -> Self {
         let mut triggers = pt! {
+            "your","doing" => "you're doing",
+            "no","to" => "not to",
+            "No","to" => "not to",
             "ngram" => "n-gram",
             "grammer" => "grammar",
             "There","fore" => "Therefore",
