@@ -1,4 +1,9 @@
 <script lang="ts">
+	// This is some of the shittiest code I've ever written.
+	// It is quite hard to look at.
+	// Someday, I'll return to it and spruce it up.
+	// For now, it works.
+
 	import type { Lint } from '$lib/analysis';
 	import { lintText, spanContent } from '$lib/analysis';
 
@@ -54,7 +59,6 @@
 
 				let lintContent = [
 					spanContent(lint.span, content).replaceAll(' ', '\u00A0'),
-					'#0B2545',
 					lintIndex === focusLintIndex,
 					lintIndex
 				];
@@ -92,10 +96,11 @@
 			{:else}
 				<span class="pointer-events-auto" style={`margin-right: -4px;`}>
 					<span
-						class={`underlinespecial transition-all rounded-sm ${chunk[2] ? 'animate-after-bigbounce text-white' : ''}`}
-						bind:this={lintHighlights[chunk[3]]}
-						on:click={() => (focusLintIndex = chunk[3]) && console.log('hit')}
-						style={`--line-color: ${chunk[1]}; --line-width: ${chunk[2] ? '4px' : '2px'}; --bg-color: ${chunk[2] ? '#8DA9C4' : 'transparent'};`}
+						class={`underlinespecial transition-all rounded-sm ${chunk[1] ? 'animate-after-bigbounce text-white' : ''}`}
+						bind:this={lintHighlights[chunk[2]]}
+						on:click={() => (focusLintIndex = chunk[2])}
+						style={`--line-color: #DB2B39; --line-width: ${chunk[1] ? '4px' : '2px'}; --bg-color: ${chunk[1] ? '#dbafb3' : 'transparent'};`}
+						l
 					>
 						{chunk[0]}
 					</span>

@@ -58,7 +58,10 @@ impl Backend {
         };
 
         let mut linter = self.linter.lock().await;
-        let lints = linter.lint(document);
+        let mut lints = linter.lint(document);
+
+        lints.sort_by_key(|l| l.priority);
+
         let source_chars = document.get_full_content();
 
         // Find lints whose span overlaps with range

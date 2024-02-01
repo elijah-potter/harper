@@ -56,7 +56,7 @@
 		<div class="flex flex-col overflow-y-scroll overflow-x-hidden m-0 p-0">
 			{#each lints as lint, i}
 				<div
-					class="block max-w-sm p-6 bg-white border border-gray-200 rounded-lg shadow m-1 hover:translate-x-1 transition-all"
+					class="block max-w-sm p-6 bg-white dark:bg-gray-800 border border-gray-200 rounded-lg shadow m-1 hover:translate-x-1 transition-all"
 					on:click={() => (focused = i)}
 					bind:this={lintCards[i]}
 				>
