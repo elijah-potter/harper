@@ -30673,7 +30673,7 @@ look/MDRSZG
 lookalike/MS
 looker/M
 lookout/MS
-lookup
+lookup/S
 loom/MDSG
 loon/MS
 loonie/M
@@ -49596,4 +49596,6 @@ Grammarly/M
 LanguageTool/M
 WebAssembly/M
 Neovim/M
-quartile/s
+quartile/S
+autocomplete/MS
+GPU/S

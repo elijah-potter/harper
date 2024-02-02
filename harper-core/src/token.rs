@@ -71,50 +71,52 @@ impl TokenKind {
 #[derive(Debug, Is, Clone, Copy, Serialize, Deserialize, PartialEq, Eq, PartialOrd)]
 #[serde(tag = "kind")]
 pub enum Punctuation {
-    /// .
+    /// `.`
     Period,
-    /// !
+    /// `!`
     Bang,
-    /// ?
+    /// `?`
     Question,
-    /// :
+    /// `:`
     Colon,
-    /// ;
+    /// ``;``
     Semicolon,
-    /// "
+    /// `"`
     Quote(Quote),
-    /// ,
+    /// `,`
     Comma,
-    /// -
+    /// `-`
     Hyphen,
-    /// [
+    /// `[`
     OpenSquare,
-    /// ]
+    /// `]`
     CloseSquare,
-    /// (
+    /// `(`
     OpenRound,
-    /// )
+    /// `)`
     CloseRound,
-    /// "
+    /// `"`
     Hash,
-    /// '
+    /// `'`
     Apostrophe,
-    /// %
+    /// `%`
     Percent,
-    /// /
+    /// `/`
     ForwardSlash,
-    /// \
+    /// `\`
     Backslash,
-    /// <
+    /// `<`
     LessThan,
-    /// >
+    /// `>`
     GreaterThan,
-    /// =
+    /// `=`
     Equal,
-    /// *
+    /// `*`
     Star,
-    /// ~
+    /// `~`
     Tilde,
+    /// `@`
+    At,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, PartialOrd)]

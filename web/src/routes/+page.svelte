@@ -13,7 +13,7 @@
 <div class="h-16" />
 
 <GutterCenter>
-	<h1 class="text-5xl font-bold text-center dark:text-white">Hi. I'm Harper.</h1>
+	<h1 class="text-5xl font-bold text-center dark:text-white">Hi. I’m Harper.</h1>
 	<h2 class="text-3xl text-center dark:text-white">The Grammar Checker for Developers</h2>
 	<h2 class="text-2xl font-light italic text-center dark:text-white">
 		Private. Free. Unobtrusive.

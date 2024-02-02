@@ -1,3 +1,5 @@
+use std::borrow::Cow;
+
 use itertools::{Itertools, MinMaxResult};
 use smallvec::SmallVec;
 
@@ -18,6 +20,8 @@ pub fn suggest_correct_spelling<'a>(
     max_edit_dist: u8,
     dictionary: &'a Dictionary,
 ) -> Vec<&'a [char]> {
+    let misspelled_word = seq_to_normalized(misspelled_word);
+
     let misspelled_lower: Vec<char> = misspelled_word
         .iter()
         .flat_map(|v| v.to_lowercase())
@@ -40,7 +44,7 @@ pub fn suggest_correct_spelling<'a>(
         .flat_map(|len| dictionary.words_with_len_iter(len));
 
     let pruned_words = words_to_search.filter_map(|word| {
-        let dist = edit_distance_min_alloc(misspelled_word, word, &mut buf_a, &mut buf_b);
+        let dist = edit_distance_min_alloc(&misspelled_word, word, &mut buf_a, &mut buf_b);
         let dist_lower = edit_distance_min_alloc(&misspelled_lower, word, &mut buf_a, &mut buf_b);
 
         if dist.min(dist_lower) <= max_edit_dist {
@@ -153,9 +157,26 @@ fn edit_distance(source: &[char], target: &[char]) -> u8 {
     edit_distance_min_alloc(source, target, &mut Vec::new(), &mut Vec::new())
 }
 
+/// Convert a given character sequence to the standard character set
+/// the dictionary is in.
+fn seq_to_normalized(seq: &[char]) -> Cow<'_, [char]> {
+    if seq.iter().any(|c| char_to_normalized(*c) != *c) {
+        Cow::Owned(seq.iter().copied().map(char_to_normalized).collect())
+    } else {
+        Cow::Borrowed(seq)
+    }
+}
+
+fn char_to_normalized(c: char) -> char {
+    match c {
+        '’' => '\'',
+        _ => c,
+    }
+}
+
 #[cfg(test)]
 mod tests {
-    use super::edit_distance;
+    use super::{edit_distance, seq_to_normalized};
 
     fn assert_edit_dist(source: &str, target: &str, expected: u8) {
         let source: Vec<_> = source.chars().collect();
@@ -163,6 +184,14 @@ mod tests {
 
         let dist = edit_distance(&source, &target);
         assert_eq!(dist, expected)
+    }
+
+    #[test]
+    fn normalizes_weve() {
+        let word = vec!['w', 'e', '’', 'v', 'e'];
+        let norm = seq_to_normalized(&word);
+
+        assert_eq!(norm.clone(), vec!['w', 'e', '\'', 'v', 'e'])
     }
 
     #[test]

@@ -1,10 +1,12 @@
+use std::borrow::Borrow;
+
 use hashbrown::HashSet;
 use once_cell::sync::Lazy;
 use smallvec::SmallVec;
 
 use super::{
     hunspell::{parse_default_attribute_list, parse_default_word_list},
-    DictWord,
+    seq_to_normalized, DictWord,
 };
 
 #[derive(Debug, Clone)]
@@ -76,8 +78,9 @@ impl Dictionary {
     }
 
     pub fn contains_word(&self, word: &[char]) -> bool {
-        let lowercase: SmallVec<_> = word.iter().flat_map(|c| c.to_lowercase()).collect();
+        let normalized = seq_to_normalized(word);
+        let lowercase: SmallVec<_> = normalized.iter().flat_map(|c| c.to_lowercase()).collect();
 
-        self.word_set.contains(word) || self.word_set.contains(&lowercase)
+        self.word_set.contains(normalized.as_ref()) || self.word_set.contains(&lowercase)
     }
 }
