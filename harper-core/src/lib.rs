@@ -12,7 +12,7 @@ pub use document::Document;
 pub use linting::LintSet;
 pub use linting::{Lint, LintKind, Linter, Suggestion};
 pub use span::Span;
-pub use spell::Dictionary;
+pub use spell::{Dictionary, FullDictionary, MergedDictionary};
 pub use token::{FatToken, Punctuation, Token, TokenKind, TokenStringExt};
 
 /// A utility function that removes overlapping lints in a vector,

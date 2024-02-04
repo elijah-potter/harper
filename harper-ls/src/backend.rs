@@ -1,8 +1,8 @@
-use std::collections::HashMap;
+use std::{collections::HashMap, sync::Arc};
 
 use harper_core::{
     parsers::{Markdown, Parser},
-    Dictionary, Document, LintSet, Linter,
+    Document, FullDictionary, LintSet, Linter,
 };
 use tokio::sync::Mutex;
 use tower_lsp::{
@@ -27,7 +27,7 @@ use crate::{
 
 pub struct Backend {
     client: Client,
-    linter: Mutex<LintSet>,
+    global_dictionary: Arc<FullDictionary>,
     files: Mutex<HashMap<Url, Document>>,
 }
 
@@ -51,15 +51,18 @@ impl Backend {
         files.insert(url.clone(), doc);
     }
 
+    fn create_linter(&self) -> LintSet {
+        LintSet::new().with_standard(self.global_dictionary.clone())
+    }
+
     async fn generate_code_actions(&self, url: &Url, range: Range) -> Result<Vec<CodeAction>> {
         let files = self.files.lock().await;
         let Some(document) = files.get(url) else {
             return Ok(vec![]);
         };
 
-        let mut linter = self.linter.lock().await;
+        let mut linter = self.create_linter();
         let mut lints = linter.lint(document);
-
         lints.sort_by_key(|l| l.priority);
 
         let source_chars = document.get_full_content();
@@ -77,12 +80,11 @@ impl Backend {
     }
 
     pub fn new(client: Client) -> Self {
-        let dictionary = Dictionary::create_from_curated();
-        let linter = Mutex::new(LintSet::new().with_standard(dictionary));
+        let dictionary = FullDictionary::create_from_curated();
 
         Self {
             client,
-            linter,
+            global_dictionary: dictionary.into(),
             files: Mutex::new(HashMap::new()),
         }
     }
@@ -94,7 +96,7 @@ impl Backend {
             return vec![];
         };
 
-        let mut linter = self.linter.lock().await;
+        let mut linter = self.create_linter();
         let lints = linter.lint(document);
 
         lints_to_diagnostics(document.get_full_content(), &lints)

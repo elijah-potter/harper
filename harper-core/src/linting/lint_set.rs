@@ -1,4 +1,4 @@
-use crate::{Dictionary, Document, Lint};
+use crate::{Dictionary, Document, FullDictionary, Lint};
 
 use super::{spaces::Spaces, Linter};
 use paste::paste;
@@ -9,11 +9,11 @@ use super::{
     unclosed_quotes::UnclosedQuotes, wrong_quotes::WrongQuotes,
 };
 
-pub struct LintSet {
-    pub(super) linters: Vec<Box<dyn Linter>>,
+pub struct LintSet<'a> {
+    pub(super) linters: Vec<Box<dyn Linter + 'a>>,
 }
 
-impl Linter for LintSet {
+impl<'a> Linter for LintSet<'a> {
     fn lint(&mut self, document: &Document) -> Vec<Lint> {
         let mut lints = Vec::new();
 
@@ -27,14 +27,14 @@ impl Linter for LintSet {
     }
 }
 
-impl LintSet {
+impl<'a> LintSet<'a> {
     pub fn new() -> Self {
         Self {
             linters: Vec::new(),
         }
     }
 
-    pub fn add_standard(&mut self, dictionary: Dictionary) -> &mut Self {
+    pub fn add_standard(&mut self, dictionary: impl Dictionary + 'a) -> &mut Self {
         self.add_repeated_words()
             .add_long_sentences()
             .add_unclosed_quotes()
@@ -45,23 +45,23 @@ impl LintSet {
         self
     }
 
-    pub fn with_standard(mut self, dictionary: Dictionary) -> Self {
+    pub fn with_standard(mut self, dictionary: impl Dictionary + 'a) -> Self {
         self.add_standard(dictionary);
         self
     }
 
-    pub fn add_spell_check(&mut self, dictionary: Dictionary) -> &mut Self {
+    pub fn add_spell_check(&mut self, dictionary: impl Dictionary + 'a) -> &mut Self {
         self.linters.push(Box::new(SpellCheck::new(dictionary)));
         self
     }
 
-    pub fn with_spell_check(mut self, dictionary: Dictionary) -> Self {
+    pub fn with_spell_check(mut self, dictionary: impl Dictionary + 'a) -> Self {
         self.add_spell_check(dictionary);
         self
     }
 }
 
-impl Default for LintSet {
+impl Default for LintSet<'_> {
     fn default() -> Self {
         Self::new()
     }
@@ -70,7 +70,7 @@ impl Default for LintSet {
 /// Create builder methods for the linters that do not take any arguments.
 macro_rules! create_simple_builder_methods {
     ($($linter:ident),*) => {
-        impl LintSet {
+        impl LintSet<'_> {
             paste! {
                 $(
                     #[doc = "Modifies self, adding the `" $linter "` linter to the set."]

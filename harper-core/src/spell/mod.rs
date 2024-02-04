@@ -4,9 +4,13 @@ use itertools::{Itertools, MinMaxResult};
 use smallvec::SmallVec;
 
 pub use self::dictionary::Dictionary;
+pub use self::full_dictionary::FullDictionary;
+pub use self::merged_dictionary::MergedDictionary;
 
 mod dictionary;
+mod full_dictionary;
 mod hunspell;
+mod merged_dictionary;
 
 /// A word from a dictionary or other similar structure.
 pub type DictWord = SmallVec<[char; 6]>;
@@ -18,7 +22,7 @@ pub fn suggest_correct_spelling<'a>(
     misspelled_word: &[char],
     result_limit: usize,
     max_edit_dist: u8,
-    dictionary: &'a Dictionary,
+    dictionary: &'a impl Dictionary,
 ) -> Vec<&'a [char]> {
     let misspelled_word = seq_to_normalized(misspelled_word);
 
@@ -104,7 +108,7 @@ pub fn suggest_correct_spelling_str(
     misspelled_word: impl AsRef<str>,
     result_limit: usize,
     max_edit_dist: u8,
-    dictionary: &Dictionary,
+    dictionary: &FullDictionary,
 ) -> Vec<String> {
     let chars: Vec<char> = misspelled_word.as_ref().chars().collect();
 

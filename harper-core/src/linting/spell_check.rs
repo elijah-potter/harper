@@ -1,20 +1,20 @@
 use hashbrown::HashMap;
 
 use super::{Lint, LintKind, Linter};
-use crate::{
-    document::Document,
-    spell::{suggest_correct_spelling, Dictionary},
-};
+use crate::{document::Document, spell::suggest_correct_spelling, Dictionary};
 
 use super::lint::Suggestion;
 
-pub struct SpellCheck {
-    dictionary: Dictionary,
+pub struct SpellCheck<T>
+where
+    T: Dictionary,
+{
+    dictionary: T,
     word_cache: HashMap<Vec<char>, Vec<Vec<char>>>,
 }
 
-impl SpellCheck {
-    pub fn new(dictionary: Dictionary) -> Self {
+impl<T: Dictionary> SpellCheck<T> {
+    pub fn new(dictionary: T) -> Self {
         Self {
             dictionary,
             word_cache: HashMap::new(),
@@ -22,7 +22,7 @@ impl SpellCheck {
     }
 }
 
-impl SpellCheck {
+impl<T: Dictionary> SpellCheck<T> {
     fn cached_suggest_correct_spelling(&mut self, word: &[char]) -> Vec<Vec<char>> {
         let word = word.to_vec();
 
@@ -38,7 +38,7 @@ impl SpellCheck {
     }
 }
 
-impl Linter for SpellCheck {
+impl<T: Dictionary> Linter for SpellCheck<T> {
     fn lint(&mut self, document: &Document) -> Vec<Lint> {
         let mut lints = Vec::new();
 
