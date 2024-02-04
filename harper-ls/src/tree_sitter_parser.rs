@@ -1,11 +1,14 @@
+use std::collections::HashSet;
+
 use harper_core::{
     parsers::{Markdown, Parser},
-    Span,
+    FullDictionary, Span,
 };
-use tree_sitter::{Language, TreeCursor};
+use tree_sitter::{Language, Node, Tree, TreeCursor};
 
 /// A Harper parser that wraps the standard [`Markdown`] parser that exclusively parses
 /// comments in any language supported by [`tree_sitter`].
+#[derive(Debug, Clone)]
 pub struct TreeSitterParser {
     language: Language,
 }
@@ -37,6 +40,72 @@ impl TreeSitterParser {
 
         Some(Self { language })
     }
+
+    fn parse_root(&self, text: &str) -> Option<Tree> {
+        let mut parser = tree_sitter::Parser::new();
+        parser.set_language(self.language).unwrap();
+
+        // TODO: Use incremental parsing
+        parser.parse(text, None)
+    }
+
+    pub fn create_ident_dict(&self, source: &[char]) -> Option<FullDictionary> {
+        let text: String = source.iter().collect();
+
+        // Byte-indexed
+        let mut ident_spans = Vec::new();
+
+        let tree = self.parse_root(&text)?;
+        Self::visit_nodes(
+            &mut tree.walk(),
+            &mut |node: &Node| match node.child_count() == 0 && node.kind().contains("ident") {
+                true => ident_spans.push(node.byte_range().into()),
+                false => (),
+            },
+        );
+
+        byte_spans_to_char_spans(&mut ident_spans, &text);
+
+        let mut idents = HashSet::new();
+
+        for span in ident_spans {
+            idents.insert(span.get_content(source));
+        }
+
+        let idents: Vec<_> = idents.into_iter().collect();
+
+        let mut dictionary = FullDictionary::new();
+        dictionary.append_words(idents.as_slice());
+
+        Some(dictionary)
+    }
+
+    /// Visits the children of a TreeSitter node, searching for comments.
+    ///
+    /// Returns the BYTE spans of the comment position.
+    fn extract_comments(cursor: &mut TreeCursor, comments: &mut Vec<Span>) {
+        Self::visit_nodes(cursor, &mut |node: &Node| {
+            if node.kind().contains("comment") {
+                comments.push(node.byte_range().into());
+            }
+        });
+    }
+
+    fn visit_nodes(cursor: &mut TreeCursor, mut visit: &mut impl FnMut(&Node)) {
+        if !cursor.goto_first_child() {
+            return;
+        }
+
+        while cursor.goto_next_sibling() {
+            let node = cursor.node();
+
+            visit(&node);
+
+            Self::visit_nodes(cursor, visit);
+        }
+
+        cursor.goto_parent();
+    }
 }
 
 impl Parser for TreeSitterParser {
@@ -44,17 +113,14 @@ impl Parser for TreeSitterParser {
         let text: String = source.iter().collect();
 
         let mut markdown_parser = Markdown;
-        let mut parser = tree_sitter::Parser::new();
-        parser.set_language(self.language).unwrap();
 
-        // TODO: Use incremental parsing
-        let Some(root) = parser.parse(&text, None) else {
+        let Some(root) = self.parse_root(&text) else {
             return vec![];
         };
 
         let mut comments_spans = Vec::new();
 
-        extract_comments(&mut root.walk(), &mut comments_spans);
+        Self::extract_comments(&mut root.walk(), &mut comments_spans);
         byte_spans_to_char_spans(&mut comments_spans, &text);
 
         let mut tokens = Vec::new();
@@ -106,7 +172,7 @@ fn is_comment_character(c: char) -> bool {
 }
 
 /// Converts a set of byte-indexed [`Span`]s to char-index Spans, in-place.
-/// NOTE: Will sort the given array by their [`Span::start`].
+/// NOTE: Will sort the given slice by their [`Span::start`].
 ///
 /// Assumes that none of the Spans are overlapping.
 fn byte_spans_to_char_spans(byte_spans: &mut [Span], source: &str) {
@@ -126,25 +192,4 @@ fn byte_spans_to_char_spans(byte_spans: &mut [Span], source: &str) {
 
         last_byte_pos = byte_span.end;
     })
-}
-
-/// Visits the children of a TreeSitter node, searching for comments.
-///
-/// Returns the BYTE spans of the comment position.
-fn extract_comments(cursor: &mut TreeCursor, comments: &mut Vec<Span>) {
-    if !cursor.goto_first_child() {
-        return;
-    }
-
-    while cursor.goto_next_sibling() {
-        let node = cursor.node();
-
-        if node.kind().contains("comment") {
-            comments.push(node.byte_range().into());
-        }
-
-        extract_comments(cursor, comments);
-    }
-
-    cursor.goto_parent();
 }

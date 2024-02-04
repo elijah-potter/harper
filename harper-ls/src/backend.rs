@@ -1,8 +1,8 @@
-use std::{collections::HashMap, sync::Arc};
+use std::{collections::HashMap, process::id, sync::Arc};
 
 use harper_core::{
     parsers::{Markdown, Parser},
-    Document, FullDictionary, LintSet, Linter,
+    Document, FullDictionary, LintSet, Linter, MergedDictionary,
 };
 use tokio::sync::Mutex;
 use tower_lsp::{
@@ -29,6 +29,8 @@ pub struct Backend {
     client: Client,
     global_dictionary: Arc<FullDictionary>,
     files: Mutex<HashMap<Url, Document>>,
+    /// The identifiers extracted from each file by Tree-sitter.
+    ident_dicts: Mutex<HashMap<Url, Arc<FullDictionary>>>,
 }
 
 impl Backend {
@@ -38,21 +40,38 @@ impl Backend {
     }
 
     async fn update_document(&self, url: &Url, text: &str) {
-        let mut parser: Box<dyn Parser> = Box::new(Markdown);
+        let doc = if let Some(extension) = url.to_file_path().unwrap().extension() {
+            if let Some(ts_parser) =
+                TreeSitterParser::new_from_extension(&extension.to_string_lossy())
+            {
+                let doc = Document::new(text, Box::new(ts_parser.clone()));
 
-        if let Some(extension) = url.to_file_path().unwrap().extension() {
-            parser = TreeSitterParser::new_from_extension(&extension.to_string_lossy())
-                .map::<Box<dyn Parser>, _>(|v| Box::new(v))
-                .unwrap_or(Box::new(Markdown));
-        }
+                if let Some(new_dict) = ts_parser.create_ident_dict(doc.get_full_content()) {
+                    let mut ident_dicts = self.ident_dicts.lock().await;
+                    ident_dicts.insert(url.clone(), new_dict.into());
+                }
 
-        let doc = Document::new(text, parser);
+                doc
+            } else {
+                Document::new(text, Box::new(Markdown))
+            }
+        } else {
+            Document::new(text, Box::new(Markdown))
+        };
+
         let mut files = self.files.lock().await;
         files.insert(url.clone(), doc);
     }
 
-    fn create_linter(&self) -> LintSet {
-        LintSet::new().with_standard(self.global_dictionary.clone())
+    async fn create_linter(&self, url: &Url) -> LintSet {
+        let mut dictionary = MergedDictionary::new();
+        dictionary.add_dictionary(self.global_dictionary.clone());
+
+        if let Some(ident_dict) = self.ident_dicts.lock().await.get(url) {
+            dictionary.add_dictionary(ident_dict.clone());
+        };
+
+        LintSet::new().with_standard(dictionary)
     }
 
     async fn generate_code_actions(&self, url: &Url, range: Range) -> Result<Vec<CodeAction>> {
@@ -61,7 +80,7 @@ impl Backend {
             return Ok(vec![]);
         };
 
-        let mut linter = self.create_linter();
+        let mut linter = self.create_linter(url).await;
         let mut lints = linter.lint(document);
         lints.sort_by_key(|l| l.priority);
 
@@ -86,6 +105,7 @@ impl Backend {
             client,
             global_dictionary: dictionary.into(),
             files: Mutex::new(HashMap::new()),
+            ident_dicts: Mutex::new(HashMap::new()),
         }
     }
 
@@ -96,7 +116,7 @@ impl Backend {
             return vec![];
         };
 
-        let mut linter = self.create_linter();
+        let mut linter = self.create_linter(url).await;
         let lints = linter.lint(document);
 
         lints_to_diagnostics(document.get_full_content(), &lints)

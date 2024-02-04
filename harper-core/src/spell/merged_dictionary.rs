@@ -22,8 +22,17 @@ where
         }
     }
 
-    pub fn add_dictionary(&mut self, dictionary: impl AsRef<Arc<T>>) {
-        self.children.push(dictionary.as_ref().clone());
+    pub fn add_dictionary(&mut self, dictionary: Arc<T>) {
+        self.children.push(dictionary.clone());
+    }
+}
+
+impl<T> Default for MergedDictionary<T>
+where
+    T: Dictionary + Clone,
+{
+    fn default() -> Self {
+        Self::new()
     }
 }
 

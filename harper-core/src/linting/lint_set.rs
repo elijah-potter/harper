@@ -1,4 +1,4 @@
-use crate::{Dictionary, Document, FullDictionary, Lint};
+use crate::{Dictionary, Document, Lint};
 
 use super::{spaces::Spaces, Linter};
 use paste::paste;

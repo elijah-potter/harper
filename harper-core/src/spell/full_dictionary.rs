@@ -1,6 +1,6 @@
 use hashbrown::HashSet;
 use once_cell::sync::Lazy;
-use smallvec::SmallVec;
+use smallvec::{SmallVec, ToSmallVec};
 
 use super::{
     dictionary::Dictionary,
@@ -44,6 +44,14 @@ fn uncached_inner_new() -> FullDictionary {
 static DICT: Lazy<FullDictionary> = Lazy::new(uncached_inner_new);
 
 impl FullDictionary {
+    pub fn new() -> Self {
+        Self {
+            words: Vec::new(),
+            word_len_starts: Vec::new(),
+            word_set: HashSet::new(),
+        }
+    }
+
     /// Create a dictionary from the curated Hunspell dictionary included
     /// in the Harper binary.
     pub fn create_from_curated() -> Self {
@@ -53,9 +61,9 @@ impl FullDictionary {
     /// Appends words to the dictionary.
     /// It is significantly faster to append many words with one call than many
     /// distinct calls to this function.
-    pub fn append_words(&mut self, words: &mut [DictWord]) {
-        self.words.extend(words.iter().cloned());
-        self.word_set.extend(words.iter().cloned());
+    pub fn append_words(&mut self, words: &[&[char]]) {
+        self.words.extend(words.iter().map(|v| v.to_smallvec()));
+        self.word_set.extend(words.iter().map(|v| v.to_smallvec()));
         self.word_len_starts = Self::create_len_starts(&mut self.words);
     }
 
@@ -73,6 +81,12 @@ impl FullDictionary {
         }
 
         word_len_starts
+    }
+}
+
+impl Default for FullDictionary {
+    fn default() -> Self {
+        Self::new()
     }
 }
 
