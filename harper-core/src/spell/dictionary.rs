@@ -33,19 +33,9 @@ fn uncached_inner_new() -> Dictionary {
     let words = attr_list.expand_marked_words(word_list).unwrap();
     let mut words: Vec<DictWord> = words.into_iter().collect();
 
-    words.sort_by_key(|a| a.len());
-
-    let mut word_len_starts = vec![0, 0];
-
-    for (index, len) in words.iter().map(SmallVec::len).enumerate() {
-        if word_len_starts.len() == len {
-            word_len_starts.push(index);
-        }
-    }
-
     Dictionary {
         word_set: HashSet::from_iter(words.iter().cloned()),
-        word_len_starts,
+        word_len_starts: Dictionary::create_len_starts(&mut words),
         words,
     }
 }
@@ -53,8 +43,35 @@ fn uncached_inner_new() -> Dictionary {
 static DICT: Lazy<Dictionary> = Lazy::new(uncached_inner_new);
 
 impl Dictionary {
-    pub fn new() -> Self {
+    /// Create a dictionary from the curated Hunspell dictionary included
+    /// in the Harper binary.
+    pub fn create_from_curated() -> Self {
         DICT.clone()
+    }
+
+    /// Appends words to the dictionary.
+    /// It is significantly faster to append many words with one call than many
+    /// distinct calls to this function.
+    pub fn append_words(&mut self, words: &mut [DictWord]) {
+        self.words.extend(words.iter().cloned());
+        self.word_set.extend(words.iter().cloned());
+        self.word_len_starts = Self::create_len_starts(&mut self.words);
+    }
+
+    /// Create a lookup table for finding words of a specific length in a word list.
+    /// NOTE: This function will sort the original word list by its length.
+    /// If the word list's order is changed after creating the lookup, it will no longer be valid.
+    fn create_len_starts(words: &mut [DictWord]) -> Vec<usize> {
+        words.sort_by_key(|a| a.len());
+        let mut word_len_starts = vec![0, 0];
+
+        for (index, len) in words.iter().map(SmallVec::len).enumerate() {
+            if word_len_starts.len() == len {
+                word_len_starts.push(index);
+            }
+        }
+
+        word_len_starts
     }
 
     /// Iterate over all the words in the dictionary of a given length

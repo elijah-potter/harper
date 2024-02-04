@@ -93,6 +93,7 @@ pub struct Matcher {
 impl Matcher {
     pub fn new() -> Self {
         let mut triggers = pt! {
+            "wordlist" => "word list",
             "the","challenged" => "that challenged",
             "stdin" => "standard input",
             "stdout" => "standard output",

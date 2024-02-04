@@ -92,7 +92,7 @@ async fn lint(Json(payload): Json<LintRequest>) -> (StatusCode, Json<LintRespons
 
     let document = Document::new_markdown(&text);
 
-    let dictionary = Dictionary::new();
+    let dictionary = Dictionary::create_from_curated();
     let mut linter = LintSet::new().with_standard(dictionary);
     let lints = linter.lint(&document);
 

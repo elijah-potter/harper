@@ -77,7 +77,7 @@ impl Backend {
     }
 
     pub fn new(client: Client) -> Self {
-        let dictionary = Dictionary::new();
+        let dictionary = Dictionary::create_from_curated();
         let linter = Mutex::new(LintSet::new().with_standard(dictionary));
 
         Self {

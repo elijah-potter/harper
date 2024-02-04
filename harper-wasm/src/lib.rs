@@ -6,7 +6,7 @@ use serde::Serialize;
 use wasm_bindgen::{prelude::wasm_bindgen, JsValue};
 
 static LINTER: Lazy<Mutex<LintSet>> =
-    Lazy::new(|| Mutex::new(LintSet::new().with_standard(Dictionary::new())));
+    Lazy::new(|| Mutex::new(LintSet::new().with_standard(Dictionary::create_from_curated())));
 
 /// Create the serializer that preserves types across the JavaScript barrier
 fn glue_serializer() -> serde_wasm_bindgen::Serializer {
