@@ -1,9 +1,6 @@
-use std::{collections::HashMap, process::id, sync::Arc};
+use std::{collections::HashMap, sync::Arc};
 
-use harper_core::{
-    parsers::{Markdown, Parser},
-    Document, FullDictionary, LintSet, Linter, MergedDictionary,
-};
+use harper_core::{parsers::Markdown, Document, FullDictionary, LintSet, Linter, MergedDictionary};
 use tokio::sync::Mutex;
 use tower_lsp::{
     jsonrpc::Result,

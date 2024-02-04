@@ -56,13 +56,11 @@ impl TreeSitterParser {
         let mut ident_spans = Vec::new();
 
         let tree = self.parse_root(&text)?;
-        Self::visit_nodes(
-            &mut tree.walk(),
-            &mut |node: &Node| match node.child_count() == 0 && node.kind().contains("ident") {
-                true => ident_spans.push(node.byte_range().into()),
-                false => (),
-            },
-        );
+        Self::visit_nodes(&mut tree.walk(), &mut |node: &Node| {
+            if node.child_count() == 0 && node.kind().contains("ident") {
+                ident_spans.push(node.byte_range().into())
+            }
+        });
 
         byte_spans_to_char_spans(&mut ident_spans, &text);
 

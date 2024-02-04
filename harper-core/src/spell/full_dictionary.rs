@@ -75,7 +75,8 @@ impl FullDictionary {
         let mut word_len_starts = vec![0, 0];
 
         for (index, len) in words.iter().map(SmallVec::len).enumerate() {
-            if word_len_starts.len() == len {
+            if word_len_starts.len() <= len {
+                word_len_starts.resize(len, index);
                 word_len_starts.push(index);
             }
         }

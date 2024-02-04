@@ -46,7 +46,7 @@ where
                 return true;
             }
         }
-        return false;
+        false
     }
 
     fn words_iter(&self) -> impl Iterator<Item = &'_ [char]> {
