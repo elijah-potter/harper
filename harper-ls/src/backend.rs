@@ -32,7 +32,10 @@ pub struct Backend {
 
 impl Backend {
     async fn update_document_from_file(&self, url: &Url) {
-        let content = tokio::fs::read_to_string(url.path()).await.unwrap();
+        let Ok(content) = tokio::fs::read_to_string(url.path()).await else {
+            // TODO: Proper error handling here.
+            return;
+        };
         self.update_document(url, &content).await;
     }
 
