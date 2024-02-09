@@ -52,7 +52,6 @@ impl Default for RepeatedWords {
 }
 
 impl Linter for RepeatedWords {
-    /// A linter that checks to make sure the first word of each sentence is capitalized.
     fn lint(&mut self, document: &Document) -> Vec<Lint> {
         let mut lints = Vec::new();
 
@@ -68,6 +67,10 @@ impl Linter for RepeatedWords {
 
                 if self.set.contains(word_a) && word_a == word_b {
                     let intervening_tokens = &sentence[idx_a + 1..*idx_b];
+
+                    if intervening_tokens.iter().any(|t| !t.kind.is_whitespace()) {
+                        continue;
+                    }
 
                     // Detect and remove the whitespace between the repetitions.
                     let remove_end = tok_b.span.end;

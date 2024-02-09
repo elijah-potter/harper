@@ -2,6 +2,9 @@
     <h1>Harper</h1>
 </div>
 
+[![Build](https://github.com/chilipepperhott/harper/actions/workflows/build.yml/badge.svg)](https://github.com/chilipepperhott/harper/actions/workflows/build.yml)
+[![Rust Tests](https://github.com/chilipepperhott/harper/actions/workflows/rust-tests.yml/badge.svg)](https://github.com/chilipepperhott/harper/actions/workflows/rust-tests.yml)
+
 Harper is a an English grammar checker designed to be _just right._
 I created it after years of dealing with the shortcomings of the competition.
 
@@ -23,11 +26,7 @@ Harper is even small enough to load via [WebAssembly.](https://harper.elijahpott
 
 ## Installation
 
-Binary releases are coming soon, so if you are looking for a single file download, you'll have to wait.
+If you want to use Harper on your machine, you will want to look at the [documentation for
+`harper-ls`](./harper-ls/README.md), the Language Server Protocol implementation.
 
-However, if you happen to have [Rust installed](https://www.rust-lang.org/tools/install), you're in luck!
-To install `harper-ls`, the variant of Harper for text editors like Neovim, simply run:
 
-```bash
-cargo install harper-ls
-```
