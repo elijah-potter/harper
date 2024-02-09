@@ -11313,6 +11313,7 @@ adversary/SM
 adverse/PRYT
 adverseness/M
 adversity/SM
+adversive
 advert/SMDG
 advertise/LZGDRS
 advertised/U
@@ -28801,7 +28802,7 @@ invalid/GMDYS
 invalidism/M
 invaluable
 invaluably
-invariant
+invariant/S
 invasion/MS
 invasive
 invective/M
@@ -49593,9 +49594,14 @@ backend
 frontend
 automata
 Grammarly/M
+Raytheon/M
 LanguageTool/M
 WebAssembly/M
 Neovim/M
 quartile/S
 autocomplete/MS
 GPU/S
+codebase/S
+LIDAR
+LiDAR
+LADAR

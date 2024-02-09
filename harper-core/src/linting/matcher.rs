@@ -32,10 +32,17 @@ macro_rules! vecword {
 }
 
 macro_rules! pt {
+
     ($str:literal) => {
         PatternToken {
             kind: TokenKind::Word,
             content: Some($str.chars().collect()),
+        }
+    };
+    (Word) => {
+        PatternToken {
+            kind: TokenKind::Word,
+            content: None,
         }
     };
     (Period) => {
@@ -92,7 +99,18 @@ pub struct Matcher {
 
 impl Matcher {
     pub fn new() -> Self {
+        // This match list needs to be automatically expanded instead of explicitly defined
+        // like it is now.
         let mut triggers = pt! {
+            "united nations" => "United Nations",
+            "mins" => "minutes",
+            "min" => "minute",
+            "secs" => "seconds",
+            "sec" => "second",
+            "hrs" => "hours",
+            "hr" => "hour",
+            "w/o" => "without",
+            "w/" => "with",
             "wordlist" => "word list",
             "the","challenged" => "that challenged",
             "stdin" => "standard input",
@@ -111,6 +129,7 @@ impl Matcher {
             "north","america" => "North America",
             "fatal","outcome" => "death",
             "geiger","counter" => "Geiger counter",
+            "Geiger","Counter" => "Geiger counter",
             "veterans","day" => "Veterans Day",
             "presidents","day" => "Presidents' Day",
             "president's","day" => "Presidents' Day",
@@ -163,6 +182,25 @@ impl Matcher {
             "al","though" => "although",
             "Al","though" => "although"
         };
+
+        // TODO: Improve the description for this lint specifically.
+        // We need to be more explicit that we are replacing with an Em dash
+        triggers.push(Rule {
+            pattern: vec![pt!(Hyphen), pt!(Hyphen), pt!(Hyphen)],
+            replace_with: vecword!("—"),
+        });
+
+        // Same goes for this En dash
+        triggers.push(Rule {
+            pattern: vec![pt!(Hyphen), pt!(Hyphen), pt!(Hyphen)],
+            replace_with: vecword!("–"),
+        });
+
+        // An this ellipsis
+        triggers.push(Rule {
+            pattern: vec![pt!(Period), pt!(Period), pt!(Period)],
+            replace_with: vecword!("…"),
+        });
 
         triggers.push(Rule {
             pattern: vec![pt!("break"), pt!(Hyphen), pt!("up")],

@@ -140,6 +140,10 @@ fn lex_punctuation(source: &[char]) -> Option<FoundToken> {
         ')' => CloseRound,
         '#' => Hash,
         '*' => Star,
+        '&' => Ampersand,
+        '–' => EnDash,
+        '—' => EmDash,
+        '…' => Ellipsis,
         _ => return None,
     };
 

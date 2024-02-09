@@ -71,6 +71,14 @@ impl TokenKind {
 #[derive(Debug, Is, Clone, Copy, Serialize, Deserialize, PartialEq, Eq, PartialOrd)]
 #[serde(tag = "kind")]
 pub enum Punctuation {
+    /// `…`
+    Ellipsis,
+    /// `–`
+    EnDash,
+    /// `—`
+    EmDash,
+    /// `&`
+    Ampersand,
     /// `.`
     Period,
     /// `!`
