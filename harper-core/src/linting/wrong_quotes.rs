@@ -1,4 +1,4 @@
-use crate::{document::Document, Suggestion, Token};
+use crate::{document::Document, Suggestion, Token, TokenStringExt};
 
 use super::{Lint, Linter};
 

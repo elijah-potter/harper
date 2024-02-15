@@ -12,7 +12,7 @@ Grammarly was too expensive and too overbearing.
 It's suggestions lacked context, and were often just plain _wrong_.
 Not to mention: it's a privacy nightmare.
 Everything you write with Grammarly is sent to their servers.
-Their privacy policy claims they don't sell the data, but that doesn't mean they don't use it to train large language models god knows what else.
+Their privacy policy claims they don't sell the data, but that doesn't mean they don't use it to train large language models and god knows what else.
 Not only that, but the round-trip-time of the network request makes revising your work all the more tedious.
 
 LanguageTool is great, if you have gigabytes of RAM to spare and are willing to download the ~16GB n-gram dataset.
@@ -28,5 +28,4 @@ Harper is even small enough to load via [WebAssembly.](https://harper.elijahpott
 
 If you want to use Harper on your machine, you will want to look at the [documentation for
 `harper-ls`](./harper-ls/README.md), the Language Server Protocol implementation.
-
 

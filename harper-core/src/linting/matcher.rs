@@ -32,7 +32,6 @@ macro_rules! vecword {
 }
 
 macro_rules! pt {
-
     ($str:literal) => {
         PatternToken {
             kind: TokenKind::Word,
@@ -102,6 +101,10 @@ impl Matcher {
         // This match list needs to be automatically expanded instead of explicitly defined
         // like it is now.
         let mut triggers = pt! {
+            "and","also" => "and",
+            "todo" => "to-do",
+            "To-Do" => "To-do",
+            "performing","this" => "perform this",
             "united nations" => "United Nations",
             "mins" => "minutes",
             "min" => "minute",
@@ -180,7 +183,9 @@ impl Matcher {
             "all","though" => "although",
             "All","though" => "although",
             "al","though" => "although",
-            "Al","though" => "although"
+            "Al","though" => "although",
+            "an","this" => "and this",
+            "break","up" => "break-up"
         };
 
         // TODO: Improve the description for this lint specifically.
@@ -192,19 +197,14 @@ impl Matcher {
 
         // Same goes for this En dash
         triggers.push(Rule {
-            pattern: vec![pt!(Hyphen), pt!(Hyphen), pt!(Hyphen)],
+            pattern: vec![pt!(Hyphen), pt!(Hyphen)],
             replace_with: vecword!("–"),
         });
 
-        // An this ellipsis
+        // And this ellipsis
         triggers.push(Rule {
             pattern: vec![pt!(Period), pt!(Period), pt!(Period)],
             replace_with: vecword!("…"),
-        });
-
-        triggers.push(Rule {
-            pattern: vec![pt!("break"), pt!(Hyphen), pt!("up")],
-            replace_with: vecword!("break-up"),
         });
 
         triggers.push(Rule {
@@ -238,9 +238,11 @@ impl Linter for Matcher {
     fn lint(&mut self, document: &Document) -> Vec<Lint> {
         let mut lints = Vec::new();
 
+        let mut match_tokens = Vec::new();
+
         for (index, _) in document.tokens().enumerate() {
             for trigger in &self.triggers {
-                let mut match_tokens = Vec::new();
+                match_tokens.clear();
 
                 for (p_index, pattern) in trigger.pattern.iter().enumerate() {
                     let Some(token) = document.get_token(index + p_index) else {
@@ -291,6 +293,14 @@ mod tests {
         let document = Document::new_plain_english("There fore.");
         let mut matcher = Matcher::new();
         let lints = matcher.lint(&document);
-        assert!(lints.len() == 1)
+        assert!(lints.len() == 1);
+    }
+
+    #[test]
+    fn matches_ellipsis() {
+        let document = Document::new_plain_english("...");
+        let mut matcher = Matcher::new();
+        let lints = matcher.lint(&document);
+        assert!(lints.len() == 1);
     }
 }

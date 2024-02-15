@@ -33,6 +33,17 @@ fn lint_demo(bencher: Bencher) {
     });
 }
 
+#[divan::bench]
+fn lint_demo_uncached(bencher: Bencher) {
+    let dictionary = FullDictionary::create_from_curated();
+    bencher.bench_local(|| {
+        let mut lint_set = LintSet::new().with_standard(dictionary.clone());
+        let document = Document::new_markdown(black_box(DEMO));
+
+        lint_set.lint(&document);
+    });
+}
+
 fn main() {
     divan::main();
 }

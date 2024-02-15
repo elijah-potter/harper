@@ -122,6 +122,7 @@ pub fn suggest_correct_spelling_str(
 // This is accomplished via a memory-optimized Wagner-Fischer algorithm
 //
 // This variant avoids allocation if you already have buffers.
+#[inline]
 fn edit_distance_min_alloc(
     source: &[char],
     target: &[char],

@@ -29,10 +29,20 @@ impl<T: Dictionary> SpellCheck<T> {
         self.word_cache
             .entry(word.clone())
             .or_insert_with(|| {
-                suggest_correct_spelling(&word, 100, 2, &self.dictionary)
-                    .into_iter()
-                    .map(|v| v.to_vec())
-                    .collect()
+                // Back off until we find a match.
+                let mut suggestions = Vec::new();
+                let mut dist = 2;
+
+                while suggestions.is_empty() && dist < 5 {
+                    suggestions = suggest_correct_spelling(&word, 100, dist, &self.dictionary)
+                        .into_iter()
+                        .map(|v| v.to_vec())
+                        .collect();
+
+                    dist += 1;
+                }
+
+                suggestions
             })
             .clone()
     }

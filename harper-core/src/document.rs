@@ -3,6 +3,7 @@ use std::fmt::Display;
 use itertools::Itertools;
 
 use crate::parsers::{Markdown, Parser, PlainEnglish};
+use crate::TokenStringExt;
 use crate::{
     linting::Suggestion,
     span::Span,
@@ -46,114 +47,8 @@ impl Document {
     /// Should be run after every change to the underlying [`Self::source`].
     fn parse(&mut self) {
         self.tokens = self.parser.parse(&self.source);
-
         self.condense_contractions();
-        // Since quote matches depend on token indices.
         self.match_quotes();
-    }
-
-    pub fn iter_quote_indices(&self) -> impl Iterator<Item = usize> + '_ {
-        self.tokens.iter().enumerate().filter_map(|(idx, token)| {
-            if let TokenKind::Punctuation(Punctuation::Quote(_)) = &token.kind {
-                Some(idx)
-            } else {
-                None
-            }
-        })
-    }
-
-    pub fn iter_quotes(&self) -> impl Iterator<Item = Token> + '_ {
-        self.iter_quote_indices().map(|idx| self.tokens[idx])
-    }
-
-    /// Searches for quotation marks and fills the [`Punctuation::Quote::twin_loc`] field.
-    /// This is on a best effort basis.
-    ///
-    /// Current algorithm is very basic and could use some work.
-    fn match_quotes(&mut self) {
-        let quote_indices: Vec<usize> = self.iter_quote_indices().collect();
-
-        for i in 0..quote_indices.len() / 2 {
-            let a_i = quote_indices[i * 2];
-            let b_i = quote_indices[i * 2 + 1];
-
-            {
-                let a = self.tokens[a_i].kind.as_mut_quote().unwrap();
-                a.twin_loc = Some(b_i);
-            }
-
-            {
-                let b = self.tokens[b_i].kind.as_mut_quote().unwrap();
-                b.twin_loc = Some(a_i);
-            }
-        }
-    }
-
-    /// Searches for contractions and condenses them down into single tokens
-    fn condense_contractions(&mut self) {
-        if self.tokens.len() < 3 {
-            return;
-        }
-
-        // Indices of the three token stretches we are going to condense.
-        let mut replace_starts = Vec::new();
-
-        for idx in 0..self.tokens.len() - 2 {
-            let a = self.tokens[idx];
-            let b = self.tokens[idx + 1];
-            let c = self.tokens[idx + 2];
-
-            if matches!(
-                (a.kind, b.kind, c.kind),
-                (
-                    TokenKind::Word,
-                    TokenKind::Punctuation(Punctuation::Apostrophe),
-                    TokenKind::Word
-                )
-            ) {
-                // Ensure there is no overlapping between replacements
-                let should_replace = if let Some(last_idx) = replace_starts.last() {
-                    *last_idx < idx - 2
-                } else {
-                    true
-                };
-
-                if should_replace {
-                    replace_starts.push(idx);
-                    self.tokens[idx].span.end = c.span.end;
-                }
-            }
-        }
-
-        // Trim
-        let old = self.tokens.clone();
-        self.tokens.clear();
-
-        // Keep first chunk.
-        self.tokens.extend_from_slice(
-            &old[0..replace_starts
-                .first()
-                .copied()
-                .unwrap_or(replace_starts.len())],
-        );
-
-        let mut iter = replace_starts.iter().peekable();
-
-        while let (Some(a_idx), b) = (iter.next(), iter.peek()) {
-            self.tokens.push(old[*a_idx]);
-
-            if let Some(b_idx) = b {
-                self.tokens.extend_from_slice(&old[a_idx + 3..**b_idx]);
-            }
-        }
-
-        // Keep last chunk.
-        self.tokens.extend_from_slice(
-            &old[replace_starts
-                .last()
-                .map(|v| v + 3)
-                .unwrap_or(replace_starts.len())..],
-        )
     }
 
     /// Defensively attempt to grab a specific token.
@@ -263,6 +158,96 @@ impl Document {
 
         self.parse();
     }
+
+    /// Searches for quotation marks and fills the [`Punctuation::Quote::twin_loc`] field.
+    /// This is on a best effort basis.
+    ///
+    /// Current algorithm is very basic and could use some work.
+    fn match_quotes(&mut self) {
+        let quote_indices: Vec<usize> = self.tokens.iter_quote_indices().collect();
+
+        for i in 0..quote_indices.len() / 2 {
+            let a_i = quote_indices[i * 2];
+            let b_i = quote_indices[i * 2 + 1];
+
+            {
+                let a = self.tokens[a_i].kind.as_mut_quote().unwrap();
+                a.twin_loc = Some(b_i);
+            }
+
+            {
+                let b = self.tokens[b_i].kind.as_mut_quote().unwrap();
+                b.twin_loc = Some(a_i);
+            }
+        }
+    }
+
+    /// Searches for contractions and condenses them down into single self.tokens
+    fn condense_contractions(&mut self) {
+        if self.tokens.len() < 3 {
+            return;
+        }
+
+        // Indices of the three token stretches we are going to condense.
+        let mut replace_starts = Vec::new();
+
+        for idx in 0..self.tokens.len() - 2 {
+            let a = self.tokens[idx];
+            let b = self.tokens[idx + 1];
+            let c = self.tokens[idx + 2];
+
+            if matches!(
+                (a.kind, b.kind, c.kind),
+                (
+                    TokenKind::Word,
+                    TokenKind::Punctuation(Punctuation::Apostrophe),
+                    TokenKind::Word
+                )
+            ) {
+                // Ensure there is no overlapping between replacements
+                let should_replace = if let Some(last_idx) = replace_starts.last() {
+                    *last_idx < idx - 2
+                } else {
+                    true
+                };
+
+                if should_replace {
+                    replace_starts.push(idx);
+                    self.tokens[idx].span.end = c.span.end;
+                }
+            }
+        }
+
+        // Trim
+        let old = self.tokens.clone();
+        self.tokens.clear();
+
+        // Keep first chunk.
+        self.tokens.extend_from_slice(
+            &old[0..replace_starts
+                .first()
+                .copied()
+                .unwrap_or(replace_starts.len())],
+        );
+
+        let mut iter = replace_starts.iter().peekable();
+
+        while let (Some(a_idx), b) = (iter.next(), iter.peek()) {
+            self.tokens.push(old[*a_idx]);
+
+            if let Some(b_idx) = b {
+                self.tokens.extend_from_slice(&old[a_idx + 3..**b_idx]);
+            }
+        }
+
+        // Keep last chunk.
+        self.tokens.extend_from_slice(
+            &old[replace_starts
+                .last()
+                .map(|v| v + 3)
+                .unwrap_or(replace_starts.len())..],
+        )
+    }
 }
 
 impl Display for Document {
@@ -272,6 +257,56 @@ impl Display for Document {
         }
 
         Ok(())
+    }
+}
+
+impl TokenStringExt for Document {
+    fn first_word(&self) -> Option<Token> {
+        self.tokens.first_word()
+    }
+
+    fn first_sentence_word(&self) -> Option<Token> {
+        self.tokens.first_sentence_word()
+    }
+
+    fn first_non_whitespace(&self) -> Option<Token> {
+        self.tokens.first_non_whitespace()
+    }
+
+    fn iter_word_indices(&self) -> impl Iterator<Item = usize> + '_ {
+        self.tokens.iter_word_indices()
+    }
+
+    fn iter_words(&self) -> impl Iterator<Item = &Token> + '_ {
+        self.tokens.iter_words()
+    }
+
+    fn iter_space_indices(&self) -> impl Iterator<Item = usize> + '_ {
+        self.tokens.iter_space_indices()
+    }
+
+    fn iter_spaces(&self) -> impl Iterator<Item = &Token> + '_ {
+        self.tokens.iter_spaces()
+    }
+
+    fn iter_apostrophe_indices(&self) -> impl Iterator<Item = usize> + '_ {
+        self.tokens.iter_apostrophe_indices()
+    }
+
+    fn iter_apostrophes(&self) -> impl Iterator<Item = &Token> + '_ {
+        self.tokens.iter_apostrophes()
+    }
+
+    fn span(&self) -> Option<Span> {
+        self.tokens.span()
+    }
+
+    fn iter_quote_indices(&self) -> impl Iterator<Item = usize> + '_ {
+        self.tokens.iter_quote_indices()
+    }
+
+    fn iter_quotes(&self) -> impl Iterator<Item = Token> + '_ {
+        self.tokens.iter_quotes()
     }
 }
 
@@ -296,14 +331,35 @@ mod tests {
         token::TokenStringExt,
     };
 
+    #[test]
+    fn parses_sentences_correctly() {
+        let text = "There were three little pigs. They built three little homes.";
+        let document = Document::new(text, Box::new(PlainEnglish));
+
+        let mut sentence_strs = vec![];
+
+        for sentence in document.sentences() {
+            if let Some(span) = sentence.span() {
+                sentence_strs.push(document.get_span_content_str(span));
+            }
+        }
+
+        assert_eq!(
+            sentence_strs,
+            vec![
+                "There were three little pigs.",
+                " They built three little homes."
+            ]
+        )
+    }
+
     fn assert_condensed_contractions(text: &str, final_tok_count: usize) {
-        let mut document = Document::new(text, Box::new(PlainEnglish));
-        document.condense_contractions();
+        let document = Document::new(text, Box::new(PlainEnglish));
 
         assert_eq!(document.tokens.len(), final_tok_count);
 
-        let mut document = Document::new(text, Box::new(Markdown));
-        document.condense_contractions();
+        let mut markdown_parser = Markdown;
+        let document = Document::new(text, Box::new(markdown_parser));
 
         // We add one because the Markdown parser inserts a newline at end-of-input.
         assert_eq!(document.tokens.len(), final_tok_count + 1);
@@ -332,27 +388,5 @@ mod tests {
     #[test]
     fn medium_contraction2() {
         assert_condensed_contractions("There's no way", 5);
-    }
-
-    #[test]
-    fn parses_sentences_correctly() {
-        let text = "There were three little pigs. They built three little homes.";
-        let document = Document::new(text, Box::new(PlainEnglish));
-
-        let mut sentence_strs = vec![];
-
-        for sentence in document.sentences() {
-            if let Some(span) = sentence.span() {
-                sentence_strs.push(document.get_span_content_str(span));
-            }
-        }
-
-        assert_eq!(
-            sentence_strs,
-            vec![
-                "There were three little pigs.",
-                " They built three little homes."
-            ]
-        )
     }
 }

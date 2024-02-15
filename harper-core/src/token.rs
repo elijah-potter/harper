@@ -150,6 +150,9 @@ pub trait TokenStringExt {
     /// Grab the span that represents the beginning of the first element and the end of the last
     /// element.
     fn span(&self) -> Option<Span>;
+
+    fn iter_quote_indices(&self) -> impl Iterator<Item = usize> + '_;
+    fn iter_quotes(&self) -> impl Iterator<Item = Token> + '_;
 }
 
 impl TokenStringExt for [Token] {
@@ -210,5 +213,19 @@ impl TokenStringExt for [Token] {
 
     fn span(&self) -> Option<Span> {
         Some(Span::new(self.first()?.span.start, self.last()?.span.end))
+    }
+
+    fn iter_quote_indices(&self) -> impl Iterator<Item = usize> + '_ {
+        self.iter().enumerate().filter_map(|(idx, token)| {
+            if let TokenKind::Punctuation(Punctuation::Quote(_)) = &token.kind {
+                Some(idx)
+            } else {
+                None
+            }
+        })
+    }
+
+    fn iter_quotes(&self) -> impl Iterator<Item = Token> + '_ {
+        self.iter_quote_indices().map(|idx| self[idx])
     }
 }
