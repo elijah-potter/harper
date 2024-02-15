@@ -101,6 +101,8 @@ impl Matcher {
         // This match list needs to be automatically expanded instead of explicitly defined
         // like it is now.
         let mut triggers = pt! {
+            "human","live" => "human life",
+            "eight","grade" => "eighth grade",
             "and","also" => "and",
             "todo" => "to-do",
             "To-Do" => "To-do",

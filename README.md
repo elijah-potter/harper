@@ -1,4 +1,5 @@
 <div id="header" align="center">
+    <img src="logo.svg" width="400px" />
     <h1>Harper</h1>
 </div>
 
