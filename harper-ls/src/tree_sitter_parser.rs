@@ -172,9 +172,21 @@ fn is_comment_character(c: char) -> bool {
 /// Converts a set of byte-indexed [`Span`]s to char-index Spans, in-place.
 /// NOTE: Will sort the given slice by their [`Span::start`].
 ///
-/// Assumes that none of the Spans are overlapping.
-fn byte_spans_to_char_spans(byte_spans: &mut [Span], source: &str) {
+/// If any spans overlap, it will remove the second one.
+fn byte_spans_to_char_spans(byte_spans: &mut Vec<Span>, source: &str) {
     byte_spans.sort_by_key(|s| s.start);
+
+    let cloned = byte_spans.clone();
+
+    let mut i = 0;
+    byte_spans.retain(|cur| {
+        i += 1;
+        if let Some(prev) = cloned.get(i - 2) {
+            !cur.overlaps_with(*prev)
+        } else {
+            true
+        }
+    });
 
     let mut last_byte_pos = 0;
     let mut last_char_pos = 0;
