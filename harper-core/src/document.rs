@@ -18,6 +18,12 @@ pub struct Document {
     parser: Box<dyn Parser>,
 }
 
+impl Default for Document {
+    fn default() -> Self {
+        Self::new("", Box::new(PlainEnglish))
+    }
+}
+
 impl Document {
     /// Lexes and parses text to produce a document.
     /// Choosing to parse with markdown may have a performance penalty
@@ -358,7 +364,7 @@ mod tests {
 
         assert_eq!(document.tokens.len(), final_tok_count);
 
-        let mut markdown_parser = Markdown;
+        let markdown_parser = Markdown;
         let document = Document::new(text, Box::new(markdown_parser));
 
         // We add one because the Markdown parser inserts a newline at end-of-input.

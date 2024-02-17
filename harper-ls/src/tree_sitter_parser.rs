@@ -89,7 +89,7 @@ impl TreeSitterParser {
         });
     }
 
-    fn visit_nodes(cursor: &mut TreeCursor, mut visit: &mut impl FnMut(&Node)) {
+    fn visit_nodes(cursor: &mut TreeCursor, visit: &mut impl FnMut(&Node)) {
         if !cursor.goto_first_child() {
             return;
         }

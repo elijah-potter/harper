@@ -144,6 +144,8 @@ fn lex_punctuation(source: &[char]) -> Option<FoundToken> {
         '–' => EnDash,
         '—' => EmDash,
         '…' => Ellipsis,
+        '^' => Carrot,
+        '+' => Plus,
         _ => return None,
     };
 

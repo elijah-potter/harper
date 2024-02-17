@@ -60,11 +60,7 @@ impl TokenKind {
 
     /// Checks whether the token is whitespace.
     pub fn is_whitespace(&self) -> bool {
-        match self {
-            TokenKind::Space(_) => true,
-            TokenKind::Newline(_) => true,
-            _ => false,
-        }
+        matches!(self, TokenKind::Space(_) | TokenKind::Newline(_))
     }
 }
 
@@ -125,6 +121,10 @@ pub enum Punctuation {
     Tilde,
     /// `@`
     At,
+    /// `^`
+    Carrot,
+    /// `+`
+    Plus,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, PartialOrd)]

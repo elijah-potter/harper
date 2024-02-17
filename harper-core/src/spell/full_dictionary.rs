@@ -10,7 +10,7 @@ use super::{
 
 /// A full, fat dictionary.
 /// All of the elements are stored in-memory.
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Eq, PartialEq)]
 pub struct FullDictionary {
     /// Storing a separate [`Vec`] for iterations speeds up spellchecking by ~16% at the cost of
     /// additional memory.
