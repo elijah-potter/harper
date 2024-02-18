@@ -40,6 +40,7 @@ pub enum TokenKind {
     Space(usize),
     /// A sequence of "\n" newlines
     Newline(usize),
+    EmailAddress,
     /// A special token used for things like inline code blocks that should be ignored by all
     /// linters.
     Unlintable,
@@ -99,6 +100,14 @@ pub enum Punctuation {
     OpenRound,
     /// `)`
     CloseRound,
+    /// `<`
+    OpenAngle,
+    /// `>`
+    CloseAngle,
+    /// `{`
+    OpenCurly,
+    /// `}`
+    CloseCurly,
     /// `"`
     Hash,
     /// `'`
@@ -125,6 +134,12 @@ pub enum Punctuation {
     Carrot,
     /// `+`
     Plus,
+    /// `$`
+    Dollar,
+    /// `|`
+    Pipe,
+    /// `_`
+    Underscore,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, PartialOrd)]
