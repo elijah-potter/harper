@@ -1,6 +1,6 @@
 [package]
 name = "harper-ls"
-version = "0.6.2"
+version = "0.6.3"
 edition = "2021"
 description = "The language checker for developers."
 license = "MIT OR Apache-2.0"
