@@ -3,7 +3,7 @@ name = "harper-core"
 version = "0.6.3"
 edition = "2021"
 description = "The language checker for developers."
-license = "MIT OR Apache-2.0"
+license = "Apache-2.0"
 readme = "README.md"
 homepage = "https://github.com/chilipepperhott/harper"
 
