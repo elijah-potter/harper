@@ -73,7 +73,7 @@ impl TreeSitterParser {
         let idents: Vec<_> = idents.into_iter().collect();
 
         let mut dictionary = FullDictionary::new();
-        dictionary.append_words(idents.as_slice());
+        dictionary.extend_words(idents);
 
         Some(dictionary)
     }

@@ -8,7 +8,7 @@ publish = false
 [dependencies]
 axum = "0.6.20"
 serde = { version = "1.0.189", features = ["derive"] }
-tokio = { version = "1.33.0", features = ["full"] }
+tokio = { version = "1.35.1", features = ["fs", "rt", "rt-multi-thread", "macros"] }
 tracing = "0.1.40"
 tracing-subscriber = "0.3.17"
 harper-core = { path = "../harper-core" }

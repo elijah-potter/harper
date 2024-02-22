@@ -1,23 +1,30 @@
 use std::{collections::HashMap, sync::Arc};
 
-use harper_core::{parsers::Markdown, Document, FullDictionary, LintSet, Linter, MergedDictionary};
+use harper_core::{
+    parsers::Markdown, Dictionary, Document, FullDictionary, LintSet, Linter, MergedDictionary,
+};
+use itertools::Itertools;
+use serde_json::Value;
 use tokio::sync::Mutex;
 use tower_lsp::{
     jsonrpc::Result,
     lsp_types::{
         notification::{PublishDiagnostics, ShowMessage},
-        CodeAction, CodeActionOrCommand, CodeActionParams, CodeActionProviderCapability,
-        CodeActionResponse, Diagnostic, DidChangeTextDocumentParams, DidCloseTextDocumentParams,
-        DidOpenTextDocumentParams, DidSaveTextDocumentParams, InitializeParams, InitializeResult,
-        InitializedParams, MessageType, PublishDiagnosticsParams, Range, ServerCapabilities,
-        ShowMessageParams, TextDocumentSyncCapability, TextDocumentSyncKind,
-        TextDocumentSyncOptions, TextDocumentSyncSaveOptions, Url,
+        CodeActionOrCommand, CodeActionParams, CodeActionProviderCapability, CodeActionResponse,
+        Diagnostic, DidChangeTextDocumentParams, DidCloseTextDocumentParams,
+        DidOpenTextDocumentParams, DidSaveTextDocumentParams, ExecuteCommandParams,
+        InitializeParams, InitializeResult, InitializedParams, MessageType,
+        PublishDiagnosticsParams, Range, ServerCapabilities, ShowMessageParams,
+        TextDocumentSyncCapability, TextDocumentSyncKind, TextDocumentSyncOptions,
+        TextDocumentSyncSaveOptions, Url,
     },
     Client, LanguageServer,
 };
 
 use crate::{
+    config::Config,
     diagnostics::{lint_to_code_actions, lints_to_diagnostics},
+    dictionary_io::{load_dict, save_dict},
     pos_conv::range_to_span,
     tree_sitter_parser::TreeSitterParser,
 };
@@ -29,20 +36,23 @@ struct DocumentState {
     linter: LintSet,
 }
 
+/// Deallocate
 pub struct Backend {
     client: Client,
-    global_dictionary: Arc<FullDictionary>,
+    static_dictionary: Arc<FullDictionary>,
+    config: Config,
     doc_state: Mutex<HashMap<Url, DocumentState>>,
 }
 
 impl Backend {
-    pub fn new(client: Client) -> Self {
+    pub fn new(client: Client, config: Config) -> Self {
         let dictionary = FullDictionary::create_from_curated();
 
         Self {
             client,
-            global_dictionary: dictionary.into(),
+            static_dictionary: dictionary.into(),
             doc_state: Mutex::new(HashMap::new()),
+            config,
         }
     }
 
@@ -54,10 +64,26 @@ impl Backend {
         self.update_document(url, &content).await;
     }
 
-    async fn update_document(&self, url: &Url, text: &str) {
+    async fn load_user_dictionary(&self) -> anyhow::Result<FullDictionary> {
+        Ok(load_dict(&self.config.user_dict_path).await?)
+    }
+
+    async fn save_user_dictionary(&self, dict: impl Dictionary) -> anyhow::Result<()> {
+        Ok(save_dict(&self.config.user_dict_path, dict).await?)
+    }
+
+    async fn generate_global_dictionary(&self) -> anyhow::Result<MergedDictionary<FullDictionary>> {
+        let mut dict = MergedDictionary::new();
+        dict.add_dictionary(self.static_dictionary.clone());
+        let user_dict = self.load_user_dictionary().await?;
+        dict.add_dictionary(Arc::new(user_dict));
+        Ok(dict)
+    }
+
+    async fn update_document(&self, url: &Url, text: &str) -> anyhow::Result<()> {
         let mut lock = self.doc_state.lock().await;
         let doc_state = lock.entry(url.clone()).or_insert(DocumentState {
-            linter: LintSet::new().with_standard(self.global_dictionary.clone()),
+            linter: LintSet::new().with_standard(self.generate_global_dictionary().await?),
             ..Default::default()
         });
 
@@ -72,9 +98,9 @@ impl Backend {
 
                     if doc_state.ident_dict != new_dict {
                         doc_state.ident_dict = new_dict.clone();
-                        let mut merged = MergedDictionary::new();
+                        let mut merged = self.generate_global_dictionary().await?;
                         merged.add_dictionary(new_dict);
-                        merged.add_dictionary(self.global_dictionary.clone());
+
                         doc_state.linter = LintSet::new().with_standard(merged);
                     }
                 }
@@ -86,9 +112,15 @@ impl Backend {
         } else {
             Document::new(text, Box::new(Markdown))
         };
+
+        Ok(())
     }
 
-    async fn generate_code_actions(&self, url: &Url, range: Range) -> Result<Vec<CodeAction>> {
+    async fn generate_code_actions(
+        &self,
+        url: &Url,
+        range: Range,
+    ) -> Result<Vec<CodeActionOrCommand>> {
         let mut doc_states = self.doc_state.lock().await;
         let Some(doc_state) = doc_states.get_mut(url) else {
             return Ok(Vec::new());
@@ -105,7 +137,7 @@ impl Backend {
         let actions = lints
             .into_iter()
             .filter(|lint| lint.span.overlaps_with(span))
-            .flat_map(|lint| lint_to_code_actions(&lint, url, source_chars).collect::<Vec<_>>())
+            .flat_map(|lint| lint_to_code_actions(&lint, url, source_chars))
             .collect();
 
         Ok(actions)
@@ -210,7 +242,8 @@ impl LanguageServer for Backend {
             .await;
 
         self.update_document(&params.text_document.uri, &last.text)
-            .await;
+            .await
+            .unwrap();
         self.publish_diagnostics(&params.text_document.uri).await;
     }
 
@@ -220,20 +253,37 @@ impl LanguageServer for Backend {
             .await;
     }
 
+    async fn execute_command(&self, params: ExecuteCommandParams) -> Result<Option<Value>> {
+        match params.command.as_str() {
+            "AddWord" => {
+                let mut string_args = params
+                    .arguments
+                    .into_iter()
+                    .map(|v| serde_json::from_value::<String>(v).unwrap());
+
+                let Some((first, second)) = string_args.next_tuple() else {
+                    return Ok(None);
+                };
+
+                let mut dict = self.load_user_dictionary().await.unwrap();
+                dict.append_word(&first.chars().collect::<Vec<_>>());
+                self.save_user_dictionary(dict).await.unwrap();
+
+                self.publish_diagnostics(&Url::parse(&second).unwrap())
+                    .await;
+
+                Ok(None)
+            }
+
+            _ => Ok(None),
+        }
+    }
+
     async fn code_action(&self, params: CodeActionParams) -> Result<Option<CodeActionResponse>> {
         let actions = self
             .generate_code_actions(&params.text_document.uri, params.range)
             .await?;
 
-        self.client
-            .log_message(MessageType::INFO, format!("{:?}", actions))
-            .await;
-
-        Ok(Some(
-            actions
-                .into_iter()
-                .map(CodeActionOrCommand::CodeAction)
-                .collect(),
-        ))
+        Ok(Some(actions))
     }
 }

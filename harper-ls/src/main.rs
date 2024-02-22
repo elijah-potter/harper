@@ -1,6 +1,9 @@
-use tokio::net::TcpListener;
+use config::Config;
+use tokio::{fs, net::TcpListener};
 mod backend;
+mod config;
 mod diagnostics;
+mod dictionary_io;
 mod pos_conv;
 mod tree_sitter_parser;
 
@@ -15,10 +18,15 @@ struct Args {
 }
 
 #[tokio::main]
-async fn main() {
+async fn main() -> anyhow::Result<()> {
     let args = Args::parse();
 
-    let (service, socket) = LspService::new(Backend::new);
+    let config = Config::default();
+
+    // Make sure this is available.
+    fs::create_dir_all(config.user_dict_path.parent().unwrap()).await?;
+
+    let (service, socket) = LspService::new(|client| Backend::new(client, config));
 
     if args.stdio {
         let stdin = tokio::io::stdin();
@@ -32,4 +40,6 @@ async fn main() {
         let (read, write) = tokio::io::split(stream);
         Server::new(read, write, socket).serve(service).await;
     }
+
+    Ok(())
 }

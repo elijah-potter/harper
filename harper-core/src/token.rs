@@ -100,10 +100,6 @@ pub enum Punctuation {
     OpenRound,
     /// `)`
     CloseRound,
-    /// `<`
-    OpenAngle,
-    /// `>`
-    CloseAngle,
     /// `{`
     OpenCurly,
     /// `}`

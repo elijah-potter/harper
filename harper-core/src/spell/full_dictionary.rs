@@ -61,10 +61,20 @@ impl FullDictionary {
     /// Appends words to the dictionary.
     /// It is significantly faster to append many words with one call than many
     /// distinct calls to this function.
-    pub fn append_words(&mut self, words: &[&[char]]) {
-        self.words.extend(words.iter().map(|v| v.to_smallvec()));
-        self.word_set.extend(words.iter().map(|v| v.to_smallvec()));
+    pub fn extend_words(&mut self, words: impl IntoIterator<Item = impl AsRef<[char]>>) {
+        let init_size = self.words.len();
+        self.words
+            .extend(words.into_iter().map(|v| v.as_ref().to_smallvec()));
+        self.word_set
+            .extend(self.words[init_size..].iter().cloned());
         self.word_len_starts = Self::create_len_starts(&mut self.words);
+    }
+
+    /// Append a single word to the dictionary.
+    ///
+    /// If you are appending many words, consider using [`Self::extend_words`] instead.
+    pub fn append_word(&mut self, word: impl AsRef<[char]>) {
+        self.extend_words(std::iter::once(word.as_ref()))
     }
 
     /// Create a lookup table for finding words of a specific length in a word list.

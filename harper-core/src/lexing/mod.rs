@@ -136,8 +136,6 @@ fn lex_punctuation(source: &[char]) -> Option<FoundToken> {
         '-' => Hyphen,
         '[' => OpenSquare,
         ']' => CloseSquare,
-        '<' => OpenAngle,
-        '>' => CloseAngle,
         '{' => OpenCurly,
         '}' => CloseCurly,
         '(' => OpenRound,

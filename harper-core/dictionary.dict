@@ -11689,7 +11689,7 @@ alligator/MS
 alliterate/DSXGNV
 alliteration/M
 alliterative/Y
-allocate/ADSGN
+allocate/ADSGNY
 allocation/AM
 allocations
 allot/LS
@@ -49607,3 +49607,4 @@ LIDAR
 LiDAR
 LADAR
 TODO
+struct
