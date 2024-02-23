@@ -1,0 +1,81 @@
+name: Release
+
+on: 
+  push: 
+    branches: [ "master" ]
+
+jobs:
+  release:
+    name: Release - ${{ matrix.platform.release_for }}
+    strategy:
+      matrix:
+        platform:
+          - release_for: Windows-x86_64
+            os: windows-latest
+            target: x86_64-pc-windows-gnu
+            bin: harper-ls.exe
+            name: harper-ls-x86_64-pc-windows-gnu.zip
+            command: build
+
+          - release_for: macOS-x86_64
+            os: macOS-latest
+            target: x86_64-apple-darwin
+            bin: harper-ls
+            name: harper-ls-x86_64-apple-darwin.tar.gz
+            command: build
+
+          - release_for: macOS-aarch64
+            os: macOS-latest
+            target: aarch64-apple-darwin
+            bin: harper-ls
+            name: harper-ls-aarch64-apple-darwin.tar.gz
+            command: build
+
+          - release_for: Linux-x86_64-GNU
+            os: ubuntu-20.04
+            target: x86_64-unknown-linux-gnu
+            bin: harper-ls
+            name: harper-ls-x86_64-unknown-linux-gnu.tar.gz
+            command: build
+            
+          - release_for: Linux-aarch64-GNU
+            os: ubuntu-20.04
+            target: aarch64-unknown-linux-gnu
+            bin: harper-ls
+            name: harper-ls-aarch64-unknown-linux-gnu.tar.gz
+            command: build
+
+    runs-on: ${{ matrix.platform.os }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+      - name: Build binary
+        uses: houseabsolute/actions-rust-cross@v0
+        with:
+          command: ${{ matrix.platform.command }}
+          target: ${{ matrix.platform.target }}
+          args: "--locked --release --bin harper-ls"
+          strip: true
+      - name: Package as archive
+        shell: bash
+        run: |
+          cd target/${{ matrix.platform.target }}/release
+          if [[ "${{ matrix.platform.os }}" == "windows-latest" ]]; then
+            7z a ../../../${{ matrix.platform.name }} ${{ matrix.platform.bin }}
+          else
+            tar czvf ../../../${{ matrix.platform.name }} ${{ matrix.platform.bin }}
+          fi
+          cd -
+      - name: Generate SHA-256
+        run: shasum -a 256 ${{ matrix.platform.name }}
+        if: |
+          matrix.toolchain == 'stable' &&
+          matrix.platform.os == 'macOS-latest' &&
+          ( startsWith( github.ref, 'refs/tags/v' ) ||
+            github.ref == 'refs/tags/test-release' )
+      - name: Publish GitHub release
+        uses: softprops/action-gh-release@v1
+        with:
+          draft: true
+          files: "harper-ls-*"
+        if: startsWith(github.ref, 'refs/tags/')
