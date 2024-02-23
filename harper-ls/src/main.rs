@@ -25,6 +25,7 @@ async fn main() -> anyhow::Result<()> {
 
     // Make sure this is available.
     fs::create_dir_all(config.user_dict_path.parent().unwrap()).await?;
+    fs::create_dir_all(&config.file_dict_path).await?;
 
     let (service, socket) = LspService::new(|client| Backend::new(client, config));
 

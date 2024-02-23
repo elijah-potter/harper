@@ -32,7 +32,7 @@ pub async fn load_dict(path: impl AsRef<Path>) -> io::Result<FullDictionary> {
     let file = File::open(path.as_ref()).await?;
     let read = BufReader::new(file);
 
-    Ok(dict_from_word_list(read).await?)
+    dict_from_word_list(read).await
 }
 
 /// This function could definitely be optimized to use less memory.

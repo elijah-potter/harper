@@ -1,4 +1,4 @@
-use std::{collections::HashMap, sync::Arc};
+use std::{collections::HashMap, path::PathBuf, sync::Arc};
 
 use harper_core::{
     parsers::Markdown, Dictionary, Document, FullDictionary, LintSet, Linter, MergedDictionary,
@@ -56,19 +56,39 @@ impl Backend {
         }
     }
 
-    async fn update_document_from_file(&self, url: &Url) {
-        let Ok(content) = tokio::fs::read_to_string(url.path()).await else {
-            // TODO: Proper error handling here.
-            return;
-        };
-        self.update_document(url, &content).await;
+    /// Rewrites a path to a filename using the same conventions as [Neovim's undo-files](https://neovim.io/doc/user/options.html#'undodir').
+    fn file_dict_name(url: &Url) -> PathBuf {
+        let mut rewritten = String::new();
+
+        // We assume all URLs are local files and have a base
+        for seg in url.path_segments().unwrap() {
+            rewritten.push_str(seg);
+            rewritten.push('%');
+        }
+
+        rewritten.into()
     }
 
-    async fn load_user_dictionary(&self) -> anyhow::Result<FullDictionary> {
-        Ok(match load_dict(&self.config.user_dict_path).await {
+    fn get_file_dict_path(&self, url: &Url) -> PathBuf {
+        self.config.file_dict_path.join(Self::file_dict_name(url))
+    }
+
+    async fn load_file_dictionary(&self, url: &Url) -> FullDictionary {
+        match load_dict(self.get_file_dict_path(url)).await {
             Ok(dict) => dict,
-            Err(err) => FullDictionary::new(),
-        })
+            Err(_) => FullDictionary::new(),
+        }
+    }
+
+    async fn save_file_dictionary(&self, url: &Url, dict: impl Dictionary) -> anyhow::Result<()> {
+        Ok(save_dict(self.get_file_dict_path(url), dict).await?)
+    }
+
+    async fn load_user_dictionary(&self) -> FullDictionary {
+        match load_dict(&self.config.user_dict_path).await {
+            Ok(dict) => dict,
+            Err(_) => FullDictionary::new(),
+        }
     }
 
     async fn save_user_dictionary(&self, dict: impl Dictionary) -> anyhow::Result<()> {
@@ -78,15 +98,39 @@ impl Backend {
     async fn generate_global_dictionary(&self) -> anyhow::Result<MergedDictionary<FullDictionary>> {
         let mut dict = MergedDictionary::new();
         dict.add_dictionary(self.static_dictionary.clone());
-        let user_dict = self.load_user_dictionary().await?;
+        let user_dict = self.load_user_dictionary().await;
         dict.add_dictionary(Arc::new(user_dict));
         Ok(dict)
+    }
+
+    async fn generate_file_dictionary(
+        &self,
+        url: &Url,
+    ) -> anyhow::Result<MergedDictionary<FullDictionary>> {
+        let (global_dictionary, file_dictionary) = tokio::join!(
+            self.generate_global_dictionary(),
+            self.load_file_dictionary(url)
+        );
+
+        let mut global_dictionary = global_dictionary?;
+        global_dictionary.add_dictionary(file_dictionary.into());
+
+        Ok(global_dictionary)
+    }
+
+    async fn update_document_from_file(&self, url: &Url) -> anyhow::Result<()> {
+        let Ok(content) = tokio::fs::read_to_string(url.path()).await else {
+            // TODO: Proper error handling here.
+            return Ok(());
+        };
+
+        self.update_document(url, &content).await
     }
 
     async fn update_document(&self, url: &Url, text: &str) -> anyhow::Result<()> {
         let mut lock = self.doc_state.lock().await;
         let doc_state = lock.entry(url.clone()).or_insert(DocumentState {
-            linter: LintSet::new().with_standard(self.generate_global_dictionary().await?),
+            linter: LintSet::new().with_standard(self.generate_file_dictionary(url).await?),
             ..Default::default()
         });
 
@@ -101,7 +145,7 @@ impl Backend {
 
                     if doc_state.ident_dict != new_dict {
                         doc_state.ident_dict = new_dict.clone();
-                        let mut merged = self.generate_global_dictionary().await?;
+                        let mut merged = self.generate_file_dictionary(url).await?;
                         merged.add_dictionary(new_dict);
 
                         doc_state.linter = LintSet::new().with_standard(merged);
@@ -257,27 +301,39 @@ impl LanguageServer for Backend {
     }
 
     async fn execute_command(&self, params: ExecuteCommandParams) -> Result<Option<Value>> {
-        match params.command.as_str() {
-            "AddWord" => {
-                let mut string_args = params
-                    .arguments
-                    .into_iter()
-                    .map(|v| serde_json::from_value::<String>(v).unwrap());
+        let mut string_args = params
+            .arguments
+            .into_iter()
+            .map(|v| serde_json::from_value::<String>(v).unwrap());
 
+        match params.command.as_str() {
+            "AddToUserDict" => {
+                let Some(first) = string_args.next() else {
+                    return Ok(None);
+                };
+
+                let word = &first.chars().collect::<Vec<_>>();
+
+                let mut dict = self.load_user_dictionary().await;
+                dict.append_word(word);
+                self.save_user_dictionary(dict).await.unwrap();
+
+                Ok(None)
+            }
+            "AddToFileDict" => {
                 let Some((first, second)) = string_args.next_tuple() else {
                     return Ok(None);
                 };
 
-                let mut dict = self.load_user_dictionary().await.unwrap();
-                dict.append_word(&first.chars().collect::<Vec<_>>());
-                self.save_user_dictionary(dict).await.unwrap();
+                let word = &first.chars().collect::<Vec<_>>();
 
-                self.publish_diagnostics(&Url::parse(&second).unwrap())
-                    .await;
+                let file_url = second.parse().unwrap();
+                let mut dict = self.load_file_dictionary(&file_url).await;
+                dict.append_word(word);
+                self.save_file_dictionary(&file_url, dict).await.unwrap();
 
                 Ok(None)
             }
-
             _ => Ok(None),
         }
     }

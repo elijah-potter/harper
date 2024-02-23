@@ -58,7 +58,13 @@ pub fn lint_to_code_actions<'a>(
 
         results.push(CodeActionOrCommand::Command(Command::new(
             format!("Add \"{}\" to the global dictionary.", orig),
-            "AddWord".to_string(),
+            "AddToUserDict".to_string(),
+            Some(vec![orig.clone().into()]),
+        )));
+
+        results.push(CodeActionOrCommand::Command(Command::new(
+            format!("Add \"{}\" to the file dictionary.", orig),
+            "AddToFileDict".to_string(),
             Some(vec![orig.into(), url.to_string().into()]),
         )))
     }
