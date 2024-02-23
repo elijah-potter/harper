@@ -129,10 +129,13 @@ impl Backend {
 
     async fn update_document(&self, url: &Url, text: &str) -> anyhow::Result<()> {
         let mut lock = self.doc_state.lock().await;
-        let doc_state = lock.entry(url.clone()).or_insert(DocumentState {
+
+        // TODO: Only reset linter when underlying dictionaries change
+
+        let mut doc_state = DocumentState {
             linter: LintSet::new().with_standard(self.generate_file_dictionary(url).await?),
             ..Default::default()
-        });
+        };
 
         doc_state.document = if let Some(extension) = url.to_file_path().unwrap().extension() {
             if let Some(ts_parser) =
@@ -159,6 +162,8 @@ impl Backend {
         } else {
             Document::new(text, Box::new(Markdown))
         };
+
+        lock.insert(url.clone(), doc_state);
 
         Ok(())
     }

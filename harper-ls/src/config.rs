@@ -12,7 +12,9 @@ impl Default for Config {
     fn default() -> Self {
         Self {
             user_dict_path: config_dir().unwrap().join("harper-ls/dictionary.txt"),
-            file_dict_path: data_local_dir().unwrap().join("harper-ls"),
+            file_dict_path: data_local_dir()
+                .unwrap()
+                .join("harper-ls/file_dictionaries/"),
         }
     }
 }
