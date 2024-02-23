@@ -65,7 +65,10 @@ impl Backend {
     }
 
     async fn load_user_dictionary(&self) -> anyhow::Result<FullDictionary> {
-        Ok(load_dict(&self.config.user_dict_path).await?)
+        Ok(match load_dict(&self.config.user_dict_path).await {
+            Ok(dict) => dict,
+            Err(err) => FullDictionary::new(),
+        })
     }
 
     async fn save_user_dictionary(&self, dict: impl Dictionary) -> anyhow::Result<()> {
