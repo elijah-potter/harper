@@ -1,6 +1,10 @@
+mod email_address;
+
 use crate::token::Quote;
 
 use crate::token::{Punctuation, TokenKind};
+
+use self::email_address::lex_email_address;
 
 #[derive(Debug)]
 pub struct FoundToken {
@@ -16,6 +20,7 @@ pub fn lex_token(source: &[char]) -> Option<FoundToken> {
         lex_spaces,
         lex_newlines,
         lex_number,
+        lex_email_address,
         lex_word,
     ];
 
