@@ -7,7 +7,7 @@
 [![Web](https://github.com/chilipepperhott/harper/actions/workflows/build_web.yml/badge.svg)](https://github.com/chilipepperhott/harper/actions/workflows/build_web.yml)
 [![Precommit](https://github.com/chilipepperhott/harper/actions/workflows/precommit.yml/badge.svg)](https://github.com/chilipepperhott/harper/actions/workflows/precommit.yml)
 
-Harper is a an English grammar checker designed to be _just right._
+Harper is an English grammar checker designed to be _just right._
 I created it after years of dealing with the shortcomings of the competition.
 
 Grammarly was too expensive and too overbearing. 
