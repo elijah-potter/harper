@@ -2,20 +2,16 @@ use std::fmt::Display;
 
 use itertools::Itertools;
 
+use crate::linting::Suggestion;
 use crate::parsers::{Markdown, Parser, PlainEnglish};
-use crate::TokenStringExt;
-use crate::{
-    linting::Suggestion,
-    span::Span,
-    FatToken,
-    Punctuation::{self},
-    Token, TokenKind,
-};
+use crate::span::Span;
+use crate::Punctuation::{self};
+use crate::{FatToken, Token, TokenKind, TokenStringExt};
 
 pub struct Document {
     source: Vec<char>,
     tokens: Vec<Token>,
-    parser: Box<dyn Parser>,
+    parser: Box<dyn Parser>
 }
 
 impl Default for Document {
@@ -33,7 +29,7 @@ impl Document {
         let mut doc = Self {
             source,
             tokens: Vec::new(),
-            parser,
+            parser
         };
         doc.parse();
 
@@ -137,7 +133,7 @@ impl Document {
     pub fn get_full_string(&self) -> String {
         self.get_span_content_str(Span {
             start: 0,
-            end: self.source.len(),
+            end: self.source.len()
         })
     }
 
@@ -165,8 +161,9 @@ impl Document {
         self.parse();
     }
 
-    /// Searches for quotation marks and fills the [`Punctuation::Quote::twin_loc`] field.
-    /// This is on a best effort basis.
+    /// Searches for quotation marks and fills the
+    /// [`Punctuation::Quote::twin_loc`] field. This is on a best effort
+    /// basis.
     ///
     /// Current algorithm is very basic and could use some work.
     fn match_quotes(&mut self) {
@@ -188,7 +185,8 @@ impl Document {
         }
     }
 
-    /// Searches for contractions and condenses them down into single self.tokens
+    /// Searches for contractions and condenses them down into single
+    /// self.tokens
     fn condense_contractions(&mut self) {
         if self.tokens.len() < 3 {
             return;
@@ -233,7 +231,7 @@ impl Document {
             &old[0..replace_starts
                 .first()
                 .copied()
-                .unwrap_or(replace_starts.len())],
+                .unwrap_or(replace_starts.len())]
         );
 
         let mut iter = replace_starts.iter().peekable();
@@ -251,7 +249,7 @@ impl Document {
             &old[replace_starts
                 .last()
                 .map(|v| v + 3)
-                .unwrap_or(replace_starts.len())..],
+                .unwrap_or(replace_starts.len())..]
         )
     }
 }
@@ -321,21 +319,19 @@ fn is_sentence_terminator(token: &TokenKind) -> bool {
         TokenKind::Punctuation(punct) => [
             Punctuation::Period,
             Punctuation::Bang,
-            Punctuation::Question,
+            Punctuation::Question
         ]
         .contains(punct),
         TokenKind::Newline(_) => true,
-        _ => false,
+        _ => false
     }
 }
 
 #[cfg(test)]
 mod tests {
     use super::Document;
-    use crate::{
-        parsers::{Markdown, PlainEnglish},
-        token::TokenStringExt,
-    };
+    use crate::parsers::{Markdown, PlainEnglish};
+    use crate::token::TokenStringExt;
 
     #[test]
     fn parses_sentences_correctly() {

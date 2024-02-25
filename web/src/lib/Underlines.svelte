@@ -39,8 +39,16 @@
 		return output;
 	}
 
+	type UnderlineDetails = {
+		focused: boolean;
+		content: string;
+		index: number;
+	};
+
+	type UnderlineToken = string | null | undefined | UnderlineDetails;
+
 	function processString(lintMap: [Lint, number][], focusLintIndex?: number) {
-		let results = lintMap
+		let results: UnderlineToken[] = lintMap
 			.map(([lint, lintIndex], index, arr) => {
 				let prevStart = 0;
 				let prev = arr[index - 1];
@@ -57,11 +65,11 @@
 					prevContent.push(...reOrgString(content.substring(prevStart, prevEnd)));
 				}
 
-				let lintContent = [
-					spanContent(lint.span, content).replaceAll(' ', '\u00A0'),
-					lintIndex === focusLintIndex,
-					lintIndex
-				];
+				let lintContent: UnderlineDetails = {
+					focused: lintIndex === focusLintIndex,
+					index: lintIndex,
+					content: spanContent(lint.span, content).replaceAll(' ', '\u00A0')
+				};
 
 				return [...prevContent, lintContent];
 			})
@@ -95,15 +103,15 @@
 				<span class="">{chunk}</span>
 			{:else}
 				<span class="pointer-events-auto" style={`margin-right: -4px;`}>
-					<span
-						class={`underlinespecial transition-all rounded-sm ${chunk[1] ? 'animate-after-bigbounce text-white' : ''}`}
-						bind:this={lintHighlights[chunk[2]]}
-						on:click={() => (focusLintIndex = chunk[2])}
-						style={`--line-color: #DB2B39; --line-width: ${chunk[1] ? '4px' : '2px'}; --bg-color: ${chunk[1] ? '#dbafb3' : 'transparent'};`}
-						l
+					<button
+						class={`underlinespecial transition-all rounded-sm ${chunk.focused ? 'animate-after-bigbounce text-white' : ''}`}
+						bind:this={lintHighlights[chunk.index]}
+						on:click={() =>
+							chunk != null && typeof chunk == 'object' && (focusLintIndex = chunk.index)}
+						style={`--line-color: #DB2B39; --line-width: ${chunk.focused ? '4px' : '2px'}; --bg-color: ${chunk.focused ? '#dbafb3' : 'transparent'};`}
 					>
-						{chunk[0]}
-					</span>
+						{chunk.content}
+					</button>
 				</span>
 			{/if}
 		{/each}

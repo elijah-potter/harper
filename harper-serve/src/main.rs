@@ -1,21 +1,18 @@
 #![allow(dead_code)]
 
-use harper_core::{Document, FatToken, FullDictionary, Lint, LintSet, Linter, Span, Suggestion};
 use std::net::SocketAddr;
+
+use axum::body::Body;
+use axum::http::{Request, StatusCode};
+use axum::middleware::{self, Next};
+use axum::response::Response;
+use axum::routing::post;
+use axum::{Json, Router};
+use harper_core::{Document, FatToken, FullDictionary, Lint, LintSet, Linter, Span, Suggestion};
+use serde::{Deserialize, Serialize};
 use tokio::time::Instant;
 use tracing::{info, Level};
 use tracing_subscriber::FmtSubscriber;
-
-use axum::{
-    body::Body,
-    http::Request,
-    http::StatusCode,
-    middleware::{self, Next},
-    response::Response,
-    routing::post,
-    Json, Router,
-};
-use serde::{Deserialize, Serialize};
 
 #[tokio::main]
 async fn main() {
@@ -79,12 +76,12 @@ async fn parse_text(Json(payload): Json<ParseRequest>) -> (StatusCode, Json<Pars
 
 #[derive(Deserialize)]
 struct ParseRequest {
-    pub text: String,
+    pub text: String
 }
 
 #[derive(Serialize)]
 struct ParseResponse {
-    pub tokens: Vec<FatToken>,
+    pub tokens: Vec<FatToken>
 }
 
 async fn lint(Json(payload): Json<LintRequest>) -> (StatusCode, Json<LintResponse>) {
@@ -101,16 +98,16 @@ async fn lint(Json(payload): Json<LintRequest>) -> (StatusCode, Json<LintRespons
 
 #[derive(Deserialize)]
 struct LintRequest {
-    pub text: String,
+    pub text: String
 }
 
 #[derive(Serialize)]
 struct LintResponse {
-    pub lints: Vec<Lint>,
+    pub lints: Vec<Lint>
 }
 
 async fn apply_suggestion(
-    Json(payload): Json<ApplySuggestionRequest>,
+    Json(payload): Json<ApplySuggestionRequest>
 ) -> (StatusCode, Json<ApplySuggestionResponse>) {
     let text = payload.text;
     let mut document = Document::new_markdown(&text);
@@ -119,8 +116,8 @@ async fn apply_suggestion(
     (
         StatusCode::ACCEPTED,
         Json(ApplySuggestionResponse {
-            text: document.get_full_string(),
-        }),
+            text: document.get_full_string()
+        })
     )
 }
 
@@ -128,10 +125,10 @@ async fn apply_suggestion(
 struct ApplySuggestionRequest {
     pub text: String,
     pub suggestion: Suggestion,
-    pub span: Span,
+    pub span: Span
 }
 
 #[derive(Serialize)]
 struct ApplySuggestionResponse {
-    pub text: String,
+    pub text: String
 }

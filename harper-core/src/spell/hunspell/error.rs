@@ -13,5 +13,5 @@ pub enum Error {
     #[error("Could not parse because we encountered the end of the line.")]
     UnexpectedEndOfLine,
     #[error("An error occured with a condition: {0}")]
-    Matcher(#[from] matcher::Error),
+    Matcher(#[from] matcher::Error)
 }

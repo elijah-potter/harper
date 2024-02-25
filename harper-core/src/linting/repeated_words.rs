@@ -1,17 +1,14 @@
 use hashbrown::HashSet;
 
-use crate::{
-    spell::DictWord,
-    token::{Token, TokenKind, TokenStringExt},
-    Document, Span, Suggestion,
-};
-
 use super::{Lint, LintKind, Linter};
+use crate::spell::DictWord;
+use crate::token::{Token, TokenKind, TokenStringExt};
+use crate::{Document, Span, Suggestion};
 
 #[derive(Debug, Clone)]
 pub struct RepeatedWords {
     /// The set of words that can be considered for repetition checking.
-    set: HashSet<DictWord>,
+    set: HashSet<DictWord>
 }
 
 impl RepeatedWords {
@@ -77,7 +74,7 @@ impl Linter for RepeatedWords {
 
                     let remove_start = if let Some(Token {
                         span,
-                        kind: TokenKind::Space(_),
+                        kind: TokenKind::Space(_)
                     }) = intervening_tokens.last()
                     {
                         span.start

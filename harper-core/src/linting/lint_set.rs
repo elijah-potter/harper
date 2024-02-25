@@ -1,16 +1,18 @@
-use crate::{Dictionary, Document, Lint};
-
-use super::{spaces::Spaces, Linter};
 use paste::paste;
 
-use super::{
-    long_sentences::LongSentences, matcher::Matcher, repeated_words::RepeatedWords,
-    sentence_capitalization::SentenceCapitalization, spell_check::SpellCheck,
-    unclosed_quotes::UnclosedQuotes, wrong_quotes::WrongQuotes,
-};
+use super::long_sentences::LongSentences;
+use super::matcher::Matcher;
+use super::repeated_words::RepeatedWords;
+use super::sentence_capitalization::SentenceCapitalization;
+use super::spaces::Spaces;
+use super::spell_check::SpellCheck;
+use super::unclosed_quotes::UnclosedQuotes;
+use super::wrong_quotes::WrongQuotes;
+use super::Linter;
+use crate::{Dictionary, Document, Lint};
 
 pub struct LintSet {
-    pub(super) linters: Vec<Box<dyn Linter>>,
+    pub(super) linters: Vec<Box<dyn Linter>>
 }
 
 impl Linter for LintSet {
@@ -30,7 +32,7 @@ impl Linter for LintSet {
 impl LintSet {
     pub fn new() -> Self {
         Self {
-            linters: Vec::new(),
+            linters: Vec::new()
         }
     }
 

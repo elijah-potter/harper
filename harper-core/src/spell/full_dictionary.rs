@@ -2,29 +2,27 @@ use hashbrown::HashSet;
 use once_cell::sync::Lazy;
 use smallvec::{SmallVec, ToSmallVec};
 
-use super::{
-    dictionary::Dictionary,
-    hunspell::{parse_default_attribute_list, parse_default_word_list},
-    seq_to_normalized, DictWord,
-};
+use super::dictionary::Dictionary;
+use super::hunspell::{parse_default_attribute_list, parse_default_word_list};
+use super::{seq_to_normalized, DictWord};
 
 /// A full, fat dictionary.
 /// All of the elements are stored in-memory.
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct FullDictionary {
-    /// Storing a separate [`Vec`] for iterations speeds up spellchecking by ~16% at the cost of
-    /// additional memory.
+    /// Storing a separate [`Vec`] for iterations speeds up spellchecking by
+    /// ~16% at the cost of additional memory.
     ///
     /// This is likely due to increased locality :shrug:.
     ///
     /// This list is sorted by word length (i.e. the shortest words are first).
     words: Vec<DictWord>,
     /// A lookup list for each word length.
-    /// Each index of this list will return the first index of [`Self::words`] that has a word
-    /// whose index is that length.
+    /// Each index of this list will return the first index of [`Self::words`]
+    /// that has a word whose index is that length.
     word_len_starts: Vec<usize>,
     /// All English words
-    word_set: HashSet<DictWord>,
+    word_set: HashSet<DictWord>
 }
 
 fn uncached_inner_new() -> FullDictionary {
@@ -37,7 +35,7 @@ fn uncached_inner_new() -> FullDictionary {
     FullDictionary {
         word_set: HashSet::from_iter(words.iter().cloned()),
         word_len_starts: FullDictionary::create_len_starts(&mut words),
-        words,
+        words
     }
 }
 
@@ -48,7 +46,7 @@ impl FullDictionary {
         Self {
             words: Vec::new(),
             word_len_starts: Vec::new(),
-            word_set: HashSet::new(),
+            word_set: HashSet::new()
         }
     }
 
@@ -72,14 +70,16 @@ impl FullDictionary {
 
     /// Append a single word to the dictionary.
     ///
-    /// If you are appending many words, consider using [`Self::extend_words`] instead.
+    /// If you are appending many words, consider using [`Self::extend_words`]
+    /// instead.
     pub fn append_word(&mut self, word: impl AsRef<[char]>) {
         self.extend_words(std::iter::once(word.as_ref()))
     }
 
-    /// Create a lookup table for finding words of a specific length in a word list.
-    /// NOTE: This function will sort the original word list by its length.
-    /// If the word list's order is changed after creating the lookup, it will no longer be valid.
+    /// Create a lookup table for finding words of a specific length in a word
+    /// list. NOTE: This function will sort the original word list by its
+    /// length. If the word list's order is changed after creating the
+    /// lookup, it will no longer be valid.
     fn create_len_starts(words: &mut [DictWord]) -> Vec<usize> {
         words.sort_by_key(|a| a.len());
         let mut word_len_starts = vec![0, 0];

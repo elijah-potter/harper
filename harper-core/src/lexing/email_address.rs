@@ -1,8 +1,7 @@
 use itertools::Itertools;
 
-use crate::TokenKind;
-
 use super::FoundToken;
+use crate::TokenKind;
 
 pub fn lex_email_address(source: &[char]) -> Option<FoundToken> {
     // Location of the @ sign
@@ -31,7 +30,7 @@ pub fn lex_email_address(source: &[char]) -> Option<FoundToken> {
 
     Some(FoundToken {
         next_index: at_loc + 1 + domain_part_len,
-        token: TokenKind::EmailAddress,
+        token: TokenKind::EmailAddress
     })
 }
 
@@ -103,7 +102,7 @@ fn valid_unquoted_character(c: char) -> bool {
 
     let others = [
         '!', '#', '$', '%', '&', '\'', '*', '+', '-', '/', '=', '?', '^', '_', '`', '{', '|', '}',
-        '~', '.',
+        '~', '.'
     ];
 
     if others.contains(&c) {
@@ -136,9 +135,8 @@ fn validate_hostname(source: &[char]) -> bool {
 
 #[cfg(test)]
 mod tests {
-    use crate::lexing::email_address::validate_hostname;
-
     use super::{lex_email_address, validate_local_part};
+    use crate::lexing::email_address::validate_hostname;
 
     fn example_local_parts() -> impl Iterator<Item = Vec<char>> {
         [
@@ -158,7 +156,7 @@ mod tests {
             r#"user-"#,
             r#"postmaster"#,
             r#"postmaster"#,
-            r#"_test"#,
+            r#"_test"#
         ]
         .into_iter()
         .map(|s| s.chars().collect())
@@ -179,12 +177,11 @@ mod tests {
             r#"example.org"#,
             r#"strange.example.com"#,
             r#"example.org"#,
-            r#"example.org"#,
-            // The existing parser intentionally doesn't support IP addresses
-            // It simply isn't worth the effort at the moment.
-            // r#"[123.123.123.123]"#,
-            // r#"[IPv6:2001:0db8:85a3:0000:0000:8a2e:0370:7334]"#,
-            // r#"[IPv6:2001:0db8:85a3:0000:0000:8a2e:0370:7334]"#,
+            r#"example.org"# /* The existing parser intentionally doesn't support IP addresses
+                              * It simply isn't worth the effort at the moment.
+                              * r#"[123.123.123.123]"#,
+                              * r#"[IPv6:2001:0db8:85a3:0000:0000:8a2e:0370:7334]"#,
+                              * r#"[IPv6:2001:0db8:85a3:0000:0000:8a2e:0370:7334]"#, */
         ]
         .into_iter()
         .map(|s| s.chars().collect())

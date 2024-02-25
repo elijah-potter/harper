@@ -1,5 +1,6 @@
 use config::Config;
-use tokio::{fs, net::TcpListener};
+use tokio::fs;
+use tokio::net::TcpListener;
 mod backend;
 mod config;
 mod diagnostics;
@@ -14,7 +15,7 @@ use tower_lsp::{LspService, Server};
 #[derive(Debug, Parser)]
 struct Args {
     #[arg(short, long, default_value_t = false)]
-    stdio: bool,
+    stdio: bool
 }
 
 #[tokio::main]

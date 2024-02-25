@@ -20,7 +20,8 @@ pub trait Linter: Send + Sync {
 
 #[cfg(test)]
 mod tests {
-    use crate::{parsers::Markdown, Document, Linter};
+    use crate::parsers::Markdown;
+    use crate::{Document, Linter};
 
     pub fn assert_lint_count(text: &str, mut linter: impl Linter, count: usize) {
         let test = Document::new(text, Box::new(Markdown));

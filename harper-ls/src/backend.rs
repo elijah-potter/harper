@@ -1,39 +1,52 @@
-use std::{collections::HashMap, path::PathBuf, sync::Arc};
+use std::collections::HashMap;
+use std::path::PathBuf;
+use std::sync::Arc;
 
-use harper_core::{
-    parsers::Markdown, Dictionary, Document, FullDictionary, LintSet, Linter, MergedDictionary,
-};
+use harper_core::parsers::Markdown;
+use harper_core::{Dictionary, Document, FullDictionary, LintSet, Linter, MergedDictionary};
 use itertools::Itertools;
 use serde_json::Value;
 use tokio::sync::Mutex;
-use tower_lsp::{
-    jsonrpc::Result,
-    lsp_types::{
-        notification::{PublishDiagnostics, ShowMessage},
-        CodeActionOrCommand, CodeActionParams, CodeActionProviderCapability, CodeActionResponse,
-        Diagnostic, DidChangeTextDocumentParams, DidCloseTextDocumentParams,
-        DidOpenTextDocumentParams, DidSaveTextDocumentParams, ExecuteCommandParams,
-        InitializeParams, InitializeResult, InitializedParams, MessageType,
-        PublishDiagnosticsParams, Range, ServerCapabilities, ShowMessageParams,
-        TextDocumentSyncCapability, TextDocumentSyncKind, TextDocumentSyncOptions,
-        TextDocumentSyncSaveOptions, Url,
-    },
-    Client, LanguageServer,
+use tower_lsp::jsonrpc::Result;
+use tower_lsp::lsp_types::notification::{PublishDiagnostics, ShowMessage};
+use tower_lsp::lsp_types::{
+    CodeActionOrCommand,
+    CodeActionParams,
+    CodeActionProviderCapability,
+    CodeActionResponse,
+    Diagnostic,
+    DidChangeTextDocumentParams,
+    DidCloseTextDocumentParams,
+    DidOpenTextDocumentParams,
+    DidSaveTextDocumentParams,
+    ExecuteCommandParams,
+    InitializeParams,
+    InitializeResult,
+    InitializedParams,
+    MessageType,
+    PublishDiagnosticsParams,
+    Range,
+    ServerCapabilities,
+    ShowMessageParams,
+    TextDocumentSyncCapability,
+    TextDocumentSyncKind,
+    TextDocumentSyncOptions,
+    TextDocumentSyncSaveOptions,
+    Url
 };
+use tower_lsp::{Client, LanguageServer};
 
-use crate::{
-    config::Config,
-    diagnostics::{lint_to_code_actions, lints_to_diagnostics},
-    dictionary_io::{load_dict, save_dict},
-    pos_conv::range_to_span,
-    tree_sitter_parser::TreeSitterParser,
-};
+use crate::config::Config;
+use crate::diagnostics::{lint_to_code_actions, lints_to_diagnostics};
+use crate::dictionary_io::{load_dict, save_dict};
+use crate::pos_conv::range_to_span;
+use crate::tree_sitter_parser::TreeSitterParser;
 
 #[derive(Default)]
 struct DocumentState {
     document: Document,
     ident_dict: Arc<FullDictionary>,
-    linter: LintSet,
+    linter: LintSet
 }
 
 /// Deallocate
@@ -41,7 +54,7 @@ pub struct Backend {
     client: Client,
     static_dictionary: Arc<FullDictionary>,
     config: Config,
-    doc_state: Mutex<HashMap<Url, DocumentState>>,
+    doc_state: Mutex<HashMap<Url, DocumentState>>
 }
 
 impl Backend {
@@ -52,11 +65,12 @@ impl Backend {
             client,
             static_dictionary: dictionary.into(),
             doc_state: Mutex::new(HashMap::new()),
-            config,
+            config
         }
     }
 
-    /// Rewrites a path to a filename using the same conventions as [Neovim's undo-files](https://neovim.io/doc/user/options.html#'undodir').
+    /// Rewrites a path to a filename using the same conventions as
+    /// [Neovim's undo-files](https://neovim.io/doc/user/options.html#'undodir').
     fn file_dict_name(url: &Url) -> PathBuf {
         let mut rewritten = String::new();
 
@@ -76,7 +90,7 @@ impl Backend {
     async fn load_file_dictionary(&self, url: &Url) -> FullDictionary {
         match load_dict(self.get_file_dict_path(url)).await {
             Ok(dict) => dict,
-            Err(_) => FullDictionary::new(),
+            Err(_) => FullDictionary::new()
         }
     }
 
@@ -87,7 +101,7 @@ impl Backend {
     async fn load_user_dictionary(&self) -> FullDictionary {
         match load_dict(&self.config.user_dict_path).await {
             Ok(dict) => dict,
-            Err(_) => FullDictionary::new(),
+            Err(_) => FullDictionary::new()
         }
     }
 
@@ -105,7 +119,7 @@ impl Backend {
 
     async fn generate_file_dictionary(
         &self,
-        url: &Url,
+        url: &Url
     ) -> anyhow::Result<MergedDictionary<FullDictionary>> {
         let (global_dictionary, file_dictionary) = tokio::join!(
             self.generate_global_dictionary(),
@@ -171,7 +185,7 @@ impl Backend {
     async fn generate_code_actions(
         &self,
         url: &Url,
-        range: Range,
+        range: Range
     ) -> Result<Vec<CodeActionOrCommand>> {
         let mut doc_states = self.doc_state.lock().await;
         let Some(doc_state) = doc_states.get_mut(url) else {
@@ -213,7 +227,7 @@ impl Backend {
             client
                 .send_notification::<ShowMessage>(ShowMessageParams {
                     typ: MessageType::INFO,
-                    message: "Linting...".to_string(),
+                    message: "Linting...".to_string()
                 })
                 .await
         });
@@ -223,7 +237,7 @@ impl Backend {
         let result = PublishDiagnosticsParams {
             uri: url.clone(),
             diagnostics,
-            version: None,
+            version: None
         };
 
         self.client
@@ -245,11 +259,11 @@ impl LanguageServer for Backend {
                         change: Some(TextDocumentSyncKind::FULL),
                         will_save: None,
                         will_save_wait_until: None,
-                        save: Some(TextDocumentSyncSaveOptions::Supported(true)),
-                    },
+                        save: Some(TextDocumentSyncSaveOptions::Supported(true))
+                    }
                 )),
                 ..Default::default()
-            },
+            }
         })
     }
 
@@ -268,8 +282,10 @@ impl LanguageServer for Backend {
             .log_message(MessageType::INFO, "File saved!")
             .await;
 
-        self.update_document_from_file(&params.text_document.uri)
+        let _ = self
+            .update_document_from_file(&params.text_document.uri)
             .await;
+
         self.publish_diagnostics(&params.text_document.uri).await;
     }
 
@@ -278,7 +294,8 @@ impl LanguageServer for Backend {
             .log_message(MessageType::INFO, "File opened!")
             .await;
 
-        self.update_document_from_file(&params.text_document.uri)
+        let _ = self
+            .update_document_from_file(&params.text_document.uri)
             .await;
 
         self.publish_diagnostics(&params.text_document.uri).await;
@@ -339,7 +356,7 @@ impl LanguageServer for Backend {
 
                 Ok(None)
             }
-            _ => Ok(None),
+            _ => Ok(None)
         }
     }
 

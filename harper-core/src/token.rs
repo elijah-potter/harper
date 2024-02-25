@@ -7,7 +7,7 @@ use crate::span::Span;
 #[derive(Debug, Clone, Copy, Serialize, Deserialize, PartialEq, Default)]
 pub struct Token {
     pub span: Span,
-    pub kind: TokenKind,
+    pub kind: TokenKind
 }
 
 impl Token {
@@ -17,16 +17,17 @@ impl Token {
 
         FatToken {
             content,
-            kind: self.kind,
+            kind: self.kind
         }
     }
 }
 
-/// A [`Token`] that holds its content as a fat [`Vec<char>`] rather than as a [`Span`].
+/// A [`Token`] that holds its content as a fat [`Vec<char>`] rather than as a
+/// [`Span`].
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, PartialOrd)]
 pub struct FatToken {
     pub content: Vec<char>,
-    pub kind: TokenKind,
+    pub kind: TokenKind
 }
 
 #[derive(Debug, Is, Clone, Copy, Serialize, Deserialize, PartialEq, Default, PartialOrd)]
@@ -41,9 +42,9 @@ pub enum TokenKind {
     /// A sequence of "\n" newlines
     Newline(usize),
     EmailAddress,
-    /// A special token used for things like inline code blocks that should be ignored by all
-    /// linters.
-    Unlintable,
+    /// A special token used for things like inline code blocks that should be
+    /// ignored by all linters.
+    Unlintable
 }
 
 impl TokenKind {
@@ -135,20 +136,20 @@ pub enum Punctuation {
     /// `|`
     Pipe,
     /// `_`
-    Underscore,
+    Underscore
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, PartialOrd)]
 pub struct Quote {
     /// The location of the matching quote, if it exists.
-    pub twin_loc: Option<usize>,
+    pub twin_loc: Option<usize>
 }
 
 pub trait TokenStringExt {
     fn first_word(&self) -> Option<Token>;
     /// Grabs the first word in the sentence.
-    /// Will also return [`None`] if there is an unlintable token in the position of the first
-    /// word.
+    /// Will also return [`None`] if there is an unlintable token in the
+    /// position of the first word.
     fn first_sentence_word(&self) -> Option<Token>;
     /// Grabs the first token that isn't whitespace from the token string.
     fn first_non_whitespace(&self) -> Option<Token>;
@@ -158,8 +159,8 @@ pub trait TokenStringExt {
     fn iter_spaces(&self) -> impl Iterator<Item = &Token> + '_;
     fn iter_apostrophe_indices(&self) -> impl Iterator<Item = usize> + '_;
     fn iter_apostrophes(&self) -> impl Iterator<Item = &Token> + '_;
-    /// Grab the span that represents the beginning of the first element and the end of the last
-    /// element.
+    /// Grab the span that represents the beginning of the first element and the
+    /// end of the last element.
     fn span(&self) -> Option<Span>;
 
     fn iter_quote_indices(&self) -> impl Iterator<Item = usize> + '_;

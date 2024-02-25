@@ -1,9 +1,8 @@
-use std::path::{Path, PathBuf};
+use std::path::Path;
 
 use harper_core::{Dictionary, FullDictionary};
 use tokio::fs::File;
-use tokio::io::{self, AsyncRead, AsyncReadExt, BufReader};
-use tokio::io::{AsyncWrite, AsyncWriteExt};
+use tokio::io::{self, AsyncRead, AsyncReadExt, AsyncWrite, AsyncWriteExt, BufReader};
 
 pub async fn save_dict(path: impl AsRef<Path>, dict: impl Dictionary) -> io::Result<()> {
     let file = File::create(path.as_ref()).await?;

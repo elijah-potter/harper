@@ -1,5 +1,6 @@
 use super::{Lint, Linter};
-use crate::{token::TokenStringExt, Document, LintKind, Suggestion, TokenKind};
+use crate::token::TokenStringExt;
+use crate::{Document, LintKind, Suggestion, TokenKind};
 
 #[derive(Debug, Default)]
 pub struct Spaces;
@@ -23,7 +24,7 @@ impl Linter for Spaces {
                             "There are {} spaces where there should be only one.",
                             count
                         ),
-                        priority: 15,
+                        priority: 15
                     })
                 }
             }

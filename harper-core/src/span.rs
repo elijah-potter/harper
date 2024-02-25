@@ -6,7 +6,7 @@ use serde::{Deserialize, Serialize};
 #[derive(Debug, Clone, Copy, Serialize, Deserialize, Default, PartialEq, Eq)]
 pub struct Span {
     pub start: usize,
-    pub end: usize,
+    pub end: usize
 }
 
 impl Span {
@@ -17,7 +17,7 @@ impl Span {
     pub fn new_with_len(start: usize, len: usize) -> Self {
         Self {
             start,
-            end: start + len,
+            end: start + len
         }
     }
 

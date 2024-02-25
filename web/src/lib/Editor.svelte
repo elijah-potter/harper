@@ -9,7 +9,7 @@
 	let content = demo;
 
 	let lints: Lint[] = [];
-	let lintCards: HTMLDivElement[] = [];
+	let lintCards: HTMLButtonElement[] = [];
 	let focused: number | undefined;
 	let editor: HTMLTextAreaElement | null;
 
@@ -55,7 +55,7 @@
 		<h2 class="text-2xl font-bold m-1">Suggestions</h2>
 		<div class="flex flex-col overflow-y-scroll overflow-x-hidden m-0 p-0">
 			{#each lints as lint, i}
-				<div
+				<button
 					class="block max-w-sm p-6 bg-white dark:bg-gray-800 border border-gray-200 rounded-lg shadow m-1 hover:translate-x-1 transition-all"
 					on:click={() => (focused = i)}
 					bind:this={lintCards[i]}
@@ -95,7 +95,7 @@
 							{/each}
 						</div>
 					</div>
-				</div>
+				</button>
 			{/each}
 		</div>
 	</Card>

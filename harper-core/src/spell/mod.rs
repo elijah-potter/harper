@@ -17,12 +17,13 @@ pub type DictWord = SmallVec<[char; 6]>;
 
 /// Suggest a correct spelling for a given misspelled word.
 /// [`misspelled_word`] is assumed to be quite small (n < 100).
-/// [`max_edit_dist`] relates to an optimization that allows the search algorithm to prune large portions of the search.
+/// [`max_edit_dist`] relates to an optimization that allows the search
+/// algorithm to prune large portions of the search.
 pub fn suggest_correct_spelling<'a>(
     misspelled_word: &[char],
     result_limit: usize,
     max_edit_dist: u8,
-    dictionary: &'a impl Dictionary,
+    dictionary: &'a impl Dictionary
 ) -> Vec<&'a [char]> {
     let misspelled_word = seq_to_normalized(misspelled_word);
 
@@ -77,7 +78,8 @@ pub fn suggest_correct_spelling<'a>(
     // Create final, ordered list of suggestions.
     let mut found = Vec::with_capacity(found_dist.len());
 
-    // Often the longest and the shortest words are the most helpful, so lets push them first.
+    // Often the longest and the shortest words are the most helpful, so lets push
+    // them first.
     let minmax = found_dist.iter().position_minmax_by_key(|a| a.0.len());
     if let MinMaxResult::MinMax(a, b) = minmax {
         if a == b {
@@ -103,12 +105,13 @@ pub fn suggest_correct_spelling<'a>(
     found
 }
 
-/// Convenience function over [`suggest_correct_spelling`] that does conversions for you.
+/// Convenience function over [`suggest_correct_spelling`] that does conversions
+/// for you.
 pub fn suggest_correct_spelling_str(
     misspelled_word: impl AsRef<str>,
     result_limit: usize,
     max_edit_dist: u8,
-    dictionary: &FullDictionary,
+    dictionary: &FullDictionary
 ) -> Vec<String> {
     let chars: Vec<char> = misspelled_word.as_ref().chars().collect();
 
@@ -127,7 +130,7 @@ fn edit_distance_min_alloc(
     source: &[char],
     target: &[char],
     previous_row: &mut Vec<u8>,
-    current_row: &mut Vec<u8>,
+    current_row: &mut Vec<u8>
 ) -> u8 {
     if cfg!(debug) {
         assert!(source.len() <= 255 && target.len() <= 255);
@@ -175,7 +178,7 @@ fn seq_to_normalized(seq: &[char]) -> Cow<'_, [char]> {
 fn char_to_normalized(c: char) -> char {
     match c {
         '’' => '\'',
-        _ => c,
+        _ => c
     }
 }
 

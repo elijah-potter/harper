@@ -1,9 +1,10 @@
 mod markdown;
 mod plain_english;
 
-pub use crate::token::{Quote, Token, TokenKind, TokenStringExt};
 pub use markdown::Markdown;
 pub use plain_english::PlainEnglish;
+
+pub use crate::token::{Quote, Token, TokenKind, TokenStringExt};
 
 pub trait Parser: Send + Sync {
     fn parse(&mut self, source: &[char]) -> Vec<Token>;
@@ -15,7 +16,7 @@ pub trait StrParser {
 
 impl<T> StrParser for T
 where
-    T: Parser,
+    T: Parser
 {
     fn parse_str(&mut self, source: impl AsRef<str>) -> Vec<Token> {
         let source: Vec<_> = source.as_ref().chars().collect();
@@ -26,15 +27,13 @@ where
 #[cfg(test)]
 mod tests {
     use super::{Markdown, Parser, PlainEnglish};
-    use crate::{
-        Punctuation,
-        TokenKind::{self, *},
-    };
+    use crate::Punctuation;
+    use crate::TokenKind::{self, *};
 
     fn assert_tokens_eq(
         test_str: impl AsRef<str>,
         expected: &[TokenKind],
-        parser: &mut impl Parser,
+        parser: &mut impl Parser
     ) {
         let chars: Vec<_> = test_str.as_ref().chars().collect();
         let tokens = parser.parse(&chars);
@@ -71,8 +70,8 @@ mod tests {
                 Space(1),
                 Word,
                 Space(1),
-                Word,
-            ],
+                Word
+            ]
         )
     }
 
@@ -89,8 +88,8 @@ mod tests {
                 Word,
                 Space(1),
                 Word,
-                Newline(1),
-            ],
+                Newline(1)
+            ]
         );
     }
 
@@ -107,8 +106,8 @@ mod tests {
                 Word,
                 Space(1),
                 Word,
-                Newline(1),
-            ],
+                Newline(1)
+            ]
         );
     }
 }

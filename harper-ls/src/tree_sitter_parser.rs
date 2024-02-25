@@ -1,23 +1,17 @@
 use std::collections::HashSet;
 
-use harper_core::{
-    parsers::{Markdown, Parser},
-    FullDictionary, Span,
-};
+use harper_core::parsers::{Markdown, Parser};
+use harper_core::{FullDictionary, Span};
 use tree_sitter::{Language, Node, Tree, TreeCursor};
 
-/// A Harper parser that wraps the standard [`Markdown`] parser that exclusively parses
-/// comments in any language supported by [`tree_sitter`].
+/// A Harper parser that wraps the standard [`Markdown`] parser that exclusively
+/// parses comments in any language supported by [`tree_sitter`].
 #[derive(Debug, Clone)]
 pub struct TreeSitterParser {
-    language: Language,
+    language: Language
 }
 
 impl TreeSitterParser {
-    pub fn new(language: Language) -> Self {
-        Self { language }
-    }
-
     pub fn new_from_extension(file_extension: &str) -> Option<Self> {
         let language = match file_extension {
             "rs" => tree_sitter_rust::language(),
@@ -35,7 +29,7 @@ impl TreeSitterParser {
             "cs" => tree_sitter_c_sharp::language(),
             "toml" => tree_sitter_toml::language(),
             "lua" => tree_sitter_lua::language(),
-            _ => return None,
+            _ => return None
         };
 
         Some(Self { language })

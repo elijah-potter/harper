@@ -1,6 +1,7 @@
-use crate::{document::Document, token::Quote, Punctuation, TokenKind};
-
 use super::{Lint, LintKind, Linter};
+use crate::document::Document;
+use crate::token::Quote;
+use crate::{Punctuation, TokenKind};
 
 #[derive(Debug, Clone, Copy, Default)]
 pub struct UnclosedQuotes;
@@ -18,7 +19,7 @@ impl Linter for UnclosedQuotes {
                     lint_kind: LintKind::Formatting,
                     suggestions: vec![],
                     message: "This quote has no termination.".to_string(),
-                    priority: 255,
+                    priority: 255
                 })
             }
         }

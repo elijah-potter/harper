@@ -1,7 +1,8 @@
 use super::{Parser, PlainEnglish};
 use crate::{Span, Token, TokenKind};
 
-/// A parser that wraps the [`PlainEnglish`] parser that allows one to parse CommonMark files.
+/// A parser that wraps the [`PlainEnglish`] parser that allows one to parse
+/// CommonMark files.
 ///
 /// Will ignore code blocks and tables.
 pub struct Markdown;
@@ -33,14 +34,14 @@ impl Parser for Markdown {
                 pulldown_cmark::Event::HardBreak => {
                     tokens.push(Token {
                         span: Span::new_with_len(traversed_chars, 1),
-                        kind: TokenKind::Newline(1),
+                        kind: TokenKind::Newline(1)
                     });
                 }
                 pulldown_cmark::Event::Start(tag) => stack.push(tag),
                 pulldown_cmark::Event::End(pulldown_cmark::Tag::Paragraph)
                 | pulldown_cmark::Event::End(pulldown_cmark::Tag::Item) => tokens.push(Token {
                     span: Span::new_with_len(traversed_chars, 1),
-                    kind: TokenKind::Newline(1),
+                    kind: TokenKind::Newline(1)
                 }),
                 pulldown_cmark::Event::End(_) => {
                     stack.pop();
@@ -50,7 +51,7 @@ impl Parser for Markdown {
 
                     tokens.push(Token {
                         span: Span::new(traversed_chars, chunk_len),
-                        kind: TokenKind::Unlintable,
+                        kind: TokenKind::Unlintable
                     });
                 }
                 pulldown_cmark::Event::Text(text) => {
@@ -62,7 +63,7 @@ impl Parser for Markdown {
                         if matches!(tag, Tag::CodeBlock(..)) {
                             tokens.push(Token {
                                 span: Span::new(traversed_chars, text.chars().count()),
-                                kind: TokenKind::Unlintable,
+                                kind: TokenKind::Unlintable
                             });
                             continue;
                         }
@@ -89,7 +90,7 @@ impl Parser for Markdown {
 
                     tokens.append(&mut new_tokens);
                 }
-                _ => (),
+                _ => ()
             }
         }
 

@@ -1,10 +1,9 @@
-use crate::spell::DictWord;
-
 use super::Error;
+use crate::spell::DictWord;
 
 pub struct MarkedWord {
     pub letters: DictWord,
-    pub attributes: Vec<char>,
+    pub attributes: Vec<char>
 }
 
 /// Parse a hunspell word list
@@ -25,12 +24,12 @@ pub fn parse_word_list(source: &str) -> Result<Vec<MarkedWord>, Error> {
         if let Some((word, attributes)) = line.split_once('/') {
             words.push(MarkedWord {
                 letters: word.chars().collect(),
-                attributes: attributes.chars().collect(),
+                attributes: attributes.chars().collect()
             })
         } else {
             words.push(MarkedWord {
                 letters: line.chars().collect(),
-                attributes: Vec::new(),
+                attributes: Vec::new()
             })
         }
     }

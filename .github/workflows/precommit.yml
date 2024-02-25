@@ -1,0 +1,24 @@
+name: Precommit
+
+on:
+  push:
+    branches: [ "master" ]
+  pull_request:
+    branches: [ "master" ]
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  precommit:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+    - uses: actions/setup-node@v4
+    - name: Install Rust Nightly
+      run: rustup toolchain install nightly && rustup component add rustfmt --toolchain nightly
+    - name: Install `wasm-pack`
+      run: curl https://rustwasm.github.io/wasm-pack/installer/init.sh -sSf | sh
+    - name: Precommit
+      run: ./precommit.sh

@@ -1,18 +1,20 @@
-use itertools::Itertools;
-use smallvec::ToSmallVec;
 use std::usize;
 
 use hashbrown::HashMap;
+use itertools::Itertools;
+use smallvec::ToSmallVec;
 
-use crate::{spell::DictWord, Span};
-
-use super::{matcher::Matcher, word_list::MarkedWord, Error};
+use super::matcher::Matcher;
+use super::word_list::MarkedWord;
+use super::Error;
+use crate::spell::DictWord;
+use crate::Span;
 
 #[derive(Debug, Clone)]
 struct AffixReplacement {
     pub remove: Vec<char>,
     pub add: Vec<char>,
-    pub condition: Matcher,
+    pub condition: Matcher
 }
 
 #[derive(Debug, Clone)]
@@ -20,19 +22,19 @@ struct Expansion {
     // If not true, its a prefix
     pub suffix: bool,
     pub cross_product: bool,
-    pub replacements: Vec<AffixReplacement>,
+    pub replacements: Vec<AffixReplacement>
 }
 
 #[derive(Debug)]
 pub struct AttributeList {
     /// Key = Affix Flag
-    affixes: HashMap<char, Expansion>,
+    affixes: HashMap<char, Expansion>
 }
 
 impl AttributeList {
     pub fn parse(file: &str) -> Result<Self, Error> {
         let mut output = Self {
-            affixes: HashMap::default(),
+            affixes: HashMap::default()
         };
 
         for line in file.lines() {
@@ -56,7 +58,7 @@ impl AttributeList {
         let suffix = match parser.parse_arg()? {
             "PFX" => false,
             "SFX" => true,
-            _ => return Ok(()),
+            _ => return Ok(())
         };
 
         let flag = {
@@ -84,7 +86,7 @@ impl AttributeList {
             let replacement = AffixReplacement {
                 remove,
                 add,
-                condition,
+                condition
             };
 
             expansion.replacements.push(replacement)
@@ -97,8 +99,8 @@ impl AttributeList {
                 Expansion {
                     suffix,
                     cross_product,
-                    replacements: Vec::with_capacity(count),
-                },
+                    replacements: Vec::with_capacity(count)
+                }
             );
         }
 
@@ -122,7 +124,7 @@ impl AttributeList {
                 new_words.extend(Self::apply_replacement(
                     replacement,
                     &word.letters,
-                    expansion.suffix,
+                    expansion.suffix
                 ))
             }
 
@@ -143,7 +145,7 @@ impl AttributeList {
                 for new_word in new_words {
                     cross_product_words.extend(self.expand_marked_word(MarkedWord {
                         letters: new_word,
-                        attributes: opp_attr.clone(),
+                        attributes: opp_attr.clone()
                     })?)
                 }
 
@@ -160,7 +162,7 @@ impl AttributeList {
 
     pub fn expand_marked_words(
         &self,
-        words: impl IntoIterator<Item = MarkedWord>,
+        words: impl IntoIterator<Item = MarkedWord>
     ) -> Result<Vec<DictWord>, Error> {
         let mut output = Vec::new();
 
@@ -174,7 +176,7 @@ impl AttributeList {
     fn apply_replacement(
         replacement: &AffixReplacement,
         letters: &[char],
-        suffix: bool,
+        suffix: bool
     ) -> Option<DictWord> {
         if replacement.condition.len() > letters.len() {
             return None;
@@ -231,7 +233,7 @@ impl AttributeList {
 
 struct AttributeArgParser<'a> {
     line: &'a str,
-    cursor: usize,
+    cursor: usize
 }
 
 impl<'a> AttributeArgParser<'a> {
@@ -262,7 +264,8 @@ impl<'a> AttributeArgParser<'a> {
         Ok(&self.line[abs_start..abs_end])
     }
 
-    // Grab next affix argument, returning an error if it isn't parsable as a number.
+    // Grab next affix argument, returning an error if it isn't parsable as a
+    // number.
     fn parse_usize_arg(&mut self) -> Result<usize, Error> {
         self.parse_arg()?
             .parse()
@@ -274,7 +277,7 @@ impl<'a> AttributeArgParser<'a> {
         match self.parse_arg()? {
             "Y" => Ok(true),
             "N" => Ok(false),
-            _ => Err(Error::ExpectedBoolean),
+            _ => Err(Error::ExpectedBoolean)
         }
     }
 }

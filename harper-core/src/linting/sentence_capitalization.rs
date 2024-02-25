@@ -1,15 +1,16 @@
 use itertools::Itertools;
 
-use crate::{document::Document, TokenStringExt};
-
 use super::lint::Suggestion;
 use super::{Lint, LintKind, Linter};
+use crate::document::Document;
+use crate::TokenStringExt;
 
 #[derive(Debug, Clone, Copy, Default)]
 pub struct SentenceCapitalization;
 
 impl Linter for SentenceCapitalization {
-    /// A linter that checks to make sure the first word of each sentence is capitalized.
+    /// A linter that checks to make sure the first word of each sentence is
+    /// capitalized.
     fn lint(&mut self, document: &Document) -> Vec<Lint> {
         let mut lints = Vec::new();
 
@@ -27,11 +28,11 @@ impl Linter for SentenceCapitalization {
                             span: first_word.span.with_len(1),
                             lint_kind: LintKind::Capitalization,
                             suggestions: vec![Suggestion::ReplaceWith(
-                                first_letter.to_uppercase().collect_vec(),
+                                first_letter.to_uppercase().collect_vec()
                             )],
                             priority: 31,
                             message: "This sentence does not start with a capital letter"
-                                .to_string(),
+                                .to_string()
                         })
                     }
                 }
@@ -62,7 +63,7 @@ mod tests {
         assert_lint_count(
             "i have complete conviction. she is guilty",
             SentenceCapitalization,
-            2,
+            2
         )
     }
 
@@ -71,7 +72,7 @@ mod tests {
         assert_lint_count(
             "53 is the length of the longest word.",
             SentenceCapitalization,
-            0,
+            0
         );
     }
 
@@ -80,7 +81,7 @@ mod tests {
         assert_lint_count(
             "[`misspelled_word`] is assumed to be quite small (n < 100). ",
             SentenceCapitalization,
-            0,
+            0
         )
     }
 
@@ -89,7 +90,7 @@ mod tests {
         assert_lint_count(
             "the linter should not be affected by `this` unlintable.",
             SentenceCapitalization,
-            1,
+            1
         )
     }
 }

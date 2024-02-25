@@ -13,7 +13,7 @@ pub struct Lint {
     pub message: String,
     /// A numerical value for the importance of a lint.
     /// Lower = more important.
-    pub priority: u8,
+    pub priority: u8
 }
 
 impl Default for Lint {
@@ -23,7 +23,7 @@ impl Default for Lint {
             lint_kind: Default::default(),
             suggestions: Default::default(),
             message: Default::default(),
-            priority: 127,
+            priority: 127
         }
     }
 }
@@ -36,12 +36,12 @@ pub enum LintKind {
     Repetition,
     Readability,
     #[default]
-    Miscellaneous,
+    Miscellaneous
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize, Is)]
 pub enum Suggestion {
-    ReplaceWith(Vec<char>),
+    ReplaceWith(Vec<char>)
 }
 
 impl Display for Suggestion {

@@ -3,8 +3,9 @@
     <h1>Harper</h1>
 </div>
 
-[![Build](https://github.com/chilipepperhott/harper/actions/workflows/build.yml/badge.svg)](https://github.com/chilipepperhott/harper/actions/workflows/build.yml)
-[![Rust Tests](https://github.com/chilipepperhott/harper/actions/workflows/rust-tests.yml/badge.svg)](https://github.com/chilipepperhott/harper/actions/workflows/rust-tests.yml)
+[![Harper LS](https://github.com/chilipepperhott/harper/actions/workflows/build_harper_ls.yml/badge.svg)](https://github.com/chilipepperhott/harper/actions/workflows/build_harper_ls.yml)
+[![Web](https://github.com/chilipepperhott/harper/actions/workflows/build_web.yml/badge.svg)](https://github.com/chilipepperhott/harper/actions/workflows/build_web.yml)
+[![Precommit](https://github.com/chilipepperhott/harper/actions/workflows/precommit.yml/badge.svg)](https://github.com/chilipepperhott/harper/actions/workflows/precommit.yml)
 
 Harper is a an English grammar checker designed to be _just right._
 I created it after years of dealing with the shortcomings of the competition.

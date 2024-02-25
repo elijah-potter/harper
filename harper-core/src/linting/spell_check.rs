@@ -1,23 +1,24 @@
 use hashbrown::HashMap;
 
-use super::{Lint, LintKind, Linter};
-use crate::{document::Document, spell::suggest_correct_spelling, Dictionary};
-
 use super::lint::Suggestion;
+use super::{Lint, LintKind, Linter};
+use crate::document::Document;
+use crate::spell::suggest_correct_spelling;
+use crate::Dictionary;
 
 pub struct SpellCheck<T>
 where
-    T: Dictionary,
+    T: Dictionary
 {
     dictionary: T,
-    word_cache: HashMap<Vec<char>, Vec<Vec<char>>>,
+    word_cache: HashMap<Vec<char>, Vec<Vec<char>>>
 }
 
 impl<T: Dictionary> SpellCheck<T> {
     pub fn new(dictionary: T) -> Self {
         Self {
             dictionary,
-            word_cache: HashMap::new(),
+            word_cache: HashMap::new()
         }
     }
 }
@@ -85,7 +86,7 @@ impl<T: Dictionary> Linter for SpellCheck<T> {
                     "Did you mean to spell “{}” this way?",
                     document.get_span_content_str(word.span)
                 ),
-                priority: 63,
+                priority: 63
             })
         }
 

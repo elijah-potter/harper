@@ -1,17 +1,14 @@
 mod email_address;
 
-use crate::token::Quote;
-
-use crate::token::{Punctuation, TokenKind};
-
 use self::email_address::lex_email_address;
+use crate::token::{Punctuation, Quote, TokenKind};
 
 #[derive(Debug)]
 pub struct FoundToken {
     /// The index of the character __after__ the lexed token
     pub next_index: usize,
     /// Token lexed
-    pub token: TokenKind,
+    pub token: TokenKind
 }
 
 pub fn lex_token(source: &[char]) -> Option<FoundToken> {
@@ -21,7 +18,7 @@ pub fn lex_token(source: &[char]) -> Option<FoundToken> {
         lex_newlines,
         lex_number,
         lex_email_address,
-        lex_word,
+        lex_word
     ];
 
     for lexer in lexers {
@@ -46,7 +43,7 @@ fn lex_word(source: &[char]) -> Option<FoundToken> {
         } else {
             return Some(FoundToken {
                 next_index: end + 1,
-                token: TokenKind::Word,
+                token: TokenKind::Word
             });
         }
     }
@@ -78,7 +75,7 @@ pub fn lex_number(source: &[char]) -> Option<FoundToken> {
         if let Ok(n) = s.parse::<f64>() {
             return Some(FoundToken {
                 token: TokenKind::Number(n),
-                next_index: end + 1,
+                next_index: end + 1
             });
         }
     }
@@ -92,7 +89,7 @@ fn lex_newlines(source: &[char]) -> Option<FoundToken> {
     if count > 0 {
         Some(FoundToken {
             token: TokenKind::Newline(count),
-            next_index: count,
+            next_index: count
         })
     } else {
         None
@@ -105,7 +102,7 @@ fn lex_spaces(source: &[char]) -> Option<FoundToken> {
     if count > 0 {
         Some(FoundToken {
             token: TokenKind::Space(count),
-            next_index: count,
+            next_index: count
         })
     } else {
         None
@@ -156,12 +153,12 @@ fn lex_punctuation(source: &[char]) -> Option<FoundToken> {
         '$' => Dollar,
         '|' => Pipe,
         '_' => Underscore,
-        _ => return None,
+        _ => return None
     };
 
     Some(FoundToken {
         next_index: 1,
-        token: TokenKind::Punctuation(punct),
+        token: TokenKind::Punctuation(punct)
     })
 }
 
@@ -171,7 +168,7 @@ fn lex_quote(source: &[char]) -> Option<FoundToken> {
     if c == '\"' || c == '“' || c == '”' {
         Some(FoundToken {
             next_index: 1,
-            token: TokenKind::Punctuation(Punctuation::Quote(Quote { twin_loc: None })),
+            token: TokenKind::Punctuation(Punctuation::Quote(Quote { twin_loc: None }))
         })
     } else {
         None

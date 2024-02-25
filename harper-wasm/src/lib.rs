@@ -3,7 +3,8 @@ use std::sync::Mutex;
 use harper_core::{remove_overlaps, Document, FullDictionary, LintSet, Linter};
 use once_cell::sync::Lazy;
 use serde::Serialize;
-use wasm_bindgen::{prelude::wasm_bindgen, JsValue};
+use wasm_bindgen::prelude::wasm_bindgen;
+use wasm_bindgen::JsValue;
 
 static LINTER: Lazy<Mutex<LintSet>> =
     Lazy::new(|| Mutex::new(LintSet::new().with_standard(FullDictionary::create_from_curated())));
@@ -15,7 +16,8 @@ fn glue_serializer() -> serde_wasm_bindgen::Serializer {
 
 /// Setup the WebAssembly module's logging.
 ///
-/// Not strictly necessary for anything to function, but makes bug-hunting less painful.
+/// Not strictly necessary for anything to function, but makes bug-hunting less
+/// painful.
 #[wasm_bindgen(start)]
 pub fn setup() {
     console_error_panic_hook::set_once();
@@ -51,7 +53,7 @@ pub fn parse(text: String) -> Vec<JsValue> {
 pub fn apply_suggestion(
     text: String,
     span: JsValue,
-    suggestion: JsValue,
+    suggestion: JsValue
 ) -> Result<String, String> {
     let span = serde_wasm_bindgen::from_value(span).map_err(|e| e.to_string())?;
     let suggestion = serde_wasm_bindgen::from_value(suggestion).map_err(|e| e.to_string())?;
