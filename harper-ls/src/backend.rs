@@ -328,36 +328,31 @@ impl LanguageServer for Backend {
             .into_iter()
             .map(|v| serde_json::from_value::<String>(v).unwrap());
 
+        let Some((first, second)) = string_args.next_tuple() else {
+            return Ok(None);
+        };
+
+        let word = &first.chars().collect::<Vec<_>>();
+        let file_url = second.parse().unwrap();
+
         match params.command.as_str() {
             "AddToUserDict" => {
-                let Some(first) = string_args.next() else {
-                    return Ok(None);
-                };
-
-                let word = &first.chars().collect::<Vec<_>>();
-
                 let mut dict = self.load_user_dictionary().await;
                 dict.append_word(word);
                 self.save_user_dictionary(dict).await.unwrap();
-
-                Ok(None)
             }
             "AddToFileDict" => {
-                let Some((first, second)) = string_args.next_tuple() else {
-                    return Ok(None);
-                };
-
-                let word = &first.chars().collect::<Vec<_>>();
-
-                let file_url = second.parse().unwrap();
                 let mut dict = self.load_file_dictionary(&file_url).await;
                 dict.append_word(word);
                 self.save_file_dictionary(&file_url, dict).await.unwrap();
-
-                Ok(None)
             }
-            _ => Ok(None)
+            _ => ()
         }
+
+        let _ = self.update_document_from_file(&file_url).await;
+        self.publish_diagnostics(&file_url).await;
+
+        Ok(None)
     }
 
     async fn code_action(&self, params: CodeActionParams) -> Result<Option<CodeActionResponse>> {
