@@ -156,6 +156,13 @@ impl Document {
                     self.source.extend(popped.into_iter().skip(span.len()));
                 }
             }
+            Suggestion::Remove => {
+                for i in span.end..self.source.len() {
+                    self.source[i - span.len()] = self.source[i];
+                }
+
+                self.source.truncate(self.source.len() - span.len());
+            }
         }
 
         self.parse();

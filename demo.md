@@ -2,7 +2,7 @@ There are some cases where the the standard grammar checkers
 don't cut it. That s where Harper comes in handy.
 
 Harper is a language checker for developers. it can detect
-improper capitalization and mispelled words.
+improper capitalization and misspellled words.
 
 Harper works everywhere, even offline. Since you r data
 never leaves your device, you don't ned to worry aout us 

@@ -34,7 +34,11 @@ pub fn lint_to_code_actions<'a>(
             .flat_map(|suggestion| {
                 let range = span_to_range(source, lint.span);
 
-                let Suggestion::ReplaceWith(with) = suggestion;
+                let replace_string = match suggestion {
+                    Suggestion::ReplaceWith(with) => with.iter().collect(),
+                    Suggestion::Remove => "".to_string()
+                };
+
                 Some(CodeAction {
                     title: suggestion.to_string(),
                     kind: Some(CodeActionKind::QUICKFIX),
@@ -44,8 +48,7 @@ pub fn lint_to_code_actions<'a>(
                             url.clone(),
                             vec![TextEdit {
                                 range,
-
-                                new_text: with.iter().collect()
+                                new_text: replace_string
                             }]
                         )])),
                         document_changes: None,

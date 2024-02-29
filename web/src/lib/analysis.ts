@@ -67,9 +67,11 @@ export interface Lint {
 	message: string;
 }
 
-export interface Suggestion {
-	ReplaceWith: string[];
-}
+export type Suggestion =
+	| {
+			ReplaceWith: string[];
+	  }
+	| 'Remove';
 
 export interface Span {
 	start: number;

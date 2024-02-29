@@ -86,10 +86,14 @@
 												(edited) => (content = edited)
 											)}
 									>
-										Replace "{content.substring(lint.span.start, lint.span.end)}" with "{suggestion.ReplaceWith.reduce(
-											(p, c) => p + c,
-											''
-										)}"
+										{#if suggestion == 'Remove'}
+											Remove "{content.substring(lint.span.start, lint.span.end)}"
+										{:else}
+											Replace "{content.substring(lint.span.start, lint.span.end)}" with "{suggestion.ReplaceWith.reduce(
+												(p, c) => p + c,
+												''
+											)}"
+										{/if}
 									</Button>
 								</div>
 							{/each}

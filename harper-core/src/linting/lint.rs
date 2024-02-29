@@ -41,7 +41,8 @@ pub enum LintKind {
 
 #[derive(Debug, Clone, Serialize, Deserialize, Is)]
 pub enum Suggestion {
-    ReplaceWith(Vec<char>)
+    ReplaceWith(Vec<char>),
+    Remove
 }
 
 impl Display for Suggestion {
@@ -50,6 +51,7 @@ impl Display for Suggestion {
             Suggestion::ReplaceWith(with) => {
                 write!(f, "Replace with: “{}”", with.iter().collect::<String>())
             }
+            Suggestion::Remove => write!(f, "Remove error")
         }
     }
 }

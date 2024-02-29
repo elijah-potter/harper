@@ -85,7 +85,7 @@ impl Linter for RepeatedWords {
                     lints.push(Lint {
                         span: Span::new(remove_start, remove_end),
                         lint_kind: LintKind::Repetition,
-                        suggestions: vec![Suggestion::ReplaceWith(Vec::new())],
+                        suggestions: vec![Suggestion::Remove],
                         message: "Did you mean to repeat this word?".to_string(),
                         ..Default::default()
                     })
