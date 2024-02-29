@@ -1,5 +1,6 @@
 use paste::paste;
 
+use super::an_a::AnA;
 use super::long_sentences::LongSentences;
 use super::matcher::Matcher;
 use super::repeated_words::RepeatedWords;
@@ -38,6 +39,7 @@ impl LintSet {
 
     pub fn add_standard(&mut self, dictionary: impl Dictionary + 'static) -> &mut Self {
         self.add_repeated_words()
+            .add_an_a()
             .add_long_sentences()
             .add_unclosed_quotes()
             .add_sentence_capitalization()
@@ -97,6 +99,7 @@ macro_rules! create_simple_builder_methods {
 }
 
 create_simple_builder_methods!(
+    AnA,
     SentenceCapitalization,
     UnclosedQuotes,
     WrongQuotes,

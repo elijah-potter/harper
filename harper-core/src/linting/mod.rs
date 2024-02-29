@@ -1,3 +1,4 @@
+mod an_a;
 mod lint;
 mod lint_set;
 mod long_sentences;
