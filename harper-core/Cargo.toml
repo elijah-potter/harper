@@ -20,7 +20,7 @@ smallvec = { version = "1.12.0", features = ["serde"] }
 thiserror = "1.0.56"
 
 [dev-dependencies]
-divan = "0.1.11"
+divan = "0.1.14"
 
 [[bench]]
 name = "parse_demo"
