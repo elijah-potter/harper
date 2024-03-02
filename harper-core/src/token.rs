@@ -42,6 +42,7 @@ pub enum TokenKind {
     /// A sequence of "\n" newlines
     Newline(usize),
     EmailAddress,
+    Url,
     /// A special token used for things like inline code blocks that should be
     /// ignored by all linters.
     Unlintable

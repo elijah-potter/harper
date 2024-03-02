@@ -5,6 +5,7 @@
 set -eo pipefail
 
 R=$(pwd)
+RUSTDOCFLAGS="-D warnings"
 
 cargo +nightly fmt
 cargo clippy -- -Dwarnings

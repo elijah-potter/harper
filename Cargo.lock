@@ -533,6 +533,8 @@ dependencies = [
  "serde_json",
  "tokio",
  "tower-lsp",
+ "tracing",
+ "tracing-subscriber",
  "tree-sitter",
  "tree-sitter-c",
  "tree-sitter-c-sharp",

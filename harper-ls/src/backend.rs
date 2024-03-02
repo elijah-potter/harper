@@ -35,6 +35,7 @@ use tower_lsp::lsp_types::{
     Url
 };
 use tower_lsp::{Client, LanguageServer};
+use tracing::error;
 
 use crate::config::Config;
 use crate::diagnostics::{lint_to_code_actions, lints_to_diagnostics};
@@ -90,7 +91,11 @@ impl Backend {
     async fn load_file_dictionary(&self, url: &Url) -> FullDictionary {
         match load_dict(self.get_file_dict_path(url)).await {
             Ok(dict) => dict,
-            Err(_) => FullDictionary::new()
+            Err(err) => {
+                error!("Problem loading file dictionary: {}", err);
+
+                FullDictionary::new()
+            }
         }
     }
 
@@ -101,7 +106,11 @@ impl Backend {
     async fn load_user_dictionary(&self) -> FullDictionary {
         match load_dict(&self.config.user_dict_path).await {
             Ok(dict) => dict,
-            Err(_) => FullDictionary::new()
+            Err(err) => {
+                error!("Problem loading user dictionary: {}", err);
+
+                FullDictionary::new()
+            }
         }
     }
 
@@ -133,9 +142,12 @@ impl Backend {
     }
 
     async fn update_document_from_file(&self, url: &Url) -> anyhow::Result<()> {
-        let Ok(content) = tokio::fs::read_to_string(url.path()).await else {
-            // TODO: Proper error handling here.
-            return Ok(());
+        let content = match tokio::fs::read_to_string(url.path()).await {
+            Ok(content) => content,
+            Err(err) => {
+                error!("Error updating document from file: {}", err);
+                return Ok(());
+            }
         };
 
         self.update_document(url, &content).await

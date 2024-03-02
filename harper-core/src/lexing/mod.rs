@@ -1,4 +1,8 @@
 mod email_address;
+mod hostname;
+mod url;
+
+use url::lex_url;
 
 use self::email_address::lex_email_address;
 use crate::token::{Punctuation, Quote, TokenKind};
@@ -17,6 +21,7 @@ pub fn lex_token(source: &[char]) -> Option<FoundToken> {
         lex_spaces,
         lex_newlines,
         lex_number,
+        lex_url,
         lex_email_address,
         lex_word
     ];

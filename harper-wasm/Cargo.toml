@@ -8,10 +8,6 @@ publish = false
 [lib]
 crate-type = ["cdylib", "rlib"]
 
-[profile.release]
-opt-level = 3 
-strip = true
-
 [dependencies]
 console_error_panic_hook = "0.1.7"
 tracing = "0.1.40"

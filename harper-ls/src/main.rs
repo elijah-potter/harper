@@ -1,3 +1,5 @@
+use std::io::stderr;
+
 use config::Config;
 use tokio::fs;
 use tokio::net::TcpListener;
@@ -11,6 +13,8 @@ mod tree_sitter_parser;
 use backend::Backend;
 use clap::Parser;
 use tower_lsp::{LspService, Server};
+use tracing::Level;
+use tracing_subscriber::FmtSubscriber;
 
 #[derive(Debug, Parser)]
 struct Args {
@@ -20,11 +24,17 @@ struct Args {
 
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
-    let args = Args::parse();
+    let subscriber = FmtSubscriber::builder()
+        .map_writer(move |_| stderr)
+        .with_max_level(Level::TRACE)
+        .finish();
 
+    tracing::subscriber::set_global_default(subscriber)?;
+
+    let args = Args::parse();
     let config = Config::default();
 
-    // Make sure this is available.
+    // Make sure these are available.
     fs::create_dir_all(config.user_dict_path.parent().unwrap()).await?;
     fs::create_dir_all(&config.file_dict_path).await?;
 

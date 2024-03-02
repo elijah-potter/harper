@@ -99,6 +99,8 @@ impl Matcher {
         // This match list needs to be automatically expanded instead of explicitly
         // defined like it is now.
         let mut triggers = pt! {
+            "repo" => "repository",
+            "repos" => "repositories",
             "my","self" => "myself",
             "human","live" => "human life",
             "eight","grade" => "eighth grade",

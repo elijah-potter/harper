@@ -1,5 +1,6 @@
 use itertools::Itertools;
 
+use super::hostname::lex_hostname;
 use super::FoundToken;
 use crate::TokenKind;
 
@@ -13,20 +14,7 @@ pub fn lex_email_address(source: &[char]) -> Option<FoundToken> {
         return None;
     }
 
-    let mut domain_part_len = source[at_loc + 1..]
-        .iter()
-        .position(|c| c.is_whitespace())
-        .unwrap_or(source.len() - 1 - at_loc);
-
-    loop {
-        let domain_part = &source[at_loc + 1..at_loc + 1 + domain_part_len];
-
-        if validate_hostname(domain_part) {
-            break;
-        }
-
-        domain_part_len -= 1;
-    }
+    let domain_part_len = lex_hostname(&source[at_loc + 1..])?;
 
     Some(FoundToken {
         next_index: at_loc + 1 + domain_part_len,
@@ -112,31 +100,10 @@ fn valid_unquoted_character(c: char) -> bool {
     false
 }
 
-/// Check if a host name is valid.
-fn validate_hostname(source: &[char]) -> bool {
-    if source.len() > 253 || source.is_empty() {
-        return false;
-    }
-
-    for label in source.split(|c| *c == '.') {
-        if label.is_empty() || label.len() > 63 {
-            return false;
-        }
-
-        for c in label {
-            if !matches!(c, 'A'..='Z' | 'a'..='z' | '0'..='9' | '-') {
-                return false;
-            }
-        }
-    }
-
-    true
-}
-
 #[cfg(test)]
 mod tests {
+    use super::super::hostname::tests::example_domain_parts;
     use super::{lex_email_address, validate_local_part};
-    use crate::lexing::email_address::validate_hostname;
 
     fn example_local_parts() -> impl Iterator<Item = Vec<char>> {
         [
@@ -162,44 +129,11 @@ mod tests {
         .map(|s| s.chars().collect())
     }
 
-    fn example_domain_parts() -> impl Iterator<Item = Vec<char>> {
-        [
-            r#"example.com"#,
-            r#"example.com"#,
-            r#"example.com"#,
-            r#"and.subdomains.example.com"#,
-            r#"example.com"#,
-            r#"example.com"#,
-            r#"example"#,
-            r#"s.example"#,
-            r#"example.org"#,
-            r#"example.org"#,
-            r#"example.org"#,
-            r#"strange.example.com"#,
-            r#"example.org"#,
-            r#"example.org"# /* The existing parser intentionally doesn't support IP addresses
-                              * It simply isn't worth the effort at the moment.
-                              * r#"[123.123.123.123]"#,
-                              * r#"[IPv6:2001:0db8:85a3:0000:0000:8a2e:0370:7334]"#,
-                              * r#"[IPv6:2001:0db8:85a3:0000:0000:8a2e:0370:7334]"#, */
-        ]
-        .into_iter()
-        .map(|s| s.chars().collect())
-    }
-
     #[test]
     fn example_local_parts_pass_validation() {
         for local in example_local_parts() {
             dbg!(local.iter().collect::<String>());
             assert!(validate_local_part(&local));
-        }
-    }
-
-    #[test]
-    fn example_domain_parts_pass_validation() {
-        for domain in example_domain_parts() {
-            dbg!(domain.iter().collect::<String>());
-            assert!(validate_hostname(&domain));
         }
     }
 

@@ -5,8 +5,7 @@ use itertools::Itertools;
 use crate::linting::Suggestion;
 use crate::parsers::{Markdown, Parser, PlainEnglish};
 use crate::span::Span;
-use crate::Punctuation::{self};
-use crate::{FatToken, Token, TokenKind, TokenStringExt};
+use crate::{FatToken, Punctuation, Token, TokenKind, TokenStringExt};
 
 pub struct Document {
     source: Vec<char>,
@@ -114,7 +113,7 @@ impl Document {
         first_sentence.into_iter().chain(rest).chain(last)
     }
 
-    /** Returns all tokens whose `kind` is [`Punctuation::Word`] */
+    /** Returns all tokens whose `kind` is [`TokenKind::Word`] */
     pub fn words(&self) -> impl Iterator<Item = Token> + '_ {
         self.tokens
             .iter()
