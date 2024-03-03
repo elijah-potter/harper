@@ -1,7 +1,6 @@
 use std::io::stderr;
 
 use config::Config;
-use tokio::fs;
 use tokio::net::TcpListener;
 mod backend;
 mod config;
@@ -26,17 +25,13 @@ struct Args {
 async fn main() -> anyhow::Result<()> {
     let subscriber = FmtSubscriber::builder()
         .map_writer(move |_| stderr)
-        .with_max_level(Level::TRACE)
+        .with_max_level(Level::INFO)
         .finish();
 
     tracing::subscriber::set_global_default(subscriber)?;
 
     let args = Args::parse();
     let config = Config::default();
-
-    // Make sure these are available.
-    fs::create_dir_all(config.user_dict_path.parent().unwrap()).await?;
-    fs::create_dir_all(&config.file_dict_path).await?;
 
     let (service, socket) = LspService::new(|client| Backend::new(client, config));
 

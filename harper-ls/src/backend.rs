@@ -15,6 +15,7 @@ use tower_lsp::lsp_types::{
     CodeActionProviderCapability,
     CodeActionResponse,
     Diagnostic,
+    DidChangeConfigurationParams,
     DidChangeTextDocumentParams,
     DidCloseTextDocumentParams,
     DidOpenTextDocumentParams,
@@ -35,7 +36,7 @@ use tower_lsp::lsp_types::{
     Url
 };
 use tower_lsp::{Client, LanguageServer};
-use tracing::error;
+use tracing::{error, info};
 
 use crate::config::Config;
 use crate::diagnostics::{lint_to_code_actions, lints_to_diagnostics};
@@ -54,7 +55,7 @@ struct DocumentState {
 pub struct Backend {
     client: Client,
     static_dictionary: Arc<FullDictionary>,
-    config: Config,
+    config: Mutex<Config>,
     doc_state: Mutex<HashMap<Url, DocumentState>>
 }
 
@@ -66,7 +67,7 @@ impl Backend {
             client,
             static_dictionary: dictionary.into(),
             doc_state: Mutex::new(HashMap::new()),
-            config
+            config: Mutex::new(config)
         }
     }
 
@@ -84,12 +85,14 @@ impl Backend {
         rewritten.into()
     }
 
-    fn get_file_dict_path(&self, url: &Url) -> PathBuf {
-        self.config.file_dict_path.join(Self::file_dict_name(url))
+    async fn get_file_dict_path(&self, url: &Url) -> PathBuf {
+        let config = self.config.lock().await;
+
+        config.file_dict_path.join(Self::file_dict_name(url))
     }
 
     async fn load_file_dictionary(&self, url: &Url) -> FullDictionary {
-        match load_dict(self.get_file_dict_path(url)).await {
+        match load_dict(self.get_file_dict_path(url).await).await {
             Ok(dict) => dict,
             Err(err) => {
                 error!("Problem loading file dictionary: {}", err);
@@ -100,11 +103,22 @@ impl Backend {
     }
 
     async fn save_file_dictionary(&self, url: &Url, dict: impl Dictionary) -> anyhow::Result<()> {
-        Ok(save_dict(self.get_file_dict_path(url), dict).await?)
+        Ok(save_dict(self.get_file_dict_path(url).await, dict).await?)
     }
 
     async fn load_user_dictionary(&self) -> FullDictionary {
-        match load_dict(&self.config.user_dict_path).await {
+        let config = self.config.lock().await;
+
+        info!(
+            "Loading user dictionary from `{}`",
+            config
+                .user_dict_path
+                .clone()
+                .into_os_string()
+                .to_string_lossy()
+        );
+
+        match load_dict(&config.user_dict_path).await {
             Ok(dict) => dict,
             Err(err) => {
                 error!("Problem loading user dictionary: {}", err);
@@ -115,7 +129,18 @@ impl Backend {
     }
 
     async fn save_user_dictionary(&self, dict: impl Dictionary) -> anyhow::Result<()> {
-        Ok(save_dict(&self.config.user_dict_path, dict).await?)
+        let config = self.config.lock().await;
+
+        info!(
+            "Saving user dictionary to `{}`",
+            config
+                .user_dict_path
+                .clone()
+                .into_os_string()
+                .to_string_lossy()
+        );
+
+        Ok(save_dict(&config.user_dict_path, dict).await?)
     }
 
     async fn generate_global_dictionary(&self) -> anyhow::Result<MergedDictionary<FullDictionary>> {
@@ -351,12 +376,17 @@ impl LanguageServer for Backend {
             "AddToUserDict" => {
                 let mut dict = self.load_user_dictionary().await;
                 dict.append_word(word);
-                self.save_user_dictionary(dict).await.unwrap();
+                if let Err(err) = self.save_user_dictionary(dict).await {
+                    error!("Unable to save user dictionary: {}", err);
+                }
             }
             "AddToFileDict" => {
                 let mut dict = self.load_file_dictionary(&file_url).await;
                 dict.append_word(word);
-                self.save_file_dictionary(&file_url, dict).await.unwrap();
+
+                if let Err(err) = self.save_file_dictionary(&file_url, dict).await {
+                    error!("Unable to save file dictionary: {}", err);
+                }
             }
             _ => ()
         }
@@ -365,6 +395,21 @@ impl LanguageServer for Backend {
         self.publish_diagnostics(&file_url).await;
 
         Ok(None)
+    }
+
+    async fn did_change_configuration(&self, params: DidChangeConfigurationParams) {
+        info!("Changing user configuration.");
+
+        let new_config = match Config::from_json_value(params.settings) {
+            Ok(new_config) => new_config,
+            Err(err) => {
+                error!("Unable to change config: {}", err);
+                return;
+            }
+        };
+
+        let mut config = self.config.lock().await;
+        *config = new_config;
     }
 
     async fn code_action(&self, params: CodeActionParams) -> Result<Option<CodeActionResponse>> {
