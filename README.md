@@ -24,7 +24,7 @@ That's why I created Harper: it is the grammar checker that fits my needs.
 Not only does it take milliseconds to lint a document, take less than 1/50th of LanguageTool's memory footprint, 
 but it is also completely private.
 
-Harper is even small enough to load via [WebAssembly.](https://harper.elijahpotter.dev)
+Harper is even small enough to load via [WebAssembly.](https://writewithharper.com)
 
 ## Installation
 

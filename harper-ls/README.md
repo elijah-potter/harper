@@ -1,6 +1,6 @@
 # `harper-ls`
 
-`harper-ls` is the [Language Server Protocol](https://microsoft.github.io/language-server-protocol/) frontend for [Harper](https://harper.elijahpotter.dev).
+`harper-ls` is the [Language Server Protocol](https://microsoft.github.io/language-server-protocol/) frontend for [Harper](https://writewithharper.com).
 Out of the box, it has built-in support for parsing the comments of most programming languages, as well as any and all markdown files.
 
 ## Installation
