@@ -45,7 +45,9 @@ If you use Neovim, you can set the location of the dictionary with the `userDict
 ```lua
 lspconfig.harper_ls.setup {
   settings = {
-    userDictPath = "~/dict.txt"
+    ["harper-ls"] = {
+      userDictPath = "~/dict.txt"
+    }
   },
 }
 ```

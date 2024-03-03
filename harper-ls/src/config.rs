@@ -7,7 +7,7 @@ use serde_json::Value;
 #[derive(Debug, Clone)]
 pub struct Config {
     pub user_dict_path: PathBuf,
-    pub file_dict_path: PathBuf
+    pub file_dict_path: PathBuf,
 }
 
 impl Config {
@@ -16,6 +16,12 @@ impl Config {
 
         let Value::Object(value) = value else {
             return Err(anyhow::format_err!("Settings must be an object."));
+        };
+
+        let Some(Value::Object(value)) = value.get("harper-ls") else {
+            return Err(anyhow::format_err!(
+                "Settings must contain a \"harper-ls\" key."
+            ));
         };
 
         if let Some(v) = value.get("userDictPath") {
@@ -36,7 +42,7 @@ impl Default for Config {
             user_dict_path: config_dir().unwrap().join("harper-ls/dictionary.txt"),
             file_dict_path: data_local_dir()
                 .unwrap()
-                .join("harper-ls/file_dictionaries/")
+                .join("harper-ls/file_dictionaries/"),
         }
     }
 }
