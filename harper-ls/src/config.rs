@@ -7,7 +7,7 @@ use serde_json::Value;
 #[derive(Debug, Clone)]
 pub struct Config {
     pub user_dict_path: PathBuf,
-    pub file_dict_path: PathBuf,
+    pub file_dict_path: PathBuf
 }
 
 impl Config {
@@ -42,7 +42,7 @@ impl Default for Config {
             user_dict_path: config_dir().unwrap().join("harper-ls/dictionary.txt"),
             file_dict_path: data_local_dir()
                 .unwrap()
-                .join("harper-ls/file_dictionaries/"),
+                .join("harper-ls/file_dictionaries/")
         }
     }
 }
