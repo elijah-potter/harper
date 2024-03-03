@@ -37,6 +37,19 @@ This dictionary is a simple word list in plain-text.
 You can add and remove words at will.
 You can add to the user dictionary with code actions on misspelled words.
 
+#### Configuration
+
+You don't have to stick with the default locations (listed above).
+If you use Neovim, you can set the location of the dictionary with the `userDictPath` key:
+
+```lua
+lspconfig.harper_ls.setup {
+  settings = {
+    userDictPath = "~/dict.txt"
+  },
+}
+```
+
 ### File-Local Dictionary
 
 Sometimes, you'll encounter a word (or name) that is only valid within the context of a specific file.
