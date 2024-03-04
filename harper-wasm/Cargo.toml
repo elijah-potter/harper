@@ -12,7 +12,7 @@ crate-type = ["cdylib", "rlib"]
 console_error_panic_hook = "0.1.7"
 tracing = "0.1.40"
 tracing-wasm = "0.2.1"
-wasm-bindgen = "0.2.90"
+wasm-bindgen = "0.2.91"
 harper-core = { path = "../harper-core" }
 serde = "1.0.197"
 serde-wasm-bindgen = "0.6.3"
