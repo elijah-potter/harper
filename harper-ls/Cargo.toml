@@ -5,7 +5,7 @@ edition = "2021"
 description = "The language checker for developers."
 license = "Apache-2.0"
 readme = "README.md"
-homepage = "https://github.com/chilipepperhott/harper"
+homepage = "https://github.com/elijah-potter/harper"
 
 [dependencies]
 harper-core = { path = "../harper-core", version = "0.7.0" }

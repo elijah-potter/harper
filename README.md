@@ -3,15 +3,15 @@
     <h1>Harper</h1>
 </div>
 
-[![Harper LS](https://github.com/chilipepperhott/harper/actions/workflows/build_harper_ls.yml/badge.svg)](https://github.com/chilipepperhott/harper/actions/workflows/build_harper_ls.yml)
-[![Web](https://github.com/chilipepperhott/harper/actions/workflows/build_web.yml/badge.svg)](https://github.com/chilipepperhott/harper/actions/workflows/build_web.yml)
-[![Precommit](https://github.com/chilipepperhott/harper/actions/workflows/precommit.yml/badge.svg)](https://github.com/chilipepperhott/harper/actions/workflows/precommit.yml)
+[![Harper LS](https://github.com/elijah-potter/harper/actions/workflows/build_harper_ls.yml/badge.svg)](https://github.com/elijah-potter/harper/actions/workflows/build_harper_ls.yml)
+[![Web](https://github.com/elijah-potter/harper/actions/workflows/build_web.yml/badge.svg)](https://github.com/elijah-potter/harper/actions/workflows/build_web.yml)
+[![Precommit](https://github.com/elijah-potter/harper/actions/workflows/precommit.yml/badge.svg)](https://github.com/elijah-potter/harper/actions/workflows/precommit.yml)
 
 Harper is an English grammar checker designed to be _just right._
 I created it after years of dealing with the shortcomings of the competition.
 
 Grammarly was too expensive and too overbearing. 
-It's suggestions lacked context, and were often just plain _wrong_.
+Its suggestions lacked context, and were often just plain _wrong_.
 Not to mention: it's a privacy nightmare.
 Everything you write with Grammarly is sent to their servers.
 Their privacy policy claims they don't sell the data, but that doesn't mean they don't use it to train large language models and god knows what else.

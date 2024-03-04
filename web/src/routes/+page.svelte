@@ -25,7 +25,7 @@
 
 	<div class="flex flex-row justify-evenly mt-5">
 		<a
-			href="https://github.com/chilipepperhott/harper"
+			href="https://github.com/elijah-potter/harper"
 			class="flex flex-row items-center [&>*]:m-2 dark:text-white"
 			><img
 				width="40"

@@ -16,7 +16,7 @@
 	$: lintText(content).then((newLints) => (lints = newLints));
 	$: boxHeight = calcHeight(content);
 	$: if (focused != null && lintCards[focused])
-		lintCards[focused].scrollIntoView({ behavior: 'smooth' });
+		lintCards[focused].scrollIntoView({ behavior: 'smooth', block: 'center' });
 
 	$: if (editor != null && focused != null) {
 		let lint = lints[focused % lints.length];
@@ -74,7 +74,7 @@
 								focused === i ? `calc(55px * ${lint.suggestions.length + 1})` : '0px'
 							}`}
 						>
-							<p style="height: 50px">{lint.message}</p>
+							<p style="height: 50px" class="text-left">{lint.message}</p>
 							{#each lint.suggestions as suggestion}
 								<div class="w-full p-[4px]">
 									<Button

@@ -51,24 +51,17 @@ impl Linter for AnA {
 // Matches with 99.71% and 99.77% of vowels and non-vowels in the
 // Carnegie-Mellon University word -> pronunciation dataset.
 fn starts_with_vowel(word: &[char]) -> bool {
-    if word.is_empty() {
-        return false;
-    }
-
     if matches!(
         word,
-        ['e', 'u', 'p', 'h', ..] | ['e', 'u', 'g' | 'l' | 'c', ..]
+        [] | ['u', 'k', ..] | ['e', 'u', 'p', 'h', ..] | ['e', 'u', 'g' | 'l' | 'c', ..]
     ) {
         return false;
     }
 
-    if matches!(word, ['u', 'k', ..]) {
-        return false;
-    }
-
     if matches!(
         word,
-        ['h', 'o', 'u', 'r', ..]
+        ['S', 'V', 'G']
+            | ['h', 'o', 'u', 'r', ..]
             | ['h', 'o', 'n', ..]
             | ['u', 'n', 'i', 'n' | 'm', ..]
             | ['u', 'n', 'a' | 'u', ..]

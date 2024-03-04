@@ -43,7 +43,7 @@ pub fn suggest_correct_spelling<'a>(
         misspelled_word.len() - max_edit_dist as usize
     };
 
-    // Note how we look at the biggest words first
+    // Note how we look at the biggest words first.
     let words_to_search = (shortest_word_len..misspelled_word.len() + max_edit_dist as usize)
         .rev()
         .flat_map(|len| dictionary.words_with_len_iter(len));
