@@ -5,7 +5,7 @@ pub fn lex_hostname(source: &[char]) -> Option<usize> {
         for c in label {
             passed_chars += 1;
             if !matches!(c, 'A'..='Z' | 'a'..='z' | '0'..='9' | '-') {
-                return Some(passed_chars);
+                return Some(passed_chars - 1);
             }
         }
 

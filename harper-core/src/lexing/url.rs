@@ -36,6 +36,8 @@ fn lex_ip_schemepart(source: &[char]) -> Option<usize> {
 
     // Parse endpoint path
     while cursor != rest.len() {
+        dbg!(&rest[cursor..]);
+
         if rest[cursor] != '/' {
             break;
         }
@@ -81,6 +83,8 @@ fn lex_login(source: &[char]) -> Option<usize> {
 
 fn lex_hostport(source: &[char]) -> Option<usize> {
     let hostname_end = lex_hostname(source)?;
+
+    dbg!(&source[..hostname_end]);
 
     if source.get(hostname_end) == Some(&':') {
         Some(
@@ -221,6 +225,11 @@ mod tests {
 
     #[test]
     fn consumes_youtube_not_garbage() {
-        assert_consumes_part("https://youtube.com aklsjdha", 20);
+        assert_consumes_part("https://youtube.com aklsjdha", 19);
+    }
+
+    #[test]
+    fn consumes_with_path() {
+        assert_consumes_full("https://elijahpotter.dev/articles/quantifying_hope_on_a_global_scale")
     }
 }

@@ -33,8 +33,6 @@ impl Span {
         self.start.max(other.start) <= self.end.min(other.end)
     }
 
-    pub fn is_valid() {}
-
     /// Get the associated content. Will return [`None`] if any aspect is
     /// invalid.
     pub fn try_get_content<'a>(&self, source: &'a [char]) -> Option<&'a [char]> {

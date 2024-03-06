@@ -3,8 +3,16 @@ use std::path::PathBuf;
 use std::sync::Arc;
 
 use harper_core::parsers::Markdown;
-use harper_core::{Dictionary, Document, FullDictionary, LintSet, Linter, MergedDictionary};
-use itertools::Itertools;
+use harper_core::{
+    Dictionary,
+    Document,
+    FullDictionary,
+    LintSet,
+    Linter,
+    MergedDictionary,
+    Token,
+    TokenKind
+};
 use serde_json::Value;
 use tokio::sync::Mutex;
 use tower_lsp::jsonrpc::Result;
@@ -14,12 +22,14 @@ use tower_lsp::lsp_types::{
     CodeActionParams,
     CodeActionProviderCapability,
     CodeActionResponse,
+    Command,
     Diagnostic,
     DidChangeConfigurationParams,
     DidChangeTextDocumentParams,
     DidCloseTextDocumentParams,
     DidOpenTextDocumentParams,
     DidSaveTextDocumentParams,
+    ExecuteCommandOptions,
     ExecuteCommandParams,
     InitializeParams,
     InitializeResult,
@@ -237,11 +247,24 @@ impl Backend {
         // Find lints whose span overlaps with range
         let span = range_to_span(source_chars, range);
 
-        let actions = lints
+        let mut actions: Vec<CodeActionOrCommand> = lints
             .into_iter()
             .filter(|lint| lint.span.overlaps_with(span))
             .flat_map(|lint| lint_to_code_actions(&lint, url, source_chars))
             .collect();
+
+        if let Some(Token {
+            kind: TokenKind::Url,
+            span,
+            ..
+        }) = doc_state.document.get_token_at_char_index(span.start)
+        {
+            actions.push(CodeActionOrCommand::Command(Command::new(
+                "Open URL".to_string(),
+                "HarperOpen".to_string(),
+                Some(vec![doc_state.document.get_span_content_str(span).into()])
+            )))
+        }
 
         Ok(actions)
     }
@@ -290,6 +313,14 @@ impl LanguageServer for Backend {
             server_info: None,
             capabilities: ServerCapabilities {
                 code_action_provider: Some(CodeActionProviderCapability::Simple(true)),
+                execute_command_provider: Some(ExecuteCommandOptions {
+                    commands: vec![
+                        "HarperAddToUserDict".to_owned(),
+                        "HarperAddToFileDict".to_owned(),
+                        "HarperOpen".to_owned(),
+                    ],
+                    ..Default::default()
+                }),
                 text_document_sync: Some(TextDocumentSyncCapability::Options(
                     TextDocumentSyncOptions {
                         open_close: Some(true),
@@ -299,6 +330,7 @@ impl LanguageServer for Backend {
                         save: Some(TextDocumentSyncSaveOptions::Supported(true))
                     }
                 )),
+
                 ..Default::default()
             }
         })
@@ -365,34 +397,67 @@ impl LanguageServer for Backend {
             .into_iter()
             .map(|v| serde_json::from_value::<String>(v).unwrap());
 
-        let Some((first, second)) = string_args.next_tuple() else {
+        let Some(first) = string_args.next() else {
             return Ok(None);
         };
 
-        let word = &first.chars().collect::<Vec<_>>();
-        let file_url = second.parse().unwrap();
+        info!("Received command: \"{}\"", params.command.as_str());
 
         match params.command.as_str() {
-            "AddToUserDict" => {
+            "HarperAddToUserDict" => {
+                let word = &first.chars().collect::<Vec<_>>();
+
+                let Some(second) = string_args.next() else {
+                    return Ok(None);
+                };
+
+                let file_url = second.parse().unwrap();
+
                 let mut dict = self.load_user_dictionary().await;
                 dict.append_word(word);
                 if let Err(err) = self.save_user_dictionary(dict).await {
                     error!("Unable to save user dictionary: {}", err);
                 }
+
+                let _ = self.update_document_from_file(&file_url).await;
+                self.publish_diagnostics(&file_url).await;
             }
-            "AddToFileDict" => {
+            "HarperAddToFileDict" => {
+                let word = &first.chars().collect::<Vec<_>>();
+
+                let Some(second) = string_args.next() else {
+                    return Ok(None);
+                };
+
+                let file_url = second.parse().unwrap();
+
                 let mut dict = self.load_file_dictionary(&file_url).await;
                 dict.append_word(word);
 
                 if let Err(err) = self.save_file_dictionary(&file_url, dict).await {
                     error!("Unable to save file dictionary: {}", err);
                 }
+
+                let _ = self.update_document_from_file(&file_url).await;
+                self.publish_diagnostics(&file_url).await;
             }
+            "HarperOpen" => match open::that(&first) {
+                Ok(()) => {
+                    let message = format!(r#"Opened "{}""#, first);
+
+                    self.client.log_message(MessageType::INFO, &message).await;
+
+                    info!("{}", message);
+                }
+                Err(err) => {
+                    self.client
+                        .log_message(MessageType::ERROR, "Unable to open URL")
+                        .await;
+                    error!("Unable to open URL: {}", err);
+                }
+            },
             _ => ()
         }
-
-        let _ = self.update_document_from_file(&file_url).await;
-        self.publish_diagnostics(&file_url).await;
 
         Ok(None)
     }

@@ -1,3 +1,4 @@
+use std::cmp::Ordering;
 use std::fmt::Display;
 
 use itertools::Itertools;
@@ -54,6 +55,21 @@ impl Document {
         self.tokens = self.parser.parse(&self.source);
         self.condense_contractions();
         self.match_quotes();
+    }
+
+    pub fn get_token_at_char_index(&self, char_index: usize) -> Option<Token> {
+        let index = self
+            .tokens
+            .binary_search_by(|t| {
+                if t.span.overlaps_with(Span::new_with_len(char_index, 1)) {
+                    Ordering::Equal
+                } else {
+                    t.span.start.cmp(&char_index)
+                }
+            })
+            .ok()?;
+
+        Some(self.tokens[index])
     }
 
     /// Defensively attempt to grab a specific token.
@@ -342,6 +358,7 @@ mod tests {
     use super::Document;
     use crate::parsers::{Markdown, PlainEnglish};
     use crate::token::TokenStringExt;
+    use crate::{Span, Token, TokenKind};
 
     #[test]
     fn parses_sentences_correctly() {
@@ -400,5 +417,19 @@ mod tests {
     #[test]
     fn medium_contraction2() {
         assert_condensed_contractions("There's no way", 5);
+    }
+
+    #[test]
+    fn selects_token_at_char_index() {
+        let text = "There were three little pigs. They built three little homes.";
+        let document = Document::new(text, Box::new(PlainEnglish));
+
+        assert_eq!(
+            document.get_token_at_char_index(19),
+            Some(Token {
+                kind: TokenKind::Word,
+                span: Span::new(17, 23)
+            })
+        )
     }
 }
