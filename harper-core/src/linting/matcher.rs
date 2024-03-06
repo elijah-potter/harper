@@ -99,6 +99,8 @@ impl Matcher {
         // This match list needs to be automatically expanded instead of explicitly
         // defined like it is now.
         let mut triggers = pt! {
+            "off","the","cuff" => "off-the-cuff",
+            "an","in" => "and in",
             "repo" => "repository",
             "repos" => "repositories",
             "my","self" => "myself",

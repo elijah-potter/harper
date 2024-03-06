@@ -33,14 +33,21 @@ impl Span {
         self.start.max(other.start) <= self.end.min(other.end)
     }
 
-    pub fn get_content<'a>(&self, source: &'a [char]) -> &'a [char] {
-        if cfg!(debug_assertions) {
-            assert!(self.start < self.end);
-            assert!(self.start < source.len());
-            assert!(self.end <= source.len());
+    pub fn is_valid() {}
+
+    /// Get the associated content. Will return [`None`] if any aspect is
+    /// invalid.
+    pub fn try_get_content<'a>(&self, source: &'a [char]) -> Option<&'a [char]> {
+        if (self.start > self.end) || (self.start >= source.len()) || (self.end > source.len()) {
+            return None;
         }
 
-        &source[self.start..self.end]
+        Some(&source[self.start..self.end])
+    }
+
+    /// Get the associated content. Will panic if any aspect is invalid.
+    pub fn get_content<'a>(&self, source: &'a [char]) -> &'a [char] {
+        self.try_get_content(source).unwrap()
     }
 
     pub fn get_content_string(&self, source: &[char]) -> String {

@@ -3,6 +3,7 @@ use std::io::stderr;
 use config::Config;
 use tokio::net::TcpListener;
 mod backend;
+mod comment_parsers;
 mod config;
 mod diagnostics;
 mod dictionary_io;

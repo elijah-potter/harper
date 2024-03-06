@@ -20,7 +20,7 @@
 				.toSorted(([a], [b]) => a.span.start - b.span.end))
 	);
 	$: if (focusLintIndex != null && lintHighlights[focusLintIndex] != null)
-		lintHighlights[focusLintIndex].scrollIntoView({ behavior: 'smooth' });
+		lintHighlights[focusLintIndex].scrollIntoView({ behavior: 'smooth', block: 'center' });
 
 	function reOrgString(text: string): (string | undefined)[] {
 		if (text.trim().length == 0) {

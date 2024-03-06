@@ -192,9 +192,9 @@ impl Backend {
             if let Some(ts_parser) =
                 TreeSitterParser::new_from_extension(&extension.to_string_lossy())
             {
-                let doc = Document::new(text, Box::new(ts_parser.clone()));
+                let source: Vec<char> = text.chars().collect();
 
-                if let Some(new_dict) = ts_parser.create_ident_dict(doc.get_full_content()) {
+                if let Some(new_dict) = ts_parser.create_ident_dict(source.as_slice()) {
                     let new_dict = Arc::new(new_dict);
 
                     if doc_state.ident_dict != new_dict {
@@ -206,7 +206,7 @@ impl Backend {
                     }
                 }
 
-                doc
+                Document::new_from_vec(source, Box::new(ts_parser))
             } else {
                 Document::new(text, Box::new(Markdown))
             }

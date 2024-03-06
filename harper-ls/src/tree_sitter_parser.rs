@@ -1,14 +1,16 @@
 use std::collections::HashSet;
 
-use harper_core::parsers::{Markdown, Parser};
-use harper_core::{FullDictionary, Span};
+use harper_core::parsers::Parser;
+use harper_core::{FullDictionary, Span, Token};
 use tree_sitter::{Language, Node, Tree, TreeCursor};
 
-/// A Harper parser that wraps the standard [`Markdown`] parser that exclusively
-/// parses comments in any language supported by [`tree_sitter`].
-#[derive(Debug, Clone)]
+use super::comment_parsers::{Go, Unit};
+
+/// A Harper parser that wraps various [`super::comment_parsers`] that
+/// exclusively parses comments in any language supported by [`tree_sitter`].
 pub struct TreeSitterParser {
-    language: Language
+    language: Language,
+    comment_parser: Box<dyn Parser>
 }
 
 impl TreeSitterParser {
@@ -32,7 +34,15 @@ impl TreeSitterParser {
             _ => return None
         };
 
-        Some(Self { language })
+        let comment_parser: Box<dyn Parser> = match file_extension {
+            "go" => Box::new(Go),
+            _ => Box::new(Unit)
+        };
+
+        Some(Self {
+            language,
+            comment_parser
+        })
     }
 
     fn parse_root(&self, text: &str) -> Option<Tree> {
@@ -88,12 +98,16 @@ impl TreeSitterParser {
             return;
         }
 
-        while cursor.goto_next_sibling() {
+        loop {
             let node = cursor.node();
 
             visit(&node);
 
             Self::visit_nodes(cursor, visit);
+
+            if !cursor.goto_next_sibling() {
+                break;
+            }
         }
 
         cursor.goto_parent();
@@ -101,10 +115,8 @@ impl TreeSitterParser {
 }
 
 impl Parser for TreeSitterParser {
-    fn parse(&mut self, source: &[char]) -> Vec<harper_core::Token> {
+    fn parse(&mut self, source: &[char]) -> Vec<Token> {
         let text: String = source.iter().collect();
-
-        let mut markdown_parser = Markdown;
 
         let Some(root) = self.parse_root(&text) else {
             return vec![];
@@ -113,35 +125,27 @@ impl Parser for TreeSitterParser {
         let mut comments_spans = Vec::new();
 
         Self::extract_comments(&mut root.walk(), &mut comments_spans);
+
+        dbg!(&comments_spans.len());
         byte_spans_to_char_spans(&mut comments_spans, &text);
+        dbg!(&comments_spans.len());
 
         let mut tokens = Vec::new();
 
         for (s_index, span) in comments_spans.iter().enumerate() {
-            // Skip over the comment start characters
-            let actual_start = source[span.start..span.end]
-                .iter()
-                .position(|c| !is_comment_character(*c))
-                .unwrap_or(0)
-                + span.start;
+            let mut new_tokens = self.comment_parser.parse(span.get_content(source));
 
-            if span.end <= actual_start {
-                continue;
-            }
+            new_tokens
+                .iter_mut()
+                .for_each(|v| v.span.offset(span.start));
 
-            let mut new_tokens = markdown_parser.parse(&source[actual_start..span.end]);
-
-            // The markdown parser will insert a newline at end-of-input.
+            // The comment parser will insert a newline at end-of-input.
             // If the next treesitter chunk is a comment, we want to remove that.
             if let Some(next_start) = comments_spans.get(s_index + 1).map(|v| v.start) {
                 if is_span_whitespace(Span::new(span.end, next_start), source) {
                     new_tokens.pop();
                 }
             }
-
-            new_tokens
-                .iter_mut()
-                .for_each(|t| t.span.offset(actual_start));
 
             tokens.append(&mut new_tokens);
         }
@@ -159,10 +163,6 @@ fn is_span_whitespace(span: Span, source: &[char]) -> bool {
         == 0
 }
 
-fn is_comment_character(c: char) -> bool {
-    matches!(c, '#' | '-' | '/')
-}
-
 /// Converts a set of byte-indexed [`Span`]s to char-index Spans, in-place.
 /// NOTE: Will sort the given slice by their [`Span::start`].
 ///
@@ -172,10 +172,10 @@ fn byte_spans_to_char_spans(byte_spans: &mut Vec<Span>, source: &str) {
 
     let cloned = byte_spans.clone();
 
-    let mut i = 0;
+    let mut i: usize = 0;
     byte_spans.retain(|cur| {
         i += 1;
-        if let Some(prev) = cloned.get(i - 2) {
+        if let Some(prev) = cloned.get(i.wrapping_sub(2)) {
             !cur.overlaps_with(*prev)
         } else {
             true

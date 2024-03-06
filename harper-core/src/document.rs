@@ -25,6 +25,10 @@ impl Document {
     pub fn new(text: &str, parser: Box<dyn Parser>) -> Self {
         let source: Vec<_> = text.chars().collect();
 
+        Self::new_from_vec(source, parser)
+    }
+
+    pub fn new_from_vec(source: Vec<char>, parser: Box<dyn Parser>) -> Self {
         let mut doc = Self {
             source,
             tokens: Vec::new(),
