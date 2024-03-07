@@ -7,6 +7,7 @@ use super::repeated_words::RepeatedWords;
 use super::sentence_capitalization::SentenceCapitalization;
 use super::spaces::Spaces;
 use super::spell_check::SpellCheck;
+use super::spelled_numbers::SpelledNumbers;
 use super::unclosed_quotes::UnclosedQuotes;
 use super::wrong_quotes::WrongQuotes;
 use super::Linter;
@@ -39,6 +40,7 @@ impl LintSet {
 
     pub fn add_standard(&mut self, dictionary: impl Dictionary + 'static) -> &mut Self {
         self.add_repeated_words()
+            .add_spelled_numbers()
             .add_an_a()
             .add_long_sentences()
             .add_unclosed_quotes()
@@ -99,6 +101,7 @@ macro_rules! create_simple_builder_methods {
 }
 
 create_simple_builder_methods!(
+    SpelledNumbers,
     AnA,
     SentenceCapitalization,
     UnclosedQuotes,

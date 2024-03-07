@@ -36,24 +36,19 @@ pub fn lex_token(source: &[char]) -> Option<FoundToken> {
 }
 
 fn lex_word(source: &[char]) -> Option<FoundToken> {
-    let mut end = 0;
+    let end = source
+        .iter()
+        .position(|c| !c.is_ascii_alphabetic())
+        .unwrap_or(source.len());
 
-    while end < source.len() {
-        if lex_punctuation(&source[end + 1..]).is_none()
-            && lex_spaces(&source[end + 1..]).is_none()
-            && lex_newlines(&source[end + 1..]).is_none()
-            && end + 1 != source.len()
-        {
-            end += 1;
-        } else {
-            return Some(FoundToken {
-                next_index: end + 1,
-                token: TokenKind::Word
-            });
-        }
+    if end == 0 {
+        None
+    } else {
+        Some(FoundToken {
+            next_index: end,
+            token: TokenKind::Word
+        })
     }
-
-    None
 }
 
 pub fn lex_number(source: &[char]) -> Option<FoundToken> {

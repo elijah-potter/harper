@@ -126,9 +126,7 @@ impl Parser for TreeSitterParser {
 
         Self::extract_comments(&mut root.walk(), &mut comments_spans);
 
-        dbg!(&comments_spans.len());
         byte_spans_to_char_spans(&mut comments_spans, &text);
-        dbg!(&comments_spans.len());
 
         let mut tokens = Vec::new();
 
@@ -140,7 +138,7 @@ impl Parser for TreeSitterParser {
                 .for_each(|v| v.span.offset(span.start));
 
             // The comment parser will insert a newline at end-of-input.
-            // If the next treesitter chunk is a comment, we want to remove that.
+            // If the next tree-sitter chunk is a comment, we want to remove that.
             if let Some(next_start) = comments_spans.get(s_index + 1).map(|v| v.start) {
                 if is_span_whitespace(Span::new(span.end, next_start), source) {
                     new_tokens.pop();

@@ -338,6 +338,14 @@ impl TokenStringExt for Document {
     fn iter_quotes(&self) -> impl Iterator<Item = Token> + '_ {
         self.tokens.iter_quotes()
     }
+
+    fn iter_number_indices(&self) -> impl Iterator<Item = usize> + '_ {
+        self.tokens.iter_number_indices()
+    }
+
+    fn iter_numbers(&self) -> impl Iterator<Item = Token> + '_ {
+        self.tokens.iter_numbers()
+    }
 }
 
 fn is_sentence_terminator(token: &TokenKind) -> bool {

@@ -14,7 +14,7 @@ pub fn lex_url(source: &[char]) -> Option<FoundToken> {
 
     Some(FoundToken {
         next_index: url_end + sep + 1,
-        token: TokenKind::Url,
+        token: TokenKind::Url
     })
 }
 
@@ -96,7 +96,7 @@ fn lex_hostport(source: &[char]) -> Option<usize> {
                     c.is_ascii_digit()
                 })
                 .map(|(i, _)| i)
-                .unwrap_or(source.len()),
+                .unwrap_or(source.len())
         )
     } else {
         Some(hostname_end)
@@ -235,7 +235,8 @@ mod tests {
         assert_consumes_full("https://elijahpotter.dev/articles/quantifying_hope_on_a_global_scale")
     }
 
-    /// Tests that the URL parser will not throw a panic under some random situations.
+    /// Tests that the URL parser will not throw a panic under some random
+    /// situations.
     #[test]
     fn survives_random_chars() {
         let mut rng = rand::thread_rng();

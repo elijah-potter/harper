@@ -7,6 +7,7 @@ mod repeated_words;
 mod sentence_capitalization;
 mod spaces;
 mod spell_check;
+mod spelled_numbers;
 mod unclosed_quotes;
 mod wrong_quotes;
 

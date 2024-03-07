@@ -18,7 +18,7 @@ pub fn lex_email_address(source: &[char]) -> Option<FoundToken> {
 
     Some(FoundToken {
         next_index: at_loc + 1 + domain_part_len,
-        token: TokenKind::EmailAddress,
+        token: TokenKind::EmailAddress
     })
 }
 
@@ -90,7 +90,7 @@ fn valid_unquoted_character(c: char) -> bool {
 
     let others = [
         '!', '#', '$', '%', '&', '\'', '*', '+', '-', '/', '=', '?', '^', '_', '`', '{', '|', '}',
-        '~', '.',
+        '~', '.'
     ];
 
     if others.contains(&c) {
@@ -125,7 +125,7 @@ mod tests {
             r#"user-"#,
             r#"postmaster"#,
             r#"postmaster"#,
-            r#"_test"#,
+            r#"_test"#
         ]
         .into_iter()
         .map(|s| s.chars().collect())
@@ -155,7 +155,8 @@ mod tests {
         }
     }
 
-    /// Tests that the email parser will not throw a panic under some random situations.
+    /// Tests that the email parser will not throw a panic under some random
+    /// situations.
     #[test]
     fn survives_random_chars() {
         let mut rng = rand::thread_rng();
