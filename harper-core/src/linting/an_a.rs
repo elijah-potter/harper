@@ -16,7 +16,7 @@ impl Linter for AnA {
             let is_a_an = match chars_first {
                 ['a'] => Some(true),
                 ['a', 'n'] => Some(false),
-                _ => None
+                _ => None,
             };
 
             let Some(a_an) = is_a_an else {
@@ -28,7 +28,7 @@ impl Linter for AnA {
             if a_an != should_be_a_an {
                 let replacement = match a_an {
                     true => vec!['a', 'n'],
-                    false => vec!['a']
+                    false => vec!['a'],
                 };
 
                 lints.push(Lint {
@@ -36,7 +36,7 @@ impl Linter for AnA {
                     lint_kind: LintKind::Formatting,
                     suggestions: vec![Suggestion::ReplaceWith(replacement)],
                     message: "This is not vocally correct.".to_string(),
-                    priority: 31
+                    priority: 31,
                 })
             }
         }

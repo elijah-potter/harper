@@ -21,6 +21,7 @@ thiserror = "1.0.56"
 
 [dev-dependencies]
 divan = "0.1.14"
+rand = "0.8.5"
 
 [[bench]]
 name = "parse_demo"

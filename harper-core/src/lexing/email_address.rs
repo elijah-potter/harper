@@ -18,7 +18,7 @@ pub fn lex_email_address(source: &[char]) -> Option<FoundToken> {
 
     Some(FoundToken {
         next_index: at_loc + 1 + domain_part_len,
-        token: TokenKind::EmailAddress
+        token: TokenKind::EmailAddress,
     })
 }
 
@@ -90,7 +90,7 @@ fn valid_unquoted_character(c: char) -> bool {
 
     let others = [
         '!', '#', '$', '%', '&', '\'', '*', '+', '-', '/', '=', '?', '^', '_', '`', '{', '|', '}',
-        '~', '.'
+        '~', '.',
     ];
 
     if others.contains(&c) {
@@ -102,6 +102,8 @@ fn valid_unquoted_character(c: char) -> bool {
 
 #[cfg(test)]
 mod tests {
+    use rand::Rng;
+
     use super::super::hostname::tests::example_domain_parts;
     use super::{lex_email_address, validate_local_part};
 
@@ -123,7 +125,7 @@ mod tests {
             r#"user-"#,
             r#"postmaster"#,
             r#"postmaster"#,
-            r#"_test"#
+            r#"_test"#,
         ]
         .into_iter()
         .map(|s| s.chars().collect())
@@ -150,6 +152,20 @@ mod tests {
                 let found = lex_email_address(&address).unwrap();
                 assert_eq!(found.next_index, address.len());
             }
+        }
+    }
+
+    /// Tests that the email parser will not throw a panic under some random situations.
+    #[test]
+    fn survives_random_chars() {
+        let mut rng = rand::thread_rng();
+
+        let mut buf = [' '; 128];
+
+        for _ in 0..1 << 16 {
+            rng.try_fill(&mut buf).unwrap();
+
+            lex_email_address(&buf);
         }
     }
 }
