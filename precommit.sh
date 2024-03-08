@@ -14,6 +14,7 @@ cargo test --release
 cargo doc
 cargo build
 cargo build --release
+cargo bench
 
 cd $R/harper-wasm
 wasm-pack build

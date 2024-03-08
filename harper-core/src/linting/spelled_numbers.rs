@@ -13,7 +13,6 @@ impl Linter for SpelledNumbers {
 
         for number_tok in document.iter_numbers() {
             let number = number_tok.kind.number().unwrap();
-            dbg!(number);
 
             if number - number.floor() < EPSILON && number <= 100. {
                 lints.push(Lint {
