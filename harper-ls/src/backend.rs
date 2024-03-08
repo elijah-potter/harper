@@ -7,14 +7,14 @@ use harper_core::{
     Dictionary,
     Document,
     FullDictionary,
-    LintSet,
+    LintGroup,
     Linter,
     MergedDictionary,
     Token,
     TokenKind
 };
 use serde_json::Value;
-use tokio::sync::Mutex;
+use tokio::sync::{Mutex, RwLock};
 use tower_lsp::jsonrpc::Result;
 use tower_lsp::lsp_types::notification::{PublishDiagnostics, ShowMessage};
 use tower_lsp::lsp_types::{
@@ -46,7 +46,7 @@ use tower_lsp::lsp_types::{
     Url
 };
 use tower_lsp::{Client, LanguageServer};
-use tracing::{error, info};
+use tracing::{error, info, instrument};
 
 use crate::config::Config;
 use crate::diagnostics::{lint_to_code_actions, lints_to_diagnostics};
@@ -58,14 +58,14 @@ use crate::tree_sitter_parser::TreeSitterParser;
 struct DocumentState {
     document: Document,
     ident_dict: Arc<FullDictionary>,
-    linter: LintSet
+    linter: LintGroup<MergedDictionary<FullDictionary>>
 }
 
 /// Deallocate
 pub struct Backend {
     client: Client,
     static_dictionary: Arc<FullDictionary>,
-    config: Mutex<Config>,
+    config: RwLock<Config>,
     doc_state: Mutex<HashMap<Url, DocumentState>>
 }
 
@@ -77,7 +77,7 @@ impl Backend {
             client,
             static_dictionary: dictionary.into(),
             doc_state: Mutex::new(HashMap::new()),
-            config: Mutex::new(config)
+            config: RwLock::new(config)
         }
     }
 
@@ -95,12 +95,15 @@ impl Backend {
         rewritten.into()
     }
 
+    /// Get the location of the file's specific dictionary
+    #[instrument(skip(self))]
     async fn get_file_dict_path(&self, url: &Url) -> PathBuf {
-        let config = self.config.lock().await;
+        let config = self.config.read().await;
 
         config.file_dict_path.join(Self::file_dict_name(url))
     }
 
+    /// Load a specific file's dictionary
     async fn load_file_dictionary(&self, url: &Url) -> FullDictionary {
         match load_dict(self.get_file_dict_path(url).await).await {
             Ok(dict) => dict,
@@ -112,12 +115,13 @@ impl Backend {
         }
     }
 
+    #[instrument(skip(self, dict))]
     async fn save_file_dictionary(&self, url: &Url, dict: impl Dictionary) -> anyhow::Result<()> {
         Ok(save_dict(self.get_file_dict_path(url).await, dict).await?)
     }
 
     async fn load_user_dictionary(&self) -> FullDictionary {
-        let config = self.config.lock().await;
+        let config = self.config.read().await;
 
         info!(
             "Loading user dictionary from `{}`",
@@ -138,8 +142,9 @@ impl Backend {
         }
     }
 
+    #[instrument(skip_all)]
     async fn save_user_dictionary(&self, dict: impl Dictionary) -> anyhow::Result<()> {
-        let config = self.config.lock().await;
+        let config = self.config.read().await;
 
         info!(
             "Saving user dictionary to `{}`",
@@ -153,6 +158,7 @@ impl Backend {
         Ok(save_dict(&config.user_dict_path, dict).await?)
     }
 
+    #[instrument(skip(self))]
     async fn generate_global_dictionary(&self) -> anyhow::Result<MergedDictionary<FullDictionary>> {
         let mut dict = MergedDictionary::new();
         dict.add_dictionary(self.static_dictionary.clone());
@@ -161,6 +167,7 @@ impl Backend {
         Ok(dict)
     }
 
+    #[instrument(skip(self))]
     async fn generate_file_dictionary(
         &self,
         url: &Url
@@ -176,6 +183,7 @@ impl Backend {
         Ok(global_dictionary)
     }
 
+    #[instrument(skip(self))]
     async fn update_document_from_file(&self, url: &Url) -> anyhow::Result<()> {
         let content = match tokio::fs::read_to_string(url.path()).await {
             Ok(content) => content,
@@ -188,13 +196,18 @@ impl Backend {
         self.update_document(url, &content).await
     }
 
+    #[instrument(skip(self, text))]
     async fn update_document(&self, url: &Url, text: &str) -> anyhow::Result<()> {
-        let mut lock = self.doc_state.lock().await;
+        let mut doc_lock = self.doc_state.lock().await;
+        let config_lock = self.config.read().await;
 
         // TODO: Only reset linter when underlying dictionaries change
 
         let mut doc_state = DocumentState {
-            linter: LintSet::new().with_standard(self.generate_file_dictionary(url).await?),
+            linter: LintGroup::new(
+                config_lock.lint_config,
+                self.generate_file_dictionary(url).await?
+            ),
             ..Default::default()
         };
 
@@ -212,7 +225,7 @@ impl Backend {
                         let mut merged = self.generate_file_dictionary(url).await?;
                         merged.add_dictionary(new_dict);
 
-                        doc_state.linter = LintSet::new().with_standard(merged);
+                        doc_state.linter = LintGroup::new(config_lock.lint_config, merged);
                     }
                 }
 
@@ -224,11 +237,12 @@ impl Backend {
             Document::new(text, Box::new(Markdown))
         };
 
-        lock.insert(url.clone(), doc_state);
+        doc_lock.insert(url.clone(), doc_state);
 
         Ok(())
     }
 
+    #[instrument(skip(self))]
     async fn generate_code_actions(
         &self,
         url: &Url,
@@ -269,6 +283,7 @@ impl Backend {
         Ok(actions)
     }
 
+    #[instrument(skip(self))]
     async fn generate_diagnostics(&self, url: &Url) -> Vec<Diagnostic> {
         let mut doc_states = self.doc_state.lock().await;
         let Some(doc_state) = doc_states.get_mut(url) else {
@@ -280,6 +295,7 @@ impl Backend {
         lints_to_diagnostics(doc_state.document.get_full_content(), &lints)
     }
 
+    #[instrument(skip(self))]
     async fn publish_diagnostics(&self, url: &Url) {
         let client = self.client.clone();
 
@@ -465,7 +481,7 @@ impl LanguageServer for Backend {
     async fn did_change_configuration(&self, params: DidChangeConfigurationParams) {
         info!("Changing user configuration.");
 
-        let new_config = match Config::from_json_value(params.settings) {
+        let new_config = match Config::from_lsp_config(params.settings) {
             Ok(new_config) => new_config,
             Err(err) => {
                 error!("Unable to change config: {}", err);
@@ -473,8 +489,18 @@ impl LanguageServer for Backend {
             }
         };
 
-        let mut config = self.config.lock().await;
-        *config = new_config;
+        {
+            let mut config = self.config.write().await;
+            *config = new_config;
+        }
+
+        let keys: Vec<Url> = {
+            let doc_state = self.doc_state.lock().await;
+
+            doc_state.keys().cloned().collect()
+        };
+
+        futures::future::join_all(keys.iter().map(|key| self.update_document_from_file(key))).await;
     }
 
     async fn code_action(&self, params: CodeActionParams) -> Result<Option<CodeActionResponse>> {

@@ -36,8 +36,6 @@ fn lex_ip_schemepart(source: &[char]) -> Option<usize> {
 
     // Parse endpoint path
     while cursor != rest.len() {
-        dbg!(&rest[cursor..]);
-
         if rest[cursor] != '/' {
             break;
         }
@@ -83,8 +81,6 @@ fn lex_login(source: &[char]) -> Option<usize> {
 
 fn lex_hostport(source: &[char]) -> Option<usize> {
     let hostname_end = lex_hostname(source)?;
-
-    dbg!(&source[..hostname_end]);
 
     if source.get(hostname_end) == Some(&':') {
         Some(

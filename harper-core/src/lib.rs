@@ -9,7 +9,7 @@ mod spell;
 mod token;
 
 pub use document::Document;
-pub use linting::{Lint, LintKind, LintSet, Linter, Suggestion};
+pub use linting::{Lint, LintGroup, LintGroupConfig, LintKind, Linter, Suggestion};
 pub use span::Span;
 pub use spell::{Dictionary, FullDictionary, MergedDictionary};
 pub use token::{FatToken, Punctuation, Token, TokenKind, TokenStringExt};

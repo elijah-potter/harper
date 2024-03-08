@@ -1,5 +1,5 @@
 use divan::{black_box, AllocProfiler, Bencher};
-use harper_core::{Document, FullDictionary, LintSet, Linter};
+use harper_core::{Document, FullDictionary, LintGroup, LintGroupConfig, Linter};
 
 #[global_allocator]
 static ALLOC: AllocProfiler = AllocProfiler::system();
@@ -14,18 +14,9 @@ fn parse_demo(bencher: Bencher) {
 }
 
 #[divan::bench]
-fn create_lint_set(bencher: Bencher) {
-    let dictionary = FullDictionary::create_from_curated();
-
-    bencher.bench_local(|| {
-        let _lint_set = LintSet::new().with_standard(dictionary.clone());
-    });
-}
-
-#[divan::bench]
 fn lint_demo(bencher: Bencher) {
     let dictionary = FullDictionary::create_from_curated();
-    let mut lint_set = LintSet::new().with_standard(dictionary);
+    let mut lint_set = LintGroup::new(Default::default(), dictionary);
     let document = Document::new_markdown(black_box(DEMO));
 
     bencher.bench_local(|| {
@@ -37,7 +28,7 @@ fn lint_demo(bencher: Bencher) {
 fn lint_demo_uncached(bencher: Bencher) {
     let dictionary = FullDictionary::create_from_curated();
     bencher.bench_local(|| {
-        let mut lint_set = LintSet::new().with_standard(dictionary.clone());
+        let mut lint_set = LintGroup::new(LintGroupConfig::default(), dictionary.clone());
         let document = Document::new_markdown(black_box(DEMO));
 
         lint_set.lint(&document);

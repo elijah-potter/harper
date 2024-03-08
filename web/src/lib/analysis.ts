@@ -1,4 +1,4 @@
-const defaultUseWasm = true;
+const defaultUseWasm = false;
 
 export interface ParseResponse {
 	tokens: Token[];

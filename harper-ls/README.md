@@ -12,7 +12,7 @@ Refer to the linked documentation for more information.
 If you happen to use [`mason.nvim`](https://github.com/williamboman/mason.nvim), installation will be pretty straightforward.
 `harper-ls` is in the official Mason registry, so you can install it the same way you install anything through Mason.
 
-If you __don't__ install your LSPs through Mason, we also have binary releases are available on [GitHub](https://github.com/elijah-potter/harper/releases).
+If you __don't__ install your LSPs through Mason, we also have binary releases available on [GitHub](https://github.com/elijah-potter/harper/releases).
 
 Finally, if you have [Rust installed](https://www.rust-lang.org/tools/install), you're in luck!
 To install `harper-ls`, simply run:
@@ -49,6 +49,30 @@ lspconfig.harper_ls.setup {
   settings = {
     ["harper-ls"] = {
       userDictPath = "~/dict.txt"
+    }
+  },
+}
+```
+
+You can also toggle any particular linter.
+The default values are shown below:
+
+```lua
+lspconfig.harper_ls.setup {
+  settings = {
+    ["harper-ls"] = {
+      linters = {
+        spell_check = true,
+        spelled_numbers = false,
+        an_a = true,
+        sentence_capitalization = true,
+        unclosed_quotes = true,
+        wrong_quotes = true,
+        long_sentences = true,
+        repeated_words = true,
+        spaces = true,
+        matcher = true
+      }
     }
   },
 }

@@ -1,6 +1,6 @@
 mod an_a;
 mod lint;
-mod lint_set;
+mod lint_group;
 mod long_sentences;
 mod matcher;
 mod repeated_words;
@@ -12,7 +12,7 @@ mod unclosed_quotes;
 mod wrong_quotes;
 
 pub use lint::{Lint, LintKind, Suggestion};
-pub use lint_set::LintSet;
+pub use lint_group::{LintGroup, LintGroupConfig};
 
 use crate::Document;
 

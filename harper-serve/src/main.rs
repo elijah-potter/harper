@@ -8,7 +8,7 @@ use axum::middleware::{self, Next};
 use axum::response::Response;
 use axum::routing::post;
 use axum::{Json, Router};
-use harper_core::{Document, FatToken, FullDictionary, Lint, LintSet, Linter, Span, Suggestion};
+use harper_core::{Document, FatToken, FullDictionary, Lint, LintGroup, Linter, Span, Suggestion};
 use serde::{Deserialize, Serialize};
 use tokio::time::Instant;
 use tracing::{info, Level};
@@ -90,7 +90,8 @@ async fn lint(Json(payload): Json<LintRequest>) -> (StatusCode, Json<LintRespons
     let document = Document::new_markdown(&text);
 
     let dictionary = FullDictionary::create_from_curated();
-    let mut linter = LintSet::new().with_standard(dictionary);
+    let mut linter = LintGroup::new(Default::default(), dictionary);
+
     let lints = linter.lint(&document);
 
     (StatusCode::ACCEPTED, Json(LintResponse { lints }))

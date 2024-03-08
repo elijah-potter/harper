@@ -1,13 +1,17 @@
 use std::sync::Mutex;
 
-use harper_core::{remove_overlaps, Document, FullDictionary, LintSet, Linter};
+use harper_core::{remove_overlaps, Document, FullDictionary, LintGroup, Linter};
 use once_cell::sync::Lazy;
 use serde::Serialize;
 use wasm_bindgen::prelude::wasm_bindgen;
 use wasm_bindgen::JsValue;
 
-static LINTER: Lazy<Mutex<LintSet>> =
-    Lazy::new(|| Mutex::new(LintSet::new().with_standard(FullDictionary::create_from_curated())));
+static LINTER: Lazy<Mutex<LintGroup<FullDictionary>>> = Lazy::new(|| {
+    Mutex::new(LintGroup::new(
+        Default::default(),
+        FullDictionary::create_from_curated()
+    ))
+});
 
 /// Create the serializer that preserves types across the JavaScript barrier
 fn glue_serializer() -> serde_wasm_bindgen::Serializer {
