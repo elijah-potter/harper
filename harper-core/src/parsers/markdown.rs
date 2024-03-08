@@ -97,3 +97,16 @@ impl Parser for Markdown {
         tokens
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::super::StrParser;
+    use super::Markdown;
+
+    #[test]
+    fn survives_emojis() {
+        let source = r#"🤷."#;
+
+        Markdown.parse_str(source);
+    }
+}

@@ -93,7 +93,7 @@ create_lint_group_config!(
     AnA => true,
     SentenceCapitalization => true,
     UnclosedQuotes => true,
-    WrongQuotes => true,
+    WrongQuotes => false,
     LongSentences => true,
     RepeatedWords => true,
     Spaces => true,

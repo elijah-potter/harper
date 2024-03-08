@@ -23,7 +23,8 @@ pub fn lex_token(source: &[char]) -> Option<FoundToken> {
         lex_number,
         lex_url,
         lex_email_address,
-        lex_word
+        lex_word,
+        lex_catch
     ];
 
     for lexer in lexers {
@@ -173,4 +174,12 @@ fn lex_quote(source: &[char]) -> Option<FoundToken> {
     } else {
         None
     }
+}
+
+/// Covers cases not covered by the other lints.
+fn lex_catch(_source: &[char]) -> Option<FoundToken> {
+    Some(FoundToken {
+        next_index: 1,
+        token: TokenKind::Unlintable
+    })
 }
