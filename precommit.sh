@@ -7,7 +7,7 @@ set -eo pipefail
 R=$(pwd)
 RUSTDOCFLAGS="-D warnings"
 
-cargo +nightly fmt
+cargo +nightly fmt --check
 cargo clippy -- -Dwarnings
 cargo test
 cargo test --release
@@ -21,7 +21,7 @@ wasm-pack build
 
 cd $R/web
 yarn install
-yarn run format
-yarn run lint
+yarn run format --check
+yarn run lint 
 yarn run check
 yarn run build

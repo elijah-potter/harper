@@ -31,7 +31,7 @@ fn index_to_position(source: &[char], index: usize) -> Position {
 
     Position {
         line: lines as u32,
-        character: cols as u32,
+        character: cols as u32
     }
 }
 
@@ -79,7 +79,7 @@ mod tests {
 
         let start = Position {
             line: 0,
-            character: 4,
+            character: 4
         };
 
         let i = position_to_index(&source, start);
@@ -99,7 +99,7 @@ mod tests {
 
         let a = Position {
             line: 1,
-            character: 2,
+            character: 2
         };
 
         let b = position_to_index(&source, a);
