@@ -1,5 +1,6 @@
 use harper_core::Span;
 use tower_lsp::lsp_types::{Position, Range};
+use unicode_width::UnicodeWidthChar;
 
 /// This module includes various conversions from the index-based [`Span`]s that
 /// Harper uses, and the Ranges that the LSP uses.
@@ -20,11 +21,17 @@ fn index_to_position(source: &[char], index: usize) -> Position {
         .collect();
 
     let lines = newline_indices.len();
-    let cols = index - newline_indices.last().copied().unwrap_or(0);
+
+    let last_newline_idx = newline_indices.last().copied().unwrap_or(0);
+
+    let cols: usize = source[last_newline_idx..index]
+        .iter()
+        .map(|c| c.width().unwrap_or(0))
+        .sum();
 
     Position {
         line: lines as u32,
-        character: cols as u32
+        character: cols as u32,
     }
 }
 
@@ -40,7 +47,17 @@ fn position_to_index(source: &[char], position: Position) -> usize {
         .last()
         .unwrap_or(0);
 
-    line_start_idx + position.character as usize
+    let mut traversed_cols = 0;
+
+    for (traversed_chars, c) in source[line_start_idx..].iter().enumerate() {
+        if traversed_cols == position.character as usize {
+            return line_start_idx + traversed_chars;
+        }
+
+        traversed_cols += c.width().unwrap_or(0);
+    }
+
+    line_start_idx
 }
 
 pub fn range_to_span(source: &[char], range: Range) -> Span {
@@ -62,7 +79,7 @@ mod tests {
 
         let start = Position {
             line: 0,
-            character: 4
+            character: 4,
         };
 
         let i = position_to_index(&source, start);
@@ -82,7 +99,7 @@ mod tests {
 
         let a = Position {
             line: 1,
-            character: 2
+            character: 2,
         };
 
         let b = position_to_index(&source, a);

@@ -584,6 +584,7 @@ dependencies = [
  "tree-sitter-swift",
  "tree-sitter-toml",
  "tree-sitter-typescript",
+ "unicode-width",
 ]
 
 [[package]]
