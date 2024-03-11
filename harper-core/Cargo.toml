@@ -17,7 +17,7 @@ paste = "1.0.14"
 pulldown-cmark = "0.9.3"
 serde = { version = "1.0.197", features = ["derive"] }
 smallvec = { version = "1.13.1", features = ["serde"] }
-thiserror = "1.0.56"
+thiserror = "1.0.57"
 
 [dev-dependencies]
 divan = "0.1.14"
