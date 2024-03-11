@@ -543,7 +543,7 @@ dependencies = [
  "divan",
  "hashbrown",
  "is-macro",
- "itertools 0.11.0",
+ "itertools",
  "once_cell",
  "paste",
  "pulldown-cmark",
@@ -562,7 +562,7 @@ dependencies = [
  "dirs 5.0.1",
  "futures",
  "harper-core",
- "itertools 0.12.1",
+ "itertools",
  "once_cell",
  "open",
  "resolve-path",
@@ -733,15 +733,6 @@ checksum = "173609498df190136aa7dea1a91db051746d339e18476eed5ca40521f02d7aa5"
 dependencies = [
  "is-docker",
  "once_cell",
-]
-
-[[package]]
-name = "itertools"
-version = "0.11.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b1c173a5686ce8bfa551b3563d0c2170bf24ca44da99c7ca4bfdab5418c3fe57"
-dependencies = [
- "either",
 ]
 
 [[package]]
