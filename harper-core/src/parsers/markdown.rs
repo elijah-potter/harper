@@ -38,8 +38,8 @@ impl Parser for Markdown {
                     });
                 }
                 pulldown_cmark::Event::Start(tag) => stack.push(tag),
-                pulldown_cmark::Event::End(pulldown_cmark::Tag::Paragraph)
-                | pulldown_cmark::Event::End(pulldown_cmark::Tag::Item) => tokens.push(Token {
+                pulldown_cmark::Event::End(pulldown_cmark::TagEnd::Paragraph)
+                | pulldown_cmark::Event::End(pulldown_cmark::TagEnd::Item) => tokens.push(Token {
                     span: Span::new_with_len(traversed_chars, 1),
                     kind: TokenKind::Newline(1)
                 }),
@@ -69,8 +69,8 @@ impl Parser for Markdown {
                         }
 
                         if !(matches!(tag, Tag::Paragraph)
-                            || matches!(tag, Tag::Link(..))
-                            || matches!(tag, Tag::Heading(..))
+                            || matches!(tag, Tag::Link { .. })
+                            || matches!(tag, Tag::Heading { .. })
                             || matches!(tag, Tag::Item)
                             || matches!(tag, Tag::TableCell)
                             || matches!(tag, Tag::Emphasis)
