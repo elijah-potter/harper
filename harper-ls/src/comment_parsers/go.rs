@@ -11,8 +11,8 @@ impl Parser for Go {
         let mut actual = without_intiators(source);
         let mut actual_source = actual.get_content(source);
 
-        if matches!(source, ['g', 'o', ':', ..]) {
-            let Some(terminator) = source.iter().position(|c| c.is_whitespace()) else {
+        if matches!(actual_source, ['g', 'o', ':', ..]) {
+            let Some(terminator) = source.iter().position(|c| *c == '\n') else {
                 return Vec::new();
             };
 
