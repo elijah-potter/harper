@@ -29,8 +29,9 @@ fn uncached_inner_new() -> FullDictionary {
     let word_list = parse_default_word_list().unwrap();
     let attr_list = parse_default_attribute_list().unwrap();
 
-    let words = attr_list.expand_marked_words(word_list).unwrap();
-    let mut words: Vec<DictWord> = words.into_iter().collect();
+    let mut words = Vec::new();
+
+    attr_list.expand_marked_words(word_list, &mut words);
 
     FullDictionary {
         word_set: HashSet::from_iter(words.iter().cloned()),

@@ -1,5 +1,5 @@
 use std::collections::HashMap;
-use std::path::PathBuf;
+use std::path::{Component, PathBuf};
 use std::sync::Arc;
 
 use harper_core::parsers::Markdown;
@@ -87,9 +87,11 @@ impl Backend {
         let mut rewritten = String::new();
 
         // We assume all URLs are local files and have a base
-        for seg in url.path_segments().unwrap() {
-            rewritten.push_str(seg);
-            rewritten.push('%');
+        for seg in url.to_file_path().unwrap().components() {
+            if !matches!(seg, Component::RootDir) {
+                rewritten.push_str(&seg.as_os_str().to_string_lossy());
+                rewritten.push('%');
+            }
         }
 
         rewritten.into()
@@ -117,6 +119,8 @@ impl Backend {
 
     #[instrument(skip(self, dict))]
     async fn save_file_dictionary(&self, url: &Url, dict: impl Dictionary) -> anyhow::Result<()> {
+        dbg!(self.get_file_dict_path(url).await);
+
         Ok(save_dict(self.get_file_dict_path(url).await, dict).await?)
     }
 
@@ -185,7 +189,12 @@ impl Backend {
 
     #[instrument(skip(self))]
     async fn update_document_from_file(&self, url: &Url) -> anyhow::Result<()> {
-        let content = match tokio::fs::read_to_string(url.path()).await {
+        let content = match tokio::fs::read_to_string(
+            url.to_file_path()
+                .map_err(|_| anyhow::format_err!("Could not extract file path."))?
+        )
+        .await
+        {
             Ok(content) => content,
             Err(err) => {
                 error!("Error updating document from file: {}", err);

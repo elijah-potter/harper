@@ -34,7 +34,9 @@ mod tests {
         let words = parse_word_list(TEST_WORD_LIST).unwrap();
         let attributes = AttributeList::parse(ATTR_LIST).unwrap();
 
-        let expanded = attributes.expand_marked_words(words).unwrap();
+        let mut expanded = Vec::new();
+
+        attributes.expand_marked_words(words, &mut expanded);
         let expanded: Vec<String> = expanded
             .into_iter()
             .map(|v| v.into_iter().collect())
@@ -42,7 +44,7 @@ mod tests {
 
         assert_eq!(
             expanded,
-            vec!["hello", "tried", "try", "reworked", "rework", "worked", "work"]
+            vec!["hello", "tried", "try", "rework", "reworked", "work", "worked",]
         )
     }
 
@@ -56,7 +58,10 @@ mod tests {
         )
         .unwrap();
 
-        let expanded = attributes.expand_marked_words(words).unwrap();
+        let mut expanded = Vec::new();
+
+        attributes.expand_marked_words(words, &mut expanded);
+
         assert!(expanded.contains(&split("giants")))
     }
 
@@ -64,7 +69,11 @@ mod tests {
         let words = parse_default_word_list().unwrap();
         let attributes = parse_default_attribute_list().unwrap();
 
-        attributes.expand_marked_words(words).unwrap()
+        let mut expanded = Vec::new();
+
+        attributes.expand_marked_words(words, &mut expanded);
+
+        expanded
     }
 
     #[test]

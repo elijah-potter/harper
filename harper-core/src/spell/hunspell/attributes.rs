@@ -1,7 +1,6 @@
 use std::usize;
 
 use hashbrown::HashMap;
-use itertools::Itertools;
 use smallvec::ToSmallVec;
 
 use super::matcher::Matcher;
@@ -25,7 +24,7 @@ struct Expansion {
     pub replacements: Vec<AffixReplacement>
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct AttributeList {
     /// Key = Affix Flag
     affixes: HashMap<char, Expansion>
@@ -109,9 +108,13 @@ impl AttributeList {
 
     /// Expand [`MarkedWord`] into a list of full words, including itself.
     ///
+    /// Will append to the given `dest`;
+    ///
     /// In the future, I want to make this function cleaner and faster.
-    pub fn expand_marked_word(&self, word: MarkedWord) -> Result<Vec<DictWord>, Error> {
-        let mut words = Vec::with_capacity(word.attributes.len() + 1);
+    pub fn expand_marked_word(&self, word: MarkedWord, dest: &mut Vec<DictWord>) {
+        dest.reserve(word.attributes.len() + 1);
+
+        let start_len = dest.len();
 
         for attr in &word.attributes {
             let Some(expansion) = self.affixes.get(attr) else {
@@ -140,37 +143,41 @@ impl AttributeList {
                     }
                 }
 
-                let mut cross_product_words = Vec::new();
+                let cross_product_words = Vec::new();
 
                 for new_word in new_words {
-                    cross_product_words.extend(self.expand_marked_word(MarkedWord {
-                        letters: new_word,
-                        attributes: opp_attr.clone()
-                    })?)
+                    self.expand_marked_word(
+                        MarkedWord {
+                            letters: new_word,
+                            attributes: opp_attr.clone()
+                        },
+                        dest
+                    );
                 }
 
-                words.extend_from_slice(&cross_product_words);
+                dest.extend_from_slice(&cross_product_words);
             } else {
-                words.extend_from_slice(&new_words);
+                dest.extend_from_slice(&new_words);
             }
         }
 
-        words.push(word.letters);
+        dest.push(word.letters);
 
-        Ok(words)
+        let mut split = dest.split_off(start_len);
+        split.sort();
+        split.dedup();
+
+        dest.append(&mut split);
     }
 
     pub fn expand_marked_words(
         &self,
-        words: impl IntoIterator<Item = MarkedWord>
-    ) -> Result<Vec<DictWord>, Error> {
-        let mut output = Vec::new();
-
+        words: impl IntoIterator<Item = MarkedWord>,
+        dest: &mut Vec<DictWord>
+    ) {
         for word in words {
-            output.extend(self.expand_marked_word(word)?.into_iter().unique());
+            self.expand_marked_word(word, dest);
         }
-
-        Ok(output)
     }
 
     fn apply_replacement(

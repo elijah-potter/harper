@@ -356,7 +356,7 @@ fn is_sentence_terminator(token: &TokenKind) -> bool {
             Punctuation::Question
         ]
         .contains(punct),
-        TokenKind::Newline(_) => true,
+        TokenKind::Newline(count) => *count >= 2,
         _ => false
     }
 }

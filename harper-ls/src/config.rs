@@ -35,9 +35,7 @@ impl Config {
         }
 
         if let Some(v) = value.get("linters") {
-            dbg!(v);
             base.lint_config = serde_json::from_value(v.clone())?;
-            dbg!(base.lint_config);
         }
 
         Ok(base)

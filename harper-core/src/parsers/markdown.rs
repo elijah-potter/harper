@@ -31,7 +31,7 @@ impl Parser for Markdown {
             }
 
             match event {
-                pulldown_cmark::Event::HardBreak => {
+                pulldown_cmark::Event::SoftBreak | pulldown_cmark::Event::HardBreak => {
                     tokens.push(Token {
                         span: Span::new_with_len(traversed_chars, 1),
                         kind: TokenKind::Newline(1)

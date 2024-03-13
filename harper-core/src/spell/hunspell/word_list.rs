@@ -1,12 +1,13 @@
 use super::Error;
 use crate::spell::DictWord;
 
+#[derive(Debug, Clone)]
 pub struct MarkedWord {
     pub letters: DictWord,
     pub attributes: Vec<char>
 }
 
-/// Parse a hunspell word list
+/// Parse a Hunspell word list
 ///
 /// Returns [`None`] if the given string is invalid.
 pub fn parse_word_list(source: &str) -> Result<Vec<MarkedWord>, Error> {
