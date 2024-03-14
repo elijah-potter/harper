@@ -39,6 +39,9 @@
 	},
 	"type": "module",
 	"dependencies": {
+		"@codemirror/lint": "^6.5.0",
+		"@codemirror/state": "^6.4.1",
+		"codemirror": "^6.0.1",
 		"lodash-es": "^4.17.21"
 	}
 }
