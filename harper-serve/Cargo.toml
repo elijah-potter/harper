@@ -6,7 +6,7 @@ private = true
 publish = false
 
 [dependencies]
-axum = "0.6.20"
+axum = "0.7.4"
 serde = { version = "1.0.197", features = ["derive"] }
 tokio = { version = "1.36.0", features = ["fs", "rt", "rt-multi-thread", "macros"] }
 tracing = "0.1.40"
