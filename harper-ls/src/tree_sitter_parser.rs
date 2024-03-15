@@ -10,7 +10,7 @@ use super::comment_parsers::{Go, Unit};
 /// exclusively parses comments in any language supported by [`tree_sitter`].
 pub struct TreeSitterParser {
     language: Language,
-    comment_parser: Box<dyn Parser>
+    comment_parser: Box<dyn Parser>,
 }
 
 impl TreeSitterParser {
@@ -21,6 +21,8 @@ impl TreeSitterParser {
             "ts" => tree_sitter_typescript::language_typescript(),
             "py" => tree_sitter_python::language(),
             "js" => tree_sitter_javascript::language(),
+            "mjs" => tree_sitter_javascript::language(),
+            "cjs" => tree_sitter_javascript::language(),
             "go" => tree_sitter_go::language(),
             "c" => tree_sitter_c::language(),
             "cpp" => tree_sitter_cpp::language(),
@@ -31,17 +33,17 @@ impl TreeSitterParser {
             "cs" => tree_sitter_c_sharp::language(),
             "toml" => tree_sitter_toml::language(),
             "lua" => tree_sitter_lua::language(),
-            _ => return None
+            _ => return None,
         };
 
         let comment_parser: Box<dyn Parser> = match file_extension {
             "go" => Box::new(Go),
-            _ => Box::new(Unit)
+            _ => Box::new(Unit),
         };
 
         Some(Self {
             language,
-            comment_parser
+            comment_parser,
         })
     }
 

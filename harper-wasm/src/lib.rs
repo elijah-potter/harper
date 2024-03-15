@@ -9,7 +9,7 @@ use wasm_bindgen::JsValue;
 static LINTER: Lazy<Mutex<LintGroup<FullDictionary>>> = Lazy::new(|| {
     Mutex::new(LintGroup::new(
         Default::default(),
-        FullDictionary::create_from_curated()
+        FullDictionary::create_from_curated(),
     ))
 });
 
@@ -27,6 +27,12 @@ pub fn setup() {
     console_error_panic_hook::set_once();
 
     tracing_wasm::set_as_global_default();
+}
+
+#[wasm_bindgen]
+pub fn use_spell_check(set: bool) {
+    let mut linter = LINTER.lock().unwrap();
+    linter.config.spell_check = Some(set);
 }
 
 #[wasm_bindgen]
@@ -57,7 +63,7 @@ pub fn parse(text: String) -> Vec<JsValue> {
 pub fn apply_suggestion(
     text: String,
     span: JsValue,
-    suggestion: JsValue
+    suggestion: JsValue,
 ) -> Result<String, String> {
     let span = serde_wasm_bindgen::from_value(span).map_err(|e| e.to_string())?;
     let suggestion = serde_wasm_bindgen::from_value(suggestion).map_err(|e| e.to_string())?;

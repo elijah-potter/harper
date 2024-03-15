@@ -1,5 +1,4 @@
 <script>
-	import Editor from '$lib/Editor.svelte';
 	import GutterCenter from '$lib/GutterCenter.svelte';
 	import Logo from '$lib/Logo.svelte';
 	import NewEditor from '$lib/NewEditor.svelte';
@@ -48,7 +47,13 @@
 	</div>
 
 	<div class="w-full h-[600px] overflow-hidden">
-		<NewEditor />
+		{#if width > 570}
+			<NewEditor />
+		{:else}
+			<p class="italic text-lg w-full text-center dark:text-white">
+				Open this page on a bigger screen to start checking your work.
+			</p>
+		{/if}
 	</div>
 </GutterCenter>
 

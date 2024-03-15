@@ -3,6 +3,8 @@
 	import { minimalSetup, EditorView } from 'codemirror';
 	import { contentToString, lintText, type Suggestion } from './analysis';
 	import { linter } from '@codemirror/lint';
+	import demoText from '../../../demo.md?raw';
+	import { Card } from 'flowbite-svelte';
 
 	let editorDiv: HTMLDivElement;
 
@@ -16,7 +18,7 @@
 
 	const harperLinter = linter(
 		async (view) => {
-			let text = view.state.doc.sliceString(0);
+			let text = view.state.doc.sliceString(-1);
 
 			let lints = await lintText(text);
 
@@ -24,7 +26,7 @@
 				return {
 					from: lint.span.start,
 					to: lint.span.end,
-					severity: 'warning',
+					severity: 'error',
 					message: lint.message,
 					actions: lint.suggestions.map((sug, i) => {
 						return {
@@ -49,16 +51,18 @@
 				};
 			});
 		},
-		{ delay: 0 }
+		{ delay: -1 }
 	);
 
 	onMount(() => {
 		new EditorView({
-			doc: 'You cannot add new lines in this editor\n\n\n\n',
+			doc: demoText,
 			extensions: [minimalSetup, harperLinter],
 			parent: editorDiv
 		});
 	});
 </script>
 
-<div bind:this={editorDiv} />
+<Card class="w-full max-w-full">
+	<div bind:this={editorDiv} class="text-lg" />
+</Card>
