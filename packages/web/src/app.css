@@ -12,6 +12,30 @@
 	src: url('/fonts/outfit.ttf');
 }
 
+.underlinespecial {
+	position: relative;
+	background-color: var(--bg-color);
+}
+
+.underlinespecial::after {
+	transition-property: all;
+	transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+	transition-duration: 150ms;
+	content: '';
+	display: block;
+	width: 100%;
+	height: var(--line-width);
+	border-radius: 1000px;
+	background: var(--line-color);
+	position: absolute;
+	bottom: -3px;
+	left: 0;
+}
+
+textarea {
+	--tw-ring-shadow: 0 0 #000 !important;
+}
+
 .animate-bigbounce {
 	animation: bigbounce 1s infinite;
 }
@@ -30,32 +54,4 @@
 		transform: none;
 		animation-timing-function: cubic-bezier(0, 0, 0.2, 1);
 	}
-}
-
-.cm-editor {
-}
-
-.cm-diagnostic-error {
-}
-
-.cm-tooltip {
-	border-radius: 10px;
-	border: 1px solid black;
-	margin-top: 5px;
-	background: white !important;
-}
-
-.cm-diagnostic {
-	border-left: none !important;
-	display: flex !important;
-	flex-direction: column;
-	padding: 10px !important;
-	align-items: start;
-}
-
-.cm-diagnostic-error > * {
-	margin: 4px 0px !important;
-}
-
-.cm-diagnosticAction {
 }

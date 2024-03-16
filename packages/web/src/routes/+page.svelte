@@ -1,7 +1,7 @@
 <script>
+	import Editor from '$lib/Editor.svelte';
 	import GutterCenter from '$lib/GutterCenter.svelte';
 	import Logo from '$lib/Logo.svelte';
-	import NewEditor from '$lib/NewEditor.svelte';
 	import { DarkMode } from 'flowbite-svelte';
 
 	let width = window.innerWidth;
@@ -47,8 +47,8 @@
 	</div>
 
 	<div class="w-full h-[600px] overflow-hidden">
-		{#if width > 570}
-			<NewEditor />
+		{#if width > 1080}
+			<Editor />
 		{:else}
 			<p class="italic text-lg w-full text-center dark:text-white">
 				Open this page on a bigger screen to start checking your work.
