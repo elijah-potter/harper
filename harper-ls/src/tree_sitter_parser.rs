@@ -21,6 +21,8 @@ impl TreeSitterParser {
             "ts" => tree_sitter_typescript::language_typescript(),
             "py" => tree_sitter_python::language(),
             "js" => tree_sitter_javascript::language(),
+            "mjs" => tree_sitter_javascript::language(),
+            "cjs" => tree_sitter_javascript::language(),
             "go" => tree_sitter_go::language(),
             "c" => tree_sitter_c::language(),
             "cpp" => tree_sitter_cpp::language(),

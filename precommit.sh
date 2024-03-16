@@ -16,12 +16,22 @@ cargo build
 cargo build --release
 cargo bench
 
-cd $R/harper-wasm
-wasm-pack build
+cd $R/packages
+yarn install -f
+yarn prettier --check .
+yarn eslint .
 
-cd $R/web
-yarn install
-yarn run format --check
-yarn run lint 
+cd $R/harper-wasm
+wasm-pack build --target web
+
+cd $R/packages/obsidian-plugin
+yarn install -f
+yarn run build
+
+cd $R/harper-wasm
+wasm-pack build --target bundler
+
+cd $R/packages/web
+yarn install -f
 yarn run check
 yarn run build

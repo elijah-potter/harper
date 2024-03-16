@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { Card } from 'flowbite-svelte';
-	import demo from '../../../demo.md?raw';
+	import demo from '../../../../demo.md?raw';
 	import Underlines from '$lib/Underlines.svelte';
 	import { Button } from 'flowbite-svelte';
 	import { lintText, applySuggestion, spanContent } from '$lib/analysis';
@@ -51,12 +51,12 @@
 			<Underlines {content} bind:focusLintIndex={focused} />
 		</div>
 	</Card>
-	<Card class="flex-none basis-[400px] h-full p-0">
-		<h2 class="text-2xl font-bold m-1">Suggestions</h2>
+	<Card class="flex-none basis-[400px] h-full p-1">
+		<h2 class="text-2xl font-bold m-2">Suggestions</h2>
 		<div class="flex flex-col overflow-y-scroll overflow-x-hidden m-0 p-0">
 			{#each lints as lint, i}
 				<button
-					class="block max-w-sm p-6 bg-white dark:bg-gray-800 border border-gray-200 rounded-lg shadow m-1 hover:translate-x-1 transition-all"
+					class="block max-w-sm p-3 bg-white dark:bg-gray-800 border border-gray-200 rounded-lg shadow m-1 hover:translate-x-1 transition-all"
 					on:click={() => (focused = i)}
 					bind:this={lintCards[i]}
 				>
@@ -70,15 +70,12 @@
 						</div>
 						<div
 							class="transition-all overflow-hidden flex flex-col justify-evenly"
-							style={`height: ${
-								focused === i ? `calc(55px * ${lint.suggestions.length + 1})` : '0px'
-							}`}
+							style={`height: ${focused === i ? `calc(55px * ${lint.suggestions.length + 1})` : '0px'}`}
 						>
 							<p style="height: 50px" class="text-left">{lint.message}</p>
 							{#each lint.suggestions as suggestion}
 								<div class="w-full p-[4px]">
 									<Button
-										color="primary"
 										class="w-full"
 										style="height: 40px; margin: 5px 0px;"
 										on:click={() =>

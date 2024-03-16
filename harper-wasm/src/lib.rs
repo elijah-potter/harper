@@ -30,6 +30,12 @@ pub fn setup() {
 }
 
 #[wasm_bindgen]
+pub fn use_spell_check(set: bool) {
+    let mut linter = LINTER.lock().unwrap();
+    linter.config.spell_check = Some(set);
+}
+
+#[wasm_bindgen]
 pub fn lint(text: String) -> Vec<JsValue> {
     let document = Document::new_markdown(&text);
 

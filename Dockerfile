@@ -18,21 +18,22 @@ WORKDIR /usr/build/
 RUN mkdir harper-wasm
 
 COPY --from=wasm-build /usr/build/harper-wasm/pkg /usr/build/harper-wasm/pkg
-COPY web web
+COPY packages packages
 COPY demo.md .
 
-WORKDIR /usr/build/web
+WORKDIR /usr/build/packages/web
 
 RUN yarn install && yarn build
 
 FROM node:slim
 
-COPY --from=node-build /usr/build/web/build /usr/build/web/build
-COPY --from=node-build /usr/build/web/package.json /usr/build/web/package.json 
-COPY --from=node-build /usr/build/web/yarn.lock /usr/build/web/yarn.lock
-COPY --from=node-build /usr/build/web/node_modules /usr/build/web/node_modules
+COPY --from=node-build /usr/build/packages/web/build /usr/build/packages/web/build
+COPY --from=node-build /usr/build/packages/web/package.json /usr/build/packages/web/package.json 
+COPY --from=node-build /usr/build/packages/package.json /usr/build/packages/package.json 
+COPY --from=node-build /usr/build/packages/yarn.lock /usr/build/yarn.lock
+COPY --from=node-build /usr/build/packages/node_modules /usr/build/node_modules
 
-WORKDIR /usr/build/web
+WORKDIR /usr/build/packages/web
 
 RUN yarn install
 
