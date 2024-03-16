@@ -9,7 +9,7 @@ use wasm_bindgen::JsValue;
 static LINTER: Lazy<Mutex<LintGroup<FullDictionary>>> = Lazy::new(|| {
     Mutex::new(LintGroup::new(
         Default::default(),
-        FullDictionary::create_from_curated(),
+        FullDictionary::create_from_curated()
     ))
 });
 
@@ -63,7 +63,7 @@ pub fn parse(text: String) -> Vec<JsValue> {
 pub fn apply_suggestion(
     text: String,
     span: JsValue,
-    suggestion: JsValue,
+    suggestion: JsValue
 ) -> Result<String, String> {
     let span = serde_wasm_bindgen::from_value(span).map_err(|e| e.to_string())?;
     let suggestion = serde_wasm_bindgen::from_value(suggestion).map_err(|e| e.to_string())?;

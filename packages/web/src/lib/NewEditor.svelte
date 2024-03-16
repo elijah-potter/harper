@@ -3,7 +3,7 @@
 	import { minimalSetup, EditorView } from 'codemirror';
 	import { contentToString, lintText, type Suggestion } from './analysis';
 	import { linter } from '@codemirror/lint';
-	import demoText from '../../../demo.md?raw';
+	import demoText from '../../../../demo.md?raw';
 	import { Card } from 'flowbite-svelte';
 
 	let editorDiv: HTMLDivElement;
@@ -28,7 +28,7 @@
 					to: lint.span.end,
 					severity: 'error',
 					message: lint.message,
-					actions: lint.suggestions.map((sug, i) => {
+					actions: lint.suggestions.map((sug) => {
 						return {
 							name: suggestionToLabel(sug),
 							apply: (view) => {

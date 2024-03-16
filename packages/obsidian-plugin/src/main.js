@@ -1,65 +1,63 @@
 import { linter } from "@codemirror/lint";
 import { Plugin } from "obsidian";
-import { EditorView } from "@codemirror/view"
+import { EditorView } from "@codemirror/view";
 import wasm from "wasm/harper_wasm_bg.wasm";
 import init, { lint, use_spell_check } from "wasm";
 
 function contentToString(content) {
-	return content.reduce((p, c) => p + c, "");
+  return content.reduce((p, c) => p + c, "");
 }
 
 function suggestionToLabel(sug) {
-	if (sug === "Remove") {
-		return "Remove";
-	} else {
-		return `Replace with "${contentToString(sug.ReplaceWith)}"`;
-	}
+  if (sug === "Remove") {
+    return "Remove";
+  } else {
+    return `Replace with "${contentToString(sug.ReplaceWith)}"`;
+  }
 }
 
 const harperLinter = linter(
-	async (view) => {
-		let text = view.state.doc.sliceString(-1);
+  async (view) => {
+    let text = view.state.doc.sliceString(-1);
 
     await init(await wasm());
     use_spell_check(false);
-		let lints = lint(text);
+    let lints = lint(text);
 
-		return lints.map((lint) => {
-			return {
-				from: lint.span.start,
-				to: lint.span.end,
-				severity: "error",
-				message: lint.message,
-				actions: lint.suggestions.map((sug, i) => {
-					return {
-						name: suggestionToLabel(sug),
-						apply: (view) => {
-							if (sug === "Remove") {
-								view.dispatch({
-									changes: {
-										from: lint.span.start,
-										to: lint.span.end,
-										insert: "",
-									},
-								});
-							} else {
-								view.dispatch({
-									changes: {
-										from: lint.span.start,
-										to: lint.span.end,
-										insert: contentToString(
-											sug.ReplaceWith,
-										),
-									},
-								});
-							}
-						},
-					};
-				}),
-			};
-		});
-	},
-	{ delay: -1 },
+    return lints.map((lint) => {
+      return {
+        from: lint.span.start,
+        to: lint.span.end,
+        severity: "error",
+        message: lint.message,
+        actions: lint.suggestions.map((sug, i) => {
+          return {
+            name: suggestionToLabel(sug),
+            apply: (view) => {
+              if (sug === "Remove") {
+                view.dispatch({
+                  changes: {
+                    from: lint.span.start,
+                    to: lint.span.end,
+                    insert: "",
+                  },
+                });
+              } else {
+                view.dispatch({
+                  changes: {
+                    from: lint.span.start,
+                    to: lint.span.end,
+                    insert: contentToString(sug.ReplaceWith),
+                  },
+                });
+              }
+            },
+          };
+        }),
+      };
+    });
+  },
+  { delay: -1 },
 );
 
 const theme = EditorView.baseTheme({
@@ -87,12 +85,12 @@ const theme = EditorView.baseTheme({
     whiteSpace: "nowrap !important",
     backgroundColor: "white !important",
     color: "black !important",
-    width: "100%"
+    width: "100%",
   },
 
   ".cm-diagnosticSource": {
     fontSize: "70%",
-    opacity: .7
+    opacity: 0.7,
   },
 
   ".cm-tooltip-lint": {
@@ -122,23 +120,23 @@ const theme = EditorView.baseTheme({
       left: "-2px",
       borderLeft: "3px solid transparent",
       borderRight: "3px solid transparent",
-      borderBottom: "4px solid #d11"
-    }
+      borderBottom: "4px solid #d11",
+    },
   },
 
   ".cm-lintPoint-warning": {
-    "&:after": { borderBottomColor: "orange" }
+    "&:after": { borderBottomColor: "orange" },
   },
   ".cm-lintPoint-info": {
-    "&:after": { borderBottomColor: "#999" }
+    "&:after": { borderBottomColor: "#999" },
   },
   ".cm-lintPoint-hint": {
-    "&:after": { borderBottomColor: "#66d" }
+    "&:after": { borderBottomColor: "#66d" },
   },
-})
+});
 
 export default class HarperPlugin extends Plugin {
-	async onload() {
-		this.registerEditorExtension([harperLinter, theme]);
-	}
+  async onload() {
+    this.registerEditorExtension([harperLinter, theme]);
+  }
 }
