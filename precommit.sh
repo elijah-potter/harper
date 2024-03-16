@@ -19,10 +19,13 @@ cargo bench
 cd $R/harper-wasm
 wasm-pack build --target bundler
 
+cd $R/packages
+yarn install -f
+yarn prettier --check .
+yarn eslint .
+
 cd $R/packages/web
 yarn install -f
-yarn run format --check
-yarn run lint 
 yarn run check
 yarn run build
 

@@ -1,0 +1,15 @@
+{
+	"private": true,
+	"workspaces": [
+		"obsidian-plugin",
+		"web"
+	],
+	"devDependencies": {
+		"eslint": "^8.28.0",
+		"eslint-config-prettier": "^9.0.0",
+		"eslint-plugin-prettier": "^5.0.1",
+		"eslint-plugin-svelte": "^2.34.0",
+		"prettier": "^3.0.3",
+		"prettier-plugin-svelte": "^3.0.3"
+	}
+}
