@@ -88,7 +88,7 @@ mod tests {
                 Word,
                 Space(1),
                 Word,
-                Newline(1)
+                Newline(2)
             ]
         );
     }
@@ -102,11 +102,11 @@ mod tests {
                 Space(1),
                 Word,
                 Punctuation(Punctuation::Comma),
-                Newline(1),
+                Newline(2),
                 Word,
                 Space(1),
                 Word,
-                Newline(1)
+                Newline(2)
             ]
         );
     }

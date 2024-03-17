@@ -67,7 +67,7 @@ lspconfig.harper_ls.setup {
         an_a = true,
         sentence_capitalization = true,
         unclosed_quotes = true,
-        wrong_quotes = true,
+        wrong_quotes = false,
         long_sentences = true,
         repeated_words = true,
         spaces = true,

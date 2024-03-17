@@ -11689,7 +11689,8 @@ alligator/MS
 alliterate/DSXGNV
 alliteration/M
 alliterative/Y
-allocate/ADSGNY
+allocate/ADSGNYC
+allocator/C
 allocation/AM
 allocations
 allot/LS
@@ -30078,6 +30079,7 @@ legacy/SM
 legal/SMY
 legalese/M
 legalism/MS
+legalist/S
 legalistic
 legalistically
 legality/SM
@@ -35549,7 +35551,7 @@ parricide/MS
 parring
 parrot/GMDS
 parry/GDSM
-parse/DRSG
+parse/DRSGT
 parsec/MS
 parsimonious/Y
 parsimony/M
@@ -44113,7 +44115,7 @@ submerse/GNDS
 submersible/MS
 submersion/M
 submicroscopic
-submission/MS
+submission/MSA
 submissive/PY
 submissiveness/M
 submit/AS
@@ -49610,3 +49612,13 @@ LADAR
 TODO
 struct
 WASM
+hackathon/S
+pseudocode/MG
+Zettelkasten
+OAuth
+MacOS
+SVG/s
+URI/s
+suprachiasmatic
+cannabinoids
+eudaimonia

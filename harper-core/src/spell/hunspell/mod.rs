@@ -86,6 +86,11 @@ mod tests {
         assert!(build_expanded().contains(&split("giants")));
     }
 
+    #[test]
+    fn expanded_contains_deallocate() {
+        assert!(build_expanded().contains(&split("deallocate")));
+    }
+
     fn split(text: &str) -> DictWord {
         text.chars().collect()
     }
