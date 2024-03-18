@@ -8,7 +8,7 @@ readme = "README.md"
 homepage = "https://github.com/elijah-potter/harper"
 
 [dependencies]
-blanket = "0.3.0"
+blanket = "0.4.0"
 hashbrown = { version = "0.14.3", features = ["serde"] }
 is-macro = "0.3.0"
 itertools = "0.12.1"
