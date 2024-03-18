@@ -13,7 +13,7 @@ tower-lsp = "0.20.0"
 tokio = { version = "1.36.0", features = ["fs", "rt", "rt-multi-thread", "macros", "io-std", "io-util", "net"] }
 clap = { version = "4.5.1", features = ["derive"] }
 once_cell = "1.19.0"
-tree-sitter = "0.20.10"
+tree-sitter = "0.22.2"
 tree-sitter-rust = "0.20.4"
 tree-sitter-typescript = "0.20.3"
 tree-sitter-python = "0.20.4"
