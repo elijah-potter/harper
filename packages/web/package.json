@@ -30,7 +30,8 @@
 	},
 	"type": "module",
 	"dependencies": {
-		"wasm": "link:../../harper-wasm/pkg",
-		"lodash-es": "^4.17.21"
+		"lodash-es": "^4.17.21",
+		"svelte-intersection-observer": "^1.0.0",
+		"wasm": "link:../../harper-wasm/pkg"
 	}
 }
