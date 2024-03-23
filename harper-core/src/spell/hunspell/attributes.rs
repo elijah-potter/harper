@@ -208,9 +208,7 @@ impl AttributeList {
             }
 
             for c in &remove {
-                let Some(last) = replaced_segment.last() else {
-                    return None;
-                };
+                let last = replaced_segment.last()?;
 
                 if last == c {
                     replaced_segment.pop();

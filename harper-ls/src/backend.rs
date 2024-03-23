@@ -58,7 +58,8 @@ use crate::tree_sitter_parser::TreeSitterParser;
 struct DocumentState {
     document: Document,
     ident_dict: Arc<FullDictionary>,
-    linter: LintGroup<MergedDictionary<FullDictionary>>
+    linter: LintGroup<MergedDictionary<FullDictionary>>,
+    language_id: Option<String>
 }
 
 /// Deallocate
@@ -188,7 +189,11 @@ impl Backend {
     }
 
     #[instrument(skip(self))]
-    async fn update_document_from_file(&self, url: &Url) -> anyhow::Result<()> {
+    async fn update_document_from_file(
+        &self,
+        url: &Url,
+        language_id: Option<&str>
+    ) -> anyhow::Result<()> {
         let content = match tokio::fs::read_to_string(
             url.to_file_path()
                 .map_err(|_| anyhow::format_err!("Could not extract file path."))?
@@ -202,13 +207,20 @@ impl Backend {
             }
         };
 
-        self.update_document(url, &content).await
+        self.update_document(url, &content, language_id).await
     }
 
     #[instrument(skip(self, text))]
-    async fn update_document(&self, url: &Url, text: &str) -> anyhow::Result<()> {
+    async fn update_document(
+        &self,
+        url: &Url,
+        text: &str,
+        language_id: Option<&str>
+    ) -> anyhow::Result<()> {
         let mut doc_lock = self.doc_state.lock().await;
         let config_lock = self.config.read().await;
+
+        let prev_state = doc_lock.get(url);
 
         // TODO: Only reset linter when underlying dictionaries change
 
@@ -217,13 +229,19 @@ impl Backend {
                 config_lock.lint_config,
                 self.generate_file_dictionary(url).await?
             ),
+            language_id: language_id
+                .map(|v| v.to_string())
+                .or(prev_state.and_then(|s| s.language_id.clone())),
             ..Default::default()
         };
 
-        doc_state.document = if let Some(extension) = url.to_file_path().unwrap().extension() {
-            if let Some(ts_parser) =
-                TreeSitterParser::new_from_extension(&extension.to_string_lossy())
-            {
+        let Some(language_id) = &doc_state.language_id else {
+            doc_lock.remove(url);
+            return Ok(());
+        };
+
+        doc_state.document =
+            if let Some(ts_parser) = TreeSitterParser::new_from_language_id(language_id) {
                 let source: Vec<char> = text.chars().collect();
 
                 if let Some(new_dict) = ts_parser.create_ident_dict(source.as_slice()) {
@@ -239,12 +257,12 @@ impl Backend {
                 }
 
                 Document::new_from_vec(source, Box::new(ts_parser))
-            } else {
+            } else if language_id == "markdown" {
                 Document::new(text, Box::new(Markdown))
-            }
-        } else {
-            Document::new(text, Box::new(Markdown))
-        };
+            } else {
+                doc_lock.remove(url);
+                return Ok(());
+            };
 
         doc_lock.insert(url.clone(), doc_state);
 
@@ -377,7 +395,7 @@ impl LanguageServer for Backend {
             .await;
 
         let _ = self
-            .update_document_from_file(&params.text_document.uri)
+            .update_document_from_file(&params.text_document.uri, None)
             .await;
 
         self.publish_diagnostics(&params.text_document.uri).await;
@@ -389,7 +407,10 @@ impl LanguageServer for Backend {
             .await;
 
         let _ = self
-            .update_document_from_file(&params.text_document.uri)
+            .update_document_from_file(
+                &params.text_document.uri,
+                Some(&params.text_document.language_id)
+            )
             .await;
 
         self.publish_diagnostics(&params.text_document.uri).await;
@@ -404,7 +425,7 @@ impl LanguageServer for Backend {
             .log_message(MessageType::INFO, "File changed!")
             .await;
 
-        self.update_document(&params.text_document.uri, &last.text)
+        self.update_document(&params.text_document.uri, &last.text, None)
             .await
             .unwrap();
         self.publish_diagnostics(&params.text_document.uri).await;
@@ -444,7 +465,7 @@ impl LanguageServer for Backend {
                     error!("Unable to save user dictionary: {}", err);
                 }
 
-                let _ = self.update_document_from_file(&file_url).await;
+                let _ = self.update_document_from_file(&file_url, None).await;
                 self.publish_diagnostics(&file_url).await;
             }
             "HarperAddToFileDict" => {
@@ -463,7 +484,7 @@ impl LanguageServer for Backend {
                     error!("Unable to save file dictionary: {}", err);
                 }
 
-                let _ = self.update_document_from_file(&file_url).await;
+                let _ = self.update_document_from_file(&file_url, None).await;
                 self.publish_diagnostics(&file_url).await;
             }
             "HarperOpen" => match open::that(&first) {
@@ -509,7 +530,11 @@ impl LanguageServer for Backend {
             doc_state.keys().cloned().collect()
         };
 
-        futures::future::join_all(keys.iter().map(|key| self.update_document_from_file(key))).await;
+        futures::future::join_all(
+            keys.iter()
+                .map(|key| self.update_document_from_file(key, None))
+        )
+        .await;
     }
 
     async fn code_action(&self, params: CodeActionParams) -> Result<Option<CodeActionResponse>> {

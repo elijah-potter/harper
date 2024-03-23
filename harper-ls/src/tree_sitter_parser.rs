@@ -14,29 +14,26 @@ pub struct TreeSitterParser {
 }
 
 impl TreeSitterParser {
-    pub fn new_from_extension(file_extension: &str) -> Option<Self> {
-        let language = match file_extension {
-            "rs" => tree_sitter_rust::language(),
-            "tsx" => tree_sitter_typescript::language_tsx(),
-            "ts" => tree_sitter_typescript::language_typescript(),
+    pub fn new_from_language_id(language_id: &str) -> Option<Self> {
+        let language = match language_id {
+            "rust" => tree_sitter_rust::language(),
+            "typescriptreact" => tree_sitter_typescript::language_tsx(),
+            "typescript" => tree_sitter_typescript::language_typescript(),
             "py" => tree_sitter_python::language(),
-            "js" => tree_sitter_javascript::language(),
-            "mjs" => tree_sitter_javascript::language(),
-            "cjs" => tree_sitter_javascript::language(),
+            "javascript" => tree_sitter_javascript::language(),
+            "javascriptreact" => tree_sitter_typescript::language_tsx(),
             "go" => tree_sitter_go::language(),
             "c" => tree_sitter_c::language(),
             "cpp" => tree_sitter_cpp::language(),
-            "h" => tree_sitter_cpp::language(),
-            "hpp" => tree_sitter_cpp::language(),
-            "rb" => tree_sitter_ruby::language(),
+            "ruby" => tree_sitter_ruby::language(),
             "swift" => tree_sitter_swift::language(),
-            "cs" => tree_sitter_c_sharp::language(),
+            "csharp" => tree_sitter_c_sharp::language(),
             "toml" => tree_sitter_toml::language(),
             "lua" => tree_sitter_lua::language(),
             _ => return None
         };
 
-        let comment_parser: Box<dyn Parser> = match file_extension {
+        let comment_parser: Box<dyn Parser> = match language_id {
             "go" => Box::new(Go),
             _ => Box::new(Unit)
         };

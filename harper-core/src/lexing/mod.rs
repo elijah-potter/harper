@@ -61,14 +61,11 @@ pub fn lex_number(source: &[char]) -> Option<FoundToken> {
         return None;
     }
 
-    let Some(end) = source
+    let end = source
         .iter()
         .enumerate()
         .rev()
-        .find_map(|(i, v)| v.is_numeric().then_some(i))
-    else {
-        return None;
-    };
+        .find_map(|(i, v)| v.is_numeric().then_some(i))?;
 
     {
         let s: String = source[0..end + 1].iter().collect();
