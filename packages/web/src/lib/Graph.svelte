@@ -3,8 +3,8 @@
 	import { sineInOut } from 'svelte/easing';
 	let data = new Map<string, number>();
 	data.set('Harper', 10);
-	data.set('Grammarly', 200);
-	data.set('LanguageTool', 1000);
+	data.set('LanguageTool', 650);
+	data.set('Grammarly', 4000);
 
 	let maxW = 0;
 

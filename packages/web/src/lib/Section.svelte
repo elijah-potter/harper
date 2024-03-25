@@ -12,7 +12,7 @@
 		</div>
 	{/if}
 
-	<div class={`justify-center space-y-2 ${swapped ? 'text-right' : ''}`}>
+	<div class={`justify-center space-y-2`}>
 		<h2 class="text-2xl font-bold sm:text-3xl lg:text-4xl">
 			<slot name="title" />
 		</h2>
