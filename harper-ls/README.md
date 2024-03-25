@@ -18,7 +18,7 @@ Finally, if you have [Rust installed](https://www.rust-lang.org/tools/install), 
 To install `harper-ls`, simply run:
 
 ```bash
-cargo install harper-ls
+cargo install harper-ls --locked
 ```
 
 ## Dictionaries
