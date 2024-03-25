@@ -562,6 +562,7 @@ dependencies = [
  "once_cell",
  "open",
  "resolve-path",
+ "serde",
  "serde_json",
  "tokio",
  "tower-lsp",

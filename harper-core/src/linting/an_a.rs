@@ -1,6 +1,6 @@
 use itertools::Itertools;
 
-use crate::{Document, Lint, LintKind, Linter, Suggestion, TokenStringExt};
+use crate::{CharStringExt, Document, Lint, LintKind, Linter, Suggestion, TokenStringExt};
 
 #[derive(Debug, Default)]
 pub struct AnA;
@@ -23,7 +23,7 @@ impl Linter for AnA {
                 continue;
             };
 
-            let should_be_a_an = !starts_with_vowel(chars_second);
+            let should_be_a_an = !starts_with_vowel(&chars_second.to_lower());
 
             if a_an != should_be_a_an {
                 let replacement = match a_an {

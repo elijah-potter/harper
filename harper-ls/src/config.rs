@@ -3,13 +3,38 @@ use std::path::PathBuf;
 use dirs::{config_dir, data_local_dir};
 use harper_core::LintGroupConfig;
 use resolve_path::PathResolveExt;
+use serde::{Deserialize, Serialize};
 use serde_json::Value;
+
+#[derive(Debug, Serialize, Deserialize, Clone, Copy)]
+#[serde(rename_all = "camelCase")]
+pub enum DiagnosticSeverity {
+    Error,
+    Warning,
+    Information,
+    Hint
+}
+
+impl DiagnosticSeverity {
+    /// Converts `self` to the equivalent LSP type.
+    pub fn to_lsp(self) -> tower_lsp::lsp_types::DiagnosticSeverity {
+        match self {
+            DiagnosticSeverity::Error => tower_lsp::lsp_types::DiagnosticSeverity::ERROR,
+            DiagnosticSeverity::Warning => tower_lsp::lsp_types::DiagnosticSeverity::WARNING,
+            DiagnosticSeverity::Information => {
+                tower_lsp::lsp_types::DiagnosticSeverity::INFORMATION
+            }
+            DiagnosticSeverity::Hint => tower_lsp::lsp_types::DiagnosticSeverity::HINT
+        }
+    }
+}
 
 #[derive(Debug, Clone)]
 pub struct Config {
     pub user_dict_path: PathBuf,
     pub file_dict_path: PathBuf,
-    pub lint_config: LintGroupConfig
+    pub lint_config: LintGroupConfig,
+    pub diagnostic_severity: DiagnosticSeverity
 }
 
 impl Config {
@@ -38,6 +63,10 @@ impl Config {
             base.lint_config = serde_json::from_value(v.clone())?;
         }
 
+        if let Some(v) = value.get("diagnosticSeverity") {
+            base.diagnostic_severity = serde_json::from_value(v.clone())?;
+        }
+
         Ok(base)
     }
 }
@@ -49,7 +78,8 @@ impl Default for Config {
             file_dict_path: data_local_dir()
                 .unwrap()
                 .join("harper-ls/file_dictionaries/"),
-            lint_config: LintGroupConfig::default()
+            lint_config: LintGroupConfig::default(),
+            diagnostic_severity: DiagnosticSeverity::Hint
         }
     }
 }

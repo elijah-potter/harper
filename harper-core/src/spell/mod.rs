@@ -1,7 +1,6 @@
 use std::borrow::Cow;
 
 use itertools::{Itertools, MinMaxResult};
-use smallvec::SmallVec;
 
 pub use self::dictionary::Dictionary;
 pub use self::full_dictionary::FullDictionary;
@@ -11,9 +10,6 @@ mod dictionary;
 mod full_dictionary;
 mod hunspell;
 mod merged_dictionary;
-
-/// A word from a dictionary or other similar structure.
-pub type DictWord = SmallVec<[char; 6]>;
 
 /// Suggest a correct spelling for a given misspelled word.
 /// [`misspelled_word`] is assumed to be quite small (n < 100).

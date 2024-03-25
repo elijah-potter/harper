@@ -78,6 +78,20 @@ lspconfig.harper_ls.setup {
 }
 ```
 
+By default, `harper-ls` will mark all diagnostics with HINT.
+If you want to configure this, refer below:
+
+```lua
+lspconfig.harper_ls.setup {
+  settings = {
+    ["harper-ls"] = {
+        diagnosticSeverity = "hint" -- Can also be "information", "warning", or "error"
+    }
+  },
+}
+```
+
+
 ### File-Local Dictionary
 
 Sometimes, you'll encounter a word (or name) that is only valid within the context of a specific file.

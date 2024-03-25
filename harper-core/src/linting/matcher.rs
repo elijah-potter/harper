@@ -1,10 +1,20 @@
-use crate::spell::DictWord;
-use crate::{Document, Lint, LintKind, Linter, Punctuation, Span, Suggestion, Token, TokenKind};
+use crate::{
+    CharString,
+    Document,
+    Lint,
+    LintKind,
+    Linter,
+    Punctuation,
+    Span,
+    Suggestion,
+    Token,
+    TokenKind
+};
 
 #[derive(Debug, PartialEq, PartialOrd, Clone)]
 struct PatternToken {
     kind: TokenKind,
-    content: Option<DictWord>
+    content: Option<CharString>
 }
 
 impl PatternToken {

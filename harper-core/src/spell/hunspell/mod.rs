@@ -22,7 +22,7 @@ mod tests {
     use super::attributes::AttributeList;
     use super::word_list::parse_word_list;
     use super::{parse_default_attribute_list, parse_default_word_list};
-    use crate::spell::DictWord;
+    use crate::CharString;
 
     pub const TEST_WORD_LIST: &str = "3\nhello\ntry/B\nwork/AB";
     pub const ATTR_LIST: &str =
@@ -65,7 +65,7 @@ mod tests {
         assert!(expanded.contains(&split("giants")))
     }
 
-    fn build_expanded() -> Vec<DictWord> {
+    fn build_expanded() -> Vec<CharString> {
         let words = parse_default_word_list().unwrap();
         let attributes = parse_default_attribute_list().unwrap();
 
@@ -91,7 +91,7 @@ mod tests {
         assert!(build_expanded().contains(&split("deallocate")));
     }
 
-    fn split(text: &str) -> DictWord {
+    fn split(text: &str) -> CharString {
         text.chars().collect()
     }
 }

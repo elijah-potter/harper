@@ -1,14 +1,13 @@
 use hashbrown::HashSet;
 
 use super::{Lint, LintKind, Linter};
-use crate::spell::DictWord;
 use crate::token::{Token, TokenKind, TokenStringExt};
-use crate::{Document, Span, Suggestion};
+use crate::{CharString, Document, Span, Suggestion};
 
 #[derive(Debug, Clone)]
 pub struct RepeatedWords {
     /// The set of words that can be considered for repetition checking.
-    set: HashSet<DictWord>
+    set: HashSet<CharString>
 }
 
 impl RepeatedWords {

@@ -1,5 +1,6 @@
 #![allow(dead_code)]
 
+mod char_string;
 mod document;
 mod lexing;
 mod linting;
@@ -8,6 +9,7 @@ mod span;
 mod spell;
 mod token;
 
+pub use char_string::{CharString, CharStringExt};
 pub use document::Document;
 pub use linting::{Lint, LintGroup, LintGroupConfig, LintKind, Linter, Suggestion};
 pub use span::Span;

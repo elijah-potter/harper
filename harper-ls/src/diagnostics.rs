@@ -12,12 +12,17 @@ use tower_lsp::lsp_types::{
     WorkspaceEdit
 };
 
+use crate::config::DiagnosticSeverity;
 use crate::pos_conv::span_to_range;
 
-pub fn lints_to_diagnostics(source: &[char], lints: &[Lint]) -> Vec<Diagnostic> {
+pub fn lints_to_diagnostics(
+    source: &[char],
+    lints: &[Lint],
+    severity: DiagnosticSeverity
+) -> Vec<Diagnostic> {
     lints
         .iter()
-        .map(|lint| lint_to_diagnostic(lint, source))
+        .map(|lint| lint_to_diagnostic(lint, source, severity))
         .collect()
 }
 
@@ -82,12 +87,12 @@ pub fn lint_to_code_actions<'a>(
     results
 }
 
-fn lint_to_diagnostic(lint: &Lint, source: &[char]) -> Diagnostic {
+fn lint_to_diagnostic(lint: &Lint, source: &[char], severity: DiagnosticSeverity) -> Diagnostic {
     let range = span_to_range(source, lint.span);
 
     Diagnostic {
         range,
-        severity: None,
+        severity: Some(severity.to_lsp()),
         code: None,
         code_description: None,
         source: Some("Harper".to_string()),

@@ -6,8 +6,7 @@ use smallvec::ToSmallVec;
 use super::matcher::Matcher;
 use super::word_list::MarkedWord;
 use super::Error;
-use crate::spell::DictWord;
-use crate::Span;
+use crate::{CharString, Span};
 
 #[derive(Debug, Clone)]
 struct AffixReplacement {
@@ -111,7 +110,7 @@ impl AttributeList {
     /// Will append to the given `dest`;
     ///
     /// In the future, I want to make this function cleaner and faster.
-    pub fn expand_marked_word(&self, word: MarkedWord, dest: &mut Vec<DictWord>) {
+    pub fn expand_marked_word(&self, word: MarkedWord, dest: &mut Vec<CharString>) {
         dest.reserve(word.attributes.len() + 1);
 
         let start_len = dest.len();
@@ -173,7 +172,7 @@ impl AttributeList {
     pub fn expand_marked_words(
         &self,
         words: impl IntoIterator<Item = MarkedWord>,
-        dest: &mut Vec<DictWord>
+        dest: &mut Vec<CharString>
     ) {
         for word in words {
             self.expand_marked_word(word, dest);
@@ -184,7 +183,7 @@ impl AttributeList {
         replacement: &AffixReplacement,
         letters: &[char],
         suffix: bool
-    ) -> Option<DictWord> {
+    ) -> Option<CharString> {
         if replacement.condition.len() > letters.len() {
             return None;
         }
@@ -199,7 +198,7 @@ impl AttributeList {
 
         if replacement.condition.matches(target_segment) {
             let mut replaced_segment = letters.to_smallvec();
-            let mut remove: DictWord = replacement.remove.to_smallvec();
+            let mut remove: CharString = replacement.remove.to_smallvec();
 
             if !suffix {
                 replaced_segment.reverse();

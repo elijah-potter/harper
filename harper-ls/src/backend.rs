@@ -318,8 +318,13 @@ impl Backend {
         };
 
         let lints = doc_state.linter.lint(&doc_state.document);
+        let config = self.config.read().await;
 
-        lints_to_diagnostics(doc_state.document.get_full_content(), &lints)
+        lints_to_diagnostics(
+            doc_state.document.get_full_content(),
+            &lints,
+            config.diagnostic_severity
+        )
     }
 
     #[instrument(skip(self))]
@@ -519,6 +524,8 @@ impl LanguageServer for Backend {
             }
         };
 
+        dbg!(new_config.diagnostic_severity);
+
         {
             let mut config = self.config.write().await;
             *config = new_config;
@@ -530,6 +537,7 @@ impl LanguageServer for Backend {
             doc_state.keys().cloned().collect()
         };
 
+        // Update documents with new config
         futures::future::join_all(
             keys.iter()
                 .map(|key| self.update_document_from_file(key, None))

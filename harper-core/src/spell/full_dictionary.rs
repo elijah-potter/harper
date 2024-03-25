@@ -4,7 +4,8 @@ use smallvec::{SmallVec, ToSmallVec};
 
 use super::dictionary::Dictionary;
 use super::hunspell::{parse_default_attribute_list, parse_default_word_list};
-use super::{seq_to_normalized, DictWord};
+use super::seq_to_normalized;
+use crate::CharString;
 
 /// A full, fat dictionary.
 /// All of the elements are stored in-memory.
@@ -16,13 +17,13 @@ pub struct FullDictionary {
     /// This is likely due to increased locality :shrug:.
     ///
     /// This list is sorted by word length (i.e. the shortest words are first).
-    words: Vec<DictWord>,
+    words: Vec<CharString>,
     /// A lookup list for each word length.
     /// Each index of this list will return the first index of [`Self::words`]
     /// that has a word whose index is that length.
     word_len_starts: Vec<usize>,
     /// All English words
-    word_set: HashSet<DictWord>
+    word_set: HashSet<CharString>
 }
 
 fn uncached_inner_new() -> FullDictionary {
@@ -81,7 +82,7 @@ impl FullDictionary {
     /// list. NOTE: This function will sort the original word list by its
     /// length. If the word list's order is changed after creating the
     /// lookup, it will no longer be valid.
-    fn create_len_starts(words: &mut [DictWord]) -> Vec<usize> {
+    fn create_len_starts(words: &mut [CharString]) -> Vec<usize> {
         words.sort_by_key(|a| a.len());
         let mut word_len_starts = vec![0, 0];
 

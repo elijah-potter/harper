@@ -1,9 +1,9 @@
 use super::Error;
-use crate::spell::DictWord;
+use crate::CharString;
 
 #[derive(Debug, Clone)]
 pub struct MarkedWord {
-    pub letters: DictWord,
+    pub letters: CharString,
     pub attributes: Vec<char>
 }
 
