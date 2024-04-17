@@ -2,7 +2,9 @@ use is_macro::Is;
 use itertools::Itertools;
 use serde::{Deserialize, Serialize};
 
+use crate::punctuation::Punctuation;
 use crate::span::Span;
+use crate::Quote;
 
 #[derive(Debug, Clone, Copy, Serialize, Deserialize, PartialEq, Default)]
 pub struct Token {
@@ -66,85 +68,6 @@ impl TokenKind {
     pub fn is_whitespace(&self) -> bool {
         matches!(self, TokenKind::Space(_) | TokenKind::Newline(_))
     }
-}
-
-#[derive(Debug, Is, Clone, Copy, Serialize, Deserialize, PartialEq, Eq, PartialOrd)]
-#[serde(tag = "kind")]
-pub enum Punctuation {
-    /// `…`
-    Ellipsis,
-    /// `–`
-    EnDash,
-    /// `—`
-    EmDash,
-    /// `&`
-    Ampersand,
-    /// `.`
-    Period,
-    /// `!`
-    Bang,
-    /// `?`
-    Question,
-    /// `:`
-    Colon,
-    /// ``;``
-    Semicolon,
-    /// `"`
-    Quote(Quote),
-    /// `,`
-    Comma,
-    /// `-`
-    Hyphen,
-    /// `[`
-    OpenSquare,
-    /// `]`
-    CloseSquare,
-    /// `(`
-    OpenRound,
-    /// `)`
-    CloseRound,
-    /// `{`
-    OpenCurly,
-    /// `}`
-    CloseCurly,
-    /// `"`
-    Hash,
-    /// `'`
-    Apostrophe,
-    /// `%`
-    Percent,
-    /// `/`
-    ForwardSlash,
-    /// `\`
-    Backslash,
-    /// `<`
-    LessThan,
-    /// `>`
-    GreaterThan,
-    /// `=`
-    Equal,
-    /// `*`
-    Star,
-    /// `~`
-    Tilde,
-    /// `@`
-    At,
-    /// `^`
-    Carrot,
-    /// `+`
-    Plus,
-    /// `$`
-    Dollar,
-    /// `|`
-    Pipe,
-    /// `_`
-    Underscore
-}
-
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, PartialOrd)]
-pub struct Quote {
-    /// The location of the matching quote, if it exists.
-    pub twin_loc: Option<usize>
 }
 
 pub trait TokenStringExt {

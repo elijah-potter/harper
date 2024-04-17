@@ -1,7 +1,6 @@
 use super::{Lint, LintKind, Linter};
 use crate::document::Document;
-use crate::token::Quote;
-use crate::{Punctuation, TokenKind};
+use crate::{Punctuation, Quote, TokenKind};
 
 #[derive(Debug, Clone, Copy, Default)]
 pub struct UnclosedQuotes;

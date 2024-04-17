@@ -1,10 +1,12 @@
 #![allow(dead_code)]
 
+mod char_ext;
 mod char_string;
 mod document;
 mod lexing;
 mod linting;
 pub mod parsers;
+mod punctuation;
 mod span;
 mod spell;
 mod token;
@@ -12,9 +14,10 @@ mod token;
 pub use char_string::{CharString, CharStringExt};
 pub use document::Document;
 pub use linting::{Lint, LintGroup, LintGroupConfig, LintKind, Linter, Suggestion};
+pub use punctuation::{Punctuation, Quote};
 pub use span::Span;
 pub use spell::{Dictionary, FullDictionary, MergedDictionary};
-pub use token::{FatToken, Punctuation, Token, TokenKind, TokenStringExt};
+pub use token::{FatToken, Token, TokenKind, TokenStringExt};
 
 /// A utility function that removes overlapping lints in a vector,
 /// keeping the more important ones.

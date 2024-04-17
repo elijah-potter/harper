@@ -18,6 +18,8 @@ pulldown-cmark = "0.10.0"
 serde = { version = "1.0.197", features = ["derive"] }
 smallvec = { version = "1.13.1", features = ["serde"] }
 thiserror = "1.0.57"
+unicode-blocks = "0.1.9"
+unicode-width = "0.1.11"
 
 [dev-dependencies]
 divan = "0.1.14"

@@ -39,10 +39,14 @@ impl Parser for Markdown {
                 }
                 pulldown_cmark::Event::Start(tag) => stack.push(tag),
                 pulldown_cmark::Event::End(pulldown_cmark::TagEnd::Paragraph)
-                | pulldown_cmark::Event::End(pulldown_cmark::TagEnd::Item) => tokens.push(Token {
-                    span: Span::new_with_len(traversed_chars, 1),
-                    kind: TokenKind::Newline(2)
-                }),
+                | pulldown_cmark::Event::End(pulldown_cmark::TagEnd::Item)
+                | pulldown_cmark::Event::End(pulldown_cmark::TagEnd::TableCell) => {
+                    tokens.push(Token {
+                        span: Span::new_with_len(traversed_chars, 0),
+                        kind: TokenKind::Newline(2)
+                    });
+                    stack.pop();
+                }
                 pulldown_cmark::Event::End(_) => {
                     stack.pop();
                 }

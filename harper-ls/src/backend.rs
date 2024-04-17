@@ -16,7 +16,7 @@ use harper_core::{
 use serde_json::Value;
 use tokio::sync::{Mutex, RwLock};
 use tower_lsp::jsonrpc::Result;
-use tower_lsp::lsp_types::notification::{PublishDiagnostics, ShowMessage};
+use tower_lsp::lsp_types::notification::PublishDiagnostics;
 use tower_lsp::lsp_types::{
     CodeActionOrCommand,
     CodeActionParams,
@@ -38,7 +38,6 @@ use tower_lsp::lsp_types::{
     PublishDiagnosticsParams,
     Range,
     ServerCapabilities,
-    ShowMessageParams,
     TextDocumentSyncCapability,
     TextDocumentSyncKind,
     TextDocumentSyncOptions,
@@ -120,8 +119,6 @@ impl Backend {
 
     #[instrument(skip(self, dict))]
     async fn save_file_dictionary(&self, url: &Url, dict: impl Dictionary) -> anyhow::Result<()> {
-        dbg!(self.get_file_dict_path(url).await);
-
         Ok(save_dict(self.get_file_dict_path(url).await, dict).await?)
     }
 
@@ -329,17 +326,6 @@ impl Backend {
 
     #[instrument(skip(self))]
     async fn publish_diagnostics(&self, url: &Url) {
-        let client = self.client.clone();
-
-        tokio::spawn(async move {
-            client
-                .send_notification::<ShowMessage>(ShowMessageParams {
-                    typ: MessageType::INFO,
-                    message: "Linting...".to_string()
-                })
-                .await
-        });
-
         let diagnostics = self.generate_diagnostics(url).await;
 
         let result = PublishDiagnosticsParams {
@@ -523,8 +509,6 @@ impl LanguageServer for Backend {
                 return;
             }
         };
-
-        dbg!(new_config.diagnostic_severity);
 
         {
             let mut config = self.config.write().await;

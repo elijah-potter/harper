@@ -5,8 +5,9 @@ use itertools::Itertools;
 
 use crate::linting::Suggestion;
 use crate::parsers::{Markdown, Parser, PlainEnglish};
+use crate::punctuation::Punctuation;
 use crate::span::Span;
-use crate::{FatToken, Punctuation, Token, TokenKind, TokenStringExt};
+use crate::{FatToken, Token, TokenKind, TokenStringExt};
 
 pub struct Document {
     source: Vec<char>,
@@ -55,6 +56,37 @@ impl Document {
         self.tokens = self.parser.parse(&self.source);
         self.condense_contractions();
         self.match_quotes();
+    }
+
+    /// Given a list of indices, this function removes the subsequent
+    /// `stretch_len - 1` elements after each index.
+    fn condense_indices(&mut self, indices: &[usize], stretch_len: usize) {
+        // Trim
+        let old = self.tokens.clone();
+        self.tokens.clear();
+
+        // Keep first chunk.
+        self.tokens
+            .extend_from_slice(&old[0..indices.first().copied().unwrap_or(indices.len())]);
+
+        let mut iter = indices.iter().peekable();
+
+        while let (Some(a_idx), b) = (iter.next(), iter.peek()) {
+            self.tokens.push(old[*a_idx]);
+
+            if let Some(b_idx) = b {
+                self.tokens
+                    .extend_from_slice(&old[a_idx + stretch_len..**b_idx]);
+            }
+        }
+
+        // Keep last chunk.
+        self.tokens.extend_from_slice(
+            &old[indices
+                .last()
+                .map(|v| v + stretch_len)
+                .unwrap_or(indices.len())..]
+        )
     }
 
     pub fn get_token_at_char_index(&self, char_index: usize) -> Option<Token> {
@@ -248,35 +280,7 @@ impl Document {
             }
         }
 
-        // Trim
-        let old = self.tokens.clone();
-        self.tokens.clear();
-
-        // Keep first chunk.
-        self.tokens.extend_from_slice(
-            &old[0..replace_starts
-                .first()
-                .copied()
-                .unwrap_or(replace_starts.len())]
-        );
-
-        let mut iter = replace_starts.iter().peekable();
-
-        while let (Some(a_idx), b) = (iter.next(), iter.peek()) {
-            self.tokens.push(old[*a_idx]);
-
-            if let Some(b_idx) = b {
-                self.tokens.extend_from_slice(&old[a_idx + 3..**b_idx]);
-            }
-        }
-
-        // Keep last chunk.
-        self.tokens.extend_from_slice(
-            &old[replace_starts
-                .last()
-                .map(|v| v + 3)
-                .unwrap_or(replace_starts.len())..]
-        )
+        self.condense_indices(&replace_starts, 3);
     }
 }
 

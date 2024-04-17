@@ -5,7 +5,9 @@ mod url;
 use url::lex_url;
 
 use self::email_address::lex_email_address;
-use crate::token::{Punctuation, Quote, TokenKind};
+use crate::char_ext::CharExt;
+use crate::punctuation::{Punctuation, Quote};
+use crate::token::TokenKind;
 
 #[derive(Debug)]
 pub struct FoundToken {
@@ -39,7 +41,7 @@ pub fn lex_token(source: &[char]) -> Option<FoundToken> {
 fn lex_word(source: &[char]) -> Option<FoundToken> {
     let end = source
         .iter()
-        .position(|c| !c.is_ascii_alphabetic())
+        .position(|c| !c.is_lingual())
         .unwrap_or(source.len());
 
     if end == 0 {
@@ -113,46 +115,7 @@ fn lex_punctuation(source: &[char]) -> Option<FoundToken> {
     }
 
     let c = source.first()?;
-
-    use Punctuation::*;
-
-    let punct = match c {
-        '@' => At,
-        '~' => Tilde,
-        '=' => Equal,
-        '<' => LessThan,
-        '>' => GreaterThan,
-        '/' => ForwardSlash,
-        '\\' => Backslash,
-        '%' => Percent,
-        '’' => Apostrophe,
-        '\'' => Apostrophe,
-        '.' => Period,
-        '!' => Bang,
-        '?' => Question,
-        ':' => Colon,
-        ';' => Semicolon,
-        ',' => Comma,
-        '-' => Hyphen,
-        '[' => OpenSquare,
-        ']' => CloseSquare,
-        '{' => OpenCurly,
-        '}' => CloseCurly,
-        '(' => OpenRound,
-        ')' => CloseRound,
-        '#' => Hash,
-        '*' => Star,
-        '&' => Ampersand,
-        '–' => EnDash,
-        '—' => EmDash,
-        '…' => Ellipsis,
-        '^' => Carrot,
-        '+' => Plus,
-        '$' => Dollar,
-        '|' => Pipe,
-        '_' => Underscore,
-        _ => return None
-    };
+    let punct = Punctuation::from_char(*c)?;
 
     Some(FoundToken {
         next_index: 1,

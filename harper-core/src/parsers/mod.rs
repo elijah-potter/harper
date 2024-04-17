@@ -4,7 +4,7 @@ mod plain_english;
 pub use markdown::Markdown;
 pub use plain_english::PlainEnglish;
 
-pub use crate::token::{Quote, Token, TokenKind, TokenStringExt};
+pub use crate::token::{Token, TokenKind, TokenStringExt};
 
 pub trait Parser: Send + Sync {
     fn parse(&mut self, source: &[char]) -> Vec<Token>;
@@ -109,5 +109,13 @@ mod tests {
                 Newline(2)
             ]
         );
+    }
+
+    /// Make sure that the English parser correctly identifies non-english
+    /// characters as part of the same word.
+    #[test]
+    fn parses_non_english() {
+        assert_tokens_eq_plain("Løvetann", &[Word]);
+        assert_tokens_eq_plain("Naïve", &[Word]);
     }
 }
