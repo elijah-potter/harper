@@ -2,19 +2,21 @@ use std::path::Path;
 
 use harper_core::{Dictionary, FullDictionary};
 use tokio::fs::{self, File};
-use tokio::io::{self, AsyncRead, AsyncReadExt, AsyncWrite, AsyncWriteExt, BufReader};
+use tokio::io::{self, AsyncRead, AsyncReadExt, AsyncWrite, AsyncWriteExt, BufReader, BufWriter};
 
 /// Save the contents of a dictionary to a file.
 /// Ensures that the path to the destination exists.
 pub async fn save_dict(path: impl AsRef<Path>, dict: impl Dictionary) -> io::Result<()> {
-    let file = File::create(path.as_ref()).await?;
-    let write = BufReader::new(file);
-
     if let Some(parent) = path.as_ref().parent() {
         fs::create_dir_all(parent).await?;
     }
 
-    write_word_list(dict, write).await?;
+    let file = File::create(path.as_ref()).await?;
+    let mut write = BufWriter::new(file);
+
+    write_word_list(dict, &mut write).await?;
+
+    write.flush().await?;
 
     Ok(())
 }
