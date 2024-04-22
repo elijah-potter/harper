@@ -13,6 +13,7 @@
 		"@flydotio/dockerfile": "^0.5.0",
 		"@sveltejs/adapter-node": "^3.0.3",
 		"@sveltejs/kit": "^1.20.4",
+		"@types/reveal.js": "^5.0.3",
 		"@typescript-eslint/eslint-plugin": "^6.0.0",
 		"@typescript-eslint/parser": "^6.0.0",
 		"autoprefixer": "^10.4.16",
@@ -31,6 +32,7 @@
 	"type": "module",
 	"dependencies": {
 		"lodash-es": "^4.17.21",
+		"reveal.js": "^5.1.0",
 		"svelte-intersection-observer": "^1.0.0",
 		"wasm": "link:../../harper-wasm/pkg"
 	}
