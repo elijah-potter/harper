@@ -4,6 +4,7 @@ version = "0.1.0"
 edition = "2021"
 private = true
 publish = false
+repository = "https://github.com/elijah-potter/harper"
 
 [dependencies]
 axum = "0.6.20"
