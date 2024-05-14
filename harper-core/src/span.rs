@@ -11,6 +11,7 @@ pub struct Span {
 
 impl Span {
     pub fn new(start: usize, end: usize) -> Self {
+        assert!(start <= end);
         Self { start, end }
     }
 
@@ -63,9 +64,38 @@ impl Span {
     }
 
     // Add an amount to both [`Self::start`] and [`Self::end`]
-    pub fn offset(&mut self, by: usize) {
+    pub fn push_by(&mut self, by: usize) {
         self.start += by;
         self.end += by;
+    }
+
+    // Subtract an amount to both [`Self::start`] and [`Self::end`]
+    pub fn pull_by(&mut self, by: usize) {
+        self.start -= by;
+        self.end -= by;
+    }
+
+    // Add an amount to a copy of both [`Self::start`] and [`Self::end`]
+    pub fn pushed_by(&self, by: usize) -> Self {
+        let mut clone = *self;
+        clone.start += by;
+        clone.end += by;
+        clone
+    }
+
+    // Subtract an amount to a copy of both [`Self::start`] and [`Self::end`]
+    pub fn pulled_by(&self, by: usize) -> Self {
+        let mut clone = *self;
+        clone.start -= by;
+        clone.end -= by;
+        clone
+    }
+
+    // Add an amount a copy of both [`Self::start`] and [`Self::end`]
+    pub fn with_offset(&self, by: usize) -> Self {
+        let mut clone = *self;
+        clone.push_by(by);
+        clone
     }
 }
 

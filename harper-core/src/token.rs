@@ -38,7 +38,7 @@ pub enum TokenKind {
     #[default]
     Word,
     Punctuation(Punctuation),
-    Number(f64),
+    Number(f64, Option<NumberSuffix>),
     /// A sequence of " " spaces.
     Space(usize),
     /// A sequence of "\n" newlines
@@ -49,6 +49,45 @@ pub enum TokenKind {
     /// A special token used for things like inline code blocks that should be
     /// ignored by all linters.
     Unlintable
+}
+
+#[derive(Debug, Serialize, Deserialize, Default, PartialEq, PartialOrd, Clone, Copy, Is)]
+pub enum NumberSuffix {
+    #[default]
+    Th,
+    St,
+    Nd,
+    Rd
+}
+
+impl NumberSuffix {
+    /// Check the first several characters in a buffer to see if it matches a
+    /// number suffix.
+    pub fn from_chars(chars: &[char]) -> Option<Self> {
+        if chars.len() < 2 {
+            return None;
+        }
+
+        match (chars[0], chars[1]) {
+            ('t', 'h') => Some(NumberSuffix::Th),
+            ('T', 'h') => Some(NumberSuffix::Th),
+            ('t', 'H') => Some(NumberSuffix::Th),
+            ('T', 'H') => Some(NumberSuffix::Th),
+            ('s', 't') => Some(NumberSuffix::St),
+            ('S', 't') => Some(NumberSuffix::St),
+            ('s', 'T') => Some(NumberSuffix::St),
+            ('S', 'T') => Some(NumberSuffix::St),
+            ('n', 'd') => Some(NumberSuffix::Nd),
+            ('N', 'd') => Some(NumberSuffix::Nd),
+            ('n', 'D') => Some(NumberSuffix::Nd),
+            ('N', 'D') => Some(NumberSuffix::Nd),
+            ('r', 'd') => Some(NumberSuffix::Rd),
+            ('R', 'd') => Some(NumberSuffix::Rd),
+            ('r', 'D') => Some(NumberSuffix::Rd),
+            ('R', 'D') => Some(NumberSuffix::Rd),
+            _ => None
+        }
+    }
 }
 
 impl TokenKind {
@@ -170,7 +209,7 @@ impl TokenStringExt for [Token] {
 
     fn iter_number_indices(&self) -> impl Iterator<Item = usize> + '_ {
         self.iter().enumerate().filter_map(|(idx, token)| {
-            if let TokenKind::Number(_) = &token.kind {
+            if let TokenKind::Number(..) = &token.kind {
                 Some(idx)
             } else {
                 None

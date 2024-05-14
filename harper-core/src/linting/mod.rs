@@ -3,6 +3,7 @@ mod lint;
 mod lint_group;
 mod long_sentences;
 mod matcher;
+mod number_suffix_capitalization;
 mod repeated_words;
 mod sentence_capitalization;
 mod spaces;

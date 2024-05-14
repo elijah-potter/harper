@@ -12,7 +12,7 @@ impl Linter for SpelledNumbers {
         let mut lints = Vec::new();
 
         for number_tok in document.iter_numbers() {
-            let number = number_tok.kind.number().unwrap();
+            let (number, _suffix) = number_tok.kind.number().unwrap();
 
             if number - number.floor() < EPSILON && number <= 100. {
                 lints.push(Lint {

@@ -54,7 +54,7 @@ impl Parser for Markdown {
                     let chunk_len = code.chars().count();
 
                     tokens.push(Token {
-                        span: Span::new(traversed_chars, chunk_len),
+                        span: Span::new_with_len(traversed_chars, chunk_len),
                         kind: TokenKind::Unlintable
                     });
                 }
@@ -90,7 +90,7 @@ impl Parser for Markdown {
 
                     new_tokens
                         .iter_mut()
-                        .for_each(|token| token.span.offset(traversed_chars));
+                        .for_each(|token| token.span.push_by(traversed_chars));
 
                     tokens.append(&mut new_tokens);
                 }

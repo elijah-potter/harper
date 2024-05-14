@@ -7,6 +7,7 @@ use crate::linting::Suggestion;
 use crate::parsers::{Markdown, Parser, PlainEnglish};
 use crate::punctuation::Punctuation;
 use crate::span::Span;
+use crate::token::NumberSuffix;
 use crate::{FatToken, Token, TokenKind, TokenStringExt};
 
 pub struct Document {
@@ -55,12 +56,24 @@ impl Document {
     fn parse(&mut self) {
         self.tokens = self.parser.parse(&self.source);
         self.condense_contractions();
+        self.condense_number_suffixes();
         self.match_quotes();
     }
 
     /// Given a list of indices, this function removes the subsequent
     /// `stretch_len - 1` elements after each index.
+    ///
+    /// Will extend token spans to include removed elements.
+    /// Assumes condensed tokens are contiguous in source text.
     fn condense_indices(&mut self, indices: &[usize], stretch_len: usize) {
+        // Update spans
+        for idx in indices {
+            let end_tok = self.tokens[idx + stretch_len - 1];
+            let start_tok = &mut self.tokens[*idx];
+
+            start_tok.span.end = end_tok.span.end;
+        }
+
         // Trim
         let old = self.tokens.clone();
         self.tokens.clear();
@@ -86,7 +99,7 @@ impl Document {
                 .last()
                 .map(|v| v + stretch_len)
                 .unwrap_or(indices.len())..]
-        )
+        );
     }
 
     pub fn get_token_at_char_index(&self, char_index: usize) -> Option<Token> {
@@ -243,8 +256,34 @@ impl Document {
         }
     }
 
+    /// Searches for number suffixes and condenses them down into single tokens
+    fn condense_number_suffixes(&mut self) {
+        if self.tokens.len() < 2 {
+            return;
+        }
+
+        let mut replace_starts = Vec::new();
+
+        for idx in 0..self.tokens.len() - 1 {
+            let b = self.tokens[idx + 1];
+            let a = self.tokens[idx];
+
+            // TODO: Allow spaces between `a` and `b`
+
+            if let (TokenKind::Number(..), TokenKind::Word) = (a.kind, b.kind) {
+                if let Some(found_suffix) = NumberSuffix::from_chars(self.get_span_content(b.span))
+                {
+                    *self.tokens[idx].kind.as_mut_number().unwrap().1 = Some(found_suffix);
+                    replace_starts.push(idx);
+                }
+            }
+        }
+
+        self.condense_indices(&replace_starts, 2);
+    }
+
     /// Searches for contractions and condenses them down into single
-    /// self.tokens
+    /// tokens.
     fn condense_contractions(&mut self) {
         if self.tokens.len() < 3 {
             return;
@@ -443,5 +482,21 @@ mod tests {
                 span: Span::new(17, 23)
             })
         )
+    }
+
+    #[test]
+    fn condenses_number_suffixes() {
+        fn assert_token_count(source: &str, count: usize) {
+            let document = Document::new_plain_english(source);
+            assert_eq!(document.tokens.len(), count);
+        }
+
+        assert_token_count("1st", 1);
+        assert_token_count("This is the 2nd test", 9);
+        assert_token_count("This is the 3rd test", 9);
+        assert_token_count(
+            "It works even with weird capitalization like this: 600nD",
+            18
+        );
     }
 }

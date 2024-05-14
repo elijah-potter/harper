@@ -4,6 +4,7 @@ use serde::{Deserialize, Serialize};
 use super::an_a::AnA;
 use super::long_sentences::LongSentences;
 use super::matcher::Matcher;
+use super::number_suffix_capitalization::NumberSuffixCapitalization;
 use super::repeated_words::RepeatedWords;
 use super::sentence_capitalization::SentenceCapitalization;
 use super::spaces::Spaces;
@@ -97,7 +98,8 @@ create_lint_group_config!(
     LongSentences => true,
     RepeatedWords => true,
     Spaces => true,
-    Matcher => true
+    Matcher => true,
+    NumberSuffixCapitalization => true
 );
 
 impl<T: Dictionary + Default> Default for LintGroup<T> {

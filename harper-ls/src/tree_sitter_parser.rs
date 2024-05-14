@@ -134,7 +134,7 @@ impl Parser for TreeSitterParser {
 
             new_tokens
                 .iter_mut()
-                .for_each(|v| v.span.offset(span.start));
+                .for_each(|v| v.span.push_by(span.start));
 
             // The comment parser will insert a newline at end-of-input.
             // If the next tree-sitter chunk is a comment, we want to remove that.

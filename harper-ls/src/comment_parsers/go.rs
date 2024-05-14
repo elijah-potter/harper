@@ -31,7 +31,7 @@ impl Parser for Go {
 
         new_tokens
             .iter_mut()
-            .for_each(|t| t.span.offset(actual.start));
+            .for_each(|t| t.span.push_by(actual.start));
 
         new_tokens
     }
