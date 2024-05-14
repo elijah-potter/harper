@@ -66,7 +66,7 @@ impl Parser for Markdown {
 
                         if matches!(tag, Tag::CodeBlock(..)) {
                             tokens.push(Token {
-                                span: Span::new(traversed_chars, text.chars().count()),
+                                span: Span::new_with_len(traversed_chars, text.chars().count()),
                                 kind: TokenKind::Unlintable
                             });
                             continue;

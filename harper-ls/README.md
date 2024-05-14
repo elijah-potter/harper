@@ -71,7 +71,9 @@ lspconfig.harper_ls.setup {
         long_sentences = true,
         repeated_words = true,
         spaces = true,
-        matcher = true
+        matcher = true,
+        correct_number_suffix = true,
+        number_suffix_capitalization = true,
       }
     }
   },
