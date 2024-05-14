@@ -61,6 +61,41 @@ pub enum NumberSuffix {
 }
 
 impl NumberSuffix {
+    pub fn correct_suffix_for(number: f64) -> Option<Self> {
+        if number < 0.0 || number - number.floor() > f64::EPSILON || number > u64::MAX as f64 {
+            return None;
+        }
+
+        let integer = number as u64;
+
+        if let 11..=13 = integer % 100 {
+            return Some(Self::Th);
+        };
+
+        match integer % 10 {
+            0 => Some(Self::Th),
+            1 => Some(Self::St),
+            2 => Some(Self::Nd),
+            3 => Some(Self::Rd),
+            4 => Some(Self::Th),
+            5 => Some(Self::Th),
+            6 => Some(Self::Th),
+            7 => Some(Self::Th),
+            8 => Some(Self::Th),
+            9 => Some(Self::Th),
+            _ => None
+        }
+    }
+
+    pub fn to_chars(self) -> Vec<char> {
+        match self {
+            NumberSuffix::Th => vec!['t', 'h'],
+            NumberSuffix::St => vec!['s', 't'],
+            NumberSuffix::Nd => vec!['n', 'd'],
+            NumberSuffix::Rd => vec!['r', 'd']
+        }
+    }
+
     /// Check the first several characters in a buffer to see if it matches a
     /// number suffix.
     pub fn from_chars(chars: &[char]) -> Option<Self> {

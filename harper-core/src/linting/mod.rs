@@ -1,4 +1,5 @@
 mod an_a;
+mod correct_number_suffix;
 mod lint;
 mod lint_group;
 mod long_sentences;
