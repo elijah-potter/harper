@@ -105,6 +105,12 @@ impl From<Range<usize>> for Span {
     }
 }
 
+impl From<Span> for Range<usize> {
+    fn from(value: Span) -> Self {
+        value.start..value.end
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use crate::Span;
