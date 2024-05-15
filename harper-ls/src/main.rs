@@ -7,6 +7,7 @@ mod comment_parsers;
 mod config;
 mod diagnostics;
 mod dictionary_io;
+mod git_commit_parser;
 mod pos_conv;
 mod tree_sitter_parser;
 

@@ -50,6 +50,7 @@ use tracing::{error, info, instrument};
 use crate::config::Config;
 use crate::diagnostics::{lint_to_code_actions, lints_to_diagnostics};
 use crate::dictionary_io::{load_dict, save_dict};
+use crate::git_commit_parser::GitCommitParser;
 use crate::pos_conv::range_to_span;
 use crate::tree_sitter_parser::TreeSitterParser;
 
@@ -256,6 +257,8 @@ impl Backend {
                 Document::new_from_vec(source, Box::new(ts_parser))
             } else if language_id == "markdown" {
                 Document::new(text, Box::new(Markdown))
+            } else if language_id == "gitcommit" {
+                Document::new(text, Box::new(GitCommitParser))
             } else {
                 doc_lock.remove(url);
                 return Ok(());
@@ -381,9 +384,7 @@ impl LanguageServer for Backend {
     }
 
     async fn did_save(&self, params: DidSaveTextDocumentParams) {
-        self.client
-            .log_message(MessageType::INFO, "File saved!")
-            .await;
+        info!("File saved");
 
         let _ = self
             .update_document_from_file(&params.text_document.uri, None)
@@ -393,13 +394,12 @@ impl LanguageServer for Backend {
     }
 
     async fn did_open(&self, params: DidOpenTextDocumentParams) {
-        self.client
-            .log_message(MessageType::INFO, "File opened!")
-            .await;
+        info!("File opened");
 
         let _ = self
-            .update_document_from_file(
+            .update_document(
                 &params.text_document.uri,
+                &params.text_document.text,
                 Some(&params.text_document.language_id)
             )
             .await;
@@ -412,9 +412,7 @@ impl LanguageServer for Backend {
             return;
         };
 
-        self.client
-            .log_message(MessageType::INFO, "File changed!")
-            .await;
+        info!("File changed");
 
         self.update_document(&params.text_document.uri, &last.text, None)
             .await
@@ -423,9 +421,7 @@ impl LanguageServer for Backend {
     }
 
     async fn did_close(&self, _params: DidCloseTextDocumentParams) {
-        self.client
-            .log_message(MessageType::INFO, "File closed!")
-            .await;
+        info!("File closed");
     }
 
     async fn execute_command(&self, params: ExecuteCommandParams) -> Result<Option<Value>> {

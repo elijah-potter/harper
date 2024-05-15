@@ -8,6 +8,8 @@ use crate::{Span, Token, TokenKind};
 pub struct Markdown;
 
 impl Parser for Markdown {
+    /// This implementation is quite gross to look at, but it works.
+    /// If any issues arise, it would likely help to refactor this out first.
     fn parse(&mut self, source: &[char]) -> Vec<Token> {
         let mut english_parser = PlainEnglish;
 

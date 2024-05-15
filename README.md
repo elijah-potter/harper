@@ -29,8 +29,7 @@ Harper is even small enough to load via [WebAssembly.](https://writewithharper.c
 
 ## Installation
 
-If you want to use Harper on your machine, you will want to look at the [documentation for
-`harper-ls`](./harper-ls/README.md), the Language Server Protocol implementation.
+If you want to use Harper on your machine, you will want to look at the [documentation for `harper-ls`](./harper-ls/README.md), the Language Server Protocol implementation.
 
 ## Performance Issues
 
