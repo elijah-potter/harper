@@ -2,7 +2,7 @@ use std::collections::HashMap;
 use std::path::{Component, PathBuf};
 use std::sync::Arc;
 
-use harper_core::parsers::Markdown;
+use harper_core::parsers::{Markdown, PlainEnglish};
 use harper_core::{
     Dictionary,
     Document,
@@ -259,6 +259,8 @@ impl Backend {
                 Document::new(text, Box::new(Markdown))
             } else if language_id == "gitcommit" {
                 Document::new(text, Box::new(GitCommitParser))
+            } else if language_id == "mail" {
+                Document::new(text, Box::new(PlainEnglish))
             } else {
                 doc_lock.remove(url);
                 return Ok(());
