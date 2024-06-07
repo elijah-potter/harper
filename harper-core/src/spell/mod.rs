@@ -128,7 +128,7 @@ fn edit_distance_min_alloc(
     previous_row: &mut Vec<u8>,
     current_row: &mut Vec<u8>
 ) -> u8 {
-    if cfg!(debug) {
+    if cfg!(debug_assertions) {
         assert!(source.len() <= 255 && target.len() <= 255);
     }
 

@@ -1,5 +1,3 @@
-use std::f64::EPSILON;
-
 use crate::{Document, Lint, LintKind, Linter, Suggestion, TokenStringExt};
 
 /// Linter that checks to make sure small integers (< one hundred) are spelled
@@ -14,7 +12,7 @@ impl Linter for SpelledNumbers {
         for number_tok in document.iter_numbers() {
             let (number, _suffix) = number_tok.kind.number().unwrap();
 
-            if number - number.floor() < EPSILON && number <= 100. {
+            if (number - number.floor()).abs() < f64::EPSILON && number <= 100. {
                 lints.push(Lint {
                     span: number_tok.span,
                     lint_kind: LintKind::Readability,
