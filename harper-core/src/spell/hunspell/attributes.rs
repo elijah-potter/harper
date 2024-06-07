@@ -1,5 +1,3 @@
-use std::usize;
-
 use hashbrown::HashMap;
 use smallvec::ToSmallVec;
 
