@@ -35,3 +35,6 @@ If you want to use Harper on your machine, you will want to look at the [documen
 
 We consider long lint times bugs.
 If you encounter any significant performance issues, please create an issue on the topic.
+
+If you find a fix to any performance issue, we are open the contribution.
+Just make sure to read [our contribution guidelines first.](https://github.com/elijah-potter/harper/blob/master/CONTRIBUTING.md)
