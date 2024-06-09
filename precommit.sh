@@ -17,7 +17,7 @@ cargo build --release
 cargo bench
 
 cd $R/packages
-yarn install -f
+yarn install
 yarn prettier --check .
 yarn eslint .
 
@@ -25,7 +25,7 @@ cd $R/harper-wasm
 wasm-pack build --target web
 
 cd $R/packages/obsidian-plugin
-yarn install -f
+yarn install
 yarn run build
 
 cd $R/harper-wasm

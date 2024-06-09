@@ -277,7 +277,7 @@ impl Backend {
         url: &Url,
         range: Range
     ) -> Result<Vec<CodeActionOrCommand>> {
-        let mut doc_states = self.doc_state.lock().await;
+        let (config, mut doc_states) = tokio::join!(self.config.read(), self.doc_state.lock());
         let Some(doc_state) = doc_states.get_mut(url) else {
             return Ok(Vec::new());
         };
@@ -293,7 +293,9 @@ impl Backend {
         let mut actions: Vec<CodeActionOrCommand> = lints
             .into_iter()
             .filter(|lint| lint.span.overlaps_with(span))
-            .flat_map(|lint| lint_to_code_actions(&lint, url, source_chars))
+            .flat_map(|lint| {
+                lint_to_code_actions(&lint, url, source_chars, &config.code_action_config)
+            })
             .collect();
 
         if let Some(Token {

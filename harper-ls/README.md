@@ -93,6 +93,22 @@ lspconfig.harper_ls.setup {
 }
 ```
 
+You can also configure how `harper-ls` displays code actions.
+For example, to make code actions appear in "stable" positions, use the following configuration: 
+
+```lua
+lspconfig.harper_ls.setup {
+  settings = {
+    ["harper-ls"] = {
+      codeActions = {
+        forceStable = true
+      }
+    }
+  },
+}
+```
+
+This was added in response to [issue #89](https://github.com/elijah-potter/harper/issues/89).
 
 ### File-Local Dictionary
 

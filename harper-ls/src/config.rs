@@ -29,12 +29,46 @@ impl DiagnosticSeverity {
     }
 }
 
+/// Configuration for how code actions are displayed.
+/// Originally motivated by [#89](https://github.com/elijah-potter/harper/issues/89).
+#[derive(Debug, Clone, Default)]
+pub struct CodeActionConfig {
+    /// Instructs `harper-ls` to place unstable code actions last.
+    /// In this case, "unstable" refers their existence and action.
+    ///
+    /// For example, we always want to allow users to add "misspelled" elements
+    /// to dictionary, regardless of the spelling suggestions.
+    pub force_stable: bool
+}
+
+impl CodeActionConfig {
+    pub fn from_lsp_config(value: Value) -> anyhow::Result<Self> {
+        let mut base = CodeActionConfig::default();
+
+        let Value::Object(value) = value else {
+            return Err(anyhow::format_err!(
+                "The code action configuration must be an object."
+            ));
+        };
+
+        if let Some(force_stable_val) = value.get("forceStable") {
+            let Value::Bool(force_stable) = force_stable_val else {
+                return Err(anyhow::format_err!("forceStable must be a boolean value."));
+            };
+            base.force_stable = *force_stable;
+        };
+
+        Ok(base)
+    }
+}
+
 #[derive(Debug, Clone)]
 pub struct Config {
     pub user_dict_path: PathBuf,
     pub file_dict_path: PathBuf,
     pub lint_config: LintGroupConfig,
-    pub diagnostic_severity: DiagnosticSeverity
+    pub diagnostic_severity: DiagnosticSeverity,
+    pub code_action_config: CodeActionConfig
 }
 
 impl Config {
@@ -67,6 +101,10 @@ impl Config {
             base.diagnostic_severity = serde_json::from_value(v.clone())?;
         }
 
+        if let Some(v) = value.get("codeActions") {
+            base.code_action_config = CodeActionConfig::from_lsp_config(v.clone())?;
+        }
+
         Ok(base)
     }
 }
@@ -79,7 +117,8 @@ impl Default for Config {
                 .unwrap()
                 .join("harper-ls/file_dictionaries/"),
             lint_config: LintGroupConfig::default(),
-            diagnostic_severity: DiagnosticSeverity::Hint
+            diagnostic_severity: DiagnosticSeverity::Hint,
+            code_action_config: CodeActionConfig::default()
         }
     }
 }

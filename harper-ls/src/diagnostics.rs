@@ -12,7 +12,7 @@ use tower_lsp::lsp_types::{
     WorkspaceEdit
 };
 
-use crate::config::DiagnosticSeverity;
+use crate::config::{CodeActionConfig, DiagnosticSeverity};
 use crate::pos_conv::span_to_range;
 
 pub fn lints_to_diagnostics(
@@ -29,7 +29,8 @@ pub fn lints_to_diagnostics(
 pub fn lint_to_code_actions<'a>(
     lint: &'a Lint,
     url: &'a Url,
-    source: &'a [char]
+    source: &'a [char],
+    config: &CodeActionConfig
 ) -> Vec<CodeActionOrCommand> {
     let mut results = Vec::new();
 
@@ -81,7 +82,11 @@ pub fn lint_to_code_actions<'a>(
             format!("Add \"{}\" to the file dictionary.", orig),
             "HarperAddToFileDict".to_string(),
             Some(vec![orig.into(), url.to_string().into()])
-        )))
+        )));
+
+        if config.force_stable {
+            results.reverse();
+        }
     }
 
     results
