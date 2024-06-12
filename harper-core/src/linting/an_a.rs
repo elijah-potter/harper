@@ -1,3 +1,5 @@
+use std::borrow::Cow;
+
 use itertools::Itertools;
 
 use crate::{CharStringExt, Document, Lint, LintKind, Linter, Suggestion, TokenStringExt};
@@ -6,7 +8,7 @@ use crate::{CharStringExt, Document, Lint, LintKind, Linter, Suggestion, TokenSt
 pub struct AnA;
 
 impl Linter for AnA {
-    fn lint(&mut self, document: &Document) -> Vec<crate::Lint> {
+    fn lint(&mut self, document: &Document) -> Vec<Lint> {
         let mut lints = Vec::new();
 
         for (first, second) in document.iter_words().tuple_windows() {
@@ -45,12 +47,27 @@ impl Linter for AnA {
     }
 }
 
-// Checks whether a provided word begins with a vowel _sound_.
-//
-// It was produced through trail and error.
-// Matches with 99.71% and 99.77% of vowels and non-vowels in the
-// Carnegie-Mellon University word -> pronunciation dataset.
+fn to_lower_word(word: &[char]) -> Cow<'_, [char]> {
+    if word.iter().any(|c| c.is_uppercase()) {
+        Cow::Owned(
+            word.iter()
+                .flat_map(|c| c.to_lowercase())
+                .collect::<Vec<_>>()
+        )
+    } else {
+        Cow::Borrowed(word)
+    }
+}
+
+/// Checks whether a provided word begins with a vowel _sound_.
+///
+/// It was produced through trail and error.
+/// Matches with 99.71% and 99.77% of vowels and non-vowels in the
+/// Carnegie-Mellon University word -> pronunciation dataset.
 fn starts_with_vowel(word: &[char]) -> bool {
+    let word = to_lower_word(word);
+    let word = word.as_ref();
+
     if matches!(
         word,
         [] | ['u', 'k', ..] | ['e', 'u', 'p', 'h', ..] | ['e', 'u', 'g' | 'l' | 'c', ..]
@@ -60,7 +77,9 @@ fn starts_with_vowel(word: &[char]) -> bool {
 
     if matches!(
         word,
-        ['S', 'V', 'G']
+        ['s', 'v', 'g']
+            | ['h', 't', 'm', 'l']
+            | ['l', 'l', 'm']
             | ['h', 'o', 'u', 'r', ..]
             | ['h', 'o', 'n', ..]
             | ['u', 'n', 'i', 'n' | 'm', ..]
@@ -127,4 +146,22 @@ fn starts_with_vowel(word: &[char]) -> bool {
         word,
         ['a', ..] | ['e', ..] | ['i', ..] | ['o', ..] | ['u', ..]
     )
+}
+
+#[cfg(test)]
+mod tests {
+    use super::AnA;
+    use crate::linting::tests::assert_lint_count;
+
+    #[test]
+    fn detects_html_as_vowel() {
+        assert_lint_count("Here is a HTML document.", AnA, 1);
+        assert_lint_count("Here is a html document.", AnA, 1);
+    }
+
+    #[test]
+    fn detects_llm_as_vowel() {
+        assert_lint_count("Here is a LLM document.", AnA, 1);
+        assert_lint_count("Here is a llm document.", AnA, 1);
+    }
 }
