@@ -19,6 +19,23 @@
 			<h2>The Grammar Checker for Developers</h2>
 		</section>
 		<section>
+			<h1>Context</h1>
+			<h3>I was bored</h3>
+		</section>
+		<section>
+			<h2>
+				That became
+				<img
+					src="https://thrax.elijahpotter.dev/logo.svg"
+					alt="The Thrax Logo"
+					class="w-1/2 inline rounded-lg"
+				/>
+			</h2>
+		</section>
+		<section>
+			<h2>The language wasn't great, but the parser was fast.</h2>
+		</section>
+		<section>
 			<h1>The Problem:</h1>
 			<h1 class="fragment fade-in"><strong>Grammarly</strong></h1>
 		</section>
@@ -73,7 +90,7 @@
 				<li>Accidental word repetition (e.x. "We ate at <i>the the</i> cafe").</li>
 				<li>Extraneous spaces.</li>
 				<li>More than 100 curated patterns.</li>
-				<li>Run-on sentances.</li>
+				<li>Run-on sentences.</li>
 			</ul>
 		</section>
 		<section>
