@@ -1,17 +1,17 @@
-use crate::{CharString, Document, Lint, LintKind, Linter, Span, TokenStringExt};
+use crate::{CharString, Document, Lint, LintKind, Linter, Span, Token, TokenStringExt};
 
 /// Linter that checks if multiple pronouns are being used right after each
 /// other. This is a common mistake to make during the revision process.
 #[derive(Debug)]
 pub struct MultipleSequentialPronouns {
     /// Since there aren't many pronouns, it's faster to store this as a vector.
-    pronouns: Vec<CharString>
+    pronouns: Vec<CharString>,
 }
 
 impl MultipleSequentialPronouns {
     fn new() -> Self {
         let pronoun_strs = [
-            "me", "my", "I", "we", "you", "he", "him", "her", "she", "it", "they"
+            "me", "my", "I", "we", "you", "he", "him", "her", "she", "it", "they",
         ];
 
         let mut pronouns: Vec<CharString> = pronoun_strs
@@ -37,6 +37,20 @@ impl Linter for MultipleSequentialPronouns {
 
         let mut found_pronouns = Vec::new();
 
+        let mut emit_lint = |found_pronouns: &mut Vec<&Token>| {
+            let first: &&Token = found_pronouns.first().unwrap();
+            let last: &&Token = found_pronouns.last().unwrap();
+
+            lints.push(Lint {
+                span: Span::new(first.span.start, last.span.end),
+                lint_kind: LintKind::Repetition,
+                message: "There are too many personal pronouns in sequence here.".to_owned(),
+                priority: 63,
+                ..Default::default()
+            });
+            found_pronouns.clear();
+        };
+
         for sentence in document.sentences() {
             for word in sentence.iter_words() {
                 let word_chars = document.get_span_content(word.span);
@@ -46,20 +60,13 @@ impl Linter for MultipleSequentialPronouns {
                 } else if found_pronouns.len() == 1 {
                     found_pronouns.clear();
                 } else if found_pronouns.len() > 1 {
-                    let first = found_pronouns.first().unwrap();
-                    let last = found_pronouns.last().unwrap();
-
-                    lints.push(Lint {
-                        span: Span::new(first.span.start, last.span.end),
-                        lint_kind: LintKind::Repetition,
-                        message: "There are too many personal pronouns in sequence here."
-                            .to_owned(),
-                        priority: 63,
-                        ..Default::default()
-                    });
-                    found_pronouns.clear();
+                    emit_lint(&mut found_pronouns);
                 }
             }
+        }
+
+        if found_pronouns.len() > 1 {
+            emit_lint(&mut found_pronouns);
         }
 
         lints
@@ -82,7 +89,7 @@ mod tests {
         assert_lint_count(
             "...little bit about my I want to do.",
             MultipleSequentialPronouns::new(),
-            1
+            1,
         )
     }
 
@@ -91,7 +98,7 @@ mod tests {
         assert_lint_count(
             "...little bit about my I you want to do.",
             MultipleSequentialPronouns::new(),
-            1
+            1,
         )
     }
 
@@ -100,7 +107,16 @@ mod tests {
         assert_lint_count(
             "...little bit about I want to do.",
             MultipleSequentialPronouns::new(),
-            0
+            0,
+        )
+    }
+
+    #[test]
+    fn detects_multiple_pronouns_at_end() {
+        assert_lint_count(
+            "...little bit about I want to do to me you.",
+            MultipleSequentialPronouns::new(),
+            1,
         )
     }
 }
