@@ -5,13 +5,13 @@ use crate::{CharString, Document, Lint, LintKind, Linter, Span, Token, TokenStri
 #[derive(Debug)]
 pub struct MultipleSequentialPronouns {
     /// Since there aren't many pronouns, it's faster to store this as a vector.
-    pronouns: Vec<CharString>,
+    pronouns: Vec<CharString>
 }
 
 impl MultipleSequentialPronouns {
     fn new() -> Self {
         let pronoun_strs = [
-            "me", "my", "I", "we", "you", "he", "him", "her", "she", "it", "they",
+            "me", "my", "I", "we", "you", "he", "him", "her", "she", "it", "they"
         ];
 
         let mut pronouns: Vec<CharString> = pronoun_strs
@@ -89,7 +89,7 @@ mod tests {
         assert_lint_count(
             "...little bit about my I want to do.",
             MultipleSequentialPronouns::new(),
-            1,
+            1
         )
     }
 
@@ -98,7 +98,7 @@ mod tests {
         assert_lint_count(
             "...little bit about my I you want to do.",
             MultipleSequentialPronouns::new(),
-            1,
+            1
         )
     }
 
@@ -107,7 +107,7 @@ mod tests {
         assert_lint_count(
             "...little bit about I want to do.",
             MultipleSequentialPronouns::new(),
-            0,
+            0
         )
     }
 
@@ -116,7 +116,7 @@ mod tests {
         assert_lint_count(
             "...little bit about I want to do to me you.",
             MultipleSequentialPronouns::new(),
-            1,
+            1
         )
     }
 }
