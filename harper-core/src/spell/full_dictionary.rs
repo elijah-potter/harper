@@ -14,7 +14,7 @@ pub struct FullDictionary {
     /// Storing a separate [`Vec`] for iterations speeds up spellchecking by
     /// ~16% at the cost of additional memory.
     ///
-    /// This is likely due to increased locality :shrug:.
+    /// This is likely due to increased locality 🤷.
     ///
     /// This list is sorted by word length (i.e. the shortest words are first).
     words: Vec<CharString>,
@@ -30,9 +30,13 @@ fn uncached_inner_new() -> FullDictionary {
     let word_list = parse_default_word_list().unwrap();
     let attr_list = parse_default_attribute_list().unwrap();
 
-    let mut words = Vec::new();
+    // There will be at _least_ this number of words
+    let mut words = Vec::with_capacity(word_list.len());
 
     attr_list.expand_marked_words(word_list, &mut words);
+
+    words.sort();
+    words.dedup();
 
     FullDictionary {
         word_set: HashSet::from_iter(words.iter().cloned()),
@@ -129,5 +133,18 @@ impl Dictionary for FullDictionary {
         let lowercase: SmallVec<_> = normalized.iter().flat_map(|c| c.to_lowercase()).collect();
 
         self.word_set.contains(normalized.as_ref()) || self.word_set.contains(&lowercase)
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use itertools::Itertools;
+
+    use crate::{Dictionary, FullDictionary};
+
+    #[test]
+    fn curated_contains_no_duplicates() {
+        let dict = FullDictionary::create_from_curated();
+        assert!(dict.words_iter().all_unique());
     }
 }

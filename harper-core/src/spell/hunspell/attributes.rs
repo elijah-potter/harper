@@ -167,6 +167,9 @@ impl AttributeList {
         dest.append(&mut split);
     }
 
+    /// Expand an iterator of marked words into strings.
+    /// Note that this does __not__ guarantee that produced words will be
+    /// unique.
     pub fn expand_marked_words(
         &self,
         words: impl IntoIterator<Item = MarkedWord>,

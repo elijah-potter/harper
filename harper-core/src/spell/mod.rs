@@ -61,14 +61,10 @@ pub fn suggest_correct_spelling<'a>(
     for (word, dist) in pruned_words {
         if found_dist.len() < result_limit {
             found_dist.push((word, dist));
-            found_dist.sort_by_key(|a| a.1);
-            continue;
-        }
-
-        if dist < found_dist[result_limit - 1].1 {
+        } else if dist < found_dist[result_limit - 1].1 {
             found_dist[result_limit - 1] = (word, dist);
-            found_dist.sort_by_key(|a| a.1);
         }
+        found_dist.sort_by_key(|a| a.1);
     }
 
     // Create final, ordered list of suggestions.
@@ -79,19 +75,24 @@ pub fn suggest_correct_spelling<'a>(
     let minmax = found_dist.iter().position_minmax_by_key(|a| a.0.len());
     if let MinMaxResult::MinMax(a, b) = minmax {
         if a == b {
-            found.push(found_dist.remove(a).0);
+            found.push(found_dist[a].0);
         } else {
             found.push(found_dist[a].0);
-            found.push(found_dist.remove(b).0);
-            if a < b {
-                found_dist.remove(b - 1);
-            } else {
-                found_dist.remove(b);
-            }
+            found.push(found_dist[b].0);
         }
-    }
 
-    found.extend(found_dist.into_iter().map(|v| v.0));
+        // Push the rest
+        found.extend(
+            found_dist
+                .into_iter()
+                .enumerate()
+                .filter(|(i, _)| *i != a && *i != b)
+                .map(|v| v.1 .0)
+        );
+    } else {
+        // Push the rest
+        found.extend(found_dist.into_iter().map(|v| v.0));
+    }
 
     // Finally, swap the lowest edit distance word with the shortest.
     if found.len() >= 3 {
@@ -180,7 +181,10 @@ fn char_to_normalized(c: char) -> char {
 
 #[cfg(test)]
 mod tests {
-    use super::{edit_distance, seq_to_normalized};
+    use itertools::Itertools;
+
+    use super::{edit_distance, seq_to_normalized, suggest_correct_spelling_str};
+    use crate::FullDictionary;
 
     fn assert_edit_dist(source: &str, target: &str, expected: u8) {
         let source: Vec<_> = source.chars().collect();
@@ -206,5 +210,19 @@ mod tests {
     #[test]
     fn simple2() {
         assert_edit_dist("saturday", "sunday", 3)
+    }
+
+    #[test]
+    fn produces_no_duplicates() {
+        let results = suggest_correct_spelling_str(
+            "punctation",
+            100,
+            3,
+            &FullDictionary::create_from_curated()
+        );
+
+        dbg!(&results, results.iter().unique().collect_vec());
+
+        assert_eq!(results.iter().unique().count(), results.len())
     }
 }
