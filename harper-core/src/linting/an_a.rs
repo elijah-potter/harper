@@ -25,7 +25,7 @@ impl Linter for AnA {
                 continue;
             };
 
-            let should_be_a_an = !starts_with_vowel(&chars_second.to_lower());
+            let should_be_a_an = !starts_with_vowel(chars_second);
 
             if a_an != should_be_a_an {
                 let replacement = match a_an {
@@ -65,6 +65,17 @@ fn to_lower_word(word: &[char]) -> Cow<'_, [char]> {
 /// Matches with 99.71% and 99.77% of vowels and non-vowels in the
 /// Carnegie-Mellon University word -> pronunciation dataset.
 fn starts_with_vowel(word: &[char]) -> bool {
+    let is_likely_initialism = word.iter().all(|c| c.is_uppercase());
+
+    dbg!(word, is_likely_initialism);
+
+    if is_likely_initialism && !word.is_empty() {
+        return matches!(
+            word[0],
+            'A' | 'E' | 'F' | 'H' | 'I' | 'L' | 'M' | 'N' | 'O' | 'R' | 'S' | 'X'
+        );
+    }
+
     let word = to_lower_word(word);
     let word = word.as_ref();
 
@@ -75,18 +86,12 @@ fn starts_with_vowel(word: &[char]) -> bool {
         return false;
     }
 
-    if matches!(
-        word,
-        ['s', 'v', 'g']
-            | ['h', 't', 'm', 'l']
-            | ['l', 'l', 'm']
-            | ['h', 'o', 'u', 'r', ..]
-            | ['h', 'o', 'n', ..]
-            | ['u', 'n', 'i', 'n' | 'm', ..]
-            | ['u', 'n', 'a' | 'u', ..]
-            | ['h', 'e', 'r', 'b', ..]
-            | ['u', 'r', 'b', ..]
-    ) {
+    if matches!(word, |['h', 'o', 'u', 'r', ..]| ['h', 'o', 'n', ..]
+        | ['u', 'n', 'i', 'n' | 'm', ..]
+        | ['u', 'n', 'a' | 'u', ..]
+        | ['h', 'e', 'r', 'b', ..]
+        | ['u', 'r', 'b', ..])
+    {
         return true;
     }
 
@@ -156,12 +161,10 @@ mod tests {
     #[test]
     fn detects_html_as_vowel() {
         assert_lint_count("Here is a HTML document.", AnA, 1);
-        assert_lint_count("Here is a html document.", AnA, 1);
     }
 
     #[test]
     fn detects_llm_as_vowel() {
         assert_lint_count("Here is a LLM document.", AnA, 1);
-        assert_lint_count("Here is a llm document.", AnA, 1);
     }
 }
