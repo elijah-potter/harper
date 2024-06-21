@@ -30,7 +30,7 @@ impl TreeSitterParser {
             "csharp" => tree_sitter_c_sharp::language(),
             "toml" => tree_sitter_toml::language(),
             "lua" => tree_sitter_lua::language(),
-            _ => return None
+            _ => tree_sitter_toml::language()
         };
 
         let comment_parser: Box<dyn Parser> = match language_id {
