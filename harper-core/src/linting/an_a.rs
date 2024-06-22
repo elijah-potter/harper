@@ -67,8 +67,6 @@ fn to_lower_word(word: &[char]) -> Cow<'_, [char]> {
 fn starts_with_vowel(word: &[char]) -> bool {
     let is_likely_initialism = word.iter().all(|c| c.is_uppercase());
 
-    dbg!(word, is_likely_initialism);
-
     if is_likely_initialism && !word.is_empty() {
         return matches!(
             word[0],

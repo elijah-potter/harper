@@ -13,6 +13,7 @@ use harper_core::{
     Token,
     TokenKind
 };
+use harper_tree_sitter::TreeSitterParser;
 use serde_json::Value;
 use tokio::sync::{Mutex, RwLock};
 use tower_lsp::jsonrpc::Result;
@@ -52,7 +53,6 @@ use crate::diagnostics::{lint_to_code_actions, lints_to_diagnostics};
 use crate::dictionary_io::{load_dict, save_dict};
 use crate::git_commit_parser::GitCommitParser;
 use crate::pos_conv::range_to_span;
-use crate::tree_sitter_parser::TreeSitterParser;
 
 #[derive(Default)]
 struct DocumentState {

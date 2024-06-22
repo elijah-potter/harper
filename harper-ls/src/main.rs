@@ -3,13 +3,11 @@ use std::io::stderr;
 use config::Config;
 use tokio::net::TcpListener;
 mod backend;
-mod comment_parsers;
 mod config;
 mod diagnostics;
 mod dictionary_io;
 mod git_commit_parser;
 mod pos_conv;
-mod tree_sitter_parser;
 
 use backend::Backend;
 use clap::Parser;
