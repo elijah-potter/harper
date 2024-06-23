@@ -1,12 +1,13 @@
 use std::collections::HashSet;
+use std::path::Path;
 
 use harper_core::parsers::Parser;
-use harper_core::{FullDictionary, Span, Token};
+use harper_core::{FullDictionary, Span, Token, TokenKind};
 use tree_sitter::{Language, Node, Tree, TreeCursor};
 
 use super::comment_parsers::{Go, Unit};
 
-/// A Harper parser that wraps various [`super::comment_parsers`] that
+/// A Harper parser that wraps various comment parsers that
 /// exclusively parses comments in any language supported by [`tree_sitter`].
 pub struct TreeSitterParser {
     language: Language,
@@ -41,6 +42,36 @@ impl TreeSitterParser {
         Some(Self {
             language,
             comment_parser
+        })
+    }
+
+    /// Infer the programming language from a provided filename.
+    pub fn new_from_filename(filename: &Path) -> Option<Self> {
+        Self::new_from_language_id(Self::filename_to_filetype(filename)?)
+    }
+
+    /// Convert a provided path to a corresponding Language Server Protocol file
+    /// type.
+    ///
+    /// Note to contributors: try to keep this in sync with
+    /// [`Self::new_from_language_id`]
+    fn filename_to_filetype(path: &Path) -> Option<&'static str> {
+        Some(match path.extension()?.to_str()? {
+            "rs" => "rust",
+            "ts" => "typescript",
+            "tsx" => "typescriptreact",
+            "js" => "javascript",
+            "jsx" => "javascriptreact",
+            "go" => "go",
+            "c" => "c",
+            "cpp" => "cpp",
+            "h" => "cpp",
+            "rb" => "ruby",
+            "swift" => "swift",
+            "cs" => "csharp",
+            "toml" => "toml",
+            "lua" => "lua",
+            _ => return None
         })
     }
 
@@ -127,6 +158,11 @@ impl Parser for TreeSitterParser {
 
         byte_spans_to_char_spans(&mut comments_spans, &text);
 
+        dbg!(comments_spans
+            .iter()
+            .map(|span| span.get_content_string(text.chars().collect::<Vec<_>>().as_slice()))
+            .collect::<Vec<_>>());
+
         let mut tokens = Vec::new();
 
         for (s_index, span) in comments_spans.iter().enumerate() {
@@ -141,6 +177,13 @@ impl Parser for TreeSitterParser {
             if let Some(next_start) = comments_spans.get(s_index + 1).map(|v| v.start) {
                 if is_span_whitespace(Span::new(span.end, next_start), source) {
                     new_tokens.pop();
+                }
+            }
+
+            // Same goes for newlines within the comment
+            for t in new_tokens.iter_mut() {
+                if let TokenKind::Newline(n) = &mut t.kind {
+                    *n = 1;
                 }
             }
 
