@@ -555,7 +555,7 @@ dependencies = [
 
 [[package]]
 name = "harper-comments"
-version = "0.8.0"
+version = "0.8.6"
 dependencies = [
  "harper-core",
  "paste",
@@ -576,7 +576,7 @@ dependencies = [
 
 [[package]]
 name = "harper-core"
-version = "0.8.5"
+version = "0.8.6"
 dependencies = [
  "blanket",
  "divan",
@@ -596,7 +596,7 @@ dependencies = [
 
 [[package]]
 name = "harper-ls"
-version = "0.8.5"
+version = "0.8.6"
 dependencies = [
  "anyhow",
  "clap",
