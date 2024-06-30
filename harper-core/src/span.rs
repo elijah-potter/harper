@@ -30,6 +30,12 @@ impl Span {
         self.len() == 0
     }
 
+    pub fn contains(&self, idx: usize) -> bool {
+        assert!(self.start <= self.end);
+
+        self.start <= idx && idx < self.end
+    }
+
     pub fn overlaps_with(&self, other: Self) -> bool {
         self.start.max(other.start) <= self.end.min(other.end)
     }

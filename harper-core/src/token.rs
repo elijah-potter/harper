@@ -170,6 +170,8 @@ pub trait TokenStringExt {
     fn iter_quotes(&self) -> impl Iterator<Item = Token> + '_;
     fn iter_number_indices(&self) -> impl Iterator<Item = usize> + '_;
     fn iter_numbers(&self) -> impl Iterator<Item = Token> + '_;
+    fn iter_at_indices(&self) -> impl Iterator<Item = usize> + '_;
+    fn iter_at(&self) -> impl Iterator<Item = Token> + '_;
 }
 
 impl TokenStringExt for [Token] {
@@ -258,5 +260,20 @@ impl TokenStringExt for [Token] {
 
     fn iter_numbers(&self) -> impl Iterator<Item = Token> + '_ {
         self.iter_number_indices().map(|idx| self[idx])
+    }
+
+    /// Iterates through the indices of all "@" signs.
+    fn iter_at_indices(&self) -> impl Iterator<Item = usize> + '_ {
+        self.iter().enumerate().filter_map(|(idx, token)| {
+            if let TokenKind::Punctuation(Punctuation::At) = &token.kind {
+                Some(idx)
+            } else {
+                None
+            }
+        })
+    }
+
+    fn iter_at(&self) -> impl Iterator<Item = Token> + '_ {
+        self.iter_at_indices().map(|idx| self[idx])
     }
 }

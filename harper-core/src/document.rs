@@ -56,6 +56,7 @@ impl Document {
     /// Should be run after every change to the underlying [`Self::source`].
     fn parse(&mut self) {
         self.tokens = self.parser.parse(&self.source);
+        self.condense_spaces();
         self.condense_newlines();
         self.condense_contractions();
         self.condense_number_suffixes();
@@ -286,6 +287,44 @@ impl Document {
 
     /// Searches for multiple sequential newline tokens and condenses them down
     /// into one.
+    fn condense_spaces(&mut self) {
+        let mut cursor = 0;
+        let copy = self.tokens.clone();
+
+        let mut remove_these = VecDeque::new();
+
+        while cursor < self.tokens.len() {
+            // Locate a stretch of one or more newline tokens.
+            let start_tok = &mut self.tokens[cursor];
+
+            if let TokenKind::Space(start_count) = &mut start_tok.kind {
+                loop {
+                    cursor += 1;
+
+                    if cursor >= copy.len() {
+                        break;
+                    }
+
+                    let child_tok = &copy[cursor];
+                    if let TokenKind::Space(n) = child_tok.kind {
+                        *start_count += n;
+                        start_tok.span.end = child_tok.span.end;
+                        remove_these.push_back(cursor);
+                        cursor += 1;
+                    } else {
+                        break;
+                    };
+                }
+            }
+
+            cursor += 1;
+        }
+
+        remove_indices(&mut self.tokens, remove_these);
+    }
+
+    /// Searches for multiple sequential newline tokens and condenses them down
+    /// into one.
     fn condense_newlines(&mut self) {
         let mut cursor = 0;
         let copy = self.tokens.clone();
@@ -429,6 +468,14 @@ impl TokenStringExt for Document {
     fn iter_numbers(&self) -> impl Iterator<Item = Token> + '_ {
         self.tokens.iter_numbers()
     }
+
+    fn iter_at_indices(&self) -> impl Iterator<Item = usize> + '_ {
+        self.tokens.iter_at_indices()
+    }
+
+    fn iter_at(&self) -> impl Iterator<Item = Token> + '_ {
+        self.tokens.iter_at()
+    }
 }
 
 fn is_sentence_terminator(token: &TokenKind) -> bool {
@@ -469,7 +516,7 @@ fn remove_indices<T>(vec: &mut Vec<T>, mut to_remove: VecDeque<usize>) {
 
 #[cfg(test)]
 mod tests {
-    use std::collections::{vec_deque, VecDeque};
+    use std::collections::VecDeque;
 
     use super::Document;
     use crate::document::remove_indices;

@@ -28,6 +28,7 @@ macro_rules! create_test {
                  );
                  let lints = linter.lint(&document);
 
+                 dbg!(&lints);
                  assert_eq!(lints.len(), $correct_expected);
             }
         }
@@ -37,3 +38,4 @@ macro_rules! create_test {
 create_test!(multiline_comments.cpp, 3);
 create_test!(multiline_comments.ts, 3);
 create_test!(clean.rs, 0);
+create_test!(jsdoc.ts, 2);

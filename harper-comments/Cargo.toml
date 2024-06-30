@@ -22,6 +22,7 @@ tree-sitter-swift = "=0.4.0"
 tree-sitter-c-sharp = "0.20.0"
 tree-sitter-toml = "0.20.0"
 tree-sitter-lua = "0.0.19"
+itertools = "0.12.1"
 
 [dev-dependencies]
 paste = "1.0.15"

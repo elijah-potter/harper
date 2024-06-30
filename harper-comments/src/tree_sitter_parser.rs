@@ -6,6 +6,7 @@ use harper_core::{FullDictionary, Span, Token, TokenKind};
 use tree_sitter::{Language, Node, Tree, TreeCursor};
 
 use super::comment_parsers::{Go, Unit};
+use crate::comment_parsers::JsDoc;
 
 /// A Harper parser that wraps various comment parsers that
 /// exclusively parses comments in any language supported by [`tree_sitter`].
@@ -35,6 +36,7 @@ impl TreeSitterParser {
         };
 
         let comment_parser: Box<dyn Parser> = match language_id {
+            "javascriptreact" | "typescript" | "typescriptreact" | "javascript" => Box::new(JsDoc),
             "go" => Box::new(Go),
             _ => Box::new(Unit)
         };

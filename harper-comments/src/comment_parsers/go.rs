@@ -36,6 +36,3 @@ impl Parser for Go {
         new_tokens
     }
 }
-
-#[cfg(test)]
-mod tests {}
