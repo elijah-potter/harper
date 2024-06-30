@@ -158,27 +158,14 @@ impl Parser for TreeSitterParser {
 
         byte_spans_to_char_spans(&mut comments_spans, &text);
 
-        dbg!(comments_spans
-            .iter()
-            .map(|span| span.get_content_string(text.chars().collect::<Vec<_>>().as_slice()))
-            .collect::<Vec<_>>());
-
         let mut tokens = Vec::new();
 
-        for (s_index, span) in comments_spans.iter().enumerate() {
+        for span in comments_spans.iter() {
             let mut new_tokens = self.comment_parser.parse(span.get_content(source));
 
             new_tokens
                 .iter_mut()
                 .for_each(|v| v.span.push_by(span.start));
-
-            // The comment parser will insert a newline at end-of-input.
-            // If the next tree-sitter chunk is a comment, we want to remove that.
-            if let Some(next_start) = comments_spans.get(s_index + 1).map(|v| v.start) {
-                if is_span_whitespace(Span::new(span.end, next_start), source) {
-                    new_tokens.pop();
-                }
-            }
 
             // Same goes for newlines within the comment
             for t in new_tokens.iter_mut() {
@@ -188,19 +175,19 @@ impl Parser for TreeSitterParser {
             }
 
             tokens.append(&mut new_tokens);
+
+            // Insert a newline manually since we didn't pass the last one (if it existed)
+            // to the comment parser.
+            if let Some(last) = tokens.last() {
+                tokens.push(Token::new(
+                    Span::new_with_len(last.span.end, 1),
+                    TokenKind::Newline(1)
+                ));
+            }
         }
 
         tokens
     }
-}
-
-/// Check if the contents of a span is just white-space.
-fn is_span_whitespace(span: Span, source: &[char]) -> bool {
-    span.get_content(source)
-        .iter()
-        .filter(|c| !c.is_whitespace())
-        .count()
-        == 0
 }
 
 /// Converts a set of byte-indexed [`Span`]s to char-index Spans, in-place.

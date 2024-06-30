@@ -1,4 +1,5 @@
 use std::cmp::Ordering;
+use std::collections::VecDeque;
 use std::fmt::Display;
 
 use itertools::Itertools;
@@ -55,6 +56,7 @@ impl Document {
     /// Should be run after every change to the underlying [`Self::source`].
     fn parse(&mut self) {
         self.tokens = self.parser.parse(&self.source);
+        self.condense_newlines();
         self.condense_contractions();
         self.condense_number_suffixes();
         self.match_quotes();
@@ -282,6 +284,44 @@ impl Document {
         self.condense_indices(&replace_starts, 2);
     }
 
+    /// Searches for multiple sequential newline tokens and condenses them down
+    /// into one.
+    fn condense_newlines(&mut self) {
+        let mut cursor = 0;
+        let copy = self.tokens.clone();
+
+        let mut remove_these = VecDeque::new();
+
+        while cursor < self.tokens.len() {
+            // Locate a stretch of one or more newline tokens.
+            let start_tok = &mut self.tokens[cursor];
+
+            if let TokenKind::Newline(start_count) = &mut start_tok.kind {
+                loop {
+                    cursor += 1;
+
+                    if cursor >= copy.len() {
+                        break;
+                    }
+
+                    let child_tok = &copy[cursor];
+                    if let TokenKind::Newline(n) = child_tok.kind {
+                        *start_count += n;
+                        start_tok.span.end = child_tok.span.end;
+                        remove_these.push_back(cursor);
+                        cursor += 1;
+                    } else {
+                        break;
+                    };
+                }
+            }
+
+            cursor += 1;
+        }
+
+        remove_indices(&mut self.tokens, remove_these);
+    }
+
     /// Searches for contractions and condenses them down into single
     /// tokens.
     fn condense_contractions(&mut self) {
@@ -404,9 +444,35 @@ fn is_sentence_terminator(token: &TokenKind) -> bool {
     }
 }
 
+/// Removes a list of indices from a Vector.
+/// Assumes that the provided indices are already in sorted order.
+fn remove_indices<T>(vec: &mut Vec<T>, mut to_remove: VecDeque<usize>) {
+    let mut i = 0;
+
+    let mut next_remove = to_remove.pop_front();
+
+    vec.retain(|_| {
+        let keep = if let Some(next_remove) = next_remove {
+            i != next_remove
+        } else {
+            true
+        };
+
+        if !keep {
+            next_remove = to_remove.pop_front();
+        }
+
+        i += 1;
+        keep
+    });
+}
+
 #[cfg(test)]
 mod tests {
+    use std::collections::{vec_deque, VecDeque};
+
     use super::Document;
+    use crate::document::remove_indices;
     use crate::parsers::{Markdown, PlainEnglish};
     use crate::token::TokenStringExt;
     use crate::{Span, Token, TokenKind};
@@ -441,8 +507,7 @@ mod tests {
         let markdown_parser = Markdown;
         let document = Document::new(text, Box::new(markdown_parser));
 
-        // We add one because the Markdown parser inserts a newline at end-of-input.
-        assert_eq!(document.tokens.len(), final_tok_count + 1);
+        assert_eq!(document.tokens.len(), final_tok_count);
     }
 
     #[test]
@@ -498,5 +563,15 @@ mod tests {
             "It works even with weird capitalization like this: 600nD",
             18
         );
+    }
+
+    #[test]
+    fn removes_requested_indices() {
+        let mut data: Vec<i32> = (0..10).collect();
+        let remove: VecDeque<usize> = vec![1, 4, 6].into_iter().collect();
+
+        remove_indices(&mut data, remove);
+
+        assert_eq!(data, vec![0, 2, 3, 5, 7, 8, 9])
     }
 }

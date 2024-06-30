@@ -36,3 +36,4 @@ macro_rules! create_test {
 
 create_test!(multiline_comments.cpp, 3);
 create_test!(multiline_comments.ts, 3);
+create_test!(clean.rs, 0);

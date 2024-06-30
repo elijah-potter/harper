@@ -13,6 +13,10 @@ pub struct Token {
 }
 
 impl Token {
+    pub fn new(span: Span, kind: TokenKind) -> Self {
+        Self { span, kind }
+    }
+
     /// Convert to an allocated [`FatToken`].
     pub fn to_fat(&self, source: &[char]) -> FatToken {
         let content = self.span.get_content(source).to_vec();

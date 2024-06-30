@@ -1,7 +1,7 @@
 use harper_core::parsers::{Markdown, Parser};
 use harper_core::Token;
 
-use super::without_intiators;
+use super::without_initiators;
 
 /// A comment parser that strips starting `/` and `*` characters.
 ///
@@ -13,7 +13,12 @@ pub struct Unit;
 
 impl Parser for Unit {
     fn parse(&mut self, source: &[char]) -> Vec<Token> {
-        let actual = without_intiators(source);
+        let actual = without_initiators(source);
+
+        if actual.is_empty() {
+            return Vec::new();
+        }
+
         let source = actual.get_content(source);
 
         let mut markdown_parser = Markdown;

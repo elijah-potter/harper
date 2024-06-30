@@ -1,14 +1,14 @@
 use harper_core::parsers::{Markdown, Parser};
 use harper_core::Token;
 
-use super::without_intiators;
+use super::without_initiators;
 
 #[derive(Debug, Clone, Copy)]
 pub struct Go;
 
 impl Parser for Go {
     fn parse(&mut self, source: &[char]) -> Vec<Token> {
-        let mut actual = without_intiators(source);
+        let mut actual = without_initiators(source);
         let mut actual_source = actual.get_content(source);
 
         if matches!(actual_source, ['g', 'o', ':', ..]) {

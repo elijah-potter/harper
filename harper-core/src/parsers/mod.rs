@@ -87,8 +87,7 @@ mod tests {
                 Space(1),
                 Word,
                 Space(1),
-                Word,
-                Newline(2)
+                Word
             ]
         );
     }
@@ -105,8 +104,7 @@ mod tests {
                 Newline(2),
                 Word,
                 Space(1),
-                Word,
-                Newline(2)
+                Word
             ]
         );
     }

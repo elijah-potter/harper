@@ -75,7 +75,7 @@ fn main() -> anyhow::Result<()> {
             let (doc, _) = load_file(&file)?;
 
             for token in doc.tokens() {
-                dbg!(token);
+                println!("{:?}", token);
             }
 
             Ok(())

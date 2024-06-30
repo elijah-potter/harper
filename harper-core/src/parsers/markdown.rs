@@ -100,6 +100,17 @@ impl Parser for Markdown {
             }
         }
 
+        if matches!(
+            tokens.last(),
+            Some(Token {
+                kind: TokenKind::Newline(_),
+                ..
+            })
+        ) && source.last() != Some(&'\n')
+        {
+            tokens.pop();
+        }
+
         tokens
     }
 }
@@ -114,5 +125,18 @@ mod tests {
         let source = r#"🤷."#;
 
         Markdown.parse_str(source);
+    }
+
+    /// Check whether the Markdown parser will emit a breaking newline
+    /// at the end of each input.
+    ///
+    /// It should _not_ do this.
+    #[test]
+    fn ends_with_newline() {
+        let source = "This is a test.";
+
+        let tokens = Markdown.parse_str(source);
+        assert_ne!(tokens.len(), 0);
+        assert!(!tokens.last().unwrap().kind.is_newline());
     }
 }
