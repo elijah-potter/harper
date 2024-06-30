@@ -3,8 +3,8 @@ use std::path::{Path, PathBuf};
 use anyhow::format_err;
 use ariadne::{Color, Label, Report, ReportKind, Source};
 use clap::Parser;
+use harper_comments::TreeSitterParser;
 use harper_core::{remove_overlaps, Document, FullDictionary, LintGroup, LintGroupConfig, Linter};
-use harper_tree_sitter::TreeSitterParser;
 
 #[derive(Debug, Parser)]
 enum Args {

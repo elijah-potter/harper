@@ -549,8 +549,29 @@ dependencies = [
  "anyhow",
  "ariadne",
  "clap",
+ "harper-comments",
  "harper-core",
- "harper-tree-sitter",
+]
+
+[[package]]
+name = "harper-comments"
+version = "0.8.0"
+dependencies = [
+ "harper-core",
+ "paste",
+ "tree-sitter",
+ "tree-sitter-c",
+ "tree-sitter-c-sharp",
+ "tree-sitter-cpp",
+ "tree-sitter-go",
+ "tree-sitter-javascript",
+ "tree-sitter-lua",
+ "tree-sitter-python",
+ "tree-sitter-ruby",
+ "tree-sitter-rust",
+ "tree-sitter-swift",
+ "tree-sitter-toml",
+ "tree-sitter-typescript",
 ]
 
 [[package]]
@@ -581,8 +602,8 @@ dependencies = [
  "clap",
  "dirs 5.0.1",
  "futures",
+ "harper-comments",
  "harper-core",
- "harper-tree-sitter",
  "itertools",
  "once_cell",
  "open",
@@ -607,27 +628,6 @@ dependencies = [
  "tokio",
  "tracing",
  "tracing-subscriber",
-]
-
-[[package]]
-name = "harper-tree-sitter"
-version = "0.8.0"
-dependencies = [
- "harper-core",
- "paste",
- "tree-sitter",
- "tree-sitter-c",
- "tree-sitter-c-sharp",
- "tree-sitter-cpp",
- "tree-sitter-go",
- "tree-sitter-javascript",
- "tree-sitter-lua",
- "tree-sitter-python",
- "tree-sitter-ruby",
- "tree-sitter-rust",
- "tree-sitter-swift",
- "tree-sitter-toml",
- "tree-sitter-typescript",
 ]
 
 [[package]]

@@ -1,5 +1,5 @@
 [package]
-name = "harper-tree-sitter"
+name = "harper-comments"
 version = "0.8.0"
 edition = "2021"
 

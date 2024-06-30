@@ -2,6 +2,7 @@ use std::collections::HashMap;
 use std::path::{Component, PathBuf};
 use std::sync::Arc;
 
+use harper_comments::TreeSitterParser;
 use harper_core::parsers::{Markdown, PlainEnglish};
 use harper_core::{
     Dictionary,
@@ -13,7 +14,6 @@ use harper_core::{
     Token,
     TokenKind
 };
-use harper_tree_sitter::TreeSitterParser;
 use serde_json::Value;
 use tokio::sync::{Mutex, RwLock};
 use tower_lsp::jsonrpc::Result;

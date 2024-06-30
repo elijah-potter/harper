@@ -1,7 +1,7 @@
 use std::path::Path;
 
+use harper_comments::TreeSitterParser;
 use harper_core::{Document, FullDictionary, LintGroup, LintGroupConfig, Linter};
-use harper_tree_sitter::TreeSitterParser;
 
 /// Creates a unit test checking that the linting of a source file in
 /// `language_support_sources` produces the expected number of lints.
