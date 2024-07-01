@@ -206,7 +206,8 @@ impl Matcher {
             "al","though" => "although",
             "Al","though" => "although",
             "an","this" => "and this",
-            "break","up" => "break-up"
+            "break","up" => "break-up",
+            "case", "sensitive" => "case-sensitive"
         };
 
         // TODO: Improve the description for this lint specifically.
