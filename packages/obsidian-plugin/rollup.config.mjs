@@ -1,4 +1,6 @@
 import { wasm } from '@rollup/plugin-wasm';
+import typescript from '@rollup/plugin-typescript';
+import external from 'rollup-plugin-peer-deps-external';
 import { nodeResolve } from '@rollup/plugin-node-resolve';
 
 export default {
@@ -7,20 +9,11 @@ export default {
 		file: 'main.js',
 		format: 'cjs'
 	},
-	external: [
-		'obsidian',
-		'electron',
-		'@codemirror/autocomplete',
-		'@codemirror/collab',
-		'@codemirror/commands',
-		'@codemirror/language',
-		'@codemirror/lint',
-		'@codemirror/search',
-		'@codemirror/state',
-		'@codemirror/view',
-		'@lezer/common',
-		'@lezer/highlight',
-		'@lezer/lr'
-	],
-	plugins: [wasm({ maxFileSize: Math.pow(2, 32), publicPath: './' }), nodeResolve()]
+	external: ['obsidian', 'electron'],
+	plugins: [
+		external(),
+		wasm({ maxFileSize: Math.pow(2, 32), publicPath: './' }),
+		nodeResolve(),
+		typescript({ compilerOptions: { lib: ['es5', 'es6', 'dom'], target: 'es5' } })
+	]
 };

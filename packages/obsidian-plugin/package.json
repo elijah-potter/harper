@@ -5,14 +5,30 @@
 	"main": "main.js",
 	"devDependencies": {
 		"@rollup/plugin-node-resolve": "^15.2.3",
+		"@rollup/plugin-typescript": "^11.1.6",
 		"@rollup/plugin-wasm": "^6.2.2",
-		"rollup": "^4.13.0"
+		"rollup": "^4.13.0",
+		"rollup-plugin-peer-deps-external": "^2.2.4"
 	},
 	"scripts": {
 		"build": "rollup -c",
 		"dev": "rollup -c --watch"
 	},
+	"peerDependencies": {
+		"@codemirror/autocomplete": "^6.16.3",
+		"@codemirror/collab": "^6.1.1",
+		"@codemirror/commands": "^6.6.0",
+		"@codemirror/language": "^6.10.2",
+		"@codemirror/lint": "^6.8.1",
+		"@codemirror/search": "^6.5.6",
+		"@codemirror/state": "^6.4.1",
+		"@codemirror/view": "^6.28.3",
+		"@lezer/common": "^1.2.1",
+		"@lezer/highlight": "^1.2.0",
+		"@lezer/lr": "^1.4.1"
+	},
 	"dependencies": {
+		"crelt": "^1.0.5",
 		"wasm": "link:../../harper-wasm/pkg"
 	}
 }

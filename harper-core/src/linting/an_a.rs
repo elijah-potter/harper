@@ -35,9 +35,9 @@ impl Linter for AnA {
 
                 lints.push(Lint {
                     span: first.span,
-                    lint_kind: LintKind::Formatting,
+                    lint_kind: LintKind::Miscellaneous,
                     suggestions: vec![Suggestion::ReplaceWith(replacement)],
-                    message: "This is not vocally correct.".to_string(),
+                    message: "Incorrect indefinite article.".to_string(),
                     priority: 31
                 })
             }
