@@ -555,7 +555,7 @@ dependencies = [
 
 [[package]]
 name = "harper-comments"
-version = "0.8.6"
+version = "0.8.7"
 dependencies = [
  "harper-core",
  "itertools 0.12.1",
@@ -577,7 +577,7 @@ dependencies = [
 
 [[package]]
 name = "harper-core"
-version = "0.8.6"
+version = "0.8.7"
 dependencies = [
  "blanket",
  "divan",
@@ -597,7 +597,7 @@ dependencies = [
 
 [[package]]
 name = "harper-ls"
-version = "0.8.6"
+version = "0.8.7"
 dependencies = [
  "anyhow",
  "clap",
