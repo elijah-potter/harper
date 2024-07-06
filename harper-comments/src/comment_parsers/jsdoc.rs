@@ -8,76 +8,94 @@ pub struct JsDoc;
 
 impl Parser for JsDoc {
     fn parse(&mut self, source: &[char]) -> Vec<Token> {
-        dbg!();
+        let mut tokens = Vec::new();
 
-        let actual = without_initiators(source);
+        let mut chars_traversed = 0;
 
-        if actual.is_empty() {
-            return Vec::new();
-        }
+        for line in source.split(|c| *c == '\n') {
+            let mut new_tokens = parse_line(line);
 
-        let source = actual.get_content(source);
-        let mut tokens = Markdown.parse(source);
+            new_tokens
+                .iter_mut()
+                .for_each(|t| t.span.push_by(chars_traversed));
 
-        let mut cursor = 0;
-
-        // Handle inline tags
-        loop {
-            if cursor >= tokens.len() {
-                break;
-            }
-
-            if let Some(new_cursor) = &tokens[cursor..]
-                .iter()
-                .position(|t| t.kind == TokenKind::Punctuation(Punctuation::OpenCurly))
-                .map(|i| i + cursor)
-            {
-                cursor = *new_cursor;
-            } else {
-                break;
-            }
-
-            let parsers = [parse_link, parse_tutorial];
-
-            for parser in parsers {
-                if let Some(p) = parser(&tokens[cursor..], source) {
-                    for tok in &mut tokens[cursor..cursor + p] {
-                        tok.kind = TokenKind::Unlintable;
-                    }
-
-                    cursor += p;
-                    continue;
-                }
-            }
-        }
-
-        // Handle the block tag, if it exists
-        if let Some(tag_start) = tokens.iter().tuple_windows().position(|(a, b)| {
-            matches!(
-                (a, b),
-                (
-                    Token {
-                        kind: TokenKind::Punctuation(Punctuation::At),
-                        ..
-                    },
-                    Token {
-                        kind: TokenKind::Word,
-                        ..
-                    }
-                )
-            )
-        }) {
-            for token in &mut tokens[tag_start..] {
-                token.kind = TokenKind::Unlintable;
-            }
-        }
-
-        for token in tokens.iter_mut() {
-            token.span.push_by(actual.start);
+            chars_traversed += line.len() + 1;
+            tokens.append(&mut new_tokens);
         }
 
         tokens
     }
+}
+
+fn parse_line(source: &[char]) -> Vec<Token> {
+    let actual_line = without_initiators(source);
+
+    if actual_line.is_empty() {
+        return vec![];
+    }
+
+    let source_line = actual_line.get_content(source);
+
+    let mut new_tokens = Markdown.parse(source_line);
+
+    let mut cursor = 0;
+
+    // Handle inline tags
+    loop {
+        if cursor >= new_tokens.len() {
+            break;
+        }
+
+        if let Some(new_cursor) = &new_tokens[cursor..]
+            .iter()
+            .position(|t| t.kind == TokenKind::Punctuation(Punctuation::OpenCurly))
+            .map(|i| i + cursor)
+        {
+            cursor = *new_cursor;
+        } else {
+            break;
+        }
+
+        let parsers = [parse_link, parse_tutorial];
+
+        for parser in parsers {
+            if let Some(p) = parser(&new_tokens[cursor..], source_line) {
+                for tok in &mut new_tokens[cursor..cursor + p] {
+                    tok.kind = TokenKind::Unlintable;
+                }
+
+                cursor += p;
+                continue;
+            }
+        }
+    }
+
+    // Handle the block tag, if it exists on the current line.
+    if let Some(tag_start) = new_tokens.iter().tuple_windows().position(|(a, b)| {
+        matches!(
+            (a, b),
+            (
+                Token {
+                    kind: TokenKind::Punctuation(Punctuation::At),
+                    ..
+                },
+                Token {
+                    kind: TokenKind::Word,
+                    ..
+                }
+            )
+        )
+    }) {
+        for token in &mut new_tokens[tag_start..] {
+            token.kind = TokenKind::Unlintable;
+        }
+    }
+
+    for token in new_tokens.iter_mut() {
+        token.span.push_by(actual_line.start);
+    }
+
+    new_tokens
 }
 
 fn parse_link(tokens: &[Token], source: &[char]) -> Option<usize> {
@@ -112,10 +130,7 @@ fn parse_inline_tag(tag_name: &[char], tokens: &[Token], source: &[char]) -> Opt
         return None;
     }
 
-    dbg!(tokens[2].span.get_content(source));
-
     if tokens[2].span.get_content(source) != tag_name {
-        dbg!();
         return None;
     }
 

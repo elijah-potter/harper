@@ -33,15 +33,29 @@ impl Parser for Markdown {
             }
 
             match event {
-                pulldown_cmark::Event::SoftBreak | pulldown_cmark::Event::HardBreak => {
+                pulldown_cmark::Event::SoftBreak => {
                     tokens.push(Token {
                         span: Span::new_with_len(traversed_chars, 1),
                         kind: TokenKind::Newline(1)
                     });
                 }
+                pulldown_cmark::Event::HardBreak => {
+                    tokens.push(Token {
+                        span: Span::new_with_len(traversed_chars, 1),
+                        kind: TokenKind::Newline(2)
+                    });
+                }
+                pulldown_cmark::Event::Start(pulldown_cmark::Tag::List(v)) => {
+                    tokens.push(Token {
+                        span: Span::new_with_len(traversed_chars, 0),
+                        kind: TokenKind::Newline(2)
+                    });
+                    stack.push(pulldown_cmark::Tag::List(v));
+                }
                 pulldown_cmark::Event::Start(tag) => stack.push(tag),
                 pulldown_cmark::Event::End(pulldown_cmark::TagEnd::Paragraph)
                 | pulldown_cmark::Event::End(pulldown_cmark::TagEnd::Item)
+                | pulldown_cmark::Event::End(pulldown_cmark::TagEnd::Heading(_))
                 | pulldown_cmark::Event::End(pulldown_cmark::TagEnd::TableCell) => {
                     tokens.push(Token {
                         span: Span::new_with_len(traversed_chars, 0),
