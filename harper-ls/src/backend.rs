@@ -349,7 +349,9 @@ impl Backend {
 
 #[tower_lsp::async_trait]
 impl LanguageServer for Backend {
-    async fn initialize(&self, _: InitializeParams) -> Result<InitializeResult> {
+    async fn initialize(&self, p: InitializeParams) -> Result<InitializeResult> {
+        dbg!(p.capabilities);
+
         Ok(InitializeResult {
             server_info: None,
             capabilities: ServerCapabilities {

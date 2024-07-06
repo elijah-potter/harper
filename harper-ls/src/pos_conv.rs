@@ -1,6 +1,5 @@
 use harper_core::Span;
 use tower_lsp::lsp_types::{Position, Range};
-use unicode_width::UnicodeWidthChar;
 
 /// This module includes various conversions from the index-based [`Span`]s that
 /// Harper uses, and the Ranges that the LSP uses.
@@ -26,7 +25,7 @@ fn index_to_position(source: &[char], index: usize) -> Position {
 
     let cols: usize = source[last_newline_idx..index]
         .iter()
-        .map(|c| c.width().unwrap_or(0))
+        .map(|c| c.len_utf16())
         .sum();
 
     Position {
@@ -54,7 +53,7 @@ fn position_to_index(source: &[char], position: Position) -> usize {
             return line_start_idx + traversed_chars;
         }
 
-        traversed_cols += c.width().unwrap_or(0);
+        traversed_cols += c.len_utf16();
     }
 
     line_start_idx

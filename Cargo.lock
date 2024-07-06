@@ -615,7 +615,6 @@ dependencies = [
  "tower-lsp",
  "tracing",
  "tracing-subscriber",
- "unicode-width",
 ]
 
 [[package]]
