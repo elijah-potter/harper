@@ -3,6 +3,7 @@
 mod char_ext;
 mod char_string;
 mod document;
+mod language_detection;
 mod lexing;
 mod linting;
 pub mod parsers;

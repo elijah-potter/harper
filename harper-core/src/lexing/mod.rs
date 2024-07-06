@@ -20,6 +20,7 @@ pub struct FoundToken {
 pub fn lex_token(source: &[char]) -> Option<FoundToken> {
     let lexers = [
         lex_punctuation,
+        lex_tabs,
         lex_spaces,
         lex_newlines,
         lex_number,
@@ -89,6 +90,19 @@ fn lex_newlines(source: &[char]) -> Option<FoundToken> {
     if count > 0 {
         Some(FoundToken {
             token: TokenKind::Newline(count),
+            next_index: count
+        })
+    } else {
+        None
+    }
+}
+
+fn lex_tabs(source: &[char]) -> Option<FoundToken> {
+    let count = source.iter().take_while(|c| **c == '\t').count();
+
+    if count > 0 {
+        Some(FoundToken {
+            token: TokenKind::Space(count * 2),
             next_index: count
         })
     } else {

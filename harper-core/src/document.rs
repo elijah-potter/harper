@@ -181,14 +181,6 @@ impl Document {
         first_sentence.into_iter().chain(rest).chain(last)
     }
 
-    /** Returns all tokens whose `kind` is [`TokenKind::Word`] */
-    pub fn words(&self) -> impl Iterator<Item = Token> + '_ {
-        self.tokens
-            .iter()
-            .filter(|token| token.kind.is_word())
-            .cloned()
-    }
-
     pub fn get_span_content(&self, span: Span) -> &[char] {
         span.get_content(&self.source)
     }

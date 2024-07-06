@@ -4,7 +4,7 @@ use super::lint::Suggestion;
 use super::{Lint, LintKind, Linter};
 use crate::document::Document;
 use crate::spell::suggest_correct_spelling;
-use crate::Dictionary;
+use crate::{Dictionary, TokenStringExt};
 
 pub struct SpellCheck<T>
 where
@@ -53,7 +53,7 @@ impl<T: Dictionary> Linter for SpellCheck<T> {
     fn lint(&mut self, document: &Document) -> Vec<Lint> {
         let mut lints = Vec::new();
 
-        for word in document.words() {
+        for word in document.iter_words() {
             let word_chars = document.get_span_content(word.span);
             if self.dictionary.contains_word(word_chars) {
                 continue;
