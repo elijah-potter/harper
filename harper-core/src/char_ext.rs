@@ -29,7 +29,7 @@ impl CharExt for char {
             unicode_blocks::EMOTICONS,
             unicode_blocks::MISCELLANEOUS_SYMBOLS,
             unicode_blocks::VARIATION_SELECTORS,
-            unicode_blocks::SUPPLEMENTAL_SYMBOLS_AND_PICTOGRAPHS,
+            unicode_blocks::SUPPLEMENTAL_SYMBOLS_AND_PICTOGRAPHS
         ];
 
         blocks.contains(&block)

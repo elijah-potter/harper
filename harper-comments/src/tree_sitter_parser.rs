@@ -162,7 +162,9 @@ impl Parser for TreeSitterParser {
 
         let mut tokens = Vec::new();
 
-        for span in comments_spans.iter() {
+        let mut span_iter = comments_spans.iter().peekable();
+
+        while let Some(span) = span_iter.next() {
             let mut new_tokens = self.comment_parser.parse(span.get_content(source));
 
             new_tokens
@@ -181,9 +183,18 @@ impl Parser for TreeSitterParser {
             // Insert a newline manually since we didn't pass the last one (if it existed)
             // to the comment parser.
             if let Some(last) = tokens.last() {
+                let is_terminating = if let Some(next_span) = span_iter.peek() {
+                    Span::new(last.span.end, next_span.start)
+                        .get_content(source)
+                        .iter()
+                        .any(|c| !c.is_whitespace())
+                } else {
+                    false
+                };
+
                 tokens.push(Token::new(
                     Span::new_with_len(last.span.end, 1),
-                    TokenKind::Newline(1)
+                    TokenKind::Newline(if is_terminating { 2 } else { 1 })
                 ));
             }
         }
