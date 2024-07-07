@@ -4,8 +4,8 @@ This directory contains the source code for the [Obsidian](https://obsidian.md/)
 
 ## Building
 
-In order to build the plugin, you must first compile `harper-wasm` with:
+In order to build the plugin, you may use `just` like so:
 
 ```bash
-wasm-pack build --target web
+just build-obsidian
 ```
