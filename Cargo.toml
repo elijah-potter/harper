@@ -1,5 +1,5 @@
 [workspace]
-members = [ "harper-cli", "harper-core", "harper-ls", "harper-serve", "harper-comments", "harper-wasm"]
+members = [ "harper-cli", "harper-core", "harper-ls", "harper-comments", "harper-wasm"]
 resolver = "2"
 
 [profile.release]

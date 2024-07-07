@@ -1,10 +1,12 @@
+#![doc = include_str!("../README.md")]
+
+use std::rc::Rc;
 use std::sync::Mutex;
 
+use harper_core::parsers::Markdown;
 use harper_core::{remove_overlaps, Document, FullDictionary, LintGroup, Linter};
 use once_cell::sync::Lazy;
-use serde::Serialize;
 use wasm_bindgen::prelude::wasm_bindgen;
-use wasm_bindgen::JsValue;
 
 static LINTER: Lazy<Mutex<LintGroup<FullDictionary>>> = Lazy::new(|| {
     Mutex::new(LintGroup::new(
@@ -12,11 +14,6 @@ static LINTER: Lazy<Mutex<LintGroup<FullDictionary>>> = Lazy::new(|| {
         FullDictionary::create_from_curated()
     ))
 });
-
-/// Create the serializer that preserves types across the JavaScript barrier
-fn glue_serializer() -> serde_wasm_bindgen::Serializer {
-    serde_wasm_bindgen::Serializer::new().serialize_missing_as_null(true)
-}
 
 /// Setup the WebAssembly module's logging.
 ///
@@ -29,47 +26,144 @@ pub fn setup() {
     tracing_wasm::set_as_global_default();
 }
 
+/// Configure Harper whether to include spell checking in the linting provided
+/// by the [`lint`] function.
 #[wasm_bindgen]
 pub fn use_spell_check(set: bool) {
     let mut linter = LINTER.lock().unwrap();
     linter.config.spell_check = Some(set);
 }
 
+/// Perform the configured linting on the provided text.
 #[wasm_bindgen]
-pub fn lint(text: String) -> Vec<JsValue> {
-    let document = Document::new_markdown(&text);
+pub fn lint(text: String) -> Vec<Lint> {
+    let source: Vec<_> = text.chars().collect();
+
+    let document = Document::new_from_vec(source.clone(), Box::new(Markdown));
 
     let mut lints = LINTER.lock().unwrap().lint(&document);
 
     remove_overlaps(&mut lints);
 
+    let text = Rc::new(source);
+
     lints
         .into_iter()
-        .map(|lint| lint.serialize(&glue_serializer()).unwrap())
-        .collect()
-}
-
-#[wasm_bindgen]
-pub fn parse(text: String) -> Vec<JsValue> {
-    let document = Document::new_markdown(&text);
-
-    document
-        .fat_tokens()
-        .map(|lint| lint.serialize(&glue_serializer()).unwrap())
+        .map(|l| Lint::new(l, text.clone()))
         .collect()
 }
 
 #[wasm_bindgen]
 pub fn apply_suggestion(
     text: String,
-    span: JsValue,
-    suggestion: JsValue
+    span: Span,
+    suggestion: &Suggestion
 ) -> Result<String, String> {
-    let span = serde_wasm_bindgen::from_value(span).map_err(|e| e.to_string())?;
-    let suggestion = serde_wasm_bindgen::from_value(suggestion).map_err(|e| e.to_string())?;
-
     let mut document = Document::new_markdown(&text);
-    document.apply_suggestion(&suggestion, span);
+    document.apply_suggestion(&suggestion.inner, span.into());
 
     Ok(document.get_full_string())
+}
+
+#[wasm_bindgen]
+pub struct Suggestion {
+    inner: harper_core::Suggestion
+}
+
+#[wasm_bindgen]
+pub enum SuggestionKind {
+    Replace,
+    Remove
+}
+
+#[wasm_bindgen]
+impl Suggestion {
+    pub(crate) fn new(inner: harper_core::Suggestion) -> Self {
+        Self { inner }
+    }
+
+    /// Get the text that is going to replace error.
+    /// If [`Self::kind`] is `SuggestionKind::Remove`, this will return an empty
+    /// string.
+    pub fn get_replacement_text(&self) -> String {
+        match &self.inner {
+            harper_core::Suggestion::Remove => "".to_string(),
+            harper_core::Suggestion::ReplaceWith(chars) => chars.iter().collect()
+        }
+    }
+
+    pub fn kind(&self) -> SuggestionKind {
+        match &self.inner {
+            harper_core::Suggestion::Remove => SuggestionKind::Remove,
+            harper_core::Suggestion::ReplaceWith(_) => SuggestionKind::Replace
+        }
+    }
+}
+
+#[wasm_bindgen]
+pub struct Lint {
+    inner: harper_core::Lint,
+    source: Rc<Vec<char>>
+}
+
+#[wasm_bindgen]
+impl Lint {
+    pub(crate) fn new(inner: harper_core::Lint, source: Rc<Vec<char>>) -> Self {
+        Self { inner, source }
+    }
+
+    /// Get the content of the source material pointed to by [`Self::span`]
+    pub fn get_problem_text(&self) -> String {
+        self.inner.span.get_content_string(&self.source)
+    }
+
+    /// Get a string representing the general category of the lint.
+    pub fn lint_kind(&self) -> String {
+        self.inner.lint_kind.to_string()
+    }
+
+    pub fn suggestion_count(&self) -> usize {
+        self.inner.suggestions.len()
+    }
+
+    pub fn suggestions(&self) -> Vec<Suggestion> {
+        self.inner
+            .suggestions
+            .iter()
+            .map(|s| Suggestion::new(s.clone()))
+            .collect()
+    }
+
+    pub fn span(&self) -> Span {
+        self.inner.span.into()
+    }
+
+    pub fn message(&self) -> String {
+        self.inner.message.clone()
+    }
+}
+
+#[wasm_bindgen]
+pub struct Span {
+    pub start: usize,
+    pub end: usize
+}
+
+#[wasm_bindgen]
+impl Span {
+    pub fn new(start: usize, end: usize) -> Self {
+        Self { start, end }
+    }
+}
+
+impl From<Span> for harper_core::Span {
+    fn from(value: Span) -> Self {
+        harper_core::Span::new(value.start, value.end)
+    }
+}
+
+impl From<harper_core::Span> for Span {
+    fn from(value: harper_core::Span) -> Self {
+        Span::new(value.start, value.end)
+    }
 }

@@ -39,6 +39,21 @@ pub enum LintKind {
     Miscellaneous
 }
 
+impl Display for LintKind {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let s = match self {
+            LintKind::Spelling => "Spelling",
+            LintKind::Capitalization => "Capitalization",
+            LintKind::Formatting => "Formatting",
+            LintKind::Repetition => "Repetition",
+            LintKind::Readability => "Readability",
+            LintKind::Miscellaneous => "Miscellaneous"
+        };
+
+        write!(f, "{}", s)
+    }
+}
+
 #[derive(Debug, Clone, Serialize, Deserialize, Is)]
 pub enum Suggestion {
     ReplaceWith(Vec<char>),

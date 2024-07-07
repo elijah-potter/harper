@@ -18,7 +18,8 @@ jobs:
     - uses: actions/setup-node@v4
     - name: Install Rust Nightly
       run: rustup toolchain install nightly && rustup component add rustfmt --toolchain nightly
+    - uses: extractions/setup-just@v1
     - name: Install `wasm-pack`
       run: curl https://rustwasm.github.io/wasm-pack/installer/init.sh -sSf | sh
     - name: Precommit
-      run: ./precommit.sh
+      run: just precommit

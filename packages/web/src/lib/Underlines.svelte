@@ -4,8 +4,8 @@
 	// Someday, I'll return to it and spruce it up.
 	// For now, it works.
 
-	import type { Lint } from '$lib/analysis';
-	import { lintText, spanContent } from '$lib/analysis';
+	import { lintText } from '$lib/analysis';
+	import { Lint } from 'wasm';
 
 	export let content: string;
 	export let focusLintIndex: number | undefined;
@@ -17,10 +17,14 @@
 		(newLints) =>
 			(lints = newLints
 				.map<[Lint, number]>((lint, index) => [lint, index])
-				.toSorted(([a], [b]) => a.span.start - b.span.end))
+				.toSorted(([a], [b]) => a.span().start - b.span().end))
 	);
 	$: if (focusLintIndex != null && lintHighlights[focusLintIndex] != null)
-		lintHighlights[focusLintIndex].scrollIntoView({ behavior: 'smooth', block: 'center' });
+		lintHighlights[focusLintIndex].scrollIntoView({
+			behavior: 'smooth',
+			block: 'center',
+			inline: 'center'
+		});
 
 	function reOrgString(text: string): (string | undefined)[] {
 		if (text.trim().length == 0) {
@@ -54,10 +58,10 @@
 				let prev = arr[index - 1];
 
 				if (prev != null) {
-					prevStart = prev[0].span.end;
+					prevStart = prev[0].span().end;
 				}
 
-				let prevEnd = lint.span.start;
+				let prevEnd = lint.span().start;
 
 				let prevContent = [];
 
@@ -68,7 +72,7 @@
 				let lintContent: UnderlineDetails = {
 					focused: lintIndex === focusLintIndex,
 					index: lintIndex,
-					content: spanContent(lint.span, content).replaceAll(' ', '\u00A0')
+					content: lint.get_problem_text().replaceAll(' ', '\u00A0')
 				};
 
 				return [...prevContent, lintContent];
@@ -80,7 +84,7 @@
 		let finalChunk;
 
 		if (lastLint != null) {
-			finalChunk = content.substring(lastLint[0].span.end);
+			finalChunk = content.substring(lastLint[0].span().end);
 		} else {
 			finalChunk = content;
 		}

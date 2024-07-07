@@ -3,53 +3,50 @@ import { Plugin } from 'obsidian';
 import wasm from 'wasm/harper_wasm_bg.wasm';
 import init, { lint, use_spell_check } from 'wasm';
 
-function contentToString(content) {
-	return content.reduce((p, c) => p + c, '');
-}
-
 function suggestionToLabel(sug) {
-	if (sug === 'Remove') {
+	if (sug.kind() == 'Remove') {
 		return 'Remove';
 	} else {
-		return `Replace with "${contentToString(sug.ReplaceWith)}"`;
+		return `Replace with "${sug.get_replacement_text()}"`;
 	}
 }
 
 const harperLinter = linter(
 	async (view) => {
-		let text = view.state.doc.sliceString(-1);
+		const text = view.state.doc.sliceString(-1);
 
 		await init(await wasm());
+
 		use_spell_check(false);
-		let lints = lint(text);
+		const lints = lint(text);
 
 		return lints.map((lint) => {
-			console.log('Rendering lints...');
+			let span = lint.span();
 
 			return {
-				from: lint.span.start,
-				to: lint.span.end,
+				from: span.start,
+				to: span.end,
 				severity: 'error',
-				title: lint.lint_kind,
-				message: lint.message,
-				actions: lint.suggestions.map((sug) => {
+				title: lint.lint_kind(),
+				message: lint.message(),
+				actions: lint.suggestions().map((sug) => {
 					return {
 						name: suggestionToLabel(sug),
 						apply: (view) => {
 							if (sug === 'Remove') {
 								view.dispatch({
 									changes: {
-										from: lint.span.start,
-										to: lint.span.end,
+										from: span.start,
+										to: span.end,
 										insert: ''
 									}
 								});
 							} else {
 								view.dispatch({
 									changes: {
-										from: lint.span.start,
-										to: lint.span.end,
-										insert: contentToString(sug.ReplaceWith)
+										from: span.start,
+										to: span.end,
+										insert: sug.get_replacement_text()
 									}
 								});
 							}

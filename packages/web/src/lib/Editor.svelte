@@ -3,8 +3,8 @@
 	import demo from '../../../../demo.md?raw';
 	import Underlines from '$lib/Underlines.svelte';
 	import { Button } from 'flowbite-svelte';
-	import { lintText, applySuggestion, spanContent } from '$lib/analysis';
-	import type { Lint } from '$lib/analysis';
+	import { lintText, applySuggestion } from '$lib/analysis';
+	import { Lint, SuggestionKind } from 'wasm';
 
 	let content = demo;
 
@@ -16,12 +16,12 @@
 	$: lintText(content).then((newLints) => (lints = newLints));
 	$: boxHeight = calcHeight(content);
 	$: if (focused != null && lintCards[focused])
-		lintCards[focused].scrollIntoView({ behavior: 'smooth', block: 'center' });
+		lintCards[focused].scrollIntoView({ behavior: 'smooth', block: 'nearest' });
 
 	$: if (editor != null && focused != null) {
 		let lint = lints[focused % lints.length];
 		if (lint != null) {
-			let p = lint.span.end;
+			let p = lint.span().end;
 			editor.selectionStart = p;
 			editor.selectionEnd = p;
 		}
@@ -63,33 +63,30 @@
 					<div class="pl-2 border-l-[3px] border-l-primary-500">
 						<div class="flex flex-row">
 							<h3 class="font-bold">
-								{lint.lint_kind} - “<span class="italic">
-									{spanContent(lint.span, content)}
+								{lint.lint_kind()} - “<span class="italic">
+									{lint.get_problem_text()}
 								</span> ”
 							</h3>
 						</div>
 						<div
 							class="transition-all overflow-hidden flex flex-col justify-evenly"
-							style={`height: ${focused === i ? `calc(55px * ${lint.suggestions.length + 1})` : '0px'}`}
+							style={`height: ${focused === i ? `calc(55px * ${lint.suggestion_count() + 1})` : '0px'}`}
 						>
-							<p style="height: 50px" class="text-left">{lint.message}</p>
-							{#each lint.suggestions as suggestion}
+							<p style="height: 50px" class="text-left">{lint.message()}</p>
+							{#each lint.suggestions() as suggestion}
 								<div class="w-full p-[4px]">
 									<Button
 										class="w-full"
 										style="height: 40px; margin: 5px 0px;"
 										on:click={() =>
-											applySuggestion(content, suggestion, lint.span).then(
+											applySuggestion(content, suggestion, lint.span()).then(
 												(edited) => (content = edited)
 											)}
 									>
-										{#if suggestion == 'Remove'}
-											Remove "{content.substring(lint.span.start, lint.span.end)}"
+										{#if suggestion.kind() == SuggestionKind.Remove}
+											Remove "{lint.get_problem_text()}"
 										{:else}
-											Replace "{content.substring(lint.span.start, lint.span.end)}" with "{suggestion.ReplaceWith.reduce(
-												(p, c) => p + c,
-												''
-											)}"
+											Replace "{lint.get_problem_text()}" with "{suggestion.get_replacement_text()}"
 										{/if}
 									</Button>
 								</div>

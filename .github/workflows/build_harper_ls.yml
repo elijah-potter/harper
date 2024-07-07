@@ -82,6 +82,5 @@ jobs:
         uses: softprops/action-gh-release@v1
         with:
           draft: true
-          name: 
           files: "harper-ls-*"
         if: startsWith(github.ref, 'refs/tags/')
