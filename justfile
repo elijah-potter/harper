@@ -1,3 +1,4 @@
+# Format both Rust and JavaScript
 format:
   cargo +nightly fmt  
   cd {{justfile_directory()}}/packages; yarn prettier -w .
@@ -6,6 +7,7 @@ format:
 build-wasm target:
   cd {{justfile_directory()}}/harper-wasm && wasm-pack build --target {{target}}
 
+# Compile the web demo's dependencies and start a development server. Note that if you make changes to `harper-wasm`, you will have to re-run this command.
 dev-web:
   #! /bin/bash
   set -eo pipefail
@@ -23,7 +25,6 @@ build-web:
   
   cd {{justfile_directory()}}/packages/web
   yarn install -f
-  yarn run check
   yarn run build
 
 build-obsidian:
@@ -38,23 +39,34 @@ build-obsidian:
 
   zip harper-obsidian-plugin.zip manifest.json main.js
 
-precommit:
+check:
   #! /bin/bash
   set -eo pipefail
 
   cargo +nightly fmt --check
   cargo clippy -- -Dwarnings
+
+  cd {{justfile_directory()}}/packages
+  yarn install
+  yarn prettier --check .
+  yarn eslint .
+
+  cd web
+  just build-web
+  yarn run check
+
+precommit:
+  #! /bin/bash
+  set -eo pipefail
+
+  just check
+
   cargo test
   cargo test --release
   cargo doc
   cargo build
   cargo build --release
   cargo bench
-
-  cd {{justfile_directory()}}/packages
-  yarn install
-  yarn prettier --check .
-  yarn eslint .
 
   just build-obsidian
   just build-web

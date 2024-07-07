@@ -5,7 +5,7 @@
 	// For now, it works.
 
 	import { lintText } from '$lib/analysis';
-	import { Lint } from 'wasm';
+	import type { Lint } from 'wasm';
 
 	export let content: string;
 	export let focusLintIndex: number | undefined;
