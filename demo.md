@@ -10,5 +10,5 @@ never leaves your device, you don't ned to worry aout us
 selling it or using it to train LLMs.
 
 The best part: Harper can give you feedback instantly.
-For most documents, Harper can serve up suggestions in
+For most documents, Harper can serve  up suggestions in
 under 10 ms.

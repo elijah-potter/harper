@@ -190,7 +190,6 @@ impl Matcher {
             "simply","grammatical" => "simple grammatical",
             "you","r" => "your",
             "you","re" => "you're",
-            "you","re" => "you are",
             "that","s" => "that's",
             "That","s" => "That's",
             "that","s" => "that is",

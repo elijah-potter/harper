@@ -67,6 +67,7 @@ fn parse_line(source: &[char]) -> Vec<Token> {
                 cursor += p;
                 continue;
             }
+            cursor += 1;
         }
     }
 
@@ -154,6 +155,13 @@ mod tests {
     use harper_core::{Document, Punctuation, TokenKind};
 
     use crate::TreeSitterParser;
+
+    #[test]
+    fn escapes_loop() {
+        let source = "/** This should _not_cause an infinite loop: {@ */";
+        let parser = TreeSitterParser::new_from_language_id("javascript").unwrap();
+        Document::new(source, Box::new(parser));
+    }
 
     #[test]
     fn handles_inline_link() {
