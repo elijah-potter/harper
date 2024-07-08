@@ -78,9 +78,3 @@ jobs:
         with: 
           name: ${{ matrix.platform.bin }}-${{ matrix.platform.target }}
           path: harper-ls-*
-      - name: Publish GitHub release
-        uses: softprops/action-gh-release@v1
-        with:
-          draft: true
-          files: "harper-ls-*"
-        if: startsWith(github.ref, 'refs/tags/')
