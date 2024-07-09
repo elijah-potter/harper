@@ -133,6 +133,55 @@ impl Document {
         self.tokens().map(|token| token.to_fat(&self.source))
     }
 
+    /// Iterate over the locations of punctuation the separates chunks.
+    fn chunk_terminators(&self) -> impl Iterator<Item = usize> + '_ {
+        self.tokens.iter().enumerate().filter_map(|(index, token)| {
+            if is_chunk_terminator(&token.kind) {
+                return Some(index);
+            }
+            None
+        })
+    }
+
+    /// Get the index of the last chunk terminator.
+    fn last_chunk_terminator(&self) -> Option<usize> {
+        self.tokens
+            .iter()
+            .enumerate()
+            .rev()
+            .find_map(|(index, token)| {
+                if is_chunk_terminator(&token.kind) {
+                    return Some(index);
+                }
+                None
+            })
+    }
+
+    /// Iterate over sentence chunks.
+    pub fn chunks(&self) -> impl Iterator<Item = &'_ [Token]> + '_ {
+        let first_sentence = self
+            .chunk_terminators()
+            .next()
+            .map(|first_term| &self.tokens[0..=first_term]);
+
+        let rest = self
+            .chunk_terminators()
+            .tuple_windows()
+            .map(move |(a, b)| &self.tokens[a + 1..=b]);
+
+        let last = if let Some(last_i) = self.last_chunk_terminator() {
+            if last_i + 1 < self.tokens.len() {
+                Some(&self.tokens[last_i + 1..])
+            } else {
+                None
+            }
+        } else {
+            Some(self.tokens.as_slice())
+        };
+
+        first_sentence.into_iter().chain(rest).chain(last)
+    }
+
     /// Iterate over the locations of the sentence terminators in the document.
     fn sentence_terminators(&self) -> impl Iterator<Item = usize> + '_ {
         self.tokens.iter().enumerate().filter_map(|(index, token)| {
@@ -467,6 +516,17 @@ impl TokenStringExt for Document {
 
     fn iter_at(&self) -> impl Iterator<Item = Token> + '_ {
         self.tokens.iter_at()
+    }
+}
+
+fn is_chunk_terminator(token: &TokenKind) -> bool {
+    if is_sentence_terminator(token) {
+        return true;
+    }
+
+    match token {
+        TokenKind::Punctuation(punct) => [Punctuation::Comma].contains(punct),
+        _ => false
     }
 }
 

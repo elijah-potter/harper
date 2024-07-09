@@ -51,8 +51,8 @@ impl Linter for MultipleSequentialPronouns {
             found_pronouns.clear();
         };
 
-        for sentence in document.sentences() {
-            for word in sentence.iter_words() {
+        for chunk in document.chunks() {
+            for word in chunk.iter_words() {
                 let word_chars = document.get_span_content(word.span);
 
                 if self.is_pronoun(word_chars) {
@@ -63,10 +63,12 @@ impl Linter for MultipleSequentialPronouns {
                     emit_lint(&mut found_pronouns);
                 }
             }
-        }
 
-        if found_pronouns.len() > 1 {
-            emit_lint(&mut found_pronouns);
+            if found_pronouns.len() > 1 {
+                emit_lint(&mut found_pronouns);
+            }
+
+            found_pronouns.clear();
         }
 
         lints
@@ -118,5 +120,10 @@ mod tests {
             MultipleSequentialPronouns::new(),
             1
         )
+    }
+
+    #[test]
+    fn comma_separated() {
+        assert_lint_count("To prove it, we...", MultipleSequentialPronouns::new(), 0)
     }
 }

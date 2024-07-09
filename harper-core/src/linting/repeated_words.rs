@@ -51,18 +51,15 @@ impl Linter for RepeatedWords {
     fn lint(&mut self, document: &Document) -> Vec<Lint> {
         let mut lints = Vec::new();
 
-        for sentence in document.sentences() {
-            let mut iter = sentence
-                .iter_word_indices()
-                .zip(sentence.iter_words())
-                .peekable();
+        for chunk in document.chunks() {
+            let mut iter = chunk.iter_word_indices().zip(chunk.iter_words()).peekable();
 
             while let (Some((idx_a, tok_a)), Some((idx_b, tok_b))) = (iter.next(), iter.peek()) {
                 let word_a = document.get_span_content(tok_a.span);
                 let word_b = document.get_span_content(tok_b.span);
 
                 if self.set.contains(word_a) && word_a == word_b {
-                    let intervening_tokens = &sentence[idx_a + 1..*idx_b];
+                    let intervening_tokens = &chunk[idx_a + 1..*idx_b];
 
                     if intervening_tokens.iter().any(|t| !t.kind.is_whitespace()) {
                         continue;
