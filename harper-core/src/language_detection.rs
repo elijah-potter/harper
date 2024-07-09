@@ -6,7 +6,6 @@ pub fn is_likely_english(doc: &Document, dict: &impl Dictionary) -> bool {
     let mut total_words = 0;
     let mut valid_words = 0;
     let mut punctuation = 0;
-    let mut spaces = 0;
 
     for token in doc.tokens() {
         match token.kind {
@@ -19,7 +18,6 @@ pub fn is_likely_english(doc: &Document, dict: &impl Dictionary) -> bool {
                 }
             }
             TokenKind::Punctuation(_) => punctuation += 1,
-            TokenKind::Space(n) => spaces += n,
             _ => ()
         }
     }
@@ -27,13 +25,8 @@ pub fn is_likely_english(doc: &Document, dict: &impl Dictionary) -> bool {
     dbg!(total_words);
     dbg!(valid_words);
     dbg!(punctuation);
-    dbg!(spaces);
 
-    if spaces > total_words * 3 {
-        return false;
-    }
-
-    if punctuation > valid_words {
+    if (punctuation as f32 * 1.25) > valid_words as f32 {
         return false;
     }
 

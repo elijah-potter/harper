@@ -66,7 +66,9 @@ impl Parser for Markdown {
                 pulldown_cmark::Event::End(_) => {
                     stack.pop();
                 }
-                pulldown_cmark::Event::Code(code) => {
+                pulldown_cmark::Event::InlineMath(code)
+                | pulldown_cmark::Event::DisplayMath(code)
+                | pulldown_cmark::Event::Code(code) => {
                     let chunk_len = code.chars().count();
 
                     tokens.push(Token {
@@ -133,6 +135,7 @@ impl Parser for Markdown {
 mod tests {
     use super::super::StrParser;
     use super::Markdown;
+    use crate::{Punctuation, TokenKind};
 
     #[test]
     fn survives_emojis() {
@@ -152,5 +155,23 @@ mod tests {
         let tokens = Markdown.parse_str(source);
         assert_ne!(tokens.len(), 0);
         assert!(!tokens.last().unwrap().kind.is_newline());
+    }
+
+    #[test]
+    fn math_becomes_unlintable() {
+        let source = r#"$\Katex$ $\text{is}$ $\text{great}$."#;
+
+        let tokens = Markdown.parse_str(source);
+        assert_eq!(
+            tokens.iter().map(|t| t.kind).collect::<Vec<_>>(),
+            vec![
+                TokenKind::Unlintable,
+                TokenKind::Space(1),
+                TokenKind::Unlintable,
+                TokenKind::Space(1),
+                TokenKind::Unlintable,
+                TokenKind::Punctuation(Punctuation::Period)
+            ]
+        )
     }
 }
