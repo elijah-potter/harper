@@ -5,7 +5,7 @@ use serde::{Deserialize, Serialize};
 
 use crate::punctuation::Punctuation;
 use crate::span::Span;
-use crate::{Document, Quote};
+use crate::Quote;
 
 #[derive(Debug, Clone, Copy, Serialize, Deserialize, PartialEq, Default)]
 pub struct Token {
