@@ -37,9 +37,9 @@ impl Linter for MultipleSequentialPronouns {
 
         let mut found_pronouns = Vec::new();
 
-        let mut emit_lint = |found_pronouns: &mut Vec<&Token>| {
-            let first: &&Token = found_pronouns.first().unwrap();
-            let last: &&Token = found_pronouns.last().unwrap();
+        let mut emit_lint = |found_pronouns: &mut Vec<Token>| {
+            let first: &Token = found_pronouns.first().unwrap();
+            let last: &Token = found_pronouns.last().unwrap();
 
             lints.push(Lint {
                 span: Span::new(first.span.start, last.span.end),

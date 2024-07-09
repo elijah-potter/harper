@@ -3,6 +3,7 @@ use std::collections::VecDeque;
 use std::fmt::Display;
 
 use itertools::Itertools;
+use paste::paste;
 
 use crate::linting::Suggestion;
 use crate::parsers::{Markdown, Parser, PlainEnglish};
@@ -443,20 +444,31 @@ impl Document {
     }
 }
 
-impl Display for Document {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        for token in &self.tokens {
-            write!(f, "{}", self.get_span_content_str(token.span))?;
-        }
+macro_rules! create_fns_on_doc {
+    ($thing:ident) => {
+        paste! {
+            fn [< first_ $thing >](&self) -> Option<Token> {
+                self.tokens.[< first_ $thing >]()
+            }
 
-        Ok(())
-    }
+            fn [<iter_ $thing _indices>](&self) -> impl Iterator<Item = usize> + '_ {
+                self.tokens.[< iter_ $thing _indices >]()
+            }
+
+            fn [<iter_ $thing s>](&self) -> impl Iterator<Item = Token> + '_ {
+                self.tokens.[< iter_ $thing s >]()
+            }
+        }
+    };
 }
 
 impl TokenStringExt for Document {
-    fn first_word(&self) -> Option<Token> {
-        self.tokens.first_word()
-    }
+    create_fns_on_doc!(word);
+    create_fns_on_doc!(space);
+    create_fns_on_doc!(apostrophe);
+    create_fns_on_doc!(quote);
+    create_fns_on_doc!(number);
+    create_fns_on_doc!(at);
 
     fn first_sentence_word(&self) -> Option<Token> {
         self.tokens.first_sentence_word()
@@ -466,56 +478,18 @@ impl TokenStringExt for Document {
         self.tokens.first_non_whitespace()
     }
 
-    fn iter_word_indices(&self) -> impl Iterator<Item = usize> + '_ {
-        self.tokens.iter_word_indices()
-    }
-
-    fn iter_words(&self) -> impl Iterator<Item = &Token> + '_ {
-        self.tokens.iter_words()
-    }
-
-    fn iter_space_indices(&self) -> impl Iterator<Item = usize> + '_ {
-        self.tokens.iter_space_indices()
-    }
-
-    fn iter_spaces(&self) -> impl Iterator<Item = &Token> + '_ {
-        self.tokens.iter_spaces()
-    }
-
-    fn iter_apostrophe_indices(&self) -> impl Iterator<Item = usize> + '_ {
-        self.tokens.iter_apostrophe_indices()
-    }
-
-    fn iter_apostrophes(&self) -> impl Iterator<Item = &Token> + '_ {
-        self.tokens.iter_apostrophes()
-    }
-
     fn span(&self) -> Option<Span> {
         self.tokens.span()
     }
+}
 
-    fn iter_quote_indices(&self) -> impl Iterator<Item = usize> + '_ {
-        self.tokens.iter_quote_indices()
-    }
+impl Display for Document {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        for token in &self.tokens {
+            write!(f, "{}", self.get_span_content_str(token.span))?;
+        }
 
-    fn iter_quotes(&self) -> impl Iterator<Item = Token> + '_ {
-        self.tokens.iter_quotes()
-    }
-
-    fn iter_number_indices(&self) -> impl Iterator<Item = usize> + '_ {
-        self.tokens.iter_number_indices()
-    }
-
-    fn iter_numbers(&self) -> impl Iterator<Item = Token> + '_ {
-        self.tokens.iter_numbers()
-    }
-
-    fn iter_at_indices(&self) -> impl Iterator<Item = usize> + '_ {
-        self.tokens.iter_at_indices()
-    }
-
-    fn iter_at(&self) -> impl Iterator<Item = Token> + '_ {
-        self.tokens.iter_at()
+        Ok(())
     }
 }
 

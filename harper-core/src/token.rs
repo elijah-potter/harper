@@ -1,10 +1,11 @@
 use is_macro::Is;
 use itertools::Itertools;
+use paste::paste;
 use serde::{Deserialize, Serialize};
 
 use crate::punctuation::Punctuation;
 use crate::span::Span;
-use crate::Quote;
+use crate::{Document, Quote};
 
 #[derive(Debug, Clone, Copy, Serialize, Deserialize, PartialEq, Default)]
 pub struct Token {
@@ -138,8 +139,16 @@ impl TokenKind {
         self.as_punctuation()?.as_quote()
     }
 
+    pub fn is_quote(&self) -> bool {
+        matches!(self, TokenKind::Punctuation(Punctuation::Quote(_)))
+    }
+
     pub fn is_apostrophe(&self) -> bool {
         matches!(self, TokenKind::Punctuation(Punctuation::Apostrophe))
+    }
+
+    pub fn is_at(&self) -> bool {
+        matches!(self, TokenKind::Punctuation(Punctuation::At))
     }
 
     /// Checks whether the token is whitespace.
@@ -148,36 +157,61 @@ impl TokenKind {
     }
 }
 
+macro_rules! create_decl_for {
+    ($thing:ident) => {
+        paste! {
+            fn [< first_ $thing >](&self) -> Option<Token> ;
+
+            fn [<iter_ $thing _indices>](&self) -> impl Iterator<Item = usize> + '_;
+
+            fn [<iter_ $thing s>](&self) -> impl Iterator<Item = Token> + '_;
+        }
+    };
+}
+
+macro_rules! create_fns_for {
+    ($thing:ident) => {
+        paste! {
+            fn [< first_ $thing >](&self) -> Option<Token> {
+                self.iter().find(|v| v.kind.[<is_ $thing>]()).copied()
+            }
+
+            fn [<iter_ $thing _indices>](&self) -> impl Iterator<Item = usize> + '_ {
+                self.iter()
+                    .enumerate()
+                    .filter(|(_, t)| t.kind.[<is_ $thing>]())
+                    .map(|(i, _)| i)
+            }
+
+            fn [<iter_ $thing s>](&self) -> impl Iterator<Item = Token> + '_ {
+                self.[<iter_ $thing _indices>]().map(|i| self[i])
+            }
+        }
+    };
+}
+
 pub trait TokenStringExt {
-    fn first_word(&self) -> Option<Token>;
-    /// Grabs the first word in the sentence.
-    /// Will also return [`None`] if there is an unlintable token in the
-    /// position of the first word.
     fn first_sentence_word(&self) -> Option<Token>;
-    /// Grabs the first token that isn't whitespace from the token string.
     fn first_non_whitespace(&self) -> Option<Token>;
-    fn iter_word_indices(&self) -> impl Iterator<Item = usize> + '_;
-    fn iter_words(&self) -> impl Iterator<Item = &Token> + '_;
-    fn iter_space_indices(&self) -> impl Iterator<Item = usize> + '_;
-    fn iter_spaces(&self) -> impl Iterator<Item = &Token> + '_;
-    fn iter_apostrophe_indices(&self) -> impl Iterator<Item = usize> + '_;
-    fn iter_apostrophes(&self) -> impl Iterator<Item = &Token> + '_;
     /// Grab the span that represents the beginning of the first element and the
     /// end of the last element.
     fn span(&self) -> Option<Span>;
 
-    fn iter_quote_indices(&self) -> impl Iterator<Item = usize> + '_;
-    fn iter_quotes(&self) -> impl Iterator<Item = Token> + '_;
-    fn iter_number_indices(&self) -> impl Iterator<Item = usize> + '_;
-    fn iter_numbers(&self) -> impl Iterator<Item = Token> + '_;
-    fn iter_at_indices(&self) -> impl Iterator<Item = usize> + '_;
-    fn iter_at(&self) -> impl Iterator<Item = Token> + '_;
+    create_decl_for!(word);
+    create_decl_for!(space);
+    create_decl_for!(apostrophe);
+    create_decl_for!(quote);
+    create_decl_for!(number);
+    create_decl_for!(at);
 }
 
 impl TokenStringExt for [Token] {
-    fn first_word(&self) -> Option<Token> {
-        self.iter().find(|v| v.kind.is_word()).copied()
-    }
+    create_fns_for!(word);
+    create_fns_for!(space);
+    create_fns_for!(apostrophe);
+    create_fns_for!(quote);
+    create_fns_for!(number);
+    create_fns_for!(at);
 
     fn first_non_whitespace(&self) -> Option<Token> {
         self.iter().find(|t| !t.kind.is_whitespace()).copied()
@@ -197,83 +231,7 @@ impl TokenStringExt for [Token] {
         }
     }
 
-    fn iter_word_indices(&self) -> impl Iterator<Item = usize> + '_ {
-        self.iter()
-            .enumerate()
-            .filter(|(_, t)| t.kind.is_word())
-            .map(|(i, _)| i)
-    }
-
-    fn iter_words(&self) -> impl Iterator<Item = &Token> + '_ {
-        self.iter_word_indices().map(|i| &self[i])
-    }
-
-    fn iter_space_indices(&self) -> impl Iterator<Item = usize> + '_ {
-        self.iter()
-            .enumerate()
-            .filter(|(_, t)| t.kind.is_space())
-            .map(|(i, _)| i)
-    }
-
-    fn iter_spaces(&self) -> impl Iterator<Item = &Token> + '_ {
-        self.iter_space_indices().map(|i| &self[i])
-    }
-
-    fn iter_apostrophe_indices(&self) -> impl Iterator<Item = usize> + '_ {
-        self.iter()
-            .enumerate()
-            .filter(|(_, t)| t.kind.is_apostrophe())
-            .map(|(i, _)| i)
-    }
-
-    fn iter_apostrophes(&self) -> impl Iterator<Item = &Token> + '_ {
-        self.iter_apostrophe_indices().map(|i| &self[i])
-    }
-
     fn span(&self) -> Option<Span> {
         Some(Span::new(self.first()?.span.start, self.last()?.span.end))
-    }
-
-    fn iter_quote_indices(&self) -> impl Iterator<Item = usize> + '_ {
-        self.iter().enumerate().filter_map(|(idx, token)| {
-            if let TokenKind::Punctuation(Punctuation::Quote(_)) = &token.kind {
-                Some(idx)
-            } else {
-                None
-            }
-        })
-    }
-
-    fn iter_quotes(&self) -> impl Iterator<Item = Token> + '_ {
-        self.iter_quote_indices().map(|idx| self[idx])
-    }
-
-    fn iter_number_indices(&self) -> impl Iterator<Item = usize> + '_ {
-        self.iter().enumerate().filter_map(|(idx, token)| {
-            if let TokenKind::Number(..) = &token.kind {
-                Some(idx)
-            } else {
-                None
-            }
-        })
-    }
-
-    fn iter_numbers(&self) -> impl Iterator<Item = Token> + '_ {
-        self.iter_number_indices().map(|idx| self[idx])
-    }
-
-    /// Iterates through the indices of all "@" signs.
-    fn iter_at_indices(&self) -> impl Iterator<Item = usize> + '_ {
-        self.iter().enumerate().filter_map(|(idx, token)| {
-            if let TokenKind::Punctuation(Punctuation::At) = &token.kind {
-                Some(idx)
-            } else {
-                None
-            }
-        })
-    }
-
-    fn iter_at(&self) -> impl Iterator<Item = Token> + '_ {
-        self.iter_at_indices().map(|idx| self[idx])
     }
 }
