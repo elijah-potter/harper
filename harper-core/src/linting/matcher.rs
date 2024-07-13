@@ -277,7 +277,10 @@ impl Matcher {
             "water", "melon" => "watermelon",
             "wee", "kend" => "weekend",
             "with", "in" => "within",
-            "with", "out" => "without"
+            "with", "out" => "without",
+            "TreeSitter" => "Tree-sitter",
+            "Treesitter" => "Tree-sitter",
+            "Tree", "sitter" => "Tree-sitter"
         };
 
         // TODO: Improve the description for this lint specifically.

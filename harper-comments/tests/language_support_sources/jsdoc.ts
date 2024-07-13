@@ -9,3 +9,22 @@ class Clazz { }
 /** Here is another example: {@link this sould also b unchecked}. But this _sould_ be.*/
 
 /** However, tis should be checked, while {@link tis should not} */
+
+/**
+ * The following examples should be ignored by Harper.
+ *
+ * @param {string} n - ignor
+ * @param {string} [o] - ignor
+ * @param {string} [d=DefaultValue] - ignor
+ * @return {string} ignor
+ *
+ * This should not be ignor
+ *
+ * @example
+ *
+ *     foo('hello')
+ */
+
+function foo(n, o, d) {
+  return n
+}

@@ -60,9 +60,8 @@ precommit:
   set -eo pipefail
 
   just check
+  just test
 
-  cargo test
-  cargo test --release
   cargo doc
   cargo build
   cargo build --release
@@ -70,3 +69,20 @@ precommit:
 
   just build-obsidian
   just build-web
+
+install:
+  cargo install --path harper-ls
+  cargo install --path harper-cli
+
+# Run `harper-cli` on the Harper repository
+dogfood:
+  #! /bin/bash
+  for file in `fd -e rs`
+  do
+    echo Linting $file
+    cargo run --bin harper-cli --quiet -- lint $file
+  done
+
+test:
+  cargo test
+  cargo test --release
