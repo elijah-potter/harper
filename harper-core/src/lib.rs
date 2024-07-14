@@ -1,3 +1,4 @@
+#![doc = include_str!("../README.md")]
 #![allow(dead_code)]
 
 mod char_ext;

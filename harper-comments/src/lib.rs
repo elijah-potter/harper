@@ -1,3 +1,5 @@
+#![doc = include_str!("../README.md")]
+
 mod comment_parsers;
 mod tree_sitter_parser;
 
