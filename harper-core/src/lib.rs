@@ -7,12 +7,14 @@ mod document;
 mod language_detection;
 mod lexing;
 mod linting;
+mod sync;
 pub mod parsers;
 mod punctuation;
 mod span;
 mod spell;
 mod token;
 
+pub use sync::Lrc;
 pub use char_string::{CharString, CharStringExt};
 pub use document::Document;
 pub use linting::{Lint, LintGroup, LintGroupConfig, LintKind, Linter, Suggestion};

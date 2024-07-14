@@ -14,5 +14,5 @@ console_error_panic_hook = "0.1.7"
 tracing = "0.1.40"
 tracing-wasm = "0.2.1"
 wasm-bindgen = "0.2.91"
-harper-core = { path = "../harper-core" }
+harper-core = { path = "../harper-core", version = "0.8.0", features = ["concurrent"] }
 once_cell = "1.19.0"

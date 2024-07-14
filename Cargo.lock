@@ -530,7 +530,7 @@ dependencies = [
  "divan",
  "hashbrown",
  "is-macro",
- "itertools 0.12.1",
+ "itertools 0.13.0",
  "once_cell",
  "paste",
  "pulldown-cmark",

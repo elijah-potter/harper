@@ -1,31 +1,32 @@
 use hashbrown::HashMap;
+use smallvec::ToSmallVec;
 
 use super::lint::Suggestion;
 use super::{Lint, LintKind, Linter};
 use crate::document::Document;
 use crate::spell::suggest_correct_spelling;
-use crate::{Dictionary, TokenStringExt};
+use crate::{CharString, Dictionary, TokenStringExt};
 
 pub struct SpellCheck<T>
 where
-    T: Dictionary
+    T: Dictionary,
 {
     dictionary: T,
-    word_cache: HashMap<Vec<char>, Vec<Vec<char>>>
+    word_cache: HashMap<CharString, Vec<CharString>>,
 }
 
 impl<T: Dictionary> SpellCheck<T> {
     pub fn new(dictionary: T) -> Self {
         Self {
             dictionary,
-            word_cache: HashMap::new()
+            word_cache: HashMap::new(),
         }
     }
 }
 
 impl<T: Dictionary> SpellCheck<T> {
-    fn cached_suggest_correct_spelling(&mut self, word: &[char]) -> Vec<Vec<char>> {
-        let word = word.to_vec();
+    fn cached_suggest_correct_spelling(&mut self, word: &[char]) -> Vec<CharString> {
+        let word = word.to_smallvec();
 
         self.word_cache
             .entry(word.clone())
@@ -37,7 +38,7 @@ impl<T: Dictionary> SpellCheck<T> {
                 while suggestions.is_empty() && dist < 5 {
                     suggestions = suggest_correct_spelling(&word, 100, dist, &self.dictionary)
                         .into_iter()
-                        .map(|v| v.to_vec())
+                        .map(|v| v.to_smallvec())
                         .collect();
 
                     dist += 1;
@@ -86,7 +87,7 @@ impl<T: Dictionary> Linter for SpellCheck<T> {
                     "Did you mean to spell “{}” this way?",
                     document.get_span_content_str(word.span)
                 ),
-                priority: 63
+                priority: 63,
             })
         }
 

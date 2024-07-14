@@ -1,3 +1,4 @@
+use crate::Lrc;
 use std::cmp::Ordering;
 use std::collections::VecDeque;
 use std::fmt::Display;
@@ -13,9 +14,9 @@ use crate::token::NumberSuffix;
 use crate::{FatToken, Token, TokenKind, TokenStringExt};
 
 pub struct Document {
-    source: Vec<char>,
+    source: Lrc<Vec<char>>,
     tokens: Vec<Token>,
-    parser: Box<dyn Parser>
+    parser: Box<dyn Parser>,
 }
 
 impl Default for Document {
@@ -30,14 +31,14 @@ impl Document {
     pub fn new(text: &str, parser: Box<dyn Parser>) -> Self {
         let source: Vec<_> = text.chars().collect();
 
-        Self::new_from_vec(source, parser)
+        Self::new_from_vec(Lrc::new(source), parser)
     }
 
-    pub fn new_from_vec(source: Vec<char>, parser: Box<dyn Parser>) -> Self {
+    pub fn new_from_vec(source: Lrc<Vec<char>>, parser: Box<dyn Parser>) -> Self {
         let mut doc = Self {
             source,
             tokens: Vec::new(),
-            parser
+            parser,
         };
         doc.parse();
 
@@ -102,7 +103,7 @@ impl Document {
             &old[indices
                 .last()
                 .map(|v| v + stretch_len)
-                .unwrap_or(indices.len())..]
+                .unwrap_or(indices.len())..],
         );
     }
 
@@ -242,7 +243,7 @@ impl Document {
     pub fn get_full_string(&self) -> String {
         self.get_span_content_str(Span {
             start: 0,
-            end: self.source.len()
+            end: self.source.len(),
         })
     }
 
@@ -251,26 +252,28 @@ impl Document {
     }
 
     pub fn apply_suggestion(&mut self, suggestion: &Suggestion, span: Span) {
+        let source = Lrc::make_mut(&mut self.source);
+
         match suggestion {
             Suggestion::ReplaceWith(chars) => {
                 // Avoid allocation if possible
                 if chars.len() == span.len() {
                     for (index, c) in chars.iter().enumerate() {
-                        self.source[index + span.start] = *c
+                        source[index + span.start] = *c
                     }
                 } else {
-                    let popped = self.source.split_off(span.start);
+                    let popped = source.split_off(span.start);
 
-                    self.source.extend(chars);
-                    self.source.extend(popped.into_iter().skip(span.len()));
+                    source.extend(chars);
+                    source.extend(popped.into_iter().skip(span.len()));
                 }
             }
             Suggestion::Remove => {
-                for i in span.end..self.source.len() {
-                    self.source[i - span.len()] = self.source[i];
+                for i in span.end..source.len() {
+                    source[i - span.len()] = source[i];
                 }
 
-                self.source.truncate(self.source.len() - span.len());
+                source.truncate(source.len() - span.len());
             }
         }
 
@@ -500,7 +503,7 @@ fn is_chunk_terminator(token: &TokenKind) -> bool {
 
     match token {
         TokenKind::Punctuation(punct) => [Punctuation::Comma].contains(punct),
-        _ => false
+        _ => false,
     }
 }
 
@@ -509,11 +512,11 @@ fn is_sentence_terminator(token: &TokenKind) -> bool {
         TokenKind::Punctuation(punct) => [
             Punctuation::Period,
             Punctuation::Bang,
-            Punctuation::Question
+            Punctuation::Question,
         ]
         .contains(punct),
         TokenKind::Newline(count) => *count >= 2,
-        _ => false
+        _ => false,
     }
 }
 
@@ -634,7 +637,7 @@ mod tests {
         assert_token_count("This is the 3rd test", 9);
         assert_token_count(
             "It works even with weird capitalization like this: 600nD",
-            18
+            18,
         );
     }
 
