@@ -14,6 +14,7 @@ use harper_core::{
     Token,
     TokenKind
 };
+use harper_html::HtmlParser;
 use serde_json::Value;
 use tokio::sync::{Mutex, RwLock};
 use tower_lsp::jsonrpc::Result;
@@ -260,6 +261,8 @@ impl Backend {
                 Document::new(text, Box::new(Markdown))
             } else if language_id == "gitcommit" {
                 Document::new(text, Box::new(GitCommitParser))
+            } else if language_id == "html" {
+                Document::new(text, Box::new(HtmlParser::new()))
             } else if language_id == "mail" {
                 Document::new(text, Box::new(PlainEnglish))
             } else {
@@ -372,7 +375,6 @@ impl LanguageServer for Backend {
                         save: Some(TextDocumentSyncSaveOptions::Supported(true))
                     }
                 )),
-
                 ..Default::default()
             }
         })
