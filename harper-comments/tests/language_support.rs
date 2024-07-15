@@ -40,3 +40,4 @@ create_test!(multiline_comments.ts, 3);
 create_test!(clean.rs, 0);
 create_test!(jsdoc.ts, 4);
 create_test!(issue_96.lua, 0);
+create_test!(merged_lines.ts, 1);

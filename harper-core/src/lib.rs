@@ -7,20 +7,22 @@ mod document;
 mod language_detection;
 mod lexing;
 mod linting;
-mod sync;
+mod mask;
 pub mod parsers;
 mod punctuation;
 mod span;
 mod spell;
+mod sync;
 mod token;
 
-pub use sync::Lrc;
 pub use char_string::{CharString, CharStringExt};
 pub use document::Document;
 pub use linting::{Lint, LintGroup, LintGroupConfig, LintKind, Linter, Suggestion};
+pub use mask::{Mask, Masker};
 pub use punctuation::{Punctuation, Quote};
 pub use span::Span;
 pub use spell::{Dictionary, FullDictionary, MergedDictionary};
+pub use sync::Lrc;
 pub use token::{FatToken, Token, TokenKind, TokenStringExt};
 
 /// A utility function that removes overlapping lints in a vector,

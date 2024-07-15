@@ -1,5 +1,5 @@
-/// This is an example of an problematic comment.
-/// It should produce one error.
+// This is an example of an problematic comment
+// It should produce one error
 function test() {}
 
 /***
@@ -9,4 +9,5 @@ function test() {}
  */
 function arbitrary() {}
 
-/// Let's aadd a cuple spelling errors for good measure.
+// Let's aadd a cuple spelling errors for good measure.
+

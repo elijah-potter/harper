@@ -10,6 +10,6 @@ alphabet = [
  "g",  # This is a test
  "h",  # This is a test
  "i",  # This is a test
-= "j", # This is a test
-= "k", # This is a test
+ "j",  # This is a test
+ "k",  # This is a test
 ]

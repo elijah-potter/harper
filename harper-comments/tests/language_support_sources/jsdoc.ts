@@ -19,10 +19,6 @@ class Clazz { }
  * @return {string} ignor
  *
  * This should not be ignor
- *
- * @example
- *
- *     foo('hello')
  */
 
 function foo(n, o, d) {

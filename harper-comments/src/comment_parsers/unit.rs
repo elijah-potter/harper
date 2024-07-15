@@ -1,5 +1,5 @@
 use harper_core::parsers::{Markdown, Parser};
-use harper_core::Token;
+use harper_core::{Span, Token};
 
 use super::without_initiators;
 
@@ -19,6 +19,11 @@ impl Parser for Unit {
 
         for line in source.split(|c| *c == '\n') {
             let mut new_tokens = parse_line(line);
+
+            new_tokens.push(Token::new(
+                Span::new_with_len(line.len(), 1),
+                harper_core::TokenKind::Newline(1),
+            ));
 
             new_tokens
                 .iter_mut()

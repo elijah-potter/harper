@@ -1,5 +1,5 @@
 use harper_core::parsers::{Markdown, Parser};
-use harper_core::{Punctuation, Token, TokenKind};
+use harper_core::{Punctuation, Span, Token, TokenKind};
 use itertools::Itertools;
 
 use super::without_initiators;
@@ -14,6 +14,11 @@ impl Parser for JsDoc {
 
         for line in source.split(|c| *c == '\n') {
             let mut new_tokens = parse_line(line);
+
+            new_tokens.push(Token::new(
+                Span::new_with_len(line.len(), 1),
+                harper_core::TokenKind::Newline(1),
+            ));
 
             new_tokens
                 .iter_mut()
@@ -199,7 +204,7 @@ mod tests {
                 TokenKind::Unlintable,
                 TokenKind::Unlintable,
                 TokenKind::Punctuation(Punctuation::Period),
-                TokenKind::Newline(1),
+                TokenKind::Newline(2),
             ]
         );
     }
