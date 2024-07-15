@@ -1,6 +1,6 @@
 use std::path::Path;
 
-use harper_comments::TreeSitterParser;
+use harper_comments::CommentParser;
 use harper_core::{Document, FullDictionary, LintGroup, LintGroupConfig, Linter};
 
 /// Creates a unit test checking that the linting of a source file in
@@ -19,7 +19,7 @@ macro_rules! create_test {
                     )
                  );
 
-                 let parser = TreeSitterParser::new_from_filename(Path::new(filename)).unwrap();
+                 let parser = CommentParser::new_from_filename(Path::new(filename)).unwrap();
                  let document = Document::new(&source, Box::new(parser));
 
                  let mut linter = LintGroup::new(

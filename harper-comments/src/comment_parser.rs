@@ -1,17 +1,18 @@
 use std::path::Path;
 
-use crate::{comment_parsers, tree_sitter_masker::TreeSitterMasker};
 use comment_parsers::{Go, JsDoc, Unit};
-use harper_core::{
-    parsers::{self, Parser},
-    FullDictionary, Token,
-};
+use harper_core::parsers::{self, Parser};
+use harper_core::{FullDictionary, Token};
+use harper_tree_sitter::TreeSitterMasker;
+use tree_sitter::Node;
 
-pub struct TreeSitterParser {
-    inner: parsers::Mask<TreeSitterMasker, Box<dyn Parser>>,
+use crate::comment_parsers;
+
+pub struct CommentParser {
+    inner: parsers::Mask<TreeSitterMasker, Box<dyn Parser>>
 }
 
-impl TreeSitterParser {
+impl CommentParser {
     pub fn create_ident_dict(&self, source: &[char]) -> Option<FullDictionary> {
         self.inner.masker.create_ident_dict(source)
     }
@@ -34,17 +35,20 @@ impl TreeSitterParser {
             "lua" => tree_sitter_lua::language(),
             "sh" => tree_sitter_bash::language(),
             "java" => tree_sitter_java::language(),
-            _ => return None,
+            _ => return None
         };
 
         let comment_parser: Box<dyn Parser> = match language_id {
             "javascriptreact" | "typescript" | "typescriptreact" | "javascript" => Box::new(JsDoc),
             "go" => Box::new(Go),
-            _ => Box::new(Unit),
+            _ => Box::new(Unit)
         };
 
         Some(Self {
-            inner: parsers::Mask::new(TreeSitterMasker::new(language), comment_parser),
+            inner: parsers::Mask::new(
+                TreeSitterMasker::new(language, Self::node_condition),
+                comment_parser
+            )
         })
     }
 
@@ -77,12 +81,16 @@ impl TreeSitterParser {
             "sh" => "sh",
             "bash" => "sh",
             "java" => "java",
-            _ => return None,
+            _ => return None
         })
+    }
+
+    fn node_condition(n: &Node) -> bool {
+        n.kind().contains("comment")
     }
 }
 
-impl Parser for TreeSitterParser {
+impl Parser for CommentParser {
     fn parse(&mut self, source: &[char]) -> Vec<Token> {
         self.inner.parse(source)
     }

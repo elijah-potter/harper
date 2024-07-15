@@ -9,17 +9,17 @@ use crate::{CharString, Dictionary, TokenStringExt};
 
 pub struct SpellCheck<T>
 where
-    T: Dictionary,
+    T: Dictionary
 {
     dictionary: T,
-    word_cache: HashMap<CharString, Vec<CharString>>,
+    word_cache: HashMap<CharString, Vec<CharString>>
 }
 
 impl<T: Dictionary> SpellCheck<T> {
     pub fn new(dictionary: T) -> Self {
         Self {
             dictionary,
-            word_cache: HashMap::new(),
+            word_cache: HashMap::new()
         }
     }
 }
@@ -87,7 +87,7 @@ impl<T: Dictionary> Linter for SpellCheck<T> {
                     "Did you mean to spell “{}” this way?",
                     document.get_span_content_str(word.span)
                 ),
-                priority: 63,
+                priority: 63
             })
         }
 

@@ -1,10 +1,9 @@
-use itertools::Itertools;
-
 use crate::Span;
 
-/// A Masker is a tool that can be composed to eliminate chunks of text from being parsed.
-/// They can be composed to do things like isolate comments from a programming language or disable
-/// linting for languages that have been determined to not be English.
+/// A Masker is a tool that can be composed to eliminate chunks of text from
+/// being parsed. They can be composed to do things like isolate comments from a
+/// programming language or disable linting for languages that have been
+/// determined to not be English.
 pub trait Masker: Send + Sync {
     fn create_mask(&mut self, source: &[char]) -> Mask;
 }
@@ -13,20 +12,21 @@ pub struct Mask {
     // Right now, there aren't any use-cases where we can't treat this as a stack.
     //
     // Assumed that no elements overlap and exist in sorted order.
-    pub(self) allowed: Vec<Span>,
+    pub(self) allowed: Vec<Span>
 }
 
 impl Mask {
-    /// Create a new Mask for a given piece of text, marking all text as disallowed.
+    /// Create a new Mask for a given piece of text, marking all text as
+    /// disallowed.
     pub fn new_blank() -> Self {
         Self {
-            allowed: Vec::new(),
+            allowed: Vec::new()
         }
     }
 
     pub fn iter_allowed<'a>(
         &'a self,
-        source: &'a [char],
+        source: &'a [char]
     ) -> impl Iterator<Item = (Span, &'a [char])> + '_ {
         self.allowed.iter().map(|s| (*s, s.get_content(source)))
     }

@@ -17,7 +17,7 @@ impl Parser for JsDoc {
 
             new_tokens.push(Token::new(
                 Span::new_with_len(line.len(), 1),
-                harper_core::TokenKind::Newline(1),
+                harper_core::TokenKind::Newline(1)
             ));
 
             new_tokens
@@ -159,19 +159,19 @@ fn parse_inline_tag(tag_name: &[char], tokens: &[Token], source: &[char]) -> Opt
 mod tests {
     use harper_core::{Document, Punctuation, TokenKind};
 
-    use crate::TreeSitterParser;
+    use crate::CommentParser;
 
     #[test]
     fn escapes_loop() {
         let source = "/** This should _not_cause an infinite loop: {@ */";
-        let parser = TreeSitterParser::new_from_language_id("javascript").unwrap();
+        let parser = CommentParser::new_from_language_id("javascript").unwrap();
         Document::new(source, Box::new(parser));
     }
 
     #[test]
     fn handles_inline_link() {
         let source = "/** See {@link MyClass} and [MyClass's foo property]{@link MyClass#foo}. */";
-        let parser = TreeSitterParser::new_from_language_id("javascript").unwrap();
+        let parser = CommentParser::new_from_language_id("javascript").unwrap();
         let document = Document::new(source, Box::new(parser));
 
         assert_eq!(
@@ -212,7 +212,7 @@ mod tests {
     #[test]
     fn handles_class() {
         let source = "/** @class Circle representing a circle. */";
-        let parser = TreeSitterParser::new_from_language_id("javascript").unwrap();
+        let parser = CommentParser::new_from_language_id("javascript").unwrap();
         let document = Document::new(source, Box::new(parser));
 
         assert!(document

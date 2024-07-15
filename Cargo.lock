@@ -503,6 +503,7 @@ name = "harper-comments"
 version = "0.8.8"
 dependencies = [
  "harper-core",
+ "harper-tree-sitter",
  "itertools 0.12.1",
  "paste",
  "tree-sitter",
@@ -562,6 +563,14 @@ dependencies = [
  "tower-lsp",
  "tracing",
  "tracing-subscriber",
+]
+
+[[package]]
+name = "harper-tree-sitter"
+version = "0.8.8"
+dependencies = [
+ "harper-core",
+ "tree-sitter",
 ]
 
 [[package]]

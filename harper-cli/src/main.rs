@@ -5,7 +5,7 @@ use std::path::{Path, PathBuf};
 use anyhow::format_err;
 use ariadne::{Color, Label, Report, ReportKind, Source};
 use clap::Parser;
-use harper_comments::TreeSitterParser;
+use harper_comments::CommentParser;
 use harper_core::{remove_overlaps, Document, FullDictionary, LintGroup, LintGroupConfig, Linter};
 
 #[derive(Debug, Parser)]
@@ -88,7 +88,7 @@ fn main() -> anyhow::Result<()> {
 fn load_file(file: &Path) -> anyhow::Result<(Document, String)> {
     let source = std::fs::read_to_string(file)?;
 
-    let parser = TreeSitterParser::new_from_filename(file)
+    let parser = CommentParser::new_from_filename(file)
         .ok_or(format_err!("Could not detect language ID."))?;
 
     Ok((Document::new(&source, Box::new(parser)), source))

@@ -1,21 +1,21 @@
-use crate::{mask::Masker, Span, Token, TokenKind};
-
 use super::Parser;
+use crate::mask::Masker;
+use crate::{Token, TokenKind};
 
 /// Composes a Masker and a Parser to parse only masked chunks of text.
 pub struct Mask<M, P>
 where
     M: Masker,
-    P: Parser,
+    P: Parser
 {
     pub masker: M,
-    pub parser: P,
+    pub parser: P
 }
 
 impl<M, P> Mask<M, P>
 where
     M: Masker,
-    P: Parser,
+    P: Parser
 {
     pub fn new(masker: M, parser: P) -> Self {
         Self { masker, parser }
@@ -25,7 +25,7 @@ where
 impl<M, P> Parser for Mask<M, P>
 where
     M: Masker,
-    P: Parser,
+    P: Parser
 {
     fn parse(&mut self, source: &[char]) -> Vec<Token> {
         let mask = self.masker.create_mask(source);

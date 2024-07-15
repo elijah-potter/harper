@@ -1,18 +1,21 @@
 use std::collections::HashSet;
 
-use harper_core::{FullDictionary, Span};
-use harper_core::{Mask, Masker};
+use harper_core::{FullDictionary, Mask, Masker, Span};
 use tree_sitter::{Language, Node, Tree, TreeCursor};
 
-/// A Harper parser that wraps various comment parsers that
-/// exclusively parses comments in any language supported by [`tree_sitter`].
+/// A Harper [`Masker`] that wraps a given tree-sitter language and a condition,
+/// allowing you to selectively parse only specific tree-sitter nodes.
 pub struct TreeSitterMasker {
     language: Language,
+    node_condition: fn(&Node) -> bool
 }
 
 impl TreeSitterMasker {
-    pub fn new(language: Language) -> Self {
-        Self { language }
+    pub fn new(language: Language, node_condition: fn(&Node) -> bool) -> Self {
+        Self {
+            language,
+            node_condition
+        }
     }
 
     fn parse_root(&self, text: &str) -> Option<Tree> {
@@ -55,9 +58,9 @@ impl TreeSitterMasker {
     /// Visits the children of a TreeSitter node, searching for comments.
     ///
     /// Returns the BYTE spans of the comment position.
-    fn extract_comments(cursor: &mut TreeCursor, comments: &mut Vec<Span>) {
+    fn extract_comments(&self, cursor: &mut TreeCursor, comments: &mut Vec<Span>) {
         Self::visit_nodes(cursor, &mut |node: &Node| {
-            if node.kind().contains("comment") {
+            if (self.node_condition)(node) {
                 comments.push(node.byte_range().into());
             }
         });
@@ -94,7 +97,7 @@ impl Masker for TreeSitterMasker {
 
         let mut comments_spans = Vec::new();
 
-        Self::extract_comments(&mut root.walk(), &mut comments_spans);
+        self.extract_comments(&mut root.walk(), &mut comments_spans);
         byte_spans_to_char_spans(&mut comments_spans, &text);
 
         let mut mask = Mask::new_blank();
