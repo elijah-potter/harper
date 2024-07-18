@@ -15,7 +15,7 @@ use crate::{FatToken, Lrc, Token, TokenKind, TokenStringExt};
 pub struct Document {
     source: Lrc<Vec<char>>,
     tokens: Vec<Token>,
-    parser: Box<dyn Parser>
+    parser: Box<dyn Parser>,
 }
 
 impl Default for Document {
@@ -37,7 +37,7 @@ impl Document {
         let mut doc = Self {
             source,
             tokens: Vec::new(),
-            parser
+            parser,
         };
         doc.parse();
 
@@ -59,9 +59,21 @@ impl Document {
         self.tokens = self.parser.parse(&self.source);
         self.condense_spaces();
         self.condense_newlines();
+        self.newlines_to_breaks();
         self.condense_contractions();
         self.condense_number_suffixes();
         self.match_quotes();
+    }
+
+    /// Convert all sets of newlines greater than 2 to paragraph breaks.
+    fn newlines_to_breaks(&mut self) {
+        for token in &mut self.tokens {
+            if let TokenKind::Newline(n) = token.kind {
+                if n >= 2 {
+                    token.kind = TokenKind::ParagraphBreak;
+                }
+            }
+        }
     }
 
     /// Given a list of indices, this function removes the subsequent
@@ -102,7 +114,7 @@ impl Document {
             &old[indices
                 .last()
                 .map(|v| v + stretch_len)
-                .unwrap_or(indices.len())..]
+                .unwrap_or(indices.len())..],
         );
     }
 
@@ -242,7 +254,7 @@ impl Document {
     pub fn get_full_string(&self) -> String {
         self.get_span_content_str(Span {
             start: 0,
-            end: self.source.len()
+            end: self.source.len(),
         })
     }
 
@@ -502,7 +514,7 @@ fn is_chunk_terminator(token: &TokenKind) -> bool {
 
     match token {
         TokenKind::Punctuation(punct) => [Punctuation::Comma].contains(punct),
-        _ => false
+        _ => false,
     }
 }
 
@@ -511,11 +523,11 @@ fn is_sentence_terminator(token: &TokenKind) -> bool {
         TokenKind::Punctuation(punct) => [
             Punctuation::Period,
             Punctuation::Bang,
-            Punctuation::Question
+            Punctuation::Question,
         ]
         .contains(punct),
-        TokenKind::Newline(count) => *count >= 2,
-        _ => false
+        TokenKind::ParagraphBreak => true,
+        _ => false,
     }
 }
 
@@ -636,7 +648,7 @@ mod tests {
         assert_token_count("This is the 3rd test", 9);
         assert_token_count(
             "It works even with weird capitalization like this: 600nD",
-            18
+            18,
         );
     }
 

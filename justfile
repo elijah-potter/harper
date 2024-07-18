@@ -86,3 +86,7 @@ dogfood:
 test:
   cargo test
   cargo test --release
+
+parse file:
+  cargo run --bin harper-cli -- parse {{file}}
+

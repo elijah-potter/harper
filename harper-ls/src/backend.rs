@@ -5,14 +5,7 @@ use std::sync::Arc;
 use harper_comments::CommentParser;
 use harper_core::parsers::{Markdown, PlainEnglish};
 use harper_core::{
-    Dictionary,
-    Document,
-    FullDictionary,
-    LintGroup,
-    Linter,
-    MergedDictionary,
-    Token,
-    TokenKind
+    Dictionary, Document, FullDictionary, LintGroup, Linter, MergedDictionary, Token, TokenKind,
 };
 use harper_html::HtmlParser;
 use serde_json::Value;
@@ -20,31 +13,13 @@ use tokio::sync::{Mutex, RwLock};
 use tower_lsp::jsonrpc::Result;
 use tower_lsp::lsp_types::notification::PublishDiagnostics;
 use tower_lsp::lsp_types::{
-    CodeActionOrCommand,
-    CodeActionParams,
-    CodeActionProviderCapability,
-    CodeActionResponse,
-    Command,
-    Diagnostic,
-    DidChangeConfigurationParams,
-    DidChangeTextDocumentParams,
-    DidCloseTextDocumentParams,
-    DidOpenTextDocumentParams,
-    DidSaveTextDocumentParams,
-    ExecuteCommandOptions,
-    ExecuteCommandParams,
-    InitializeParams,
-    InitializeResult,
-    InitializedParams,
-    MessageType,
-    PublishDiagnosticsParams,
-    Range,
-    ServerCapabilities,
-    TextDocumentSyncCapability,
-    TextDocumentSyncKind,
-    TextDocumentSyncOptions,
-    TextDocumentSyncSaveOptions,
-    Url
+    CodeActionOrCommand, CodeActionParams, CodeActionProviderCapability, CodeActionResponse,
+    Command, Diagnostic, DidChangeConfigurationParams, DidChangeTextDocumentParams,
+    DidCloseTextDocumentParams, DidOpenTextDocumentParams, DidSaveTextDocumentParams,
+    ExecuteCommandOptions, ExecuteCommandParams, InitializeParams, InitializeResult,
+    InitializedParams, MessageType, PublishDiagnosticsParams, Range, ServerCapabilities,
+    TextDocumentSyncCapability, TextDocumentSyncKind, TextDocumentSyncOptions,
+    TextDocumentSyncSaveOptions, Url,
 };
 use tower_lsp::{Client, LanguageServer};
 use tracing::{error, info, instrument};
@@ -60,7 +35,7 @@ struct DocumentState {
     document: Document,
     ident_dict: Arc<FullDictionary>,
     linter: LintGroup<MergedDictionary<FullDictionary>>,
-    language_id: Option<String>
+    language_id: Option<String>,
 }
 
 /// Deallocate
@@ -68,7 +43,7 @@ pub struct Backend {
     client: Client,
     static_dictionary: Arc<FullDictionary>,
     config: RwLock<Config>,
-    doc_state: Mutex<HashMap<Url, DocumentState>>
+    doc_state: Mutex<HashMap<Url, DocumentState>>,
 }
 
 impl Backend {
@@ -79,7 +54,7 @@ impl Backend {
             client,
             static_dictionary: dictionary.into(),
             doc_state: Mutex::new(HashMap::new()),
-            config: RwLock::new(config)
+            config: RwLock::new(config),
         }
     }
 
@@ -174,7 +149,7 @@ impl Backend {
     #[instrument(skip(self))]
     async fn generate_file_dictionary(
         &self,
-        url: &Url
+        url: &Url,
     ) -> anyhow::Result<MergedDictionary<FullDictionary>> {
         let (global_dictionary, file_dictionary) = tokio::join!(
             self.generate_global_dictionary(),
@@ -191,11 +166,11 @@ impl Backend {
     async fn update_document_from_file(
         &self,
         url: &Url,
-        language_id: Option<&str>
+        language_id: Option<&str>,
     ) -> anyhow::Result<()> {
         let content = match tokio::fs::read_to_string(
             url.to_file_path()
-                .map_err(|_| anyhow::format_err!("Could not extract file path."))?
+                .map_err(|_| anyhow::format_err!("Could not extract file path."))?,
         )
         .await
         {
@@ -214,7 +189,7 @@ impl Backend {
         &self,
         url: &Url,
         text: &str,
-        language_id: Option<&str>
+        language_id: Option<&str>,
     ) -> anyhow::Result<()> {
         let mut doc_lock = self.doc_state.lock().await;
         let config_lock = self.config.read().await;
@@ -226,7 +201,7 @@ impl Backend {
         let mut doc_state = DocumentState {
             linter: LintGroup::new(
                 config_lock.lint_config,
-                self.generate_file_dictionary(url).await?
+                self.generate_file_dictionary(url).await?,
             ),
             language_id: language_id
                 .map(|v| v.to_string())
@@ -262,7 +237,7 @@ impl Backend {
             } else if language_id == "gitcommit" {
                 Document::new(text, Box::new(GitCommitParser))
             } else if language_id == "html" {
-                Document::new(text, Box::new(HtmlParser::new()))
+                Document::new(text, Box::new(HtmlParser::default()))
             } else if language_id == "mail" {
                 Document::new(text, Box::new(PlainEnglish))
             } else {
@@ -279,7 +254,7 @@ impl Backend {
     async fn generate_code_actions(
         &self,
         url: &Url,
-        range: Range
+        range: Range,
     ) -> Result<Vec<CodeActionOrCommand>> {
         let (config, mut doc_states) = tokio::join!(self.config.read(), self.doc_state.lock());
         let Some(doc_state) = doc_states.get_mut(url) else {
@@ -311,7 +286,7 @@ impl Backend {
             actions.push(CodeActionOrCommand::Command(Command::new(
                 "Open URL".to_string(),
                 "HarperOpen".to_string(),
-                Some(vec![doc_state.document.get_span_content_str(span).into()])
+                Some(vec![doc_state.document.get_span_content_str(span).into()]),
             )))
         }
 
@@ -331,7 +306,7 @@ impl Backend {
         lints_to_diagnostics(
             doc_state.document.get_full_content(),
             &lints,
-            config.diagnostic_severity
+            config.diagnostic_severity,
         )
     }
 
@@ -342,7 +317,7 @@ impl Backend {
         let result = PublishDiagnosticsParams {
             uri: url.clone(),
             diagnostics,
-            version: None
+            version: None,
         };
 
         self.client
@@ -372,11 +347,11 @@ impl LanguageServer for Backend {
                         change: Some(TextDocumentSyncKind::FULL),
                         will_save: None,
                         will_save_wait_until: None,
-                        save: Some(TextDocumentSyncSaveOptions::Supported(true))
-                    }
+                        save: Some(TextDocumentSyncSaveOptions::Supported(true)),
+                    },
                 )),
                 ..Default::default()
-            }
+            },
         })
     }
 
@@ -407,7 +382,7 @@ impl LanguageServer for Backend {
             .update_document(
                 &params.text_document.uri,
                 &params.text_document.text,
-                Some(&params.text_document.language_id)
+                Some(&params.text_document.language_id),
             )
             .await;
 
@@ -496,7 +471,7 @@ impl LanguageServer for Backend {
                     error!("Unable to open URL: {}", err);
                 }
             },
-            _ => ()
+            _ => (),
         }
 
         Ok(None)
@@ -527,7 +502,7 @@ impl LanguageServer for Backend {
         // Update documents with new config
         futures::future::join_all(
             keys.iter()
-                .map(|key| self.update_document_from_file(key, None))
+                .map(|key| self.update_document_from_file(key, None)),
         )
         .await;
     }

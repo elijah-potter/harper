@@ -1,6 +1,6 @@
 use std::path::Path;
 
-use comment_parsers::{Go, JsDoc, Unit};
+use comment_parsers::{Go, JavaDoc, JsDoc, Unit};
 use harper_core::parsers::{self, Parser};
 use harper_core::{FullDictionary, Token};
 use harper_tree_sitter::TreeSitterMasker;
@@ -9,7 +9,7 @@ use tree_sitter::Node;
 use crate::comment_parsers;
 
 pub struct CommentParser {
-    inner: parsers::Mask<TreeSitterMasker, Box<dyn Parser>>
+    inner: parsers::Mask<TreeSitterMasker, Box<dyn Parser>>,
 }
 
 impl CommentParser {
@@ -35,20 +35,21 @@ impl CommentParser {
             "lua" => tree_sitter_lua::language(),
             "sh" => tree_sitter_bash::language(),
             "java" => tree_sitter_java::language(),
-            _ => return None
+            _ => return None,
         };
 
         let comment_parser: Box<dyn Parser> = match language_id {
             "javascriptreact" | "typescript" | "typescriptreact" | "javascript" => Box::new(JsDoc),
+            "java" => Box::new(JavaDoc::default()),
             "go" => Box::new(Go),
-            _ => Box::new(Unit)
+            _ => Box::new(Unit),
         };
 
         Some(Self {
             inner: parsers::Mask::new(
                 TreeSitterMasker::new(language, Self::node_condition),
-                comment_parser
-            )
+                comment_parser,
+            ),
         })
     }
 
@@ -81,7 +82,7 @@ impl CommentParser {
             "sh" => "sh",
             "bash" => "sh",
             "java" => "java",
-            _ => return None
+            _ => return None,
         })
     }
 

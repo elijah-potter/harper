@@ -503,6 +503,7 @@ name = "harper-comments"
 version = "0.8.8"
 dependencies = [
  "harper-core",
+ "harper-html",
  "harper-tree-sitter",
  "itertools 0.12.1",
  "paste",
@@ -549,6 +550,7 @@ version = "0.8.8"
 dependencies = [
  "harper-core",
  "harper-tree-sitter",
+ "paste",
  "tree-sitter",
  "tree-sitter-html",
 ]

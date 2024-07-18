@@ -10,7 +10,7 @@ use crate::Quote;
 #[derive(Debug, Clone, Copy, Serialize, Deserialize, PartialEq, Default)]
 pub struct Token {
     pub span: Span,
-    pub kind: TokenKind
+    pub kind: TokenKind,
 }
 
 impl Token {
@@ -24,7 +24,7 @@ impl Token {
 
         FatToken {
             content,
-            kind: self.kind
+            kind: self.kind,
         }
     }
 }
@@ -34,7 +34,7 @@ impl Token {
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, PartialOrd)]
 pub struct FatToken {
     pub content: Vec<char>,
-    pub kind: TokenKind
+    pub kind: TokenKind,
 }
 
 #[derive(Debug, Is, Clone, Copy, Serialize, Deserialize, PartialEq, Default, PartialOrd)]
@@ -53,7 +53,8 @@ pub enum TokenKind {
     Hostname,
     /// A special token used for things like inline code blocks that should be
     /// ignored by all linters.
-    Unlintable
+    Unlintable,
+    ParagraphBreak,
 }
 
 #[derive(Debug, Serialize, Deserialize, Default, PartialEq, PartialOrd, Clone, Copy, Is)]
@@ -62,7 +63,7 @@ pub enum NumberSuffix {
     Th,
     St,
     Nd,
-    Rd
+    Rd,
 }
 
 impl NumberSuffix {
@@ -88,7 +89,7 @@ impl NumberSuffix {
             7 => Some(Self::Th),
             8 => Some(Self::Th),
             9 => Some(Self::Th),
-            _ => None
+            _ => None,
         }
     }
 
@@ -97,7 +98,7 @@ impl NumberSuffix {
             NumberSuffix::Th => vec!['t', 'h'],
             NumberSuffix::St => vec!['s', 't'],
             NumberSuffix::Nd => vec!['n', 'd'],
-            NumberSuffix::Rd => vec!['r', 'd']
+            NumberSuffix::Rd => vec!['r', 'd'],
         }
     }
 
@@ -125,7 +126,7 @@ impl NumberSuffix {
             ('R', 'd') => Some(NumberSuffix::Rd),
             ('r', 'D') => Some(NumberSuffix::Rd),
             ('R', 'D') => Some(NumberSuffix::Rd),
-            _ => None
+            _ => None,
         }
     }
 }
