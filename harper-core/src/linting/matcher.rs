@@ -280,7 +280,8 @@ impl Matcher {
             "with", "out" => "without",
             "TreeSitter" => "Tree-sitter",
             "Treesitter" => "Tree-sitter",
-            "Tree", "sitter" => "Tree-sitter"
+            "Tree", "sitter" => "Tree-sitter",
+            "all", "of", "the" => "all the"
         };
 
         // TODO: Improve the description for this lint specifically.
