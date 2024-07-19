@@ -6,16 +6,16 @@ use crate::{Span, Token, TokenKind};
 pub struct Mask<M, P>
 where
     M: Masker,
-    P: Parser,
+    P: Parser
 {
     pub masker: M,
-    pub parser: P,
+    pub parser: P
 }
 
 impl<M, P> Mask<M, P>
 where
     M: Masker,
-    P: Parser,
+    P: Parser
 {
     pub fn new(masker: M, parser: P) -> Self {
         Self { masker, parser }
@@ -25,7 +25,7 @@ where
 impl<M, P> Parser for Mask<M, P>
 where
     M: Masker,
-    P: Parser,
+    P: Parser
 {
     fn parse(&mut self, source: &[char]) -> Vec<Token> {
         let mask = self.masker.create_mask(source);

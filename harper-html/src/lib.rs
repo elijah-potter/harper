@@ -4,7 +4,7 @@ use harper_tree_sitter::TreeSitterMasker;
 use tree_sitter::Node;
 
 pub struct HtmlParser {
-    inner: parsers::Mask<TreeSitterMasker, PlainEnglish>,
+    inner: parsers::Mask<TreeSitterMasker, PlainEnglish>
 }
 
 impl HtmlParser {
@@ -18,8 +18,8 @@ impl Default for HtmlParser {
         Self {
             inner: parsers::Mask::new(
                 TreeSitterMasker::new(tree_sitter_html::language(), Self::node_condition),
-                PlainEnglish,
-            ),
+                PlainEnglish
+            )
         }
     }
 }
