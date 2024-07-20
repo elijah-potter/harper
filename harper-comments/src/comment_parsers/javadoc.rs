@@ -57,6 +57,23 @@ impl Parser for JavaDoc {
             token.span.push_by(actual.start);
         }
 
+        super::jsdoc::mark_inline_tags(&mut tokens, source);
+
+        // Mark @tags as unlintable
+        for i in 3..tokens.len() {
+            let a = tokens[i - 3];
+            let b = tokens[i - 2];
+            let c = tokens[i - 1];
+            let d = tokens[i];
+
+            if a.kind.is_at() && b.kind.is_word() && c.kind.is_space() && d.kind.is_word() {
+                tokens[i - 3].kind = TokenKind::Unlintable;
+                tokens[i - 2].kind = TokenKind::Unlintable;
+                tokens[i - 1].kind = TokenKind::Unlintable;
+                tokens[i].kind = TokenKind::Unlintable;
+            }
+        }
+
         tokens
     }
 }

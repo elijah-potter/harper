@@ -30,7 +30,7 @@ fn without_initiators(source: &[char]) -> Span {
 }
 
 fn is_comment_character(c: char) -> bool {
-    matches!(c, '#' | '-' | '/' | '*')
+    matches!(c, '#' | '-' | '/' | '*' | '!')
 }
 
 #[cfg(test)]

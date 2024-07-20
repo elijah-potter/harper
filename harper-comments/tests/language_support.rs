@@ -41,3 +41,5 @@ create_test!(clean.rs, 0);
 create_test!(jsdoc.ts, 4);
 create_test!(issue_96.lua, 0);
 create_test!(merged_lines.ts, 1);
+create_test!(javadoc_clean_simple.java, 0);
+create_test!(javadoc_complex.java, 4);

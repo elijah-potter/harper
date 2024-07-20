@@ -17,7 +17,7 @@ impl Parser for JsDoc {
 
             new_tokens.push(Token::new(
                 Span::new_with_len(line.len(), 1),
-                harper_core::TokenKind::Newline(1)
+                harper_core::TokenKind::Newline(1),
             ));
 
             new_tokens
@@ -43,38 +43,8 @@ fn parse_line(source: &[char]) -> Vec<Token> {
 
     let mut new_tokens = Markdown.parse(source_line);
 
-    let mut cursor = 0;
-
     // Handle inline tags
-    loop {
-        if cursor >= new_tokens.len() {
-            break;
-        }
-
-        if let Some(new_cursor) = &new_tokens[cursor..]
-            .iter()
-            .position(|t| t.kind == TokenKind::Punctuation(Punctuation::OpenCurly))
-            .map(|i| i + cursor)
-        {
-            cursor = *new_cursor;
-        } else {
-            break;
-        }
-
-        let parsers = [parse_link, parse_tutorial];
-
-        for parser in parsers {
-            if let Some(p) = parser(&new_tokens[cursor..], source_line) {
-                for tok in &mut new_tokens[cursor..cursor + p] {
-                    tok.kind = TokenKind::Unlintable;
-                }
-
-                cursor += p;
-                continue;
-            }
-            cursor += 1;
-        }
-    }
+    mark_inline_tags(&mut new_tokens, source_line);
 
     // Handle the block tag, if it exists on the current line.
     if let Some(tag_start) = new_tokens.iter().tuple_windows().position(|(a, b)| {
@@ -104,17 +74,40 @@ fn parse_line(source: &[char]) -> Vec<Token> {
     new_tokens
 }
 
-fn parse_link(tokens: &[Token], source: &[char]) -> Option<usize> {
-    parse_inline_tag(&['l', 'i', 'n', 'k'], tokens, source)
-}
+/// Locate all inline tags (i.e. `{@tag ..}`) and mark them as unlintable
+pub(super) fn mark_inline_tags(tokens: &mut [Token], source: &[char]) {
+    let mut cursor = 0;
 
-fn parse_tutorial(tokens: &[Token], source: &[char]) -> Option<usize> {
-    parse_inline_tag(&['t', 'u', 't', 'o', 'r', 'i', 'a', 'l'], tokens, source)
+    loop {
+        if cursor >= tokens.len() {
+            break;
+        }
+
+        if let Some(new_cursor) = &tokens[cursor..]
+            .iter()
+            .position(|t| t.kind == TokenKind::Punctuation(Punctuation::OpenCurly))
+            .map(|i| i + cursor)
+        {
+            cursor = *new_cursor;
+        } else {
+            break;
+        }
+
+        if let Some(p) = parse_inline_tag(&tokens[cursor..]) {
+            for tok in &mut tokens[cursor..cursor + p] {
+                tok.kind = TokenKind::Unlintable;
+            }
+
+            cursor += p;
+            continue;
+        }
+        cursor += 1;
+    }
 }
 
 /// Checks if the provided token slice begins with an inline tag, returning it's
 /// end if so.
-fn parse_inline_tag(tag_name: &[char], tokens: &[Token], source: &[char]) -> Option<usize> {
+fn parse_inline_tag(tokens: &[Token]) -> Option<usize> {
     if !matches!(
         tokens,
         [
@@ -133,10 +126,6 @@ fn parse_inline_tag(tag_name: &[char], tokens: &[Token], source: &[char]) -> Opt
             ..,
         ]
     ) {
-        return None;
-    }
-
-    if tokens[2].span.get_content(source) != tag_name {
         return None;
     }
 

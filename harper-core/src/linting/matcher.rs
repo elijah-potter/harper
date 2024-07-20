@@ -1,20 +1,11 @@
 use crate::{
-    CharString,
-    Document,
-    Lint,
-    LintKind,
-    Linter,
-    Punctuation,
-    Span,
-    Suggestion,
-    Token,
-    TokenKind
+    CharString, Document, Lint, LintKind, Linter, Punctuation, Span, Suggestion, Token, TokenKind,
 };
 
 #[derive(Debug, PartialEq, PartialOrd, Clone)]
 struct PatternToken {
     kind: TokenKind,
-    content: Option<CharString>
+    content: Option<CharString>,
 }
 
 impl PatternToken {
@@ -22,12 +13,12 @@ impl PatternToken {
         if token.kind.is_word() {
             Self {
                 kind: token.kind,
-                content: Some(document.get_span_content(token.span).into())
+                content: Some(document.get_span_content(token.span).into()),
             }
         } else {
             Self {
                 kind: token.kind,
-                content: None
+                content: None,
             }
         }
     }
@@ -95,13 +86,13 @@ macro_rules! pt {
 
 struct Rule {
     pattern: Vec<PatternToken>,
-    replace_with: Vec<char>
+    replace_with: Vec<char>,
 }
 
 /// A linter that uses a variety of curated pattern matches to find and fix
 /// common grammatical issues.
 pub struct Matcher {
-    triggers: Vec<Rule>
+    triggers: Vec<Rule>,
 }
 
 impl Matcher {
@@ -281,31 +272,32 @@ impl Matcher {
             "TreeSitter" => "Tree-sitter",
             "Treesitter" => "Tree-sitter",
             "Tree", "sitter" => "Tree-sitter",
-            "all", "of", "the" => "all the"
+            "all", "of", "the" => "all the",
+            "an", "other" => "another"
         };
 
         // TODO: Improve the description for this lint specifically.
         // We need to be more explicit that we are replacing with an Em dash
         triggers.push(Rule {
             pattern: vec![pt!(Hyphen), pt!(Hyphen), pt!(Hyphen)],
-            replace_with: vecword!("—")
+            replace_with: vecword!("—"),
         });
 
         // Same goes for this En dash
         triggers.push(Rule {
             pattern: vec![pt!(Hyphen), pt!(Hyphen)],
-            replace_with: vecword!("–")
+            replace_with: vecword!("–"),
         });
 
         // And this ellipsis
         triggers.push(Rule {
             pattern: vec![pt!(Period), pt!(Period), pt!(Period)],
-            replace_with: vecword!("…")
+            replace_with: vecword!("…"),
         });
 
         triggers.push(Rule {
             pattern: vec![pt!("L"), pt!(Period), pt!("L"), pt!(Period), pt!("M")],
-            replace_with: vecword!("large language model")
+            replace_with: vecword!("large language model"),
         });
 
         triggers.push(Rule {
@@ -317,7 +309,7 @@ impl Matcher {
                 pt!("M"),
                 pt!(Period),
             ],
-            replace_with: vecword!("large language model")
+            replace_with: vecword!("large language model"),
         });
 
         Self { triggers }
@@ -357,7 +349,7 @@ impl Linter for Matcher {
                 if match_tokens.len() == trigger.pattern.len() && !match_tokens.is_empty() {
                     let span = Span::new(
                         match_tokens.first().unwrap().span.start,
-                        match_tokens.last().unwrap().span.end
+                        match_tokens.last().unwrap().span.end,
                     );
 
                     lints.push(Lint {
@@ -368,7 +360,7 @@ impl Linter for Matcher {
                             "Did you mean “{}”?",
                             trigger.replace_with.iter().collect::<String>()
                         ),
-                        priority: 15
+                        priority: 15,
                     })
                 }
             }
