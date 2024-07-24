@@ -17,7 +17,7 @@ impl Parser for JsDoc {
 
             new_tokens.push(Token::new(
                 Span::new_with_len(line.len(), 1),
-                harper_core::TokenKind::Newline(1),
+                harper_core::TokenKind::Newline(1)
             ));
 
             new_tokens
@@ -44,7 +44,7 @@ fn parse_line(source: &[char]) -> Vec<Token> {
     let mut new_tokens = Markdown.parse(source_line);
 
     // Handle inline tags
-    mark_inline_tags(&mut new_tokens, source_line);
+    mark_inline_tags(&mut new_tokens);
 
     // Handle the block tag, if it exists on the current line.
     if let Some(tag_start) = new_tokens.iter().tuple_windows().position(|(a, b)| {
@@ -75,7 +75,7 @@ fn parse_line(source: &[char]) -> Vec<Token> {
 }
 
 /// Locate all inline tags (i.e. `{@tag ..}`) and mark them as unlintable
-pub(super) fn mark_inline_tags(tokens: &mut [Token], source: &[char]) {
+pub(super) fn mark_inline_tags(tokens: &mut [Token]) {
     let mut cursor = 0;
 
     loop {

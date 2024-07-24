@@ -8,7 +8,7 @@ use super::without_initiators;
 
 #[derive(Default)]
 pub struct JavaDoc {
-    html_parser: HtmlParser,
+    html_parser: HtmlParser
 }
 
 impl Parser for JavaDoc {
@@ -57,7 +57,7 @@ impl Parser for JavaDoc {
             token.span.push_by(actual.start);
         }
 
-        super::jsdoc::mark_inline_tags(&mut tokens, source);
+        super::jsdoc::mark_inline_tags(&mut tokens);
 
         // Mark @tags as unlintable
         for i in 3..tokens.len() {

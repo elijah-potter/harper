@@ -1,0 +1,163 @@
+{
+	"name": "harper",
+	"displayName": "Harper",
+	"description": "The grammar checker for developers",
+	"version": "0.0.1",
+	"engines": {
+		"vscode": "^1.89.0"
+	},
+	"categories": [
+		"Other"
+	],
+	"activationEvents": [
+		"onLanguage:markdown",
+		"onLanguage:rust",
+		"onLanguage:ruby",
+		"onLanguage:go",
+		"onLanguage:cpp",
+		"onLanguage:c",
+		"onLanguage:javascript",
+		"onLanguage:javascriptreact",
+		"onLanguage:typescript",
+		"onLanguage:typescriptreact",
+		"onLanguage:bash",
+		"onLanguage:gitcommit",
+		"onLanguage:py",
+		"onLanguage:swift",
+		"onLanguage:toml",
+		"onLanguage:lua",
+		"onLanguage:csharp",
+		"onLanguage:html",
+		"onLanguage:java"
+	],
+	"main": "./dist/extension.js",
+	"contributes": {
+		"commands": [],
+		"configuration": {
+			"type": "object",
+			"title": "Harper",
+			"properties": {
+				"harper-ls.linters.spell_check": {
+					"scope": "resource",
+					"type": "boolean",
+					"default": true,
+					"description": "Detect and provide suggestions for misspelled words."
+				},
+				"harper-ls.linters.spelled_numbers": {
+					"scope": "resource",
+					"type": "boolean",
+					"default": false,
+					"description": "Detect and fix instances where small numbers should be spelled out."
+				},
+				"harper-ls.linters.an_a": {
+					"scope": "resource",
+					"type": "boolean",
+					"default": true,
+					"description": "Detect and fix improper articles."
+				},
+				"harper-ls.linters.sentence_capitalization": {
+					"scope": "resource",
+					"type": "boolean",
+					"default": true,
+					"description": "Ensure your sentences are capitalized."
+				},
+				"harper-ls.linters.unclosed_quotes": {
+					"scope": "resource",
+					"type": "boolean",
+					"default": true,
+					"description": "Make sure you close you quotation marks."
+				},
+				"harper-ls.linters.wrong_quotes": {
+					"scope": "resource",
+					"type": "boolean",
+					"default": false,
+					"description": "Make sure you use the correct unicode characters for you quotation marks."
+				},
+				"harper-ls.linters.long_sentences": {
+					"scope": "resource",
+					"type": "boolean",
+					"default": true,
+					"description": "Warn about run-on sentences."
+				},
+				"harper-ls.linters.repeated_words": {
+					"scope": "resource",
+					"type": "boolean",
+					"default": true,
+					"description": "Detect and fix commonly repeated words."
+				},
+				"harper-ls.linters.spaces": {
+					"scope": "resource",
+					"type": "boolean",
+					"default": true,
+					"description": "Detect improper spacing between words."
+				},
+				"harper-ls.linters.matcher": {
+					"scope": "resource",
+					"type": "boolean",
+					"default": true,
+					"description": "A collection of hand-crafted common grammar mistakes."
+				},
+				"harper-ls.linters.correct_number_suffix": {
+					"scope": "resource",
+					"type": "boolean",
+					"default": true,
+					"description": "Make sure you provide the correct suffix for numbers."
+				},
+				"harper-ls.linters.number_suffix_capitalization": {
+					"scope": "resource",
+					"type": "boolean",
+					"default": true,
+					"description": "Make sure you correctly capitalize your number suffixes."
+				},
+				"harper-ls.linters.multiple_sequential_pronouns": {
+					"scope": "resource",
+					"type": "boolean",
+					"default": true,
+					"description": "Detect improper sequences of pronouns."
+				},
+				"harper-ls.diagnosticSeverity": {
+					"scope": "resource",
+					"type": "string",
+					"enum": [
+						"error",
+						"hint",
+						"information",
+						"warning"
+					],
+					"default": "information",
+					"description": "How severe do you want diagnostics to appear in the editor?"
+				}
+			}
+		}
+	},
+	"scripts": {
+		"vscode:prepublish": "yarn run package",
+		"compile": "yarn run check-types && yarn run lint && node esbuild.cjs",
+		"watch": "npm-run-all -p watch:*",
+		"watch:esbuild": "node esbuild.cjs --watch",
+		"watch:tsc": "tsc --noEmit --watch --project tsconfig.json",
+		"package": "yarn run check-types && yarn run lint && node esbuild.cjs --production",
+		"compile-tests": "tsc -p . --outDir out",
+		"watch-tests": "tsc -p . -w --outDir out",
+		"pretest": "yarn run compile-tests && yarn run compile && yarn run lint",
+		"check-types": "tsc --noEmit",
+		"lint": "eslint src --ext ts",
+		"test": "vscode-test"
+	},
+	"devDependencies": {
+		"@types/mocha": "^10.0.6",
+		"@types/node": "18.x",
+		"@types/vscode": "^1.89.0",
+		"@typescript-eslint/eslint-plugin": "^7.7.1",
+		"@typescript-eslint/parser": "^7.7.1",
+		"@vscode/test-cli": "^0.0.9",
+		"@vscode/test-electron": "^2.3.9",
+		"esbuild": "^0.20.2",
+		"eslint": "^8.57.0",
+		"npm-run-all": "^4.1.5",
+		"typescript": "^5.4.5"
+	},
+	"dependencies": {
+		"vscode-languageclient": "^9.0.1"
+	}
+}

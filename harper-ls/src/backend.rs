@@ -2,6 +2,7 @@ use std::collections::HashMap;
 use std::path::{Component, PathBuf};
 use std::sync::Arc;
 
+use anyhow::anyhow;
 use harper_comments::CommentParser;
 use harper_core::parsers::{Markdown, PlainEnglish};
 use harper_core::{
@@ -25,6 +26,7 @@ use tower_lsp::lsp_types::{
     CodeActionProviderCapability,
     CodeActionResponse,
     Command,
+    ConfigurationItem,
     Diagnostic,
     DidChangeConfigurationParams,
     DidChangeTextDocumentParams,
@@ -47,7 +49,7 @@ use tower_lsp::lsp_types::{
     Url
 };
 use tower_lsp::{Client, LanguageServer};
-use tracing::{error, info, instrument};
+use tracing::{error, info};
 
 use crate::config::Config;
 use crate::diagnostics::{lint_to_code_actions, lints_to_diagnostics};
@@ -85,43 +87,47 @@ impl Backend {
 
     /// Rewrites a path to a filename using the same conventions as
     /// [Neovim's undo-files](https://neovim.io/doc/user/options.html#'undodir').
-    fn file_dict_name(url: &Url) -> PathBuf {
+    fn file_dict_name(url: &Url) -> Option<PathBuf> {
         let mut rewritten = String::new();
 
         // We assume all URLs are local files and have a base
-        for seg in url.to_file_path().unwrap().components() {
+        for seg in url.to_file_path().ok()?.components() {
             if !matches!(seg, Component::RootDir) {
                 rewritten.push_str(&seg.as_os_str().to_string_lossy());
                 rewritten.push('%');
             }
         }
 
-        rewritten.into()
+        Some(rewritten.into())
     }
 
     /// Get the location of the file's specific dictionary
-    #[instrument(skip(self))]
-    async fn get_file_dict_path(&self, url: &Url) -> PathBuf {
+    async fn get_file_dict_path(&self, url: &Url) -> Option<PathBuf> {
         let config = self.config.read().await;
 
-        config.file_dict_path.join(Self::file_dict_name(url))
+        Some(config.file_dict_path.join(Self::file_dict_name(url)?))
     }
 
-    /// Load a specific file's dictionary
-    async fn load_file_dictionary(&self, url: &Url) -> FullDictionary {
-        match load_dict(self.get_file_dict_path(url).await).await {
-            Ok(dict) => dict,
+    /// Load a speCific file's dictionary
+    async fn load_file_dictionary(&self, url: &Url) -> Option<FullDictionary> {
+        match load_dict(self.get_file_dict_path(url).await?).await {
+            Ok(dict) => Some(dict),
             Err(err) => {
                 error!("Problem loading file dictionary: {}", err);
 
-                FullDictionary::new()
+                Some(FullDictionary::new())
             }
         }
     }
 
-    #[instrument(skip(self, dict))]
     async fn save_file_dictionary(&self, url: &Url, dict: impl Dictionary) -> anyhow::Result<()> {
-        Ok(save_dict(self.get_file_dict_path(url).await, dict).await?)
+        Ok(save_dict(
+            self.get_file_dict_path(url)
+                .await
+                .ok_or(anyhow!("Could not compute dictionary path."))?,
+            dict
+        )
+        .await?)
     }
 
     async fn load_user_dictionary(&self) -> FullDictionary {
@@ -146,7 +152,6 @@ impl Backend {
         }
     }
 
-    #[instrument(skip_all)]
     async fn save_user_dictionary(&self, dict: impl Dictionary) -> anyhow::Result<()> {
         let config = self.config.read().await;
 
@@ -162,7 +167,6 @@ impl Backend {
         Ok(save_dict(&config.user_dict_path, dict).await?)
     }
 
-    #[instrument(skip(self))]
     async fn generate_global_dictionary(&self) -> anyhow::Result<MergedDictionary<FullDictionary>> {
         let mut dict = MergedDictionary::new();
         dict.add_dictionary(self.static_dictionary.clone());
@@ -171,7 +175,6 @@ impl Backend {
         Ok(dict)
     }
 
-    #[instrument(skip(self))]
     async fn generate_file_dictionary(
         &self,
         url: &Url
@@ -181,13 +184,16 @@ impl Backend {
             self.load_file_dictionary(url)
         );
 
+        let Some(file_dictionary) = file_dictionary else {
+            return Err(anyhow!("Unable to compute dictionary path."));
+        };
+
         let mut global_dictionary = global_dictionary?;
         global_dictionary.add_dictionary(file_dictionary.into());
 
         Ok(global_dictionary)
     }
 
-    #[instrument(skip(self))]
     async fn update_document_from_file(
         &self,
         url: &Url,
@@ -209,13 +215,14 @@ impl Backend {
         self.update_document(url, &content, language_id).await
     }
 
-    #[instrument(skip(self, text))]
     async fn update_document(
         &self,
         url: &Url,
         text: &str,
         language_id: Option<&str>
     ) -> anyhow::Result<()> {
+        self.pull_config().await;
+
         let mut doc_lock = self.doc_state.lock().await;
         let config_lock = self.config.read().await;
 
@@ -275,7 +282,6 @@ impl Backend {
         Ok(())
     }
 
-    #[instrument(skip(self))]
     async fn generate_code_actions(
         &self,
         url: &Url,
@@ -291,7 +297,7 @@ impl Backend {
 
         let source_chars = doc_state.document.get_full_content();
 
-        // Find lints whose span overlaps with range
+        // Find lints whole span overlaps with range
         let span = range_to_span(source_chars, range);
 
         let mut actions: Vec<CodeActionOrCommand> = lints
@@ -318,7 +324,6 @@ impl Backend {
         Ok(actions)
     }
 
-    #[instrument(skip(self))]
     async fn generate_diagnostics(&self, url: &Url) -> Vec<Diagnostic> {
         let mut doc_states = self.doc_state.lock().await;
         let Some(doc_state) = doc_states.get_mut(url) else {
@@ -335,7 +340,6 @@ impl Backend {
         )
     }
 
-    #[instrument(skip(self))]
     async fn publish_diagnostics(&self, url: &Url) {
         let diagnostics = self.generate_diagnostics(url).await;
 
@@ -348,6 +352,40 @@ impl Backend {
         self.client
             .send_notification::<PublishDiagnostics>(result)
             .await;
+    }
+
+    /// Update the configuration of the server and publish document updates that
+    /// match it.
+    async fn update_config_from_obj(&self, json_obj: Value) {
+        let new_config = match Config::from_lsp_config(json_obj) {
+            Ok(new_config) => new_config,
+            Err(err) => {
+                error!("Unable to change config: {}", err);
+                return;
+            }
+        };
+
+        {
+            let mut config = self.config.write().await;
+            *config = new_config;
+        }
+    }
+
+    async fn pull_config(&self) {
+        let mut new_config = self
+            .client
+            .configuration(vec![ConfigurationItem {
+                scope_uri: None,
+                section: None
+            }])
+            .await
+            .unwrap();
+
+        info!("Changing user configuration.");
+
+        if let Some(first) = new_config.pop() {
+            self.update_config_from_obj(first).await;
+        }
     }
 }
 
@@ -384,6 +422,8 @@ impl LanguageServer for Backend {
         self.client
             .log_message(MessageType::INFO, "Server initialized!")
             .await;
+
+        self.pull_config().await;
     }
 
     async fn shutdown(&self) -> Result<()> {
@@ -471,7 +511,10 @@ impl LanguageServer for Backend {
 
                 let file_url = second.parse().unwrap();
 
-                let mut dict = self.load_file_dictionary(&file_url).await;
+                let Some(mut dict) = self.load_file_dictionary(&file_url).await else {
+                    error!("Unable resolve dictionary path: {file_url}");
+                    return Ok(None);
+                };
                 dict.append_word(word);
 
                 if let Err(err) = self.save_file_dictionary(&file_url, dict).await {
@@ -505,31 +548,7 @@ impl LanguageServer for Backend {
     async fn did_change_configuration(&self, params: DidChangeConfigurationParams) {
         info!("Changing user configuration.");
 
-        let new_config = match Config::from_lsp_config(params.settings) {
-            Ok(new_config) => new_config,
-            Err(err) => {
-                error!("Unable to change config: {}", err);
-                return;
-            }
-        };
-
-        {
-            let mut config = self.config.write().await;
-            *config = new_config;
-        }
-
-        let keys: Vec<Url> = {
-            let doc_state = self.doc_state.lock().await;
-
-            doc_state.keys().cloned().collect()
-        };
-
-        // Update documents with new config
-        futures::future::join_all(
-            keys.iter()
-                .map(|key| self.update_document_from_file(key, None))
-        )
-        .await;
+        self.update_config_from_obj(params.settings).await;
     }
 
     async fn code_action(&self, params: CodeActionParams) -> Result<Option<CodeActionResponse>> {
