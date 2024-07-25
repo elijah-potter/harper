@@ -580,7 +580,7 @@ dependencies = [
 
 [[package]]
 name = "harper-tree-sitter"
-version = "0.9.0"
+version = "0.9.1"
 dependencies = [
  "harper-core",
  "tree-sitter",

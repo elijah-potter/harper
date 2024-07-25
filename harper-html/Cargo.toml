@@ -4,7 +4,6 @@ version = "0.9.0"
 edition = "2021"
 description = "The language checker for developers."
 license = "Apache-2.0"
-readme = "README.md"
 repository = "https://github.com/elijah-potter/harper"
 
 [dependencies]
