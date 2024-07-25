@@ -1,6 +1,6 @@
 [package]
 name = "harper-tree-sitter"
-version = "0.8.8"
+version = "0.9.0"
 edition = "2021"
 description = "The language checker for developers."
 license = "Apache-2.0"
@@ -8,5 +8,5 @@ readme = "README.md"
 repository = "https://github.com/elijah-potter/harper"
 
 [dependencies]
-harper-core = { path = "../harper-core", version = "0.8.0" }
+harper-core = { path = "../harper-core", version = "0.9.0" }
 tree-sitter = "0.20.10"
