@@ -148,6 +148,10 @@ impl TokenKind {
         matches!(self, TokenKind::Punctuation(Punctuation::Apostrophe))
     }
 
+    pub fn is_period(&self) -> bool {
+        matches!(self, TokenKind::Punctuation(Punctuation::Period))
+    }
+
     pub fn is_at(&self) -> bool {
         matches!(self, TokenKind::Punctuation(Punctuation::At))
     }

@@ -62,6 +62,7 @@ impl Document {
         self.condense_newlines();
         self.newlines_to_breaks();
         self.condense_contractions();
+        self.condense_dotted_initialisms();
         self.condense_number_suffixes();
         self.match_quotes();
     }
@@ -418,6 +419,54 @@ impl Document {
         self.tokens.remove_indices(remove_these);
     }
 
+    /// Condenses words like "i.e.", "e.g." and "N.S.A." down to single words
+    /// using a state machine.
+    fn condense_dotted_initialisms(&mut self) {
+        if self.tokens.len() < 2 {
+            return;
+        }
+
+        let mut to_remove = VecDeque::new();
+
+        let mut cursor = 1;
+
+        let mut initialism_start = None;
+
+        loop {
+            let a = self.tokens[cursor - 1];
+            let b = self.tokens[cursor];
+
+            let is_initialism_chunk = a.kind.is_word() && a.span.len() == 1 && b.kind.is_period();
+
+            if is_initialism_chunk {
+                if initialism_start.is_none() {
+                    initialism_start = Some(cursor - 1);
+                } else {
+                    to_remove.push_back(cursor - 1);
+                }
+
+                to_remove.push_back(cursor);
+                cursor += 1;
+            } else {
+                if let Some(start) = initialism_start {
+                    let end = self.tokens[cursor - 2].span.end;
+                    let start_tok: &mut Token = &mut self.tokens[start];
+                    start_tok.span.end = end;
+                }
+
+                initialism_start = None;
+            }
+
+            cursor += 1;
+
+            if cursor >= self.tokens.len() - 1 {
+                break;
+            }
+        }
+
+        self.tokens.remove_indices(to_remove);
+    }
+
     /// Searches for contractions and condenses them down into single
     /// tokens.
     fn condense_contractions(&mut self) {
@@ -534,6 +583,8 @@ fn is_sentence_terminator(token: &TokenKind) -> bool {
 
 #[cfg(test)]
 mod tests {
+    use itertools::Itertools;
+
     use super::Document;
     use crate::parsers::{Markdown, PlainEnglish};
     use crate::token::TokenStringExt;
@@ -611,13 +662,15 @@ mod tests {
         )
     }
 
+    fn assert_token_count(source: &str, count: usize) {
+        let document = Document::new_plain_english(source);
+
+        dbg!(document.tokens().map(|t| t.kind).collect_vec());
+        assert_eq!(document.tokens.len(), count);
+    }
+
     #[test]
     fn condenses_number_suffixes() {
-        fn assert_token_count(source: &str, count: usize) {
-            let document = Document::new_plain_english(source);
-            assert_eq!(document.tokens.len(), count);
-        }
-
         assert_token_count("1st", 1);
         assert_token_count("This is the 2nd test", 9);
         assert_token_count("This is the 3rd test", 9);
@@ -625,5 +678,23 @@ mod tests {
             "It works even with weird capitalization like this: 600nD",
             18
         );
+    }
+
+    #[test]
+    fn condenses_ie() {
+        assert_token_count("There is a thing (i.e. that one)", 15);
+        assert_token_count("We are trying to condense \"i.e.\"", 13);
+        assert_token_count(r#"Condenses words like "i.e.", "e.g." and "N.S.A.""#, 20);
+    }
+
+    #[test]
+    fn condenses_eg() {
+        assert_token_count("We are trying to condense \"e.g.\"", 13);
+        assert_token_count(r#"Condenses words like "i.e.", "e.g." and "N.S.A.""#, 20);
+    }
+
+    #[test]
+    fn condenses_nsa() {
+        assert_token_count(r#"Condenses words like "i.e.", "e.g." and "N.S.A.""#, 20);
     }
 }
