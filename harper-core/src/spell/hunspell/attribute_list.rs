@@ -15,22 +15,6 @@ pub struct AttributeList {
 }
 
 impl AttributeList {
-    pub fn parse(file: &str) -> Result<Self, Error> {
-        let mut output = Self {
-            affixes: HashMap::default(),
-        };
-
-        for line in file.lines() {
-            if line.chars().filter(|c| !c.is_whitespace()).count() == 0 {
-                continue;
-            }
-
-            output.parse_line(line)?;
-        }
-
-        Ok(output)
-    }
-
     pub fn to_human_readable(&self) -> HumanReadableAttributeList {
         HumanReadableAttributeList {
             affixes: self
@@ -39,66 +23,6 @@ impl AttributeList {
                 .map(|(affix, exp)| (*affix, exp.to_human_readable()))
                 .collect(),
         }
-    }
-
-    fn parse_line(&mut self, line: &str) -> Result<(), Error> {
-        if line.len() < 4 {
-            return Ok(());
-        }
-
-        let mut parser = AttributeArgParser::new(line);
-
-        let suffix = match parser.parse_arg()? {
-            "PFX" => false,
-            "SFX" => true,
-            _ => return Ok(()),
-        };
-
-        let flag = {
-            let flag_arg = parser.parse_arg()?;
-            if flag_arg.len() != 1 {
-                return Err(Error::MultiCharacterFlag);
-            };
-
-            flag_arg.chars().next().unwrap()
-        };
-
-        if let Some(expansion) = self.affixes.get_mut(&flag) {
-            let remove_arg = parser.parse_arg()?;
-
-            let remove: Vec<_> = remove_arg.chars().collect();
-            let remove = if remove.len() == 1 && remove[0] == '0' {
-                vec![]
-            } else {
-                remove
-            };
-
-            let add = parser.parse_arg()?.chars().collect();
-            let condition = Matcher::parse(parser.parse_arg()?)?;
-
-            let replacement = AffixReplacement {
-                remove,
-                add,
-                condition,
-            };
-
-            expansion.replacements.push(replacement)
-        } else {
-            let cross_product = parser.parse_bool_arg()?;
-            let count = parser.parse_usize_arg()?;
-
-            self.affixes.insert(
-                flag,
-                Expansion {
-                    suffix,
-                    cross_product,
-                    replacements: Vec::with_capacity(count),
-                    adds_metadata: WordMetadata::default(),
-                },
-            );
-        }
-
-        Ok(())
     }
 
     /// Expand [`MarkedWord`] into a list of full words, including itself.
@@ -248,67 +172,5 @@ impl HumanReadableAttributeList {
         }
 
         Ok(AttributeList { affixes })
-    }
-}
-
-struct AttributeArgParser<'a> {
-    line: &'a str,
-    cursor: usize,
-}
-
-impl<'a> AttributeArgParser<'a> {
-    pub fn new(line: &'a str) -> Self {
-        Self { line, cursor: 0 }
-    }
-
-    // Grab next affix argument, returning an error if it doesn't exist.
-    fn parse_arg(&mut self) -> Result<&'a str, Error> {
-        let Some((next_word_start, _)) = self.line[self.cursor..]
-            .char_indices()
-            .find(|(_i, c)| !c.is_whitespace())
-        else {
-            return Err(Error::UnexpectedEndOfLine);
-        };
-
-        let next_word_end = self.line[self.cursor + next_word_start..]
-            .char_indices()
-            .find(|(_i, c)| c.is_whitespace())
-            .map(|(end, _)| end)
-            .unwrap_or(self.line.len() - self.cursor - next_word_start);
-
-        let abs_start = next_word_start + self.cursor;
-        let abs_end = next_word_start + self.cursor + next_word_end;
-
-        self.cursor = abs_end;
-
-        Ok(&self.line[abs_start..abs_end])
-    }
-
-    // Grab next affix argument, returning an error if it isn't parsable as a
-    // number.
-    fn parse_usize_arg(&mut self) -> Result<usize, Error> {
-        self.parse_arg()?
-            .parse()
-            .map_err(|_| Error::ExpectedUnsignedInteger)
-    }
-
-    // Grab next affix argument, returning an error if it isn't Y or N.
-    fn parse_bool_arg(&mut self) -> Result<bool, Error> {
-        match self.parse_arg()? {
-            "Y" => Ok(true),
-            "N" => Ok(false),
-            _ => Err(Error::ExpectedBoolean),
-        }
-    }
-}
-
-#[cfg(test)]
-mod tests {
-    use super::super::tests::ATTR_LIST;
-    use super::AttributeList;
-
-    #[test]
-    fn can_parse_test_file() {
-        AttributeList::parse(ATTR_LIST).unwrap();
     }
 }

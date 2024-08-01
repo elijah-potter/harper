@@ -23,12 +23,12 @@ pub struct FullDictionary {
     /// that has a word whose index is that length.
     word_len_starts: Vec<usize>,
     /// All English words
-    word_set: HashSet<CharString>
+    word_set: HashSet<CharString>,
 }
 
 fn uncached_inner_new() -> FullDictionary {
     let word_list = parse_default_word_list().unwrap();
-    let attr_list = parse_default_attribute_list().unwrap();
+    let attr_list = parse_default_attribute_list();
 
     // There will be at _least_ this number of words
     let mut words = Vec::with_capacity(word_list.len());
@@ -41,7 +41,7 @@ fn uncached_inner_new() -> FullDictionary {
     FullDictionary {
         word_set: HashSet::from_iter(words.iter().cloned()),
         word_len_starts: FullDictionary::create_len_starts(&mut words),
-        words
+        words,
     }
 }
 
@@ -52,7 +52,7 @@ impl FullDictionary {
         Self {
             words: Vec::new(),
             word_len_starts: Vec::new(),
-            word_set: HashSet::new()
+            word_set: HashSet::new(),
         }
     }
 

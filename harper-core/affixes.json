@@ -1,0 +1,514 @@
+{
+  "affixes": {
+    "K": {
+      "suffix": false,
+      "cross_product": true,
+      "replacements": [
+        {
+          "remove": "",
+          "add": "pro",
+          "condition": "."
+        }
+      ],
+      "adds_metadata": {
+        "kind": null,
+        "tense": null
+      }
+    },
+    "L": {
+      "suffix": true,
+      "cross_product": true,
+      "replacements": [
+        {
+          "remove": "",
+          "add": "ment",
+          "condition": "."
+        }
+      ],
+      "adds_metadata": {
+        "kind": null,
+        "tense": null
+      }
+    },
+    "E": {
+      "suffix": false,
+      "cross_product": true,
+      "replacements": [
+        {
+          "remove": "",
+          "add": "dis",
+          "condition": "."
+        }
+      ],
+      "adds_metadata": {
+        "kind": null,
+        "tense": null
+      }
+    },
+    "Y": {
+      "suffix": true,
+      "cross_product": true,
+      "replacements": [
+        {
+          "remove": "",
+          "add": "ly",
+          "condition": "."
+        }
+      ],
+      "adds_metadata": {
+        "kind": null,
+        "tense": null
+      }
+    },
+    "U": {
+      "suffix": false,
+      "cross_product": true,
+      "replacements": [
+        {
+          "remove": "",
+          "add": "un",
+          "condition": "."
+        }
+      ],
+      "adds_metadata": {
+        "kind": null,
+        "tense": null
+      }
+    },
+    "H": {
+      "suffix": true,
+      "cross_product": false,
+      "replacements": [
+        {
+          "remove": "y",
+          "add": "ieth",
+          "condition": "y"
+        },
+        {
+          "remove": "",
+          "add": "th",
+          "condition": "[^y]"
+        }
+      ],
+      "adds_metadata": {
+        "kind": null,
+        "tense": null
+      }
+    },
+    "T": {
+      "suffix": true,
+      "cross_product": false,
+      "replacements": [
+        {
+          "remove": "",
+          "add": "st",
+          "condition": "e"
+        },
+        {
+          "remove": "y",
+          "add": "iest",
+          "condition": "[^aeiou]y"
+        },
+        {
+          "remove": "",
+          "add": "est",
+          "condition": "[aeiou]y"
+        },
+        {
+          "remove": "",
+          "add": "est",
+          "condition": "[^ey]"
+        }
+      ],
+      "adds_metadata": {
+        "kind": null,
+        "tense": null
+      }
+    },
+    "R": {
+      "suffix": true,
+      "cross_product": true,
+      "replacements": [
+        {
+          "remove": "",
+          "add": "r",
+          "condition": "e"
+        },
+        {
+          "remove": "y",
+          "add": "ier",
+          "condition": "[^aeiou]y"
+        },
+        {
+          "remove": "",
+          "add": "er",
+          "condition": "[aeiou]y"
+        },
+        {
+          "remove": "",
+          "add": "er",
+          "condition": "[^ey]"
+        }
+      ],
+      "adds_metadata": {
+        "kind": null,
+        "tense": null
+      }
+    },
+    "C": {
+      "suffix": false,
+      "cross_product": true,
+      "replacements": [
+        {
+          "remove": "",
+          "add": "de",
+          "condition": "."
+        }
+      ],
+      "adds_metadata": {
+        "kind": null,
+        "tense": null
+      }
+    },
+    "V": {
+      "suffix": true,
+      "cross_product": false,
+      "replacements": [
+        {
+          "remove": "e",
+          "add": "ive",
+          "condition": "e"
+        },
+        {
+          "remove": "",
+          "add": "ive",
+          "condition": "[^e]"
+        }
+      ],
+      "adds_metadata": {
+        "kind": null,
+        "tense": null
+      }
+    },
+    "N": {
+      "suffix": true,
+      "cross_product": true,
+      "replacements": [
+        {
+          "remove": "e",
+          "add": "ion",
+          "condition": "e"
+        },
+        {
+          "remove": "y",
+          "add": "ication",
+          "condition": "y"
+        },
+        {
+          "remove": "",
+          "add": "en",
+          "condition": "[^ey]"
+        }
+      ],
+      "adds_metadata": {
+        "kind": null,
+        "tense": null
+      }
+    },
+    "A": {
+      "suffix": false,
+      "cross_product": true,
+      "replacements": [
+        {
+          "remove": "",
+          "add": "re",
+          "condition": "."
+        }
+      ],
+      "adds_metadata": {
+        "kind": null,
+        "tense": null
+      }
+    },
+    "Z": {
+      "suffix": true,
+      "cross_product": true,
+      "replacements": [
+        {
+          "remove": "",
+          "add": "rs",
+          "condition": "e"
+        },
+        {
+          "remove": "y",
+          "add": "iers",
+          "condition": "[^aeiou]y"
+        },
+        {
+          "remove": "",
+          "add": "ers",
+          "condition": "[aeiou]y"
+        },
+        {
+          "remove": "",
+          "add": "ers",
+          "condition": "[^ey]"
+        }
+      ],
+      "adds_metadata": {
+        "kind": null,
+        "tense": null
+      }
+    },
+    "P": {
+      "suffix": true,
+      "cross_product": true,
+      "replacements": [
+        {
+          "remove": "y",
+          "add": "iness",
+          "condition": "[^aeiou]y"
+        },
+        {
+          "remove": "",
+          "add": "ness",
+          "condition": "[aeiou]y"
+        },
+        {
+          "remove": "",
+          "add": "ness",
+          "condition": "[^y]"
+        }
+      ],
+      "adds_metadata": {
+        "kind": null,
+        "tense": null
+      }
+    },
+    "M": {
+      "suffix": true,
+      "cross_product": true,
+      "replacements": [
+        {
+          "remove": "",
+          "add": "'s",
+          "condition": "."
+        }
+      ],
+      "adds_metadata": {
+        "kind": null,
+        "tense": null
+      }
+    },
+    "F": {
+      "suffix": false,
+      "cross_product": true,
+      "replacements": [
+        {
+          "remove": "",
+          "add": "con",
+          "condition": "."
+        }
+      ],
+      "adds_metadata": {
+        "kind": null,
+        "tense": null
+      }
+    },
+    "B": {
+      "suffix": true,
+      "cross_product": true,
+      "replacements": [
+        {
+          "remove": "",
+          "add": "able",
+          "condition": "[^aeiou]"
+        },
+        {
+          "remove": "",
+          "add": "able",
+          "condition": "ee"
+        },
+        {
+          "remove": "e",
+          "add": "able",
+          "condition": "[^aeiou]e"
+        }
+      ],
+      "adds_metadata": {
+        "kind": null,
+        "tense": null
+      }
+    },
+    "S": {
+      "suffix": true,
+      "cross_product": true,
+      "replacements": [
+        {
+          "remove": "y",
+          "add": "ies",
+          "condition": "[^aeiou]y"
+        },
+        {
+          "remove": "",
+          "add": "s",
+          "condition": "[aeiou]y"
+        },
+        {
+          "remove": "",
+          "add": "es",
+          "condition": "[sxzh]"
+        },
+        {
+          "remove": "",
+          "add": "s",
+          "condition": "[^sxzhy]"
+        }
+      ],
+      "adds_metadata": {
+        "kind": null,
+        "tense": null
+      }
+    },
+    "D": {
+      "suffix": true,
+      "cross_product": true,
+      "replacements": [
+        {
+          "remove": "",
+          "add": "d",
+          "condition": "e"
+        },
+        {
+          "remove": "y",
+          "add": "ied",
+          "condition": "[^aeiou]y"
+        },
+        {
+          "remove": "",
+          "add": "ed",
+          "condition": "[^ey]"
+        },
+        {
+          "remove": "",
+          "add": "ed",
+          "condition": "[aeiou]y"
+        }
+      ],
+      "adds_metadata": {
+        "kind": null,
+        "tense": null
+      }
+    },
+    "G": {
+      "suffix": true,
+      "cross_product": true,
+      "replacements": [
+        {
+          "remove": "e",
+          "add": "ing",
+          "condition": "e"
+        },
+        {
+          "remove": "",
+          "add": "ing",
+          "condition": "[^e]"
+        }
+      ],
+      "adds_metadata": {
+        "kind": null,
+        "tense": null
+      }
+    },
+    "Q": {
+      "suffix": true,
+      "cross_product": true,
+      "replacements": [
+        {
+          "remove": "",
+          "add": "ally",
+          "condition": "."
+        }
+      ],
+      "adds_metadata": {
+        "kind": null,
+        "tense": null
+      }
+    },
+    "O": {
+      "suffix": true,
+      "cross_product": true,
+      "replacements": [
+        {
+          "remove": "",
+          "add": "ful",
+          "condition": "."
+        }
+      ],
+      "adds_metadata": {
+        "kind": null,
+        "tense": null
+      }
+    },
+    "I": {
+      "suffix": false,
+      "cross_product": true,
+      "replacements": [
+        {
+          "remove": "",
+          "add": "in",
+          "condition": "."
+        }
+      ],
+      "adds_metadata": {
+        "kind": null,
+        "tense": null
+      }
+    },
+    "X": {
+      "suffix": true,
+      "cross_product": true,
+      "replacements": [
+        {
+          "remove": "e",
+          "add": "ions",
+          "condition": "e"
+        },
+        {
+          "remove": "y",
+          "add": "ications",
+          "condition": "y"
+        },
+        {
+          "remove": "",
+          "add": "ens",
+          "condition": "[^ey]"
+        }
+      ],
+      "adds_metadata": {
+        "kind": null,
+        "tense": null
+      }
+    },
+    "J": {
+      "suffix": true,
+      "cross_product": true,
+      "replacements": [
+        {
+          "remove": "e",
+          "add": "ings",
+          "condition": "e"
+        },
+        {
+          "remove": "",
+          "add": "ings",
+          "condition": "[^e]"
+        }
+      ],
+      "adds_metadata": {
+        "kind": null,
+        "tense": null
+      }
+    }
+  }
+}

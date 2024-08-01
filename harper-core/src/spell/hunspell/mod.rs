@@ -6,6 +6,7 @@ mod matcher;
 mod word_list;
 
 pub use attribute_list::AttributeList;
+use attribute_list::HumanReadableAttributeList;
 pub use error::Error;
 
 use self::word_list::parse_word_list;
@@ -15,37 +16,71 @@ pub fn parse_default_word_list() -> Result<Vec<MarkedWord>, Error> {
     parse_word_list(include_str!("../../../dictionary.dict"))
 }
 
-pub fn parse_default_attribute_list() -> Result<AttributeList, Error> {
-    AttributeList::parse(include_str!("../../../dictionary.aff"))
+pub fn parse_default_attribute_list() -> AttributeList {
+    let human_readable: HumanReadableAttributeList =
+        serde_json::from_str(include_str!("../../../affixes.json"))
+            .expect("The built-in affix list should always be valid.");
+
+    human_readable
+        .to_normal()
+        .expect("All expressions in the built-in attribute list should be valid.")
 }
 
 #[cfg(test)]
 mod tests {
-    use std::fs;
+    use serde_json::json;
 
-    use super::attribute_list::AttributeList;
     use super::word_list::parse_word_list;
     use super::{parse_default_attribute_list, parse_default_word_list};
+    use crate::spell::hunspell::attribute_list::HumanReadableAttributeList;
     use crate::CharString;
 
     pub const TEST_WORD_LIST: &str = "3\nhello\ntry/B\nwork/AB";
-    pub const ATTR_LIST: &str =
-        "SET UTF-8\nTRY esianrtolcdugmphbyfvkwzESIANRTOLCDUGMPHBYFVKWZ'\n\nREP 2\nREP f ph\nREP \
-         ph f\n\nPFX A Y 1\nPFX A 0 re .\n\nSFX B Y 2\nSFX B 0 ed [^y]\nSFX B y ied y";
-
-    #[test]
-    fn dump() {
-        let default = parse_default_attribute_list().unwrap();
-        let default_human_readable = default.to_human_readable();
-
-        let dumped = serde_json::to_string_pretty(&default_human_readable).unwrap();
-        fs::write("affixes.json", dumped.as_bytes());
-    }
 
     #[test]
     fn correctly_expands_test_files() {
         let words = parse_word_list(TEST_WORD_LIST).unwrap();
-        let attributes = AttributeList::parse(ATTR_LIST).unwrap();
+        let attributes: HumanReadableAttributeList = serde_json::from_value(json!({
+            "affixes": {
+                "A": {
+                    "suffix": false,
+                    "cross_product": true,
+                    "replacements": [
+                      {
+                        "remove": "",
+                        "add": "re",
+                        "condition": "."
+                      }
+                    ],
+                    "adds_metadata": {
+                      "kind": null,
+                      "tense": null
+                    }
+                },
+                "B": {
+                    "suffix": true,
+                    "cross_product": true,
+                    "replacements": [
+                      {
+                        "remove": "",
+                        "add": "ed",
+                        "condition": "[^y]"
+                      },
+                      {
+                        "remove": "y",
+                        "add": "ied",
+                        "condition": "y"
+                      }
+                    ],
+                    "adds_metadata": {
+                      "kind": null,
+                      "tense": null
+                    }
+                }
+            }
+        }))
+        .unwrap();
+        let attributes = attributes.to_normal().unwrap();
 
         let mut expanded = Vec::new();
 
@@ -64,12 +99,53 @@ mod tests {
     #[test]
     fn plural_giants() {
         let words = parse_word_list("1\ngiant/SM").unwrap();
-        let attributes = AttributeList::parse(
-            "SFX S Y 4\nSFX S   y     ies        [^aeiou]y\nSFX S   0     s          \
-             [aeiou]y\nSFX S   0     es         [sxzh]\nSFX S   0     s          [^sxzhy]\n\nSFX \
-             M Y 1\nSFX M   0     's         .",
-        )
+
+        let attributes: HumanReadableAttributeList = serde_json::from_value(json!({
+            "affixes": {
+                "S": {
+                    "suffix": true,
+                    "cross_product": true,
+                    "replacements": [
+                      {
+                        "remove": "y",
+                        "add": "ies",
+                        "condition": "[^aeiou]"
+                      },
+                      {
+                        "remove": "",
+                        "add": "s",
+                        "condition": "[aeiou]y"
+                      },
+                      {
+                        "remove": "",
+                        "add": "s",
+                        "condition": "[^sxzhy]"
+                      }
+                    ],
+                    "adds_metadata": {
+                      "kind": null,
+                      "tense": null
+                    }
+                },
+                "M": {
+                    "suffix": true,
+                    "cross_product": true,
+                    "replacements": [
+                      {
+                        "remove": "",
+                        "add": "'s",
+                        "condition": "."
+                      }
+                    ],
+                    "adds_metadata": {
+                      "kind": null,
+                      "tense": null
+                    }
+                }
+            }
+        }))
         .unwrap();
+        let attributes = attributes.to_normal().unwrap();
 
         let mut expanded = Vec::new();
 
@@ -80,7 +156,7 @@ mod tests {
 
     fn build_expanded() -> Vec<CharString> {
         let words = parse_default_word_list().unwrap();
-        let attributes = parse_default_attribute_list().unwrap();
+        let attributes = parse_default_attribute_list();
 
         let mut expanded = Vec::new();
 
