@@ -1,10 +1,14 @@
+use std::fmt::{Display, Formatter};
+
+use serde::{Deserialize, Serialize};
+
 /// A simplified, Regex-like matcher.
 ///
 /// See Hunspell documentation on affixes for more information.
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Matcher {
     /// Position-based operators.
-    operators: Vec<Operator>
+    operators: Vec<Operator>,
 }
 
 impl Matcher {
@@ -38,7 +42,7 @@ impl Matcher {
                     }
                 }
                 '.' => operators.push(Operator::Any),
-                _ => operators.push(Operator::Literal(c))
+                _ => operators.push(Operator::Literal(c)),
             }
 
             char_idx += 1;
@@ -66,12 +70,43 @@ impl Matcher {
     }
 }
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+impl Display for Matcher {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        for op in &self.operators {
+            match op {
+                Operator::Literal(c) => write!(f, "{}", c)?,
+                Operator::MatchOne(cs) => {
+                    write!(f, "[")?;
+
+                    for c in cs {
+                        write!(f, "{}", c)?;
+                    }
+
+                    write!(f, "]")?;
+                }
+                Operator::MatchNone(cs) => {
+                    write!(f, "[^")?;
+
+                    for c in cs {
+                        write!(f, "{}", c)?;
+                    }
+
+                    write!(f, "]")?;
+                }
+                Operator::Any => write!(f, ".")?,
+            }
+        }
+
+        Ok(())
+    }
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 enum Operator {
     Literal(char),
     MatchOne(Vec<char>),
     MatchNone(Vec<char>),
-    Any
+    Any,
 }
 
 impl Operator {
@@ -80,7 +115,7 @@ impl Operator {
             Operator::Literal(b) => a == *b,
             Operator::MatchOne(b) => b.contains(&a),
             Operator::MatchNone(b) => !b.contains(&a),
-            Operator::Any => true
+            Operator::Any => true,
         }
     }
 }
@@ -88,7 +123,7 @@ impl Operator {
 #[derive(Debug, Clone, Copy, thiserror::Error)]
 pub enum Error {
     #[error("Unmatched bracket at index: {index}")]
-    UnmatchedBracket { index: usize }
+    UnmatchedBracket { index: usize },
 }
 
 #[cfg(test)]
@@ -119,5 +154,13 @@ mod tests {
         assert!(matcher.matches(&['i']));
         assert!(matcher.matches(&['o']));
         assert!(matcher.matches(&['u']));
+    }
+
+    #[test]
+    fn round_trip() {
+        let source = "[^aeiou]a.s";
+        let matcher = Matcher::parse(source).unwrap();
+
+        assert_eq!(matcher.to_string(), source);
     }
 }

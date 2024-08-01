@@ -1,36 +1,23 @@
 use hashbrown::HashMap;
+use serde::{Deserialize, Serialize};
 use smallvec::ToSmallVec;
 
-use super::matcher::Matcher;
+use super::expansion::{Expansion, HumanReadableExpansion};
 use super::word_list::MarkedWord;
 use super::Error;
-use crate::{CharString, Span};
-
-#[derive(Debug, Clone)]
-struct AffixReplacement {
-    pub remove: Vec<char>,
-    pub add: Vec<char>,
-    pub condition: Matcher
-}
-
-#[derive(Debug, Clone)]
-struct Expansion {
-    // If not true, its a prefix
-    pub suffix: bool,
-    pub cross_product: bool,
-    pub replacements: Vec<AffixReplacement>
-}
+use super::{affix_replacement::AffixReplacement, matcher::Matcher};
+use crate::{CharString, Span, WordMetadata};
 
 #[derive(Debug, Clone)]
 pub struct AttributeList {
     /// Key = Affix Flag
-    affixes: HashMap<char, Expansion>
+    affixes: HashMap<char, Expansion>,
 }
 
 impl AttributeList {
     pub fn parse(file: &str) -> Result<Self, Error> {
         let mut output = Self {
-            affixes: HashMap::default()
+            affixes: HashMap::default(),
         };
 
         for line in file.lines() {
@@ -44,6 +31,16 @@ impl AttributeList {
         Ok(output)
     }
 
+    pub fn to_human_readable(&self) -> HumanReadableAttributeList {
+        HumanReadableAttributeList {
+            affixes: self
+                .affixes
+                .iter()
+                .map(|(affix, exp)| (*affix, exp.to_human_readable()))
+                .collect(),
+        }
+    }
+
     fn parse_line(&mut self, line: &str) -> Result<(), Error> {
         if line.len() < 4 {
             return Ok(());
@@ -54,7 +51,7 @@ impl AttributeList {
         let suffix = match parser.parse_arg()? {
             "PFX" => false,
             "SFX" => true,
-            _ => return Ok(())
+            _ => return Ok(()),
         };
 
         let flag = {
@@ -82,7 +79,7 @@ impl AttributeList {
             let replacement = AffixReplacement {
                 remove,
                 add,
-                condition
+                condition,
             };
 
             expansion.replacements.push(replacement)
@@ -95,8 +92,9 @@ impl AttributeList {
                 Expansion {
                     suffix,
                     cross_product,
-                    replacements: Vec::with_capacity(count)
-                }
+                    replacements: Vec::with_capacity(count),
+                    adds_metadata: WordMetadata::default(),
+                },
             );
         }
 
@@ -124,7 +122,7 @@ impl AttributeList {
                 new_words.extend(Self::apply_replacement(
                     replacement,
                     &word.letters,
-                    expansion.suffix
+                    expansion.suffix,
                 ))
             }
 
@@ -146,9 +144,9 @@ impl AttributeList {
                     self.expand_marked_word(
                         MarkedWord {
                             letters: new_word,
-                            attributes: opp_attr.clone()
+                            attributes: opp_attr.clone(),
                         },
-                        dest
+                        dest,
                     );
                 }
 
@@ -173,7 +171,7 @@ impl AttributeList {
     pub fn expand_marked_words(
         &self,
         words: impl IntoIterator<Item = MarkedWord>,
-        dest: &mut Vec<CharString>
+        dest: &mut Vec<CharString>,
     ) {
         for word in words {
             self.expand_marked_word(word, dest);
@@ -183,7 +181,7 @@ impl AttributeList {
     fn apply_replacement(
         replacement: &AffixReplacement,
         letters: &[char],
-        suffix: bool
+        suffix: bool,
     ) -> Option<CharString> {
         if replacement.condition.len() > letters.len() {
             return None;
@@ -236,9 +234,26 @@ impl AttributeList {
     }
 }
 
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct HumanReadableAttributeList {
+    affixes: HashMap<char, HumanReadableExpansion>,
+}
+
+impl HumanReadableAttributeList {
+    pub fn to_normal(&self) -> Result<AttributeList, Error> {
+        let mut affixes = HashMap::with_capacity(self.affixes.len());
+
+        for (affix, expansion) in &self.affixes {
+            affixes.insert(*affix, expansion.to_normal()?);
+        }
+
+        Ok(AttributeList { affixes })
+    }
+}
+
 struct AttributeArgParser<'a> {
     line: &'a str,
-    cursor: usize
+    cursor: usize,
 }
 
 impl<'a> AttributeArgParser<'a> {
@@ -246,7 +261,7 @@ impl<'a> AttributeArgParser<'a> {
         Self { line, cursor: 0 }
     }
 
-    // Grap next affix argument, returning an error if it doesn't exist.
+    // Grab next affix argument, returning an error if it doesn't exist.
     fn parse_arg(&mut self) -> Result<&'a str, Error> {
         let Some((next_word_start, _)) = self.line[self.cursor..]
             .char_indices()
@@ -282,7 +297,7 @@ impl<'a> AttributeArgParser<'a> {
         match self.parse_arg()? {
             "Y" => Ok(true),
             "N" => Ok(false),
-            _ => Err(Error::ExpectedBoolean)
+            _ => Err(Error::ExpectedBoolean),
         }
     }
 }

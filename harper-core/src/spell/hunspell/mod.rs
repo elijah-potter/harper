@@ -1,9 +1,11 @@
-mod attributes;
+mod affix_replacement;
+mod attribute_list;
 mod error;
+mod expansion;
 mod matcher;
 mod word_list;
 
-pub use attributes::AttributeList;
+pub use attribute_list::AttributeList;
 pub use error::Error;
 
 use self::word_list::parse_word_list;
@@ -19,7 +21,9 @@ pub fn parse_default_attribute_list() -> Result<AttributeList, Error> {
 
 #[cfg(test)]
 mod tests {
-    use super::attributes::AttributeList;
+    use std::fs;
+
+    use super::attribute_list::AttributeList;
     use super::word_list::parse_word_list;
     use super::{parse_default_attribute_list, parse_default_word_list};
     use crate::CharString;
@@ -28,6 +32,15 @@ mod tests {
     pub const ATTR_LIST: &str =
         "SET UTF-8\nTRY esianrtolcdugmphbyfvkwzESIANRTOLCDUGMPHBYFVKWZ'\n\nREP 2\nREP f ph\nREP \
          ph f\n\nPFX A Y 1\nPFX A 0 re .\n\nSFX B Y 2\nSFX B 0 ed [^y]\nSFX B y ied y";
+
+    #[test]
+    fn dump() {
+        let default = parse_default_attribute_list().unwrap();
+        let default_human_readable = default.to_human_readable();
+
+        let dumped = serde_json::to_string_pretty(&default_human_readable).unwrap();
+        fs::write("affixes.json", dumped.as_bytes());
+    }
 
     #[test]
     fn correctly_expands_test_files() {
@@ -54,7 +67,7 @@ mod tests {
         let attributes = AttributeList::parse(
             "SFX S Y 4\nSFX S   y     ies        [^aeiou]y\nSFX S   0     s          \
              [aeiou]y\nSFX S   0     es         [sxzh]\nSFX S   0     s          [^sxzhy]\n\nSFX \
-             M Y 1\nSFX M   0     's         ."
+             M Y 1\nSFX M   0     's         .",
         )
         .unwrap();
 
