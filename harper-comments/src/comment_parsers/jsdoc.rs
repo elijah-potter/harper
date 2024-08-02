@@ -56,7 +56,7 @@ fn parse_line(source: &[char]) -> Vec<Token> {
                     ..
                 },
                 Token {
-                    kind: TokenKind::Word,
+                    kind: TokenKind::Word(..),
                     ..
                 }
             )
@@ -120,7 +120,7 @@ fn parse_inline_tag(tokens: &[Token]) -> Option<usize> {
                 ..
             },
             Token {
-                kind: TokenKind::Word,
+                kind: TokenKind::Word(..),
                 ..
             },
             ..,
@@ -166,7 +166,7 @@ mod tests {
         assert_eq!(
             document.tokens().map(|t| t.kind).collect::<Vec<_>>(),
             vec![
-                TokenKind::Word,
+                TokenKind::blank_word(),
                 TokenKind::Space(1),
                 TokenKind::Unlintable,
                 TokenKind::Unlintable,
@@ -175,14 +175,14 @@ mod tests {
                 TokenKind::Unlintable,
                 TokenKind::Unlintable,
                 TokenKind::Space(1),
-                TokenKind::Word,
+                TokenKind::blank_word(),
                 TokenKind::Space(1),
                 TokenKind::Punctuation(Punctuation::OpenSquare),
-                TokenKind::Word,
+                TokenKind::blank_word(),
                 TokenKind::Space(1),
-                TokenKind::Word,
+                TokenKind::blank_word(),
                 TokenKind::Space(1),
-                TokenKind::Word,
+                TokenKind::blank_word(),
                 TokenKind::Punctuation(Punctuation::CloseSquare),
                 TokenKind::Unlintable,
                 TokenKind::Unlintable,

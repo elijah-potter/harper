@@ -5,7 +5,7 @@ use serde::{Deserialize, Serialize};
 
 use crate::punctuation::Punctuation;
 use crate::span::Span;
-use crate::Quote;
+use crate::{Quote, WordMetadata};
 
 #[derive(Debug, Clone, Copy, Serialize, Deserialize, PartialEq, Default)]
 pub struct Token {
@@ -40,8 +40,7 @@ pub struct FatToken {
 #[derive(Debug, Is, Clone, Copy, Serialize, Deserialize, PartialEq, Default, PartialOrd)]
 #[serde(tag = "kind", content = "value")]
 pub enum TokenKind {
-    #[default]
-    Word,
+    Word(WordMetadata),
     Punctuation(Punctuation),
     Number(f64, Option<NumberSuffix>),
     /// A sequence of " " spaces.
@@ -53,8 +52,16 @@ pub enum TokenKind {
     Hostname,
     /// A special token used for things like inline code blocks that should be
     /// ignored by all linters.
+    #[default]
     Unlintable,
     ParagraphBreak
+}
+
+impl TokenKind {
+    /// Construct a [`TokenKind::Word`] with no metadata.
+    pub fn blank_word() -> Self {
+        Self::Word(WordMetadata::default())
+    }
 }
 
 #[derive(Debug, Serialize, Deserialize, Default, PartialEq, PartialOrd, Clone, Copy, Is)]

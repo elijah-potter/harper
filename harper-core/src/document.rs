@@ -331,7 +331,7 @@ impl Document {
 
             // TODO: Allow spaces between `a` and `b`
 
-            if let (TokenKind::Number(..), TokenKind::Word) = (a.kind, b.kind) {
+            if let (TokenKind::Number(..), TokenKind::Word(..)) = (a.kind, b.kind) {
                 if let Some(found_suffix) = NumberSuffix::from_chars(self.get_span_content(b.span))
                 {
                     *self.tokens[idx].kind.as_mut_number().unwrap().1 = Some(found_suffix);
@@ -485,9 +485,9 @@ impl Document {
             if matches!(
                 (a.kind, b.kind, c.kind),
                 (
-                    TokenKind::Word,
+                    TokenKind::Word(..),
                     TokenKind::Punctuation(Punctuation::Apostrophe),
-                    TokenKind::Word
+                    TokenKind::Word(..)
                 )
             ) {
                 // Ensure there is no overlapping between replacements
@@ -656,7 +656,7 @@ mod tests {
         assert_eq!(
             document.get_token_at_char_index(19),
             Some(Token {
-                kind: TokenKind::Word,
+                kind: TokenKind::blank_word(),
                 span: Span::new(17, 23)
             })
         )

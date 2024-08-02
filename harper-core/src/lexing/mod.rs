@@ -8,6 +8,7 @@ use self::email_address::lex_email_address;
 use crate::char_ext::CharExt;
 use crate::punctuation::{Punctuation, Quote};
 use crate::token::TokenKind;
+use crate::WordMetadata;
 
 #[derive(Debug)]
 pub struct FoundToken {
@@ -50,7 +51,7 @@ fn lex_word(source: &[char]) -> Option<FoundToken> {
     } else {
         Some(FoundToken {
             next_index: end,
-            token: TokenKind::Word
+            token: TokenKind::Word(WordMetadata::default())
         })
     }
 }

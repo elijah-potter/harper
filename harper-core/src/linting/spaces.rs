@@ -34,7 +34,7 @@ impl Linter for Spaces {
                 [
                     ..,
                     Token {
-                        kind: TokenKind::Word,
+                        kind: TokenKind::Word(_),
                         ..
                     },
                     Token {

@@ -9,7 +9,7 @@ pub fn is_likely_english(doc: &Document, dict: &impl Dictionary) -> bool {
 
     for token in doc.tokens() {
         match token.kind {
-            TokenKind::Word => {
+            TokenKind::Word(_) => {
                 total_words += 1;
 
                 let word_content = doc.get_span_content(token.span);

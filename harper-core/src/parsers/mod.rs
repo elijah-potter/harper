@@ -59,7 +59,7 @@ mod tests {
 
     #[test]
     fn single_letter() {
-        assert_tokens_eq_plain("a", &[Word])
+        assert_tokens_eq_plain("a", &[TokenKind::blank_word()])
     }
 
     #[test]
@@ -67,14 +67,14 @@ mod tests {
         assert_tokens_eq_plain(
             "hello world, my friend",
             &[
-                Word,
+                TokenKind::blank_word(),
                 Space(1),
-                Word,
+                TokenKind::blank_word(),
                 Punctuation(Punctuation::Comma),
                 Space(1),
-                Word,
+                TokenKind::blank_word(),
                 Space(1),
-                Word
+                TokenKind::blank_word()
             ]
         )
     }
@@ -84,14 +84,14 @@ mod tests {
         assert_tokens_eq_md(
             "__hello__ world, [my]() friend",
             &[
-                Word,
+                TokenKind::blank_word(),
                 Space(1),
-                Word,
+                TokenKind::blank_word(),
                 Punctuation(Punctuation::Comma),
                 Space(1),
-                Word,
+                TokenKind::blank_word(),
                 Space(1),
-                Word
+                TokenKind::blank_word()
             ]
         );
     }
@@ -101,14 +101,14 @@ mod tests {
         assert_tokens_eq_md(
             "__hello__ world,\n\n[my]() friend",
             &[
-                Word,
+                TokenKind::blank_word(),
                 Space(1),
-                Word,
+                TokenKind::blank_word(),
                 Punctuation(Punctuation::Comma),
                 Newline(2),
-                Word,
+                TokenKind::blank_word(),
                 Space(1),
-                Word
+                TokenKind::blank_word()
             ]
         );
     }
@@ -117,7 +117,7 @@ mod tests {
     /// characters as part of the same word.
     #[test]
     fn parses_non_english() {
-        assert_tokens_eq_plain("Løvetann", &[Word]);
-        assert_tokens_eq_plain("Naïve", &[Word]);
+        assert_tokens_eq_plain("Løvetann", &[TokenKind::blank_word()]);
+        assert_tokens_eq_plain("Naïve", &[TokenKind::blank_word()]);
     }
 }

@@ -8,7 +8,8 @@ use crate::{
     Span,
     Suggestion,
     Token,
-    TokenKind
+    TokenKind,
+    WordMetadata
 };
 
 #[derive(Debug, PartialEq, PartialOrd, Clone)]
@@ -42,7 +43,7 @@ macro_rules! vecword {
 macro_rules! pt {
     ($str:literal) => {
         PatternToken {
-            kind: TokenKind::Word,
+            kind: TokenKind::Word(WordMetadata::default()),
             content: Some($str.chars().collect()),
         }
     };
