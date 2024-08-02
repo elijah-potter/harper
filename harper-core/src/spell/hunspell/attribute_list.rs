@@ -2,16 +2,16 @@ use hashbrown::HashMap;
 use serde::{Deserialize, Serialize};
 use smallvec::ToSmallVec;
 
+use super::affix_replacement::AffixReplacement;
 use super::expansion::{Expansion, HumanReadableExpansion};
 use super::word_list::MarkedWord;
 use super::Error;
-use super::{affix_replacement::AffixReplacement, matcher::Matcher};
 use crate::{CharString, Span, WordMetadata};
 
 #[derive(Debug, Clone)]
 pub struct AttributeList {
     /// Key = Affix Flag
-    affixes: HashMap<char, Expansion>,
+    affixes: HashMap<char, Expansion>
 }
 
 impl AttributeList {
@@ -21,7 +21,7 @@ impl AttributeList {
                 .affixes
                 .iter()
                 .map(|(affix, exp)| (*affix, exp.to_human_readable()))
-                .collect(),
+                .collect()
         }
     }
 
@@ -30,24 +30,26 @@ impl AttributeList {
     /// Will append to the given `dest`;
     ///
     /// In the future, I want to make this function cleaner and faster.
-    pub fn expand_marked_word(&self, word: MarkedWord, dest: &mut Vec<CharString>) {
+    pub fn expand_marked_word(
+        &self,
+        word: MarkedWord,
+        dest: &mut HashMap<CharString, WordMetadata>
+    ) {
         dest.reserve(word.attributes.len() + 1);
-
-        let start_len = dest.len();
 
         for attr in &word.attributes {
             let Some(expansion) = self.affixes.get(attr) else {
                 continue;
             };
 
-            let mut new_words = Vec::new();
+            let mut new_words = HashMap::new();
 
             for replacement in &expansion.replacements {
-                new_words.extend(Self::apply_replacement(
-                    replacement,
-                    &word.letters,
-                    expansion.suffix,
-                ))
+                if let Some(replaced) =
+                    Self::apply_replacement(replacement, &word.letters, expansion.suffix)
+                {
+                    new_words.insert(replaced, expansion.adds_metadata);
+                }
             }
 
             if expansion.cross_product {
@@ -62,31 +64,21 @@ impl AttributeList {
                     }
                 }
 
-                let cross_product_words = Vec::new();
-
-                for new_word in new_words {
+                for (new_word, _metadata) in new_words {
                     self.expand_marked_word(
                         MarkedWord {
                             letters: new_word,
-                            attributes: opp_attr.clone(),
+                            attributes: opp_attr.clone()
                         },
-                        dest,
+                        dest
                     );
                 }
-
-                dest.extend_from_slice(&cross_product_words);
             } else {
-                dest.extend_from_slice(&new_words);
+                dest.extend(new_words.into_iter());
             }
         }
 
-        dest.push(word.letters);
-
-        let mut split = dest.split_off(start_len);
-        split.sort();
-        split.dedup();
-
-        dest.append(&mut split);
+        dest.insert(word.letters, WordMetadata::default());
     }
 
     /// Expand an iterator of marked words into strings.
@@ -95,7 +87,7 @@ impl AttributeList {
     pub fn expand_marked_words(
         &self,
         words: impl IntoIterator<Item = MarkedWord>,
-        dest: &mut Vec<CharString>,
+        dest: &mut HashMap<CharString, WordMetadata>
     ) {
         for word in words {
             self.expand_marked_word(word, dest);
@@ -105,7 +97,7 @@ impl AttributeList {
     fn apply_replacement(
         replacement: &AffixReplacement,
         letters: &[char],
-        suffix: bool,
+        suffix: bool
     ) -> Option<CharString> {
         if replacement.condition.len() > letters.len() {
             return None;
@@ -160,7 +152,7 @@ impl AttributeList {
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct HumanReadableAttributeList {
-    affixes: HashMap<char, HumanReadableExpansion>,
+    affixes: HashMap<char, HumanReadableExpansion>
 }
 
 impl HumanReadableAttributeList {

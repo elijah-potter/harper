@@ -1,6 +1,6 @@
 use std::collections::HashSet;
 
-use harper_core::{FullDictionary, Mask, Masker, Span};
+use harper_core::{FullDictionary, Mask, Masker, Span, WordMetadata};
 use tree_sitter::{Language, Node, Tree, TreeCursor};
 
 /// A Harper [`Masker`] that wraps a given tree-sitter language and a condition,
@@ -47,7 +47,10 @@ impl TreeSitterMasker {
             idents.insert(span.get_content(source));
         }
 
-        let idents: Vec<_> = idents.into_iter().collect();
+        let idents: Vec<_> = idents
+            .into_iter()
+            .map(|ident| (ident, WordMetadata::default()))
+            .collect();
 
         let mut dictionary = FullDictionary::new();
         dictionary.extend_words(idents);

@@ -13,7 +13,8 @@ use harper_core::{
     Linter,
     MergedDictionary,
     Token,
-    TokenKind
+    TokenKind,
+    WordMetadata
 };
 use harper_html::HtmlParser;
 use serde_json::Value;
@@ -494,7 +495,7 @@ impl LanguageServer for Backend {
                 let file_url = second.parse().unwrap();
 
                 let mut dict = self.load_user_dictionary().await;
-                dict.append_word(word);
+                dict.append_word(word, WordMetadata::default());
                 if let Err(err) = self.save_user_dictionary(dict).await {
                     error!("Unable to save user dictionary: {}", err);
                 }
@@ -515,7 +516,7 @@ impl LanguageServer for Backend {
                     error!("Unable resolve dictionary path: {file_url}");
                     return Ok(None);
                 };
-                dict.append_word(word);
+                dict.append_word(word, WordMetadata::default());
 
                 if let Err(err) = self.save_file_dictionary(&file_url, dict).await {
                     error!("Unable to save file dictionary: {}", err);

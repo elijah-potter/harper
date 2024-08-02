@@ -1,6 +1,6 @@
 use std::path::Path;
 
-use harper_core::{Dictionary, FullDictionary};
+use harper_core::{Dictionary, FullDictionary, WordMetadata};
 use tokio::fs::{self, File};
 use tokio::io::{self, AsyncRead, AsyncReadExt, AsyncWrite, AsyncWriteExt, BufReader, BufWriter};
 
@@ -50,7 +50,10 @@ async fn dict_from_word_list(mut r: impl AsyncRead + Unpin) -> io::Result<FullDi
     r.read_to_string(&mut str).await?;
 
     let mut dict = FullDictionary::new();
-    dict.extend_words(str.lines().map(|l| l.chars().collect::<Vec<char>>()));
+    dict.extend_words(
+        str.lines()
+            .map(|l| (l.chars().collect::<Vec<char>>(), WordMetadata::default()))
+    );
 
     Ok(dict)
 }

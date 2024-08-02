@@ -1,11 +1,8 @@
 use serde::{Deserialize, Serialize};
 
+use super::affix_replacement::{AffixReplacement, HumanReadableAffixReplacement};
+use super::Error;
 use crate::WordMetadata;
-
-use super::{
-    affix_replacement::{AffixReplacement, HumanReadableAffixReplacement},
-    Error,
-};
 
 #[derive(Debug, Clone)]
 pub struct Expansion {
@@ -13,7 +10,9 @@ pub struct Expansion {
     pub suffix: bool,
     pub cross_product: bool,
     pub replacements: Vec<AffixReplacement>,
-    pub adds_metadata: WordMetadata,
+    /// When the expansion is applied, the resulting word will have fields
+    /// overwritten with the none-null properties from here.
+    pub adds_metadata: WordMetadata
 }
 
 impl Expansion {
@@ -26,7 +25,7 @@ impl Expansion {
                 .iter()
                 .map(AffixReplacement::to_human_readable)
                 .collect(),
-            adds_metadata: self.adds_metadata,
+            adds_metadata: self.adds_metadata
         }
     }
 }
@@ -36,7 +35,7 @@ pub struct HumanReadableExpansion {
     pub suffix: bool,
     pub cross_product: bool,
     pub replacements: Vec<HumanReadableAffixReplacement>,
-    pub adds_metadata: WordMetadata,
+    pub adds_metadata: WordMetadata
 }
 
 impl HumanReadableExpansion {
@@ -51,7 +50,7 @@ impl HumanReadableExpansion {
             suffix: self.suffix,
             cross_product: self.cross_product,
             replacements,
-            adds_metadata: self.adds_metadata,
+            adds_metadata: self.adds_metadata
         })
     }
 }

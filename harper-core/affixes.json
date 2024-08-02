@@ -12,7 +12,8 @@
       ],
       "adds_metadata": {
         "kind": null,
-        "tense": null
+        "tense": null,
+        "plural": null
       }
     },
     "L": {
@@ -27,7 +28,8 @@
       ],
       "adds_metadata": {
         "kind": null,
-        "tense": null
+        "tense": null,
+        "plural": null
       }
     },
     "E": {
@@ -42,7 +44,8 @@
       ],
       "adds_metadata": {
         "kind": null,
-        "tense": null
+        "tense": null,
+        "plural": null
       }
     },
     "Y": {
@@ -57,7 +60,8 @@
       ],
       "adds_metadata": {
         "kind": null,
-        "tense": null
+        "tense": null,
+        "plural": null
       }
     },
     "U": {
@@ -72,7 +76,8 @@
       ],
       "adds_metadata": {
         "kind": null,
-        "tense": null
+        "tense": null,
+        "plural": null
       }
     },
     "H": {
@@ -92,7 +97,8 @@
       ],
       "adds_metadata": {
         "kind": null,
-        "tense": null
+        "tense": null,
+        "plural": null
       }
     },
     "T": {
@@ -122,7 +128,8 @@
       ],
       "adds_metadata": {
         "kind": null,
-        "tense": null
+        "tense": null,
+        "plural": null
       }
     },
     "R": {
@@ -152,7 +159,8 @@
       ],
       "adds_metadata": {
         "kind": null,
-        "tense": null
+        "tense": null,
+        "plural": null
       }
     },
     "C": {
@@ -167,7 +175,8 @@
       ],
       "adds_metadata": {
         "kind": null,
-        "tense": null
+        "tense": null,
+        "plural": null
       }
     },
     "V": {
@@ -187,7 +196,8 @@
       ],
       "adds_metadata": {
         "kind": null,
-        "tense": null
+        "tense": null,
+        "plural": null
       }
     },
     "N": {
@@ -212,7 +222,8 @@
       ],
       "adds_metadata": {
         "kind": null,
-        "tense": null
+        "tense": null,
+        "plural": null
       }
     },
     "A": {
@@ -227,7 +238,8 @@
       ],
       "adds_metadata": {
         "kind": null,
-        "tense": null
+        "tense": null,
+        "plural": null
       }
     },
     "Z": {
@@ -257,7 +269,8 @@
       ],
       "adds_metadata": {
         "kind": null,
-        "tense": null
+        "tense": null,
+        "plural": null
       }
     },
     "P": {
@@ -282,7 +295,8 @@
       ],
       "adds_metadata": {
         "kind": null,
-        "tense": null
+        "tense": null,
+        "plural": null
       }
     },
     "M": {
@@ -297,7 +311,8 @@
       ],
       "adds_metadata": {
         "kind": null,
-        "tense": null
+        "tense": null,
+        "plural": null
       }
     },
     "F": {
@@ -312,7 +327,8 @@
       ],
       "adds_metadata": {
         "kind": null,
-        "tense": null
+        "tense": null,
+        "plural": null
       }
     },
     "B": {
@@ -337,7 +353,8 @@
       ],
       "adds_metadata": {
         "kind": null,
-        "tense": null
+        "tense": null,
+        "plural": null
       }
     },
     "S": {
@@ -367,7 +384,8 @@
       ],
       "adds_metadata": {
         "kind": null,
-        "tense": null
+        "tense": null,
+        "plural": true
       }
     },
     "D": {
@@ -397,7 +415,8 @@
       ],
       "adds_metadata": {
         "kind": null,
-        "tense": null
+        "tense": null,
+        "plural": null
       }
     },
     "G": {
@@ -417,7 +436,8 @@
       ],
       "adds_metadata": {
         "kind": null,
-        "tense": null
+        "tense": null,
+        "plural": null
       }
     },
     "Q": {
@@ -432,7 +452,8 @@
       ],
       "adds_metadata": {
         "kind": null,
-        "tense": null
+        "tense": null,
+        "plural": null
       }
     },
     "O": {
@@ -447,7 +468,8 @@
       ],
       "adds_metadata": {
         "kind": null,
-        "tense": null
+        "tense": null,
+        "plural": null
       }
     },
     "I": {
@@ -462,7 +484,8 @@
       ],
       "adds_metadata": {
         "kind": null,
-        "tense": null
+        "tense": null,
+        "plural": null
       }
     },
     "X": {
@@ -487,7 +510,8 @@
       ],
       "adds_metadata": {
         "kind": null,
-        "tense": null
+        "tense": null,
+        "plural": null
       }
     },
     "J": {
@@ -507,7 +531,8 @@
       ],
       "adds_metadata": {
         "kind": null,
-        "tense": null
+        "tense": null,
+        "plural": null
       }
     }
   }

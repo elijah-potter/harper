@@ -1,11 +1,11 @@
-use hashbrown::HashSet;
+use hashbrown::{HashMap, HashSet};
 use once_cell::sync::Lazy;
 use smallvec::{SmallVec, ToSmallVec};
 
 use super::dictionary::Dictionary;
 use super::hunspell::{parse_default_attribute_list, parse_default_word_list};
 use super::seq_to_normalized;
-use crate::CharString;
+use crate::{CharString, WordMetadata};
 
 /// A full, fat dictionary.
 /// All of the elements are stored in-memory.
@@ -23,7 +23,7 @@ pub struct FullDictionary {
     /// that has a word whose index is that length.
     word_len_starts: Vec<usize>,
     /// All English words
-    word_set: HashSet<CharString>,
+    word_map: HashMap<CharString, WordMetadata>
 }
 
 fn uncached_inner_new() -> FullDictionary {
@@ -31,17 +31,18 @@ fn uncached_inner_new() -> FullDictionary {
     let attr_list = parse_default_attribute_list();
 
     // There will be at _least_ this number of words
-    let mut words = Vec::with_capacity(word_list.len());
+    let mut word_map = HashMap::with_capacity(word_list.len());
 
-    attr_list.expand_marked_words(word_list, &mut words);
+    attr_list.expand_marked_words(word_list, &mut word_map);
 
+    let mut words: Vec<CharString> = word_map.iter().map(|(v, _)| v.clone()).collect();
     words.sort();
     words.dedup();
 
     FullDictionary {
-        word_set: HashSet::from_iter(words.iter().cloned()),
+        word_map,
         word_len_starts: FullDictionary::create_len_starts(&mut words),
-        words,
+        words
     }
 }
 
@@ -52,7 +53,7 @@ impl FullDictionary {
         Self {
             words: Vec::new(),
             word_len_starts: Vec::new(),
-            word_set: HashSet::new(),
+            word_map: HashMap::new()
         }
     }
 
@@ -65,21 +66,26 @@ impl FullDictionary {
     /// Appends words to the dictionary.
     /// It is significantly faster to append many words with one call than many
     /// distinct calls to this function.
-    pub fn extend_words(&mut self, words: impl IntoIterator<Item = impl AsRef<[char]>>) {
-        let init_size = self.words.len();
-        self.words
-            .extend(words.into_iter().map(|v| v.as_ref().to_smallvec()));
-        self.word_set
-            .extend(self.words[init_size..].iter().cloned());
+    pub fn extend_words(
+        &mut self,
+        words: impl IntoIterator<Item = (impl AsRef<[char]>, WordMetadata)>
+    ) {
+        let pairs: Vec<_> = words
+            .into_iter()
+            .map(|(v, m)| (v.as_ref().to_smallvec(), m))
+            .collect();
+
+        self.words.extend(pairs.iter().map(|(v, _)| v.clone()));
         self.word_len_starts = Self::create_len_starts(&mut self.words);
+        self.word_map.extend(pairs);
     }
 
     /// Append a single word to the dictionary.
     ///
     /// If you are appending many words, consider using [`Self::extend_words`]
     /// instead.
-    pub fn append_word(&mut self, word: impl AsRef<[char]>) {
-        self.extend_words(std::iter::once(word.as_ref()))
+    pub fn append_word(&mut self, word: impl AsRef<[char]>, metadata: WordMetadata) {
+        self.extend_words(std::iter::once((word.as_ref(), metadata)))
     }
 
     /// Create a lookup table for finding words of a specific length in a word
@@ -132,7 +138,7 @@ impl Dictionary for FullDictionary {
         let normalized = seq_to_normalized(word);
         let lowercase: SmallVec<_> = normalized.iter().flat_map(|c| c.to_lowercase()).collect();
 
-        self.word_set.contains(normalized.as_ref()) || self.word_set.contains(&lowercase)
+        self.word_map.contains_key(normalized.as_ref()) || self.word_map.contains_key(&lowercase)
     }
 }
 
