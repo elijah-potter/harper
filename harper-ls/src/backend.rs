@@ -4,7 +4,7 @@ use std::sync::Arc;
 
 use anyhow::anyhow;
 use harper_comments::CommentParser;
-use harper_core::parsers::{Markdown, PlainEnglish};
+use harper_core::parsers::{Latex, Markdown, PlainEnglish};
 use harper_core::{
     Dictionary,
     Document,
@@ -265,6 +265,8 @@ impl Backend {
                 }
 
                 Document::new_from_vec(source, Box::new(ts_parser))
+            } else if language_id == "tex" {
+                Document::new(text, Box::new(Latex))
             } else if language_id == "markdown" {
                 Document::new(text, Box::new(Markdown))
             } else if language_id == "gitcommit" {
