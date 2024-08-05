@@ -4,8 +4,12 @@ use std::sync::Arc;
 
 use anyhow::anyhow;
 use harper_comments::CommentParser;
+<<<<<<< HEAD
 use harper_core::linting::{LintGroup, Linter};
 use harper_core::parsers::{Markdown, PlainEnglish};
+=======
+use harper_core::parsers::{Latex, Markdown, PlainEnglish};
+>>>>>>> a257952 (feat: add latex parser to file tree and add support in harper-ls)
 use harper_core::{
     Dictionary,
     Document,
@@ -227,6 +231,8 @@ impl Backend {
                 }
 
                 Document::new_from_vec(source, &mut ts_parser, &doc_state.dict)
+            } else if language_id == "tex" {
+                Document::new(text, Box::new(Latex))
             } else if language_id == "markdown" {
                 Document::new(text, &mut Markdown, &doc_state.dict)
             } else if language_id == "gitcommit" {

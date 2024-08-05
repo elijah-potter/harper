@@ -1,8 +1,10 @@
+mod latex;
 mod markdown;
 mod mask;
 mod plain_english;
 
 use blanket::blanket;
+pub use latex::Latex;
 pub use markdown::Markdown;
 pub use mask::Mask;
 pub use plain_english::PlainEnglish;

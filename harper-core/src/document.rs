@@ -5,7 +5,7 @@ use std::fmt::Display;
 use itertools::Itertools;
 use paste::paste;
 
-use crate::parsers::{Markdown, Parser, PlainEnglish};
+use crate::parsers::{Latex, Markdown, Parser, PlainEnglish};
 use crate::patterns::{PatternExt, RepeatingPattern, SequencePattern};
 use crate::punctuation::Punctuation;
 use crate::span::Span;
@@ -17,7 +17,7 @@ use crate::{Dictionary, FatToken, FullDictionary, Lrc, Token, TokenKind, TokenSt
 #[derive(Debug, Clone)]
 pub struct Document {
     source: Lrc<Vec<char>>,
-    tokens: Vec<Token>
+    tokens: Vec<Token>,
 }
 
 impl Default for Document {
@@ -48,7 +48,7 @@ impl Document {
     pub fn new_from_vec(
         source: Lrc<Vec<char>>,
         parser: &mut impl Parser,
-        dictionary: &impl Dictionary
+        dictionary: &impl Dictionary,
     ) -> Self {
         let tokens = parser.parse(&source);
 
@@ -80,6 +80,10 @@ impl Document {
     /// parser and the curated dictionary.
     pub fn new_markdown(text: &str, dictionary: &impl Dictionary) -> Self {
         Self::new(text, &mut Markdown, dictionary)
+    }
+
+    pub fn new_latex(text: &str, dictionary: &impl Dictionary) -> Self {
+        Self::new(text, &mut Latex, dictionary)
     }
 
     /// Re-parse important language constructs.
@@ -153,7 +157,7 @@ impl Document {
             &old[indices
                 .last()
                 .map(|v| v + stretch_len)
-                .unwrap_or(indices.len())..]
+                .unwrap_or(indices.len())..],
         );
     }
 
@@ -304,7 +308,7 @@ impl Document {
     pub fn get_full_string(&self) -> String {
         self.get_span_content_str(Span {
             start: 0,
-            end: self.source.len()
+            end: self.source.len(),
         })
     }
 
@@ -642,7 +646,7 @@ fn is_chunk_terminator(token: &TokenKind) -> bool {
         TokenKind::Punctuation(punct) => {
             matches!(punct, Punctuation::Comma | Punctuation::Quote { .. })
         }
-        _ => false
+        _ => false,
     }
 }
 
@@ -651,11 +655,11 @@ fn is_sentence_terminator(token: &TokenKind) -> bool {
         TokenKind::Punctuation(punct) => [
             Punctuation::Period,
             Punctuation::Bang,
-            Punctuation::Question
+            Punctuation::Question,
         ]
         .contains(punct),
         TokenKind::ParagraphBreak => true,
-        _ => false
+        _ => false,
     }
 }
 
@@ -749,7 +753,7 @@ mod tests {
         assert_token_count("This is the 3rd test", 9);
         assert_token_count(
             "It works even with weird capitalization like this: 600nD",
-            18
+            18,
         );
     }
 
