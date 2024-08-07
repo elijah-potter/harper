@@ -6,7 +6,7 @@ use itertools::Itertools;
 use paste::paste;
 
 use crate::linting::Suggestion;
-use crate::parsers::{Latex, Markdown, Parser, PlainEnglish};
+use crate::parsers::{Markdown, Parser, PlainEnglish};
 use crate::punctuation::Punctuation;
 use crate::span::Span;
 use crate::token::NumberSuffix;
@@ -51,10 +51,6 @@ impl Document {
 
     pub fn new_markdown(text: &str) -> Self {
         Self::new(text, Box::new(Markdown))
-    }
-
-    pub fn new_latex(text: &str) -> Self {
-        Self::new(text, Box::new(Latex))
     }
 
     /// Re-parse important language constructs.

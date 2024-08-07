@@ -4,7 +4,7 @@ use std::sync::Arc;
 
 use anyhow::anyhow;
 use harper_comments::CommentParser;
-use harper_core::parsers::{Latex, Markdown, PlainEnglish};
+use harper_core::parsers::{Markdown, PlainEnglish};
 use harper_core::{
     Dictionary,
     Document,
@@ -17,6 +17,7 @@ use harper_core::{
     WordMetadata
 };
 use harper_html::HtmlParser;
+use harper_latex::LatexParser;
 use serde_json::Value;
 use tokio::sync::{Mutex, RwLock};
 use tower_lsp::jsonrpc::Result;
@@ -266,13 +267,13 @@ impl Backend {
 
                 Document::new_from_vec(source, Box::new(ts_parser))
             } else if language_id == "tex" {
-                Document::new(text, Box::new(Latex))
+                Document::new(text, Box::<LatexParser>::default())
             } else if language_id == "markdown" {
                 Document::new(text, Box::new(Markdown))
             } else if language_id == "gitcommit" {
                 Document::new(text, Box::new(GitCommitParser))
             } else if language_id == "html" {
-                Document::new(text, Box::new(HtmlParser::default()))
+                Document::new(text, Box::<HtmlParser>::default())
             } else if language_id == "mail" {
                 Document::new(text, Box::new(PlainEnglish))
             } else {

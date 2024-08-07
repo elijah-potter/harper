@@ -1,4 +1,4 @@
-use hashbrown::{HashMap, HashSet};
+use hashbrown::HashMap;
 use once_cell::sync::Lazy;
 use smallvec::{SmallVec, ToSmallVec};
 
