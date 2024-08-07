@@ -5,7 +5,7 @@ use std::fmt::Display;
 use itertools::Itertools;
 use paste::paste;
 
-use crate::parsers::{Latex, Markdown, Parser, PlainEnglish};
+use crate::parsers::{Markdown, Parser, PlainEnglish};
 use crate::patterns::{PatternExt, RepeatingPattern, SequencePattern};
 use crate::punctuation::Punctuation;
 use crate::span::Span;

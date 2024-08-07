@@ -589,6 +589,7 @@ dependencies = [
  "tree-sitter-go",
  "tree-sitter-java",
  "tree-sitter-javascript",
+ "tree-sitter-latex",
  "tree-sitter-lua",
  "tree-sitter-python",
  "tree-sitter-ruby",
@@ -631,6 +632,17 @@ dependencies = [
 ]
 
 [[package]]
+name = "harper-latex"
+version = "0.9.0"
+dependencies = [
+ "harper-core",
+ "harper-tree-sitter",
+ "paste",
+ "tree-sitter",
+ "tree-sitter-latex",
+]
+
+[[package]]
 name = "harper-ls"
 version = "0.11.0"
 dependencies = [
@@ -641,6 +653,7 @@ dependencies = [
  "harper-comments",
  "harper-core",
  "harper-html",
+ "harper-latex",
  "itertools 0.13.0",
  "once_cell",
  "open",
@@ -1639,6 +1652,15 @@ name = "tree-sitter-javascript"
 version = "0.20.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "d015c02ea98b62c806f7329ff71c383286dfc3a7a7da0cc484f6e42922f73c2c"
+dependencies = [
+ "cc",
+ "tree-sitter",
+]
+
+[[package]]
+name = "tree-sitter-latex"
+version = "0.3.0"
+source = "git+https://github.com/latex-lsp/tree-sitter-latex?rev=a6c812704b3d3e1541b0853aa0d6d561301320e1#a6c812704b3d3e1541b0853aa0d6d561301320e1"
 dependencies = [
  "cc",
  "tree-sitter",

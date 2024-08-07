@@ -1,0 +1,411 @@
+% Document by Grant Lemons <grantlemons@aol.com>
+% Original source can be found at https://github.com/grantlemons/math-ia-latex
+% Generated document can be found at https://grantlemons.com/files/Grant%20Lemons%20Math%20IA.pdf
+
+\documentclass{paper}
+
+\begin{document}
+\insertTitlePage
+\pagenumbering{roman}
+\tableofcontents
+\thispagestyle{frontorback}
+\newpage
+\setcounter{page}{1}
+\pagenumbering{arabic}
+\justifying
+
+\section{Introduction}
+\label{sec:intro}
+Integration is the process of calculating the area enclosed by a function~(known as the integrand) over an interval via the calculation of the definite integral.
+This process is often done by hand using techniques such as the Fundamental Theorem of Calculus~(see \cref{sec:definite}), but can be approximated by a computer.
+The means by which a computer conducts this operation is through a process called quadrature~(also known as numerical integration).
+Quadrature is the process of fitting shapes of a known area to the integrand in order to closely approximate the area enclosed by the integrand.
+This often involves splitting the interval into smaller \textit{subintervals}, and summing the approximate areas of each.
+In the most basic methods of quadrature, these subintervals are of a fixed width, but it is possible to use subintervals of varying widths for the sake of computational efficiency.
+This is known as \emph{adaptive quadrature}, and can be accomplished in a variety of ways.
+The aim of this paper is to compare an existing method of adaptive quadrature to one of my own design, and examine the effectiveness and efficiency of the two methods.
+
+My interest in this topic was sparked when we first covered integrals in our IB AA SL coursework.
+In class we only covered the \hyperref[sec:rect_rule]{Rectangle Rule} and briefly mentioned the \hyperref[sec:trap_rule]{Trapezoid Rule}, but through consulting with my teacher and self-study, I quickly learned all about advanced methods such as \hyperref[sec:smps_rule]{Simpson's 1/3} and 3/8 Rules.
+I didn't have the opportunity to channel this passion until the IA, but have used this opportunity to deepen my knowledge of the means by which advanced methods operate and the pros and cons of different quadrature rules.
+I also used this opportunity to include one of my passions, computer science, applying it in a useful manner to contribute to my understanding and this investigation.
+
+This paper will begin with an exploration and explanation of different method of fixed quadrature, before moving into an explanation of adaptive quadrature, its benefits, and how I and others have chosen to approach it.
+It will conclude with a comparison of efficiency and accuracy between the effectiveness of my method and an established method before summarizing and theorizing about results and suggesting further research.
+
+\section{Notation}
+\label{sec:notation}
+For clarity's sake, I will explain some of the specifics of the notation used within this paper, as well as define some of the commonly used variables.
+\cref{table:variables} describes the meaning of, and in some cases the equation for, the commonly used variables within the paper.
+
+\subsection{Difficulty}
+Within this paper, for the sake of conciseness, I will use the term \emph{difficult} to describe functions or intervals that would require a large amount of subintervals to effectively approximate.
+
+\subsection{Subscript Notation}
+Within this paper, numeric subscripts or lowercase variables in subscripts will denote an index in a set.
+For instance, \(x_j\) represents the \emph{j}-th number in the set of \(x\)-values.
+Alphabetic subscripts, such as \(A_R\), will be used in order to specify that, for instance, a given equation defines the area of a rectangle instead of that of a trapezoid.
+These two uses of subscripts are sometimes combined in a form such as \(A_{R_1}\), denoting the area of rectangle 1 in a similar way to other subscripts throughout the paper.
+
+\subsection{Indexes}
+Note that within the scope of this paper, sets are zero-indexed, meaning that the "first" value is at index \(0\).
+For example, in the set \(\{10, 20, 30\}\), index zero refers to the number \(10\).
+
+\subsection{Table of Variables}
+\renewcommand{\arraystretch}{1.1}
+\begin{table}[ht]
+    \centering
+    \begin{tabular}{cll}
+            \dtoprule
+            \textbf{Variable}   &   \textbf{Description}            &   \textbf{Equation}       \\
+            \hline
+            \(n_s\)             &   The number of subintervals      &                           \\
+            \(a\)               &   Left bound of the interval      &                           \\
+            \(b\)               &   Right bound of the interval     &                           \\
+            \(x_L\)             &   Left bound of the subinterval   &                           \\
+            \(x_R\)             &   Right bound of the subinterval  &                           \\
+            \(h\)               &   Width of each subinterval       &   \(h=(b-a)/n_s\)         \\
+            \(m\)               &   Mid-subinterval value           &   \(m=(x_L+x_R)/2\)       \\
+            \(A\)               &   Area confined by \(f(x)\), \(a\), \(b\) and the \(x\)-axis. & \(A=\int_a^b f(x) \, dx\) \\
+            \(A_R\)             &   Area of a rectangle             &   \(A_R=w \cdot l\)       \\
+            \(A_T\)             &   Area of a trapezoid             &   \(A_T=\frac{1}{2} h (f(x_L) + f(x_R))\)  \\
+            \dbottomrule
+    \end{tabular}
+    \caption{List of variables and their definitions.}
+    \label{table:variables}
+\end{table}
+
+\section{Background}
+\label{sec:background}
+\subsection{Definite Integrals}
+\label{sec:definite}
+For integrable functions, the area enclosed by a function over an interval can be found through taking the \emph{definite integral} of the function.
+The value obtained through definite integration is exact, having no error other than that from rounding.
+
+For instance, the area constrained by \cref{eqn:rule_eqn}, \(x = 0\), \(x = 6\), and the \(x\)-axis can be found exactly through the process in \crefrange{eqn:def_int_first_eqn}{eqn:def_int_result}.
+
+\begin{equation}
+    f(x) = \cos(x + 2) + 1
+    \label{eqn:rule_eqn}
+\end{equation}
+
+\begin{gather*}
+    A = \int_0^6 \cos(x + 2) \,dx + \int_0^6 1 \,dx                             \tageq\label{eqn:def_int_first_eqn}         \\
+    \text{let } u = x + 2                                                                                                               \\
+    \frac{du}{dx} = 1                                                                                                       \\
+    du = dx
+\end{gather*}
+\begin{align*}
+    A                                                   &=      \int_{x=0}^{x=6} \cos(u) \,du + \int_0^6 1 \,dx             \\
+    \int_{x=0}^{x=6} \cos(u) \,du + \int_0^6 1 \,dx     &=      \left[ \sin(u)\right]_{x=0}^{x=6} + \left[ x \right]_0^6    \\
+                                                        &=      \left[ \sin(x + 2) + x \right]_0^6                          \\
+                                                        &=      (\sin(6 + 2) + 6) - (\sin(0 + 2) + 0)                       \\
+                                                        &=      \sin(8) - \sin(2) + 6                                       \\
+    A                                                   &=      6.080060820    \tageq\label{eqn:def_int_result}
+\end{align*}
+
+Although this result isn't exact~(having been rounded), for the sake of comparing methods of quadrature we will treat this as the "true" value and as if it fits the area enclosed by \(f(x)\) as shown in \cref{fig:definite_integration}.
+
+\subfile{graphs/definite}
+
+This calculated value is useful when evaluating methods of quadrature, as it allows us to have a "true" value to compare the result of each method to.
+Of course, definite integration has its limitations: it needs to be performed by hand, it can be challenging with certain functions, and is impossible for a few functions.
+Because of this, quadrature can be used as a substitute to approximate the "true" value as closely as possible.
+
+\cref{eqn:rule_eqn} will be used to demonstrate the comparative effectiveness of each method of quadrature when discussed in following sections for the sake of comparison to the calculated value and calculated of error percentage.
+
+\subsection{Rectangle Rule}
+\label{sec:rect_rule}
+The most basic method---or rule---used in quadrature is that of splitting the interval into smaller subintervals and fitting rectangles beneath the integrand.
+The height of each rectangle is based on the value of the function at one of its subinterval's bounds, which makes area easy to approximate to a reasonable degree of accuracy as shown by \cref{fig:rect_rule}.
+Since the area of a rectangle is extremely easy to calculate~(see \cref{eqn:rect_area}), this method is simple to implement over the entire function by summing the areas of each subinterval as demonstrated in \cref{eqn:rect_rule}.\autocite{num_methods}
+
+\begin{gather*}
+    A_{R} = w \cdot l \tageq\label{eqn:rect_area}                                               \\
+    A_{R_{0}} = h \cdot f(x_0)                                                                  \\
+    \int_a^b f(x) \,dx \approx h \sum^{n_s-1}_{j=0}f(x_j) \tageq\label{eqn:rect_rule}
+\end{gather*}
+
+\subfile{graphs/rules/rect_rule}
+
+Applying the Rectangle Rule on \cref{eqn:rule_eqn} with 5 subdivisions~(represented by \(n_s\))~(as in \cref{fig:rect_rule}), the calculations are as follows.
+\begin{align*}
+    \text{let } a   &= 0                              \tageq\label{eqn:rect_example_first}             \\
+    \text{let } b   &= 6                                                                               \\
+    \text{let } n_s &= 5                                                                             
+\end{align*}
+\begin{align*}
+    h &= (6 - 0) / 5                                                                                \\
+    h &= \frac{6}{5}                                                                                
+\end{align*}
+\begin{align*}
+    \int_a^b f(x) \,dx      &\approx    h \sum^{n_s-1}_{j=0}f(x_j)                                  \\
+                            &\approx    \frac{6}{5} [f(0) + f(1.2) + ... + f(4.8)]                  \\
+                            &\approx    \frac{6}{5} \cdot 4.923188887                               \\
+                            &\approx    5.907826664                                                 
+\end{align*}
+Comparing this value to the value calculated in \cref{sec:definite} as follows, we can calculate the percent error of this method on the function.
+\begin{align*}
+    \delta      &=      \left| \frac{v_A - v_E}{v_E} \right| \cdot 100\%                            \\
+                &=      \left| \frac{5.907826664 - 6.080060820}{6.080060820} \right| \cdot 100\%    \\
+                &=      2.833\%                      \tageq\label{eqn:rect_example_last}           
+\end{align*}
+
+More effective rules exist however, that can be used to compute a more accurate value with minimal extra computations.
+One such rule is the Trapezoid Rule.
+
+\subsection{Trapezoid Rule}
+\label{sec:trap_rule}
+The Trapezoid Rule is an alternative means typically used in place of the Rectangle Rule that utilizes trapezoids instead of rectangles.
+Instead of picking a single point at which to base the height on, the Trapezoid Rule utilizes the value of the function at both the left and right bounds, and uses them to construct a trapezoid under the integrand.
+This has the advantage that it can better account for slope in the integrand.\autocite{num_methods}
+
+The equation for the Trapezoid Rule~(see \cref{eqn:trap_rule}) is only marginally more complicated than that of the Rectangle Rule~(see \cref{eqn:rect_rule}), but fits functions more closely, which provides significantly more accuracy as can be observed in in \cref{fig:trap_rule}.
+
+\begin{gather*}
+    A_{T_{j}} = \frac{1}{2} h \left[ f(x_{j}) + f(x_{j+1}) \right]                                                                                                \\
+    A_{T_{0}} = \frac{1}{2} h \left[f(x_0) + f(x_1)\right]                                                                  \\
+    \int_a^b f(x) \,dx \approx \frac{1}{2}h \sum^{n_s-1}_{j=0}[f(x_{j}) + f(x_{j+1})] \tageq\label{eqn:trap_rule} 
+\end{gather*}
+
+\subfile{graphs/rules/trap_rule}
+
+Applying the same methodology of computation as in \crefrange{eqn:rect_example_first}{eqn:rect_example_last}---only using the Trapezoid Rule instead of the Rectangle Rule---the Trapezoid Rule's error in this example can be evaluated to be \(0.162\%\).
+
+Trapezoids have many advantages over rectangles for quadrature, but fail to account for change in slope over the interval.
+In moving from rectangles to trapezoids, we moved from fitting the function with a zeroth order polynomial to a first order polynomial, but in order to fit the function even more closely, polynomials of a higher order can be used.
+
+\subsection{Composite Simpson's 1/3 Rule}
+\label{sec:smps_rule}
+The Composite Simpson's 1/3 Rule uses second degree polynomials~(quadratics) in order to fit the function, even over sections with changing slope.
+This is done by using the left, right, and mid-interval values of each subinterval in order to calculate a 2nd degree polynomial per subinterval that passes through those points.
+The use of second degree polynomials allows the Composite Simpson's 1/3 Rule to approximate a difficult integrand extremely closely as shown in \cref{fig:smps_rule}.
+
+\subfile{graphs/rules/smps_rule}
+
+Simpson's rule uses pairs of subintervals for its calculations.
+This means that a quadratic is constructed for each pair of subintervals that passes through the points \((x_0, f(x_0))\), \((x_1, f(x_1))\), \((x_2, f(x_2))\) as shown in \cref{fig:smps_rule_bounds}.
+For the sake of easier calculations, the following will use \((-h, y_0)\), \((0, y_1)\), \((h, y_2)\), as if the quadratic was shifted such that it is centered on the \(y\)-axis.
+
+\subfile{graphs/rules/smps_rule_bounds}
+
+Generalizing the equation of the quadratic to the standard form \cref{eqn:quadratic}, we can integrate it over the two subintervals.
+\begin{equation}
+    Ax^2 + Bx + C
+    \label{eqn:quadratic}
+\end{equation}
+
+\begin{equation*}
+    \int_{-h}^{h} \left[Ax^2 + Bx + C\right] \, dx   =  \int_{-h}^{h} \left[Ax^2 + C\right] \, dx + \int_{-h}^{h} \left[Bx\right] \, dx
+\end{equation*}
+
+As \(y=Bx\) is a linear function that passes through the origin, and the subinterval being evaluated extends the same distance in the positive and negative directions, the area enclosed by it is negated to zero~(see \cref{fig:smps_rule_bx}).
+
+\subfile{graphs/rules/smps_rule_bx}
+
+As such, the equation can be evaluated without considering \(Bx\).
+As the function \(Ax^2 + C\) is symmetrical, the integral from \(-h\) to \(h\) is equal to two times the integral from \(0\) to \(h\).
+
+\begin{align*}
+    \int_{-h}^{h} \left[Ax^2 + Bx + C\right] \, dx  &= 2\int_{0}^{h} \left[Ax^2 + C\right]      \\
+                                                    &= 2\left[\frac{1}{3}Ax^3 + Cx\right]_0^h   \\
+                                                    &= 2[\frac{1}{3}Ah^3 + Ch] - [0 + 0]        \\
+                                                    &= \frac{2Ah^3}{3} + 2Ch                    \tageq\label{eqn:special_smps_thing}\\
+                                                    &= \frac{h}{3}(2Ah^2 + 6C)                  
+\end{align*}
+
+Now we can create as system of equations to solve the equation of the quadratic using the coordinate pairs established above.\autocite{smps}
+
+\begin{align*}
+    y_0     &=      A(-h)^2 + B(-h) + C         \\
+            &=      Ah^2    - Bh    + C         \\
+    y_1     &=      A(0)^2 + B(0) + C           \\
+            &=                      C           \\
+    y_2     &=      A(h)^2 + B(h) + C           \\
+            &=      Ah^2   + Bh   + C
+\end{align*}
+
+Adding these equations together in a certain way \(y_0 + 4y_1 + y_2\) and combining like terms, we obtain an equation similar to \cref{eqn:special_smps_thing} derived above.
+\begin{align*}
+    y_0 + 4y_1 + y_2        &=       Ah^2 - Bh + C + 4C + Ah^2 + Bh + C    \\
+                            &=       2Ah^2 + 6C                           \tageq\label{eqn:special_matching_thing}
+\end{align*}
+Factoring out \(\frac{h}{3}\) from \cref{eqn:special_smps_thing}, we obtain \(\frac{h}{3}(2Ah^2 + 6C)\), which is equal to \(\frac{h}{3}\) times \cref{eqn:special_matching_thing}.
+This means that the equation for the area enclosed by the quadratic can be expressed as \(y_0 + 4y_1 + y_2\), which is equivalent to \(f(x_0) + 4f(x_1) + f(x_2)\).
+Through this means, we can derive the equation for simpson's rule shown below.\autocite{smps}
+
+\begin{equation}
+    \int_{-h}^{h} f(x) \,dx \approx \frac{h}{3} \left[f(a) + 4f\left(\frac{a + b}{2}\right) + f(b)\right]
+    \label{eqn:smps_rule}
+\end{equation}
+
+
+\cref{eqn:smps_rule} gives an approximate value for the integral of the subinterval using a single polynomial function.
+Like in the Trapezoid and Rectangle rules~(see \cref{eqn:trap_rule,eqn:rect_rule}), however, the interval can be split into smaller subintervals in order to increase accuracy.
+Expressed mathematically, the equation for the approximate value of the interval as a whole is equal to the sum of the values of each subinterval, the equation of which takes the form of \cref{eqn:composite_smps_rule}.
+
+\begin{equation}
+    \label{eqn:composite_smps_rule}
+    \int_a^b f(x) \,dx \approx \frac{h}{3} \sum_{j=1}^{n_s / 2} \biggl[f(x_{2j-2}) + 4f(x_{2j-1}) + f(x_{2j})\biggr]
+\end{equation}
+
+Calculating the percent error using \cref{eqn:rule_eqn} in the same fashion as in \cref{sec:rect_rule,sec:trap_rule}, the Composite Simpson's 1/3 Rule only had an error of \(0.008288\%\).
+This extremely low error demonstrates well the performance of this rule in comparison to others, but how does it fare on different functions?
+
+\subsection{Effectiveness}
+\label{sec:effectiveness}
+\subsubsection{Simple Function}
+\label{sec:simple}
+The effectiveness of the Trapezoid Rule and the composite Simpson's 1/3 Rule can be seen in \cref{fig:trap_rule,fig:smps_rule}.
+Even with the relatively large subinterval size, these methods are effective, because the function has no fluctuations that the method would not account for with the subinterval count being used.
+Because the methods only sample a few points of the integrand, however, if these few points are not representative of the integrand over the subinterval, neither method will effectively approximate the integral value.
+This means that, although both methods are effective at fitting a relatively simple function such as a polynomial with relatively few subintervals, they get significantly less effective the more difficult the integrand.
+
+\subsubsection{Difficult Function}
+\label{sec:complex_examples}
+Had the integrand been more difficult, as in \cref{fig:smps_rule_complex_low}, the fluctuations would not have been taken into account by either rule.
+
+\subfile{graphs/complex/low/smps_complex_low}
+
+The only way to improve the accuracy of the estimate is to increase the number of subintervals as in \cref{fig:smps_rule_complex_high}.
+The issue with this, however, is that---no matter the method---a large amount of subintervals requires a large amount of computing power.
+By scaling the number of subintervals by a factor of some value \(n\), the number of calculations required also scales linearly by \(n\).
+
+\subfile{graphs/complex/high/smps_complex_high}
+
+Moreover, although increasing the subinterval count is necessary and effective for difficult portions of the integrand, it is inefficient and unnecessary over the portions of the integrand that are relatively simple such as \(1.5 < |x| < 2\) in \cref{fig:smps_rule_complex_high}.
+This means ideally, quadrature should seek to maximize subinterval count when necessary, and, in all other circumstances, minimize subintervals.
+
+\section{Adaptive Quadrature}
+\label{sec:adaptive}
+Adaptive quadrature is the process of changing the width of each subinterval dependent on the difficulty of the function within each subinterval.
+An easy-to-implement process for this calculates the values of both the trapezoid and composite Simpson's 1/3 rules for the current subinterval, compares the two, and---should they significantly differ---splits the subinterval in two and repeats the process.\autocite[p. 1]{established}
+I seek to propose an alternative means of calculating a difficulty value and to compare the computational efficiency and accuracy of the two methods.
+
+\subsection{My Method}
+\label{sec:my_method}
+Because 2nd degree polynomials---which Simpson's 1/3 Rule uses---fit functions with consistent concavity well, and only encounter difficulty when the concavity changes over the course of the subinterval~(see \cref{fig:concavities}), my function for difficulty will operate via detecting changes in concavity.
+In order to accomplish this, my function~(see \cref{eqn:complexity}) finds the absolute value of the difference between the second derivatives of the two bounds.\\
+\emph{In order to avoid confusion with the use of absolute value and derivative notation, the following will use the notation \(f''(a)\) to indicate the same as \(\left.\frac{d^2f}{dx^2}\right|_{x=a}\)}
+
+\subfile{graphs/concavity/concavity}
+
+\begin{equation}
+    \label{eqn:complexity}
+    D(x_L, x_R) = \left|f''(x_R) - f''(x_L)\right|
+\end{equation}
+
+The value calculated using \cref{eqn:complexity} is then---similarly to in the established method---compared to a defined threshold value, and if it exceeds it, the subdivision is split in two and the process is repeated for each.
+
+An example of two steps in this process is shown in \cref{fig:my_adpt_stepone,fig:my_adpt_steptwo}.
+The numbers above each subinterval represent the value of \cref{eqn:complexity} with the two bounds of the subinterval as input, and the threshold for subdivision is a difficulty of \(2.000\).
+The second derivative is shown as a dashed dark gray function on the sketches in order to show how my difficulty function operates.
+
+\emph{%
+Note: \cref{fig:my_adpt_stepone,fig:my_adpt_steptwo} are examples of Normal Distributions.
+The reasoning for this is discussed in \cref{sec:normal}.%
+}
+
+\subfile{graphs/steps/my_method/first_step}
+
+\subfile{graphs/steps/my_method/second_step}
+
+\subsection{Comparison}
+\label{sec:comparison}
+In order to compare the two methods, I created a program that obtains the subdivision bounds, calculates the integral, and calculates the error as a percentage.
+\crefrange{lst:rust_functions}{lst:rust_composite} show the main functions that make this program function.
+
+\subfile{code/functions}
+
+\subfile{code/helpers}
+
+\subfile{code/rules}
+
+\subfile{code/composite}
+
+The two methods, in terms of number of operations per subinterval are extremely similar.
+The only difference between the two is that the established method calls the Trapezoid Rule~(see \cref{lst:rust_rules}), while my method calls the difficulty function~(see \cref{lst:rust_helpers}).
+Even within the two methods called, the number of operations performed is extremely similar.
+In the Trapezoid Rule function, two calls to the function \(f(x)\) are made and four additional arithmetic operations are performed.
+On the other hand, using the difficulty function, two calls to the function \(f(x)\) are made, and seven additional arithmetic operations are performed.
+This means that per subinterval, my method performs three more arithmetic operations than the existing method.
+Although this is proportional to the number of subintervals, considering the extreme speed of an arithmetic operation, there is very little difference in performance between the methods.
+The major downside to my method is that it requires the user to calculate the second derivative by hand before using the method.
+
+\subsubsection{Example Program Usage --- Normal Distribution}
+\label{sec:normal}
+The function I am using to test and compare both methods is a normal distribution as defined by \cref{eqn:normal}.
+A normal distribution is a good function to test quadrature on as it is impossible to integrate using the Fundamental Theorem of Calculus, and must be solved using quadrature.
+One effect that this has, however, is that error percentages cannot be 100\% correct, as the "correct value" has to be generated using quadrature as well.
+In order to mitigate this issue, the value considered "correct" was calculated with the Composite Simpson's 1/3 Rule with \(10,000\) subintervals.
+
+\begin{equation}
+    \label{eqn:normal}
+    f(x) = \frac{10}{\sqrt{2\pi}}e^{-\frac{x^2}{2}}
+\end{equation}
+
+In order to use my method, the second derivative of \cref{eqn:normal} must be calculated and hard coded into my program as in \cref{lst:rust_functions}.
+
+\begin{align*}
+    \der{f(x)} &= \frac{10}{\sqrt{2\pi}}e^{-\frac{x^2}{2}} \cdot \der{-\frac{x^2}{2}}\\
+    &= \frac{10}{\sqrt{2\pi}}e^{-\frac{x^2}{2}} \cdot \left(-\frac{1}{2} \cdot 2x\right)\\
+    &= -x \cdot \frac{10}{\sqrt{2\pi}}e^{-\frac{x^2}{2}}\\
+    \der{f(x)} &= -x \cdot f(x) \tageq\label{eqn:first_der}
+\end{align*}
+
+Note that \cref{eqn:first_der} includes \cref{eqn:normal}.
+This makes calculating the second derivative simpler and makes code reuse possible in my program.
+
+\begin{align*}
+    \frac{d^2(f(x))}{dx^2} &= \der{-x \cdot f(x)}\\
+    &= (-x) \cdot \der{f(x)} + \der{-x} \cdot f(x)\\
+    &= (-x) \cdot (-x \cdot f(x)) + (-1) \cdot f(x)\\
+    &= -x^2f(x) - f(x)\\
+    \frac{d^2(f(x))}{dx^2} &= f(x)(x^2-1)\tageq\label{eqn:2nd_derivative_normal}\\
+    &= \frac{10(x^2 - 1)}{\sqrt{2\pi}}e^{-\frac{x^2}{2}}
+\end{align*}
+
+Note again that \cref{eqn:2nd_derivative_normal} also includes \cref{eqn:normal}.
+Like with the first derivative, this allows code reuse within my program.
+
+Using the program, my method and the established method subdivide the function as shown in \cref{fig:my_adpt_subdiv,fig:other_adpt_subdiv} respectively.
+
+\subfile{graphs/adaptive/my_method/subdivisions}
+
+\subfile{graphs/adaptive/other_method/subdivisions}
+
+These subdivisions make sense for each method, as my method increases the subintervals while the curvature is changing from concave-up to concave-down and vice versa, while the established method increases the subintervals any time that \textit{either} the Trapezoid Rule or Simpson's Rule does not perform well.
+Since the Trapezoid Rule does not perform well at the most concave sections and Simpson's Rule does, it is logical that those sections would have the most disparity between the two rules' values, and thus be the most subdivided.
+It is hard to compare the overall accuracy of the two methods, as the thresholds are completely different, but I've picked two thresholds that have a similar number of subdivisions.
+When calculating the enclosed area of the interval \(-4\) to \(4\), using a threshold of \(0.002\) for the established method gave a value of \(9.999367\), which has an error of \(0.000210\%\), while using a threshold of \(0.4\) for my method gave a value of \(9.999754\), which has an error of \(0.004082\%\).
+
+Surprisingly, in this case my method was less accurate than the existing method, despite using 30 more arithmetic operations.
+In addition, my method required the manual calculation of the second derivative of the integrand.
+
+\section{Conclusion}
+\label{sec:conclusion}
+My method of adaptive quadrature, although extremely similar to the existing method, produces subintervals in dramatically different places.
+Whereas the existing method resulted in subintervals clustered around the sections of the integrand with high concavity, my method's subintervals focused on some of the least concave portions of the integrand.
+This is probably because on this function specifically, the portion over which the concavity changed sign was relatively simple.
+This meant that even with a relatively low subinterval count, this portion was easy to fit a quadratic to closely.
+Had the function's concavity shifted more rapidly, my method may have seen better results than the established method.
+
+Regardless of which performed better, both methods were extremely effective. An error percentage of \(0.004\)~(produced by my method), is still extremely low.
+This low error was accomplished with only 40 subintervals, which is significantly less than would have been needed for such a degree of accuracy had this function been evaluated in a non-adaptive manner.
+
+A further investigation could consider the effectiveness of the two methods on more difficult functions.
+Although my method performed more poorly than the established one on this particular function, a function with rapid fluctuations may have differing results.
+\label{mylastpage}
+
+\newpage
+\pagenumbering{Roman}
+\pagestyle{frontorback}
+\listoffigures
+\vspace{1cm}
+\listofsnippets
+\vspace{1cm}
+\thispagestyle{frontorback}
+\phantomsection
+\addcontentsline{toc}{section}{References}
+\printbibliography
+\end{document}
