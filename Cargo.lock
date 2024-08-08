@@ -500,7 +500,7 @@ dependencies = [
 
 [[package]]
 name = "harper-comments"
-version = "0.9.0"
+version = "0.9.2"
 dependencies = [
  "harper-core",
  "harper-html",
@@ -526,7 +526,7 @@ dependencies = [
 
 [[package]]
 name = "harper-core"
-version = "0.9.0"
+version = "0.9.2"
 dependencies = [
  "blanket",
  "divan",
@@ -547,7 +547,7 @@ dependencies = [
 
 [[package]]
 name = "harper-html"
-version = "0.9.0"
+version = "0.9.2"
 dependencies = [
  "harper-core",
  "harper-tree-sitter",
@@ -558,7 +558,7 @@ dependencies = [
 
 [[package]]
 name = "harper-ls"
-version = "0.9.0"
+version = "0.9.2"
 dependencies = [
  "anyhow",
  "clap",
@@ -581,7 +581,7 @@ dependencies = [
 
 [[package]]
 name = "harper-tree-sitter"
-version = "0.9.1"
+version = "0.9.2"
 dependencies = [
  "harper-core",
  "tree-sitter",

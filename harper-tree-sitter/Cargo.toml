@@ -1,6 +1,6 @@
 [package]
 name = "harper-tree-sitter"
-version = "0.9.1"
+version = "0.9.2"
 edition = "2021"
 description = "The language checker for developers."
 license = "Apache-2.0"
