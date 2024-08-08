@@ -118,8 +118,6 @@ impl Matcher {
             "deps" => "dependencies",
             "off","the","cuff" => "off-the-cuff",
             "an","in" => "and in",
-            "repo" => "repository",
-            "repos" => "repositories",
             "my","self" => "myself",
             "human","live" => "human life",
             "eight","grade" => "eighth grade",

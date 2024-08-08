@@ -181,6 +181,15 @@ mod tests {
         assert!(build_expanded().contains_key(&split("deallocate")));
     }
 
+    #[test]
+    fn expanded_contains_repo() {
+        let expanded = build_expanded();
+
+        assert!(expanded.contains_key(&split("repo")));
+        assert!(expanded.contains_key(&split("repos")));
+        assert!(expanded.contains_key(&split("repo's")));
+    }
+
     fn split(text: &str) -> CharString {
         text.chars().collect()
     }
