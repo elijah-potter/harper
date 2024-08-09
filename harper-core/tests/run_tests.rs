@@ -30,3 +30,4 @@ macro_rules! create_test {
 }
 
 create_test!(whack_bullets.md, 1);
+create_test!(preexisting.md, 0);
