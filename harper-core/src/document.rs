@@ -467,8 +467,8 @@ impl Document {
         self.tokens.remove_indices(to_remove);
     }
 
-    /// Searches for contractions and hyphenated words and condenses them down
-    /// into single tokens.
+    /// Searches for contractions and condenses them down into single
+    /// tokens.
     fn condense_contractions(&mut self) {
         if self.tokens.len() < 3 {
             return;
@@ -487,10 +487,6 @@ impl Document {
                 (
                     TokenKind::Word(..),
                     TokenKind::Punctuation(Punctuation::Apostrophe),
-                    TokenKind::Word(..)
-                ) | (
-                    TokenKind::Word(..),
-                    TokenKind::Punctuation(Punctuation::Hyphen),
                     TokenKind::Word(..)
                 )
             ) {
@@ -650,15 +646,6 @@ mod tests {
     #[test]
     fn medium_contraction2() {
         assert_condensed_contractions("There's no way", 5);
-    }
-
-    #[test]
-    fn condenses_pre_existing() {
-        assert_condensed_contractions("pre-existing", 1);
-        assert_condensed_contractions(
-            "There was a pre-existing problem with words with hyphens.",
-            18
-        );
     }
 
     #[test]
