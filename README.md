@@ -38,3 +38,9 @@ If you encounter any significant performance issues, please create an issue on t
 
 If you find a fix to any performance issue, we are open the contribution.
 Just make sure to read [our contribution guidelines first.](https://github.com/elijah-potter/harper/blob/master/CONTRIBUTING.md)
+
+## FAQs
+
+### Where did the name Harper come from?
+
+See [this blog post](https://elijahpotter.dev/articles/naming_harper).
