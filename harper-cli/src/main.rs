@@ -6,6 +6,7 @@ use anyhow::format_err;
 use ariadne::{Color, Label, Report, ReportKind, Source};
 use clap::Parser;
 use harper_comments::CommentParser;
+use harper_core::parsers::Markdown;
 use harper_core::{remove_overlaps, Document, FullDictionary, LintGroup, LintGroupConfig, Linter};
 
 #[derive(Debug, Parser)]
@@ -88,8 +89,16 @@ fn main() -> anyhow::Result<()> {
 fn load_file(file: &Path) -> anyhow::Result<(Document, String)> {
     let source = std::fs::read_to_string(file)?;
 
-    let parser = CommentParser::new_from_filename(file)
-        .ok_or(format_err!("Could not detect language ID."))?;
+    let parser: Box<dyn harper_core::parsers::Parser> =
+        if let Some("md") = file.extension().map(|v| v.to_str().unwrap()) {
+            Box::new(Markdown)
+        } else {
+            Box::new(
+                CommentParser::new_from_filename(file)
+                    .map(Box::new)
+                    .ok_or(format_err!("Could not detect language ID."))?
+            )
+        };
 
     Ok((Document::new(&source, Box::new(parser)), source))
 }

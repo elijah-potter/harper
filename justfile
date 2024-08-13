@@ -99,3 +99,5 @@ test:
 parse file:
   cargo run --bin harper-cli -- parse {{file}}
 
+lint file:
+  cargo run --bin harper-cli -- lint {{file}}

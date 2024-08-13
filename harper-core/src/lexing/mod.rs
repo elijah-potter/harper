@@ -43,7 +43,7 @@ pub fn lex_token(source: &[char]) -> Option<FoundToken> {
 fn lex_word(source: &[char]) -> Option<FoundToken> {
     let end = source
         .iter()
-        .position(|c| !c.is_lingual())
+        .position(|c| !c.is_english_lingual())
         .unwrap_or(source.len());
 
     if end == 0 {
@@ -157,4 +157,15 @@ fn lex_catch(_source: &[char]) -> Option<FoundToken> {
         next_index: 1,
         token: TokenKind::Unlintable
     })
+}
+
+#[cfg(test)]
+mod tests {
+    use super::lex_word;
+
+    #[test]
+    fn lexes_cjk_as_unlintable() {
+        let source: Vec<_> = "世".chars().collect();
+        assert!(lex_word(&source).is_none());
+    }
 }
