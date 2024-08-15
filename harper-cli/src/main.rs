@@ -34,10 +34,7 @@ fn main() -> anyhow::Result<()> {
         Args::Lint { file, count } => {
             let (doc, source) = load_file(&file)?;
 
-            let mut linter = LintGroup::new(
-                LintGroupConfig::default(),
-                FullDictionary::create_from_curated()
-            );
+            let mut linter = LintGroup::new(LintGroupConfig::default(), FullDictionary::curated());
             let mut lints = linter.lint(&doc);
 
             if count {
@@ -89,7 +86,7 @@ fn main() -> anyhow::Result<()> {
 fn load_file(file: &Path) -> anyhow::Result<(Document, String)> {
     let source = std::fs::read_to_string(file)?;
 
-    let parser: Box<dyn harper_core::parsers::Parser> =
+    let mut parser: Box<dyn harper_core::parsers::Parser> =
         if let Some("md") = file.extension().map(|v| v.to_str().unwrap()) {
             Box::new(Markdown)
         } else {
@@ -100,5 +97,5 @@ fn load_file(file: &Path) -> anyhow::Result<(Document, String)> {
             )
         };
 
-    Ok((Document::new(&source, Box::new(parser)), source))
+    Ok((Document::new_curated(&source, &mut parser), source))
 }

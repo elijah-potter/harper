@@ -1,7 +1,7 @@
 use is_macro::Is;
 use serde::{Deserialize, Serialize};
 
-#[derive(Debug, Is, Clone, Copy, Serialize, Deserialize, PartialEq, Eq, PartialOrd)]
+#[derive(Debug, Is, Clone, Copy, Serialize, Deserialize, PartialEq, Eq, PartialOrd, Default)]
 #[serde(tag = "kind")]
 pub enum Punctuation {
     /// `…`
@@ -13,6 +13,7 @@ pub enum Punctuation {
     /// `&`
     Ampersand,
     /// `.`
+    #[default]
     Period,
     /// `!`
     Bang,

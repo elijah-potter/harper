@@ -1,6 +1,6 @@
 use hashbrown::HashMap;
 use serde::{Deserialize, Serialize};
-use smallvec::ToSmallVec;
+use smallvec::{smallvec, ToSmallVec};
 
 use super::affix_replacement::AffixReplacement;
 use super::expansion::{Expansion, HumanReadableExpansion};
@@ -33,22 +33,30 @@ impl AttributeList {
     pub fn expand_marked_word(
         &self,
         word: MarkedWord,
+        metadata: WordMetadata,
         dest: &mut HashMap<CharString, WordMetadata>
     ) {
         dest.reserve(word.attributes.len() + 1);
+        let mut gifted_metadata = WordMetadata::default();
 
         for attr in &word.attributes {
             let Some(expansion) = self.affixes.get(attr) else {
                 continue;
             };
 
-            let mut new_words = HashMap::new();
+            let mut new_words: HashMap<CharString, WordMetadata> = HashMap::new();
 
             for replacement in &expansion.replacements {
                 if let Some(replaced) =
                     Self::apply_replacement(replacement, &word.letters, expansion.suffix)
                 {
-                    new_words.insert(replaced, expansion.adds_metadata);
+                    if let Some(val) = new_words.get_mut(&replaced) {
+                        *val = val.or(&expansion.adds_metadata);
+                    } else {
+                        new_words.insert(replaced, expansion.adds_metadata.or(&metadata));
+                    }
+
+                    gifted_metadata = gifted_metadata.or(&expansion.gifts_metadata);
                 }
             }
 
@@ -64,21 +72,34 @@ impl AttributeList {
                     }
                 }
 
-                for (new_word, _metadata) in new_words {
+                if new_words.get(&smallvec!['h', 'a', 's']).is_some() {
+                    dbg!(&word);
+                }
+
+                for (new_word, metadata) in new_words {
                     self.expand_marked_word(
                         MarkedWord {
                             letters: new_word,
                             attributes: opp_attr.clone()
                         },
+                        metadata,
                         dest
                     );
                 }
             } else {
-                dest.extend(new_words.into_iter());
+                for (key, value) in new_words.into_iter() {
+                    if let Some(val) = dest.get_mut(&key) {
+                        *val = val.or(&value);
+                    } else {
+                        dest.insert(key, value);
+                    }
+                }
             }
         }
 
-        dest.insert(word.letters, WordMetadata::default());
+        if !dest.contains_key(&word.letters) {
+            dest.insert(word.letters, metadata.or(&gifted_metadata));
+        }
     }
 
     /// Expand an iterator of marked words into strings.
@@ -86,11 +107,11 @@ impl AttributeList {
     /// unique.
     pub fn expand_marked_words(
         &self,
-        words: impl IntoIterator<Item = MarkedWord>,
+        words: impl IntoIterator<Item = (MarkedWord, WordMetadata)>,
         dest: &mut HashMap<CharString, WordMetadata>
     ) {
-        for word in words {
-            self.expand_marked_word(word, dest);
+        for (word, word_metadata) in words {
+            self.expand_marked_word(word, word_metadata, dest);
         }
     }
 

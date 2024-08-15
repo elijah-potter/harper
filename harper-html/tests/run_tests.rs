@@ -14,11 +14,12 @@ macro_rules! create_test {
                     )
                  );
 
-                 let document = Document::new_markdown(&source);
+                 let dict = FullDictionary::curated();
+                 let document = Document::new_markdown(&source, &dict);
 
                  let mut linter = LintGroup::new(
                      LintGroupConfig::default(),
-                     FullDictionary::create_from_curated()
+                     dict
                  );
                  let lints = linter.lint(&document);
 

@@ -58,6 +58,28 @@ pub enum TokenKind {
 }
 
 impl TokenKind {
+    /// Checks that `self` is the same enum variant as `other`, regardless of
+    /// whether the inner metadata is also equal.
+    pub fn matches_variant_of(&self, other: &Self) -> bool {
+        self.with_default_data() == other.with_default_data()
+    }
+
+    /// Produces a copy of `self` with any inner data replaced with it's default
+    /// value. Useful for making comparisons on just the variant of the
+    /// enum.
+    pub fn with_default_data(&self) -> Self {
+        match self {
+            TokenKind::Word(_) => TokenKind::Word(Default::default()),
+            TokenKind::Punctuation(_) => TokenKind::Punctuation(Default::default()),
+            TokenKind::Number(..) => TokenKind::Number(Default::default(), Default::default()),
+            TokenKind::Space(_) => TokenKind::Space(Default::default()),
+            TokenKind::Newline(_) => TokenKind::Newline(Default::default()),
+            _ => *self
+        }
+    }
+}
+
+impl TokenKind {
     /// Construct a [`TokenKind::Word`] with no metadata.
     pub fn blank_word() -> Self {
         Self::Word(WordMetadata::default())

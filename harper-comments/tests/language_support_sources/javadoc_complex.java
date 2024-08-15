@@ -19,7 +19,7 @@ class TestClass {
   /**
    * This doc has a link in it: {@link this sould b ignor} but not tis
    *
-   * @param this is an other test.
+   * @param name this is an other test.
    */
   public static void greet(String name) {
     System.out.println("Hello " + name + ".");

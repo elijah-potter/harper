@@ -11,6 +11,7 @@ use harper_core::{
     FullDictionary,
     LintGroup,
     Linter,
+    Lrc,
     MergedDictionary,
     Token,
     TokenKind,
@@ -61,8 +62,9 @@ use crate::pos_conv::range_to_span;
 #[derive(Default)]
 struct DocumentState {
     document: Document,
-    ident_dict: Arc<FullDictionary>,
-    linter: LintGroup<MergedDictionary<FullDictionary>>,
+    ident_dict: Lrc<FullDictionary>,
+    dict: Lrc<MergedDictionary<FullDictionary>>,
+    linter: LintGroup<Lrc<MergedDictionary<FullDictionary>>>,
     language_id: Option<String>
 }
 
@@ -76,7 +78,7 @@ pub struct Backend {
 
 impl Backend {
     pub fn new(client: Client, config: Config) -> Self {
-        let dictionary = FullDictionary::create_from_curated();
+        let dictionary = FullDictionary::curated();
 
         Self {
             client,
@@ -234,7 +236,7 @@ impl Backend {
         let mut doc_state = DocumentState {
             linter: LintGroup::new(
                 config_lock.lint_config,
-                self.generate_file_dictionary(url).await?
+                self.generate_file_dictionary(url).await?.into()
             ),
             language_id: language_id
                 .map(|v| v.to_string())
@@ -248,7 +250,7 @@ impl Backend {
         };
 
         doc_state.document =
-            if let Some(ts_parser) = CommentParser::new_from_language_id(language_id) {
+            if let Some(mut ts_parser) = CommentParser::new_from_language_id(language_id) {
                 let source: Vec<char> = text.chars().collect();
                 let source = Arc::new(source);
 
@@ -259,20 +261,22 @@ impl Backend {
                         doc_state.ident_dict = new_dict.clone();
                         let mut merged = self.generate_file_dictionary(url).await?;
                         merged.add_dictionary(new_dict);
+                        let merged = Arc::new(merged);
 
-                        doc_state.linter = LintGroup::new(config_lock.lint_config, merged);
+                        doc_state.linter = LintGroup::new(config_lock.lint_config, merged.clone());
+                        doc_state.dict = merged.clone();
                     }
                 }
 
-                Document::new_from_vec(source, Box::new(ts_parser))
+                Document::new_from_vec(source, &mut ts_parser, &doc_state.dict)
             } else if language_id == "markdown" {
-                Document::new(text, Box::new(Markdown))
+                Document::new(text, &mut Markdown, &doc_state.dict)
             } else if language_id == "gitcommit" {
-                Document::new(text, Box::new(GitCommitParser))
+                Document::new(text, &mut GitCommitParser, &doc_state.dict)
             } else if language_id == "html" {
-                Document::new(text, Box::new(HtmlParser::default()))
+                Document::new(text, &mut HtmlParser::default(), &doc_state.dict)
             } else if language_id == "mail" {
-                Document::new(text, Box::new(PlainEnglish))
+                Document::new(text, &mut PlainEnglish, &doc_state.dict)
             } else {
                 doc_lock.remove(url);
                 return Ok(());

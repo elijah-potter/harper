@@ -10,11 +10,8 @@
           "condition": "."
         }
       ],
-      "adds_metadata": {
-        "kind": null,
-        "tense": null,
-        "plural": null
-      }
+      "adds_metadata": {},
+      "gifts_metadata": {}
     },
     "L": {
       "suffix": true,
@@ -26,11 +23,8 @@
           "condition": "."
         }
       ],
-      "adds_metadata": {
-        "kind": null,
-        "tense": null,
-        "plural": null
-      }
+      "adds_metadata": {},
+      "gifts_metadata": {}
     },
     "E": {
       "suffix": false,
@@ -42,11 +36,8 @@
           "condition": "."
         }
       ],
-      "adds_metadata": {
-        "kind": null,
-        "tense": null,
-        "plural": null
-      }
+      "adds_metadata": {},
+      "gifts_metadata": {}
     },
     "Y": {
       "suffix": true,
@@ -58,11 +49,8 @@
           "condition": "."
         }
       ],
-      "adds_metadata": {
-        "kind": null,
-        "tense": null,
-        "plural": null
-      }
+      "adds_metadata": {},
+      "gifts_metadata": {}
     },
     "U": {
       "suffix": false,
@@ -74,11 +62,8 @@
           "condition": "."
         }
       ],
-      "adds_metadata": {
-        "kind": null,
-        "tense": null,
-        "plural": null
-      }
+      "adds_metadata": {},
+      "gifts_metadata": {}
     },
     "H": {
       "suffix": true,
@@ -95,11 +80,8 @@
           "condition": "[^y]"
         }
       ],
-      "adds_metadata": {
-        "kind": null,
-        "tense": null,
-        "plural": null
-      }
+      "adds_metadata": {},
+      "gifts_metadata": {}
     },
     "T": {
       "suffix": true,
@@ -126,11 +108,8 @@
           "condition": "[^ey]"
         }
       ],
-      "adds_metadata": {
-        "kind": null,
-        "tense": null,
-        "plural": null
-      }
+      "adds_metadata": {},
+      "gifts_metadata": {}
     },
     "R": {
       "suffix": true,
@@ -157,11 +136,8 @@
           "condition": "[^ey]"
         }
       ],
-      "adds_metadata": {
-        "kind": null,
-        "tense": null,
-        "plural": null
-      }
+      "adds_metadata": {},
+      "gifts_metadata": {}
     },
     "C": {
       "suffix": false,
@@ -173,11 +149,8 @@
           "condition": "."
         }
       ],
-      "adds_metadata": {
-        "kind": null,
-        "tense": null,
-        "plural": null
-      }
+      "adds_metadata": {},
+      "gifts_metadata": {}
     },
     "V": {
       "suffix": true,
@@ -194,11 +167,8 @@
           "condition": "[^e]"
         }
       ],
-      "adds_metadata": {
-        "kind": null,
-        "tense": null,
-        "plural": null
-      }
+      "adds_metadata": {},
+      "gifts_metadata": {}
     },
     "N": {
       "suffix": true,
@@ -220,11 +190,8 @@
           "condition": "[^ey]"
         }
       ],
-      "adds_metadata": {
-        "kind": null,
-        "tense": null,
-        "plural": null
-      }
+      "adds_metadata": {},
+      "gifts_metadata": {}
     },
     "A": {
       "suffix": false,
@@ -236,11 +203,8 @@
           "condition": "."
         }
       ],
-      "adds_metadata": {
-        "kind": null,
-        "tense": null,
-        "plural": null
-      }
+      "adds_metadata": {},
+      "gifts_metadata": {}
     },
     "Z": {
       "suffix": true,
@@ -267,11 +231,8 @@
           "condition": "[^ey]"
         }
       ],
-      "adds_metadata": {
-        "kind": null,
-        "tense": null,
-        "plural": null
-      }
+      "adds_metadata": {},
+      "gifts_metadata": {}
     },
     "P": {
       "suffix": true,
@@ -293,11 +254,8 @@
           "condition": "[^y]"
         }
       ],
-      "adds_metadata": {
-        "kind": null,
-        "tense": null,
-        "plural": null
-      }
+      "adds_metadata": {},
+      "gifts_metadata": {}
     },
     "M": {
       "suffix": true,
@@ -310,9 +268,12 @@
         }
       ],
       "adds_metadata": {
-        "kind": null,
-        "tense": null,
-        "plural": null
+        "possessive": true
+      },
+      "gifts_metadata": {
+        "kind": {
+          "kind": "Noun"
+        }
       }
     },
     "F": {
@@ -325,11 +286,8 @@
           "condition": "."
         }
       ],
-      "adds_metadata": {
-        "kind": null,
-        "tense": null,
-        "plural": null
-      }
+      "adds_metadata": {},
+      "gifts_metadata": {}
     },
     "B": {
       "suffix": true,
@@ -351,11 +309,8 @@
           "condition": "[^aeiou]e"
         }
       ],
-      "adds_metadata": {
-        "kind": null,
-        "tense": null,
-        "plural": null
-      }
+      "adds_metadata": {},
+      "gifts_metadata": {}
     },
     "S": {
       "suffix": true,
@@ -383,10 +338,12 @@
         }
       ],
       "adds_metadata": {
-        "kind": null,
-        "tense": null,
-        "plural": true
-      }
+        "kind": {
+          "kind": "Noun",
+          "plural": true
+        }
+      },
+      "gifts_metadata": {}
     },
     "D": {
       "suffix": true,
@@ -414,9 +371,15 @@
         }
       ],
       "adds_metadata": {
-        "kind": null,
-        "tense": null,
-        "plural": null
+        "kind": {
+          "kind": "Adjective"
+        }
+      },
+      "gifts_metadata": {
+        "kind": {
+          "kind": "Noun",
+          "is_proper": null
+        }
       }
     },
     "G": {
@@ -435,9 +398,14 @@
         }
       ],
       "adds_metadata": {
-        "kind": null,
-        "tense": null,
-        "plural": null
+        "kind": {
+          "kind": "Adjective"
+        }
+      },
+      "gifts_metadata": {
+        "kind": {
+          "kind": "Verb"
+        }
       }
     },
     "Q": {
@@ -450,11 +418,8 @@
           "condition": "."
         }
       ],
-      "adds_metadata": {
-        "kind": null,
-        "tense": null,
-        "plural": null
-      }
+      "adds_metadata": {},
+      "gifts_metadata": {}
     },
     "O": {
       "suffix": true,
@@ -466,11 +431,8 @@
           "condition": "."
         }
       ],
-      "adds_metadata": {
-        "kind": null,
-        "tense": null,
-        "plural": null
-      }
+      "adds_metadata": {},
+      "gifts_metadata": {}
     },
     "I": {
       "suffix": false,
@@ -482,11 +444,8 @@
           "condition": "."
         }
       ],
-      "adds_metadata": {
-        "kind": null,
-        "tense": null,
-        "plural": null
-      }
+      "adds_metadata": {},
+      "gifts_metadata": {}
     },
     "X": {
       "suffix": true,
@@ -508,11 +467,8 @@
           "condition": "[^ey]"
         }
       ],
-      "adds_metadata": {
-        "kind": null,
-        "tense": null,
-        "plural": null
-      }
+      "adds_metadata": {},
+      "gifts_metadata": {}
     },
     "J": {
       "suffix": true,
@@ -529,11 +485,8 @@
           "condition": "[^e]"
         }
       ],
-      "adds_metadata": {
-        "kind": null,
-        "tense": null,
-        "plural": null
-      }
+      "adds_metadata": {},
+      "gifts_metadata": {}
     }
   }
 }

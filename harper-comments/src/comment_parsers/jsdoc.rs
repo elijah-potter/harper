@@ -153,20 +153,24 @@ mod tests {
     #[test]
     fn escapes_loop() {
         let source = "/** This should _not_cause an infinite loop: {@ */";
-        let parser = CommentParser::new_from_language_id("javascript").unwrap();
-        Document::new(source, Box::new(parser));
+        let mut parser = CommentParser::new_from_language_id("javascript").unwrap();
+        Document::new_curated(source, &mut parser);
     }
 
     #[test]
     fn handles_inline_link() {
         let source = "/** See {@link MyClass} and [MyClass's foo property]{@link MyClass#foo}. */";
-        let parser = CommentParser::new_from_language_id("javascript").unwrap();
-        let document = Document::new(source, Box::new(parser));
+        let mut parser = CommentParser::new_from_language_id("javascript").unwrap();
+        let document = Document::new_curated(source, &mut parser);
 
-        assert_eq!(
-            document.tokens().map(|t| t.kind).collect::<Vec<_>>(),
-            vec![
-                TokenKind::blank_word(),
+        assert!(matches!(
+            document
+                .tokens()
+                .map(|t| t.kind)
+                .collect::<Vec<_>>()
+                .as_slice(),
+            &[
+                TokenKind::Word(..),
                 TokenKind::Space(1),
                 TokenKind::Unlintable,
                 TokenKind::Unlintable,
@@ -175,14 +179,14 @@ mod tests {
                 TokenKind::Unlintable,
                 TokenKind::Unlintable,
                 TokenKind::Space(1),
-                TokenKind::blank_word(),
+                TokenKind::Word(..),
                 TokenKind::Space(1),
                 TokenKind::Punctuation(Punctuation::OpenSquare),
-                TokenKind::blank_word(),
+                TokenKind::Word(..),
                 TokenKind::Space(1),
-                TokenKind::blank_word(),
+                TokenKind::Word(..),
                 TokenKind::Space(1),
-                TokenKind::blank_word(),
+                TokenKind::Word(..),
                 TokenKind::Punctuation(Punctuation::CloseSquare),
                 TokenKind::Unlintable,
                 TokenKind::Unlintable,
@@ -195,14 +199,14 @@ mod tests {
                 TokenKind::Punctuation(Punctuation::Period),
                 TokenKind::Newline(1),
             ]
-        );
+        ));
     }
 
     #[test]
     fn handles_class() {
         let source = "/** @class Circle representing a circle. */";
-        let parser = CommentParser::new_from_language_id("javascript").unwrap();
-        let document = Document::new(source, Box::new(parser));
+        let mut parser = CommentParser::new_from_language_id("javascript").unwrap();
+        let document = Document::new_curated(source, &mut parser);
 
         assert!(document
             .tokens()

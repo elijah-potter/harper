@@ -19,12 +19,13 @@ macro_rules! create_test {
                     )
                  );
 
-                 let parser = CommentParser::new_from_filename(Path::new(filename)).unwrap();
-                 let document = Document::new(&source, Box::new(parser));
+                 let mut parser = CommentParser::new_from_filename(Path::new(filename)).unwrap();
+                 let dict = FullDictionary::curated();
+                 let document = Document::new(&source, &mut parser, &dict);
 
                  let mut linter = LintGroup::new(
                      LintGroupConfig::default(),
-                     FullDictionary::create_from_curated()
+                     dict
                  );
                  let lints = linter.lint(&document);
 

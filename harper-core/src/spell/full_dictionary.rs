@@ -1,11 +1,10 @@
 use hashbrown::HashMap;
-use once_cell::sync::Lazy;
 use smallvec::{SmallVec, ToSmallVec};
 
 use super::dictionary::Dictionary;
 use super::hunspell::{parse_default_attribute_list, parse_default_word_list};
 use super::seq_to_normalized;
-use crate::{CharString, WordMetadata};
+use crate::{CharString, Lrc, WordMetadata};
 
 /// A full, fat dictionary.
 /// All of the elements are stored in-memory.
@@ -26,27 +25,32 @@ pub struct FullDictionary {
     word_map: HashMap<CharString, WordMetadata>
 }
 
-fn uncached_inner_new() -> FullDictionary {
+fn uncached_inner_new() -> Lrc<FullDictionary> {
     let word_list = parse_default_word_list().unwrap();
     let attr_list = parse_default_attribute_list();
 
     // There will be at _least_ this number of words
     let mut word_map = HashMap::with_capacity(word_list.len());
 
-    attr_list.expand_marked_words(word_list, &mut word_map);
+    attr_list.expand_marked_words(
+        word_list.into_iter().map(|w| (w, WordMetadata::default())),
+        &mut word_map
+    );
 
     let mut words: Vec<CharString> = word_map.iter().map(|(v, _)| v.clone()).collect();
     words.sort();
     words.dedup();
 
-    FullDictionary {
+    Lrc::new(FullDictionary {
         word_map,
         word_len_starts: FullDictionary::create_len_starts(&mut words),
         words
-    }
+    })
 }
 
-static DICT: Lazy<FullDictionary> = Lazy::new(uncached_inner_new);
+thread_local! {
+    static DICT: Lrc<FullDictionary> = uncached_inner_new();
+}
 
 impl FullDictionary {
     pub fn new() -> Self {
@@ -59,8 +63,8 @@ impl FullDictionary {
 
     /// Create a dictionary from the curated Hunspell dictionary included
     /// in the Harper binary.
-    pub fn create_from_curated() -> Self {
-        DICT.clone()
+    pub fn curated() -> Lrc<Self> {
+        DICT.with(|v| v.clone())
     }
 
     /// Appends words to the dictionary.
@@ -134,6 +138,17 @@ impl Dictionary for FullDictionary {
         Box::new(self.words[start..end].iter().map(|v| v.as_slice()))
     }
 
+    fn get_word_metadata(&self, word: &[char]) -> WordMetadata {
+        let normalized = seq_to_normalized(word);
+        let lowercase: SmallVec<_> = normalized.iter().flat_map(|c| c.to_lowercase()).collect();
+
+        self.word_map
+            .get(normalized.as_ref())
+            .or(self.word_map.get(&lowercase))
+            .copied()
+            .unwrap_or_default()
+    }
+
     fn contains_word(&self, word: &[char]) -> bool {
         let normalized = seq_to_normalized(word);
         let lowercase: SmallVec<_> = normalized.iter().flat_map(|c| c.to_lowercase()).collect();
@@ -150,7 +165,7 @@ mod tests {
 
     #[test]
     fn curated_contains_no_duplicates() {
-        let dict = FullDictionary::create_from_curated();
+        let dict = FullDictionary::curated();
         assert!(dict.words_iter().all_unique());
     }
 }

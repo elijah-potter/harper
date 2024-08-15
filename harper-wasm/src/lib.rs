@@ -7,10 +7,10 @@ use harper_core::{remove_overlaps, Document, FullDictionary, LintGroup, Linter, 
 use once_cell::sync::Lazy;
 use wasm_bindgen::prelude::wasm_bindgen;
 
-static LINTER: Lazy<Mutex<LintGroup<FullDictionary>>> = Lazy::new(|| {
+static LINTER: Lazy<Mutex<LintGroup<Lrc<FullDictionary>>>> = Lazy::new(|| {
     Mutex::new(LintGroup::new(
         Default::default(),
-        FullDictionary::create_from_curated()
+        FullDictionary::curated()
     ))
 });
 
@@ -39,7 +39,8 @@ pub fn lint(text: String) -> Vec<Lint> {
     let source: Vec<_> = text.chars().collect();
     let source = Lrc::new(source);
 
-    let document = Document::new_from_vec(source.clone(), Box::new(Markdown));
+    let document =
+        Document::new_from_vec(source.clone(), &mut Markdown, &FullDictionary::curated());
 
     let mut lints = LINTER.lock().unwrap().lint(&document);
 
@@ -57,10 +58,33 @@ pub fn apply_suggestion(
     span: Span,
     suggestion: &Suggestion
 ) -> Result<String, String> {
-    let mut document = Document::new_markdown(&text);
-    document.apply_suggestion(&suggestion.inner, span.into());
+    let mut source: Vec<_> = text.chars().collect();
+    let span: harper_core::Span = span.into();
 
-    Ok(document.get_full_string())
+    match &suggestion.inner {
+        harper_core::Suggestion::ReplaceWith(chars) => {
+            // Avoid allocation if possible
+            if chars.len() == span.len() {
+                for (index, c) in chars.iter().enumerate() {
+                    source[index + span.start] = *c
+                }
+            } else {
+                let popped = source.split_off(span.start);
+
+                source.extend(chars);
+                source.extend(popped.into_iter().skip(span.len()));
+            }
+        }
+        harper_core::Suggestion::Remove => {
+            for i in span.end..source.len() {
+                source[i - span.len()] = source[i];
+            }
+
+            source.truncate(source.len() - span.len());
+        }
+    }
+
+    Ok(source.iter().collect())
 }
 
 #[wasm_bindgen]

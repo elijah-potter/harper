@@ -19,17 +19,21 @@ pub use lint_group::{LintGroup, LintGroupConfig};
 
 use crate::Document;
 
+#[cfg(not(feature = "concurrent"))]
+pub trait Linter {
+    fn lint(&mut self, document: &Document) -> Vec<Lint>;
+}
+#[cfg(feature = "concurrent")]
 pub trait Linter: Send + Sync {
     fn lint(&mut self, document: &Document) -> Vec<Lint>;
 }
 
 #[cfg(test)]
 mod tests {
-    use crate::parsers::Markdown;
     use crate::{Document, Linter};
 
     pub fn assert_lint_count(text: &str, mut linter: impl Linter, count: usize) {
-        let test = Document::new(text, Box::new(Markdown));
+        let test = Document::new_markdown_curated(text);
         let lints = linter.lint(&test);
         dbg!(&lints);
         assert_eq!(lints.len(), count);

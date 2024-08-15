@@ -5,59 +5,73 @@ use std::fmt::Display;
 use itertools::Itertools;
 use paste::paste;
 
-use crate::linting::Suggestion;
 use crate::parsers::{Markdown, Parser, PlainEnglish};
 use crate::punctuation::Punctuation;
 use crate::span::Span;
 use crate::token::NumberSuffix;
 use crate::vec_ext::VecExt;
-use crate::{FatToken, Lrc, Token, TokenKind, TokenStringExt};
+use crate::{Dictionary, FatToken, FullDictionary, Lrc, Token, TokenKind, TokenStringExt};
 
 pub struct Document {
     source: Lrc<Vec<char>>,
-    tokens: Vec<Token>,
-    parser: Box<dyn Parser>
+    tokens: Vec<Token>
 }
 
 impl Default for Document {
     fn default() -> Self {
-        Self::new("", Box::new(PlainEnglish))
+        Self::new("", &mut PlainEnglish, &FullDictionary::curated())
     }
 }
 
 impl Document {
     /// Lexes and parses text to produce a document.
-    /// Choosing to parse with markdown may have a performance penalty
-    pub fn new(text: &str, parser: Box<dyn Parser>) -> Self {
+    pub fn new(text: &str, parser: &mut impl Parser, dictionary: &impl Dictionary) -> Self {
         let source: Vec<_> = text.chars().collect();
 
-        Self::new_from_vec(Lrc::new(source), parser)
+        Self::new_from_vec(Lrc::new(source), parser, dictionary)
     }
 
-    pub fn new_from_vec(source: Lrc<Vec<char>>, parser: Box<dyn Parser>) -> Self {
-        let mut doc = Self {
-            source,
-            tokens: Vec::new(),
-            parser
-        };
-        doc.parse();
+    /// Lexes and parses text to produce a document.
+    pub fn new_curated(text: &str, parser: &mut impl Parser) -> Self {
+        let source: Vec<_> = text.chars().collect();
 
-        doc
+        Self::new_from_vec(Lrc::new(source), parser, &FullDictionary::curated())
     }
 
-    pub fn new_plain_english(text: &str) -> Self {
-        Self::new(text, Box::new(PlainEnglish))
+    pub fn new_from_vec(
+        source: Lrc<Vec<char>>,
+        parser: &mut impl Parser,
+        dictionary: &impl Dictionary
+    ) -> Self {
+        let tokens = parser.parse(&source);
+
+        let mut document = Self { source, tokens };
+        document.parse(dictionary);
+
+        document
     }
 
-    pub fn new_markdown(text: &str) -> Self {
-        Self::new(text, Box::new(Markdown))
+    pub fn new_plain_english_curated(text: &str) -> Self {
+        Self::new(text, &mut PlainEnglish, &FullDictionary::curated())
+    }
+
+    pub fn new_plain_english(text: &str, dictionary: &impl Dictionary) -> Self {
+        Self::new(text, &mut PlainEnglish, dictionary)
+    }
+
+    /// Create a new Markdown document using the curated dictionary for tagging.
+    pub fn new_markdown_curated(text: &str) -> Self {
+        Self::new(text, &mut Markdown, &FullDictionary::curated())
+    }
+
+    pub fn new_markdown(text: &str, dictionary: &impl Dictionary) -> Self {
+        Self::new(text, &mut Markdown, dictionary)
     }
 
     /// Re-parse important language constructs.
     ///
     /// Should be run after every change to the underlying [`Self::source`].
-    fn parse(&mut self) {
-        self.tokens = self.parser.parse(&self.source);
+    fn parse(&mut self, dictionary: &impl Dictionary) {
         self.condense_spaces();
         self.condense_newlines();
         self.newlines_to_breaks();
@@ -65,6 +79,14 @@ impl Document {
         self.condense_dotted_initialisms();
         self.condense_number_suffixes();
         self.match_quotes();
+
+        for token in self.tokens.iter_mut() {
+            if let TokenKind::Word(meta) = &mut token.kind {
+                let word_source = token.span.get_content(&self.source);
+                let found_meta = dictionary.get_word_metadata(word_source);
+                *meta = meta.or(&found_meta);
+            }
+        }
     }
 
     /// Convert all sets of newlines greater than 2 to paragraph breaks.
@@ -262,35 +284,6 @@ impl Document {
 
     pub fn get_full_content(&self) -> &[char] {
         &self.source
-    }
-
-    pub fn apply_suggestion(&mut self, suggestion: &Suggestion, span: Span) {
-        let source = Lrc::make_mut(&mut self.source);
-
-        match suggestion {
-            Suggestion::ReplaceWith(chars) => {
-                // Avoid allocation if possible
-                if chars.len() == span.len() {
-                    for (index, c) in chars.iter().enumerate() {
-                        source[index + span.start] = *c
-                    }
-                } else {
-                    let popped = source.split_off(span.start);
-
-                    source.extend(chars);
-                    source.extend(popped.into_iter().skip(span.len()));
-                }
-            }
-            Suggestion::Remove => {
-                for i in span.end..source.len() {
-                    source[i - span.len()] = source[i];
-                }
-
-                source.truncate(source.len() - span.len());
-            }
-        }
-
-        self.parse();
     }
 
     /// Searches for quotation marks and fills the
@@ -586,14 +579,13 @@ mod tests {
     use itertools::Itertools;
 
     use super::Document;
-    use crate::parsers::{Markdown, PlainEnglish};
     use crate::token::TokenStringExt;
-    use crate::{Span, Token, TokenKind};
+    use crate::Span;
 
     #[test]
     fn parses_sentences_correctly() {
         let text = "There were three little pigs. They built three little homes.";
-        let document = Document::new(text, Box::new(PlainEnglish));
+        let document = Document::new_plain_english_curated(text);
 
         let mut sentence_strs = vec![];
 
@@ -613,12 +605,11 @@ mod tests {
     }
 
     fn assert_condensed_contractions(text: &str, final_tok_count: usize) {
-        let document = Document::new(text, Box::new(PlainEnglish));
+        let document = Document::new_plain_english_curated(text);
 
         assert_eq!(document.tokens.len(), final_tok_count);
 
-        let markdown_parser = Markdown;
-        let document = Document::new(text, Box::new(markdown_parser));
+        let document = Document::new_markdown_curated(text);
 
         assert_eq!(document.tokens.len(), final_tok_count);
     }
@@ -651,19 +642,16 @@ mod tests {
     #[test]
     fn selects_token_at_char_index() {
         let text = "There were three little pigs. They built three little homes.";
-        let document = Document::new(text, Box::new(PlainEnglish));
+        let document = Document::new_plain_english_curated(text);
 
-        assert_eq!(
-            document.get_token_at_char_index(19),
-            Some(Token {
-                kind: TokenKind::blank_word(),
-                span: Span::new(17, 23)
-            })
-        )
+        let got = document.get_token_at_char_index(19).unwrap();
+
+        assert!(got.kind.is_word());
+        assert_eq!(got.span, Span::new(17, 23));
     }
 
     fn assert_token_count(source: &str, count: usize) {
-        let document = Document::new_plain_english(source);
+        let document = Document::new_plain_english_curated(source);
 
         dbg!(document.tokens().map(|t| t.kind).collect_vec());
         assert_eq!(document.tokens.len(), count);

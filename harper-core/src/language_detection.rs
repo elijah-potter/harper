@@ -43,16 +43,16 @@ mod tests {
     use crate::{Document, FullDictionary};
 
     fn assert_not_english(source: &'static str) {
-        let dict = FullDictionary::create_from_curated();
-        let doc = Document::new_plain_english(source);
+        let dict = FullDictionary::curated();
+        let doc = Document::new_plain_english(source, &dict);
         let is_likely_english = is_likely_english(&doc, &dict);
         dbg!(source);
         assert!(!is_likely_english);
     }
 
     fn assert_english(source: &'static str) {
-        let dict = FullDictionary::create_from_curated();
-        let doc = Document::new_plain_english(source);
+        let dict = FullDictionary::curated();
+        let doc = Document::new_plain_english(source, &dict);
         let is_likely_english = is_likely_english(&doc, &dict);
         dbg!(source);
         assert!(is_likely_english);

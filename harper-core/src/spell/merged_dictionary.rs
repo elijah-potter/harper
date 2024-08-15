@@ -1,6 +1,7 @@
 use std::sync::Arc;
 
 use super::dictionary::Dictionary;
+use crate::WordMetadata;
 
 /// A simple wrapper over [`Dictionary`] that allows
 /// one to merge multiple dictionaries without copying.
@@ -47,6 +48,14 @@ where
             }
         }
         false
+    }
+
+    fn get_word_metadata(&self, word: &[char]) -> WordMetadata {
+        let mut found_metadata = WordMetadata::default();
+        for child in &self.children {
+            found_metadata = found_metadata.or(&child.get_word_metadata(word));
+        }
+        found_metadata
     }
 
     fn words_iter(&self) -> impl Iterator<Item = &'_ [char]> {

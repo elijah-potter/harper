@@ -214,12 +214,8 @@ mod tests {
 
     #[test]
     fn produces_no_duplicates() {
-        let results = suggest_correct_spelling_str(
-            "punctation",
-            100,
-            3,
-            &FullDictionary::create_from_curated()
-        );
+        let results =
+            suggest_correct_spelling_str("punctation", 100, 3, &FullDictionary::curated());
 
         dbg!(&results, results.iter().unique().collect_vec());
 

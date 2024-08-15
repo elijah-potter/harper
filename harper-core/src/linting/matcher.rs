@@ -14,6 +14,9 @@ use crate::{
 
 #[derive(Debug, PartialEq, PartialOrd, Clone)]
 struct PatternToken {
+    /// The general variant of the token.
+    /// The inner data of the [`TokenKind`] should be replaced with the default
+    /// value.
     kind: TokenKind,
     content: Option<CharString>
 }
@@ -22,7 +25,7 @@ impl PatternToken {
     fn from_token(token: Token, document: &Document) -> Self {
         if token.kind.is_word() {
             Self {
-                kind: token.kind,
+                kind: token.kind.with_default_data(),
                 content: Some(document.get_span_content(token.span).into())
             }
         } else {
@@ -346,6 +349,15 @@ impl Linter for Matcher {
                     };
 
                     let t_pattern = PatternToken::from_token(token, document);
+                    if pattern.content.is_some()
+                        && matches!(
+                            pattern.content.clone().unwrap().as_slice(),
+                            &['T', 'h', 'e', 'r', 'e']
+                        )
+                    {
+                        dbg!(&t_pattern);
+                        dbg!(pattern);
+                    }
 
                     if t_pattern != *pattern {
                         break;
@@ -385,17 +397,17 @@ mod tests {
 
     #[test]
     fn matches_therefore() {
-        let document = Document::new_plain_english("There fore.");
+        let document = Document::new_plain_english_curated("There fore.");
         let mut matcher = Matcher::new();
         let lints = matcher.lint(&document);
-        assert!(lints.len() == 1);
+        assert_eq!(lints.len(), 1);
     }
 
     #[test]
     fn matches_ellipsis() {
-        let document = Document::new_plain_english("...");
+        let document = Document::new_plain_english_curated("...");
         let mut matcher = Matcher::new();
         let lints = matcher.lint(&document);
-        assert!(lints.len() == 1);
+        assert_eq!(lints.len(), 1);
     }
 }
