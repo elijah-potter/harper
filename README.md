@@ -29,7 +29,17 @@ Harper is even small enough to load via [WebAssembly.](https://writewithharper.c
 
 ## Installation
 
-If you want to use Harper on your machine, you will want to look at the [documentation for `harper-ls`](./harper-ls/README.md), the Language Server Protocol implementation.
+If you want to use Harper on your machine, you have two choices.
+
+### `harper-ls`
+
+`harper-ls` provides an integration that works for most code editors. 
+
+[Read more here.](./harper-ls/README.md)
+
+### Harper Obsidian Integration
+
+If you use [Obsidian](https://obsidian.md/), you may install the [Harper Obsidian Plugin](https://github.com/elijah-potter/harper-obsidian-plugin) by searching for "Harper" in the community plugin store.
 
 ## Performance Issues
 
