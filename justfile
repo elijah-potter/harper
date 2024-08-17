@@ -89,7 +89,7 @@ dogfood:
   for file in `fd -e rs`
   do
     echo Linting $file
-    cargo run --bin harper-cli --quiet -- lint $file
+    cargo run --bin harper-cli --release --quiet -- lint $file
   done
 
 test:
