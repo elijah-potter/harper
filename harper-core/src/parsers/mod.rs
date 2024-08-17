@@ -20,7 +20,7 @@ pub trait StrParser {
 
 impl<T> StrParser for T
 where
-    T: Parser,
+    T: Parser
 {
     fn parse_str(&mut self, source: impl AsRef<str>) -> Vec<Token> {
         let source: Vec<_> = source.as_ref().chars().collect();
@@ -37,7 +37,7 @@ mod tests {
     fn assert_tokens_eq(
         test_str: impl AsRef<str>,
         expected: &[TokenKind],
-        parser: &mut impl Parser,
+        parser: &mut impl Parser
     ) {
         let chars: Vec<_> = test_str.as_ref().chars().collect();
         let tokens = parser.parse(&chars);
@@ -74,8 +74,8 @@ mod tests {
                 Space(1),
                 TokenKind::blank_word(),
                 Space(1),
-                TokenKind::blank_word(),
-            ],
+                TokenKind::blank_word()
+            ]
         )
     }
 
@@ -91,8 +91,8 @@ mod tests {
                 Space(1),
                 TokenKind::blank_word(),
                 Space(1),
-                TokenKind::blank_word(),
-            ],
+                TokenKind::blank_word()
+            ]
         );
     }
 
@@ -108,8 +108,8 @@ mod tests {
                 Newline(2),
                 TokenKind::blank_word(),
                 Space(1),
-                TokenKind::blank_word(),
-            ],
+                TokenKind::blank_word()
+            ]
         );
     }
 
