@@ -52,7 +52,21 @@ impl CharExt for char {
             unicode_blocks::CJK_UNIFIED_IDEOGRAPHS_EXTENSION_F,
             unicode_blocks::CJK_UNIFIED_IDEOGRAPHS_EXTENSION_G,
             unicode_blocks::CJK_UNIFIED_IDEOGRAPHS_EXTENSION_H,
-            unicode_blocks::CJK_UNIFIED_IDEOGRAPHS_EXTENSION_I
+            unicode_blocks::CJK_UNIFIED_IDEOGRAPHS_EXTENSION_I,
+            unicode_blocks::HANGUL_JAMO,
+            unicode_blocks::HANGUL_SYLLABLES,
+            unicode_blocks::HANGUL_JAMO_EXTENDED_A,
+            unicode_blocks::HANGUL_JAMO_EXTENDED_B,
+            unicode_blocks::HANGUL_COMPATIBILITY_JAMO,
+            unicode_blocks::CJK_SYMBOLS_AND_PUNCTUATION,
+            unicode_blocks::CJK_STROKES,
+            unicode_blocks::CJK_COMPATIBILITY,
+            unicode_blocks::CJK_COMPATIBILITY_FORMS,
+            unicode_blocks::CJK_COMPATIBILITY_IDEOGRAPHS,
+            unicode_blocks::CJK_COMPATIBILITY_IDEOGRAPHS_SUPPLEMENT,
+            unicode_blocks::CJK_RADICALS_SUPPLEMENT,
+            unicode_blocks::ENCLOSED_CJK_LETTERS_AND_MONTHS,
+            unicode_blocks::HIRAGANA
         ];
 
         blocks.contains(&block)

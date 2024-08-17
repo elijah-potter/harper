@@ -82,7 +82,7 @@ impl Backend {
 
         Self {
             client,
-            static_dictionary: dictionary.into(),
+            static_dictionary: dictionary,
             doc_state: Mutex::new(HashMap::new()),
             config: RwLock::new(config)
         }

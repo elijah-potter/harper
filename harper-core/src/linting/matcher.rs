@@ -349,15 +349,6 @@ impl Linter for Matcher {
                     };
 
                     let t_pattern = PatternToken::from_token(token, document);
-                    if pattern.content.is_some()
-                        && matches!(
-                            pattern.content.clone().unwrap().as_slice(),
-                            &['T', 'h', 'e', 'r', 'e']
-                        )
-                    {
-                        dbg!(&t_pattern);
-                        dbg!(pattern);
-                    }
 
                     if t_pattern != *pattern {
                         break;
