@@ -1,4 +1,5 @@
-use crate::{Document, Lint, LintKind, Linter, Suggestion, TokenStringExt};
+use crate::linting::{LintKind, Linter, Suggestion};
+use crate::{Document, Lint, TokenStringExt};
 
 /// Linter that checks to make sure small integers (< one hundred) are spelled
 /// out.

@@ -1,7 +1,8 @@
 use std::path::Path;
 
 use harper_comments::CommentParser;
-use harper_core::{Document, FullDictionary, LintGroup, LintGroupConfig, Linter};
+use harper_core::linting::{LintGroup, LintGroupConfig, Linter};
+use harper_core::{Document, FullDictionary};
 
 /// Creates a unit test checking that the linting of a source file in
 /// `language_support_sources` produces the expected number of lints.

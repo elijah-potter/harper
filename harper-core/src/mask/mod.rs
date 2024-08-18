@@ -4,10 +4,15 @@ use crate::Span;
 /// being parsed. They can be composed to do things like isolate comments from a
 /// programming language or disable linting for languages that have been
 /// determined to not be English.
+///
+/// This is primarily used by [`crate::parsers::Mask`] to create parsers for
+/// things like comments of programming languages.
 pub trait Masker: Send + Sync {
     fn create_mask(&mut self, source: &[char]) -> Mask;
 }
 
+/// Identifies portions of a [`char`] sequence that should __not__ be ignored by
+/// Harper.
 pub struct Mask {
     // Right now, there aren't any use-cases where we can't treat this as a stack.
     //

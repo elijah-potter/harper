@@ -4,13 +4,12 @@ use std::sync::Arc;
 
 use anyhow::anyhow;
 use harper_comments::CommentParser;
+use harper_core::linting::{LintGroup, Linter};
 use harper_core::parsers::{Markdown, PlainEnglish};
 use harper_core::{
     Dictionary,
     Document,
     FullDictionary,
-    LintGroup,
-    Linter,
     Lrc,
     MergedDictionary,
     Token,

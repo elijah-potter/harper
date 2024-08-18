@@ -1,4 +1,5 @@
-use harper_core::{Document, FullDictionary, LintGroup, LintGroupConfig, Linter};
+use harper_core::linting::{LintGroup, LintGroupConfig, Linter};
+use harper_core::{Document, FullDictionary};
 
 /// Creates a unit test checking that the linting of a Markdown document (in
 /// `tests_sources`) produces the expected number of lints.

@@ -1,4 +1,5 @@
-use crate::{CharString, Document, Lint, LintKind, Linter, Span, Token, TokenStringExt};
+use crate::linting::{LintKind, Linter};
+use crate::{CharString, Document, Lint, Span, Token, TokenStringExt};
 
 /// Linter that checks if multiple pronouns are being used right after each
 /// other. This is a common mistake to make during the revision process.

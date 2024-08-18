@@ -1,6 +1,6 @@
-use super::{Lint, LintKind, Linter};
+use super::{Lint, LintKind, Linter, Suggestion};
 use crate::token::TokenStringExt;
-use crate::{Document, Span, Suggestion, TokenKind};
+use crate::{Document, Span, TokenKind};
 
 /// Detect and warn that the sentence is too long.
 #[derive(Debug, Clone, Copy, Default)]

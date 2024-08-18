@@ -7,7 +7,7 @@ use super::seq_to_normalized;
 use crate::{CharString, Lrc, WordMetadata};
 
 /// A full, fat dictionary.
-/// All of the elements are stored in-memory.
+/// All elements are stored in-memory.
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct FullDictionary {
     /// Storing a separate [`Vec`] for iterations speeds up spellchecking by
@@ -25,6 +25,8 @@ pub struct FullDictionary {
     word_map: HashMap<CharString, WordMetadata>
 }
 
+/// The uncached function that is used to produce the original copy of the
+/// curated dictionary.
 fn uncached_inner_new() -> Lrc<FullDictionary> {
     let word_list = parse_default_word_list().unwrap();
     let attr_list = parse_default_attribute_list();
@@ -61,7 +63,7 @@ impl FullDictionary {
         }
     }
 
-    /// Create a dictionary from the curated Hunspell dictionary included
+    /// Create a dictionary from the curated dictionary included
     /// in the Harper binary.
     pub fn curated() -> Lrc<Self> {
         DICT.with(|v| v.clone())

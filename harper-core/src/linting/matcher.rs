@@ -1,16 +1,5 @@
-use crate::{
-    CharString,
-    Document,
-    Lint,
-    LintKind,
-    Linter,
-    Punctuation,
-    Span,
-    Suggestion,
-    Token,
-    TokenKind,
-    WordMetadata
-};
+use crate::linting::{Lint, LintKind, Linter, Suggestion};
+use crate::{CharString, Document, Punctuation, Span, Token, TokenKind, WordMetadata};
 
 #[derive(Debug, PartialEq, PartialOrd, Clone)]
 struct PatternToken {
@@ -383,8 +372,8 @@ impl Linter for Matcher {
 
 #[cfg(test)]
 mod tests {
-    use super::Matcher;
-    use crate::{Document, Linter};
+    use super::{Linter, Matcher};
+    use crate::Document;
 
     #[test]
     fn matches_therefore() {

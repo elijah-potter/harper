@@ -2,7 +2,8 @@ use std::borrow::Cow;
 
 use itertools::Itertools;
 
-use crate::{Document, Lint, LintKind, Linter, Suggestion, TokenStringExt};
+use crate::linting::{Lint, LintKind, Linter, Suggestion};
+use crate::{Document, TokenStringExt};
 
 #[derive(Debug, Default)]
 pub struct AnA;

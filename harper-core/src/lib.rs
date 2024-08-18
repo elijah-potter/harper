@@ -6,7 +6,7 @@ mod char_string;
 mod document;
 mod language_detection;
 mod lexing;
-mod linting;
+pub mod linting;
 mod mask;
 pub mod parsers;
 mod punctuation;
@@ -19,7 +19,7 @@ mod word_metadata;
 
 pub use char_string::{CharString, CharStringExt};
 pub use document::Document;
-pub use linting::{Lint, LintGroup, LintGroupConfig, LintKind, Linter, Suggestion};
+use linting::Lint;
 pub use mask::{Mask, Masker};
 pub use punctuation::{Punctuation, Quote};
 pub use span::Span;

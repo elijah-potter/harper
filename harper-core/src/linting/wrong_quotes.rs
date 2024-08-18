@@ -1,6 +1,6 @@
-use super::{Lint, Linter};
+use super::{Lint, Linter, Suggestion};
 use crate::document::Document;
-use crate::{Suggestion, Token, TokenStringExt};
+use crate::{Token, TokenStringExt};
 
 #[derive(Debug, Clone, Copy, Default)]
 pub struct WrongQuotes;

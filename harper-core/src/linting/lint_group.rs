@@ -23,7 +23,7 @@ macro_rules! create_lint_group_config {
             #[derive(Debug, Clone, Copy, Serialize, Deserialize, Default)]
             pub struct LintGroupConfig {
                 $(
-                    #[doc = "Configures the use of the `" $linter "` linter.
+                    #[doc = "Configures the use of the [`" $linter "`] linter.
                     If set to [`None`], the default configuration will be used."]
                     pub [<$linter:snake>]: Option<bool>,
                 )*
@@ -45,6 +45,8 @@ macro_rules! create_lint_group_config {
                 }
             }
 
+            /// A wrapper that combines all built-in Harper linters
+            /// into a single, configurable [`Linter`].
             pub struct LintGroup<T: Dictionary> {
                 $(
                     [<$linter:snake>]: $linter,

@@ -1,6 +1,6 @@
-use super::{Lint, Linter};
+use super::{Lint, LintKind, Linter, Suggestion};
 use crate::token::TokenStringExt;
-use crate::{Document, LintKind, Suggestion, Token, TokenKind};
+use crate::{Document, Token, TokenKind};
 
 #[derive(Debug, Default)]
 pub struct Spaces;

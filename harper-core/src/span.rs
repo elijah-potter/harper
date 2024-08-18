@@ -2,7 +2,7 @@ use std::ops::Range;
 
 use serde::{Deserialize, Serialize};
 
-/// A window in a [char].
+/// A window in a [`char`] sequence.
 #[derive(Debug, Clone, Copy, Serialize, Deserialize, Default, PartialEq, Eq)]
 pub struct Span {
     pub start: usize,

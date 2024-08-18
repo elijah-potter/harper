@@ -1,5 +1,6 @@
 use divan::{black_box, AllocProfiler, Bencher};
-use harper_core::{Document, FullDictionary, LintGroup, LintGroupConfig, Linter};
+use harper_core::linting::{LintGroup, LintGroupConfig, Linter};
+use harper_core::{Document, FullDictionary};
 
 #[global_allocator]
 static ALLOC: AllocProfiler = AllocProfiler::system();

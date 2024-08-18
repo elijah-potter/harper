@@ -12,6 +12,8 @@ use crate::token::NumberSuffix;
 use crate::vec_ext::VecExt;
 use crate::{Dictionary, FatToken, FullDictionary, Lrc, Token, TokenKind, TokenStringExt};
 
+/// A document containing some amount of lexed and parsed English text.
+/// This is
 pub struct Document {
     source: Lrc<Vec<char>>,
     tokens: Vec<Token>
@@ -24,20 +26,24 @@ impl Default for Document {
 }
 
 impl Document {
-    /// Lexes and parses text to produce a document.
+    /// Lexes and parses text to produce a document using a provided language
+    /// parser and dictionary.
     pub fn new(text: &str, parser: &mut impl Parser, dictionary: &impl Dictionary) -> Self {
         let source: Vec<_> = text.chars().collect();
 
         Self::new_from_vec(Lrc::new(source), parser, dictionary)
     }
 
-    /// Lexes and parses text to produce a document.
+    /// Lexes and parses text to produce a document using a provided language
+    /// parser and the included curated dictionary.
     pub fn new_curated(text: &str, parser: &mut impl Parser) -> Self {
         let source: Vec<_> = text.chars().collect();
 
         Self::new_from_vec(Lrc::new(source), parser, &FullDictionary::curated())
     }
 
+    /// Lexes and parses text to produce a document using a provided language
+    /// parser and dictionary.
     pub fn new_from_vec(
         source: Lrc<Vec<char>>,
         parser: &mut impl Parser,
@@ -51,19 +57,26 @@ impl Document {
         document
     }
 
+    /// Parse text to produce a document using the built-in [`PlainEnglish`]
+    /// parser and curated dictionary.
     pub fn new_plain_english_curated(text: &str) -> Self {
         Self::new(text, &mut PlainEnglish, &FullDictionary::curated())
     }
 
+    /// Parse text to produce a document using the built-in [`PlainEnglish`]
+    /// parser and a provided dictionary.
     pub fn new_plain_english(text: &str, dictionary: &impl Dictionary) -> Self {
         Self::new(text, &mut PlainEnglish, dictionary)
     }
 
-    /// Create a new Markdown document using the curated dictionary for tagging.
+    /// Parse text to produce a document using the built-in [`Markdown`] parser
+    /// and curated dictionary.
     pub fn new_markdown_curated(text: &str) -> Self {
         Self::new(text, &mut Markdown, &FullDictionary::curated())
     }
 
+    /// Parse text to produce a document using the built-in [`PlainEnglish`]
+    /// parser and the curated dictionary.
     pub fn new_markdown(text: &str, dictionary: &impl Dictionary) -> Self {
         Self::new(text, &mut Markdown, dictionary)
     }
@@ -162,10 +175,12 @@ impl Document {
         self.tokens.get(index).copied()
     }
 
+    /// Get an iterator over all the tokens contained in the document.
     pub fn tokens(&self) -> impl Iterator<Item = Token> + '_ {
         self.tokens.iter().copied()
     }
 
+    /// Get an iterator over all the tokens contained in the document.
     pub fn fat_tokens(&self) -> impl Iterator<Item = FatToken> + '_ {
         self.tokens().map(|token| token.to_fat(&self.source))
     }
@@ -194,7 +209,14 @@ impl Document {
             })
     }
 
-    /// Iterate over sentence chunks.
+    /// Iterate over chunks.
+    ///
+    /// For example, the following sentence contains two chunks separated by a
+    /// comma:
+    ///
+    /// ```text
+    /// Here is an example, it is short.
+    /// ```
     pub fn chunks(&self) -> impl Iterator<Item = &'_ [Token]> + '_ {
         let first_sentence = self
             .chunk_terminators()
@@ -229,7 +251,7 @@ impl Document {
         })
     }
 
-    /// Get the index of the last sentence terminator.
+    /// Get the index of the last sentence terminator in the document.
     fn last_sentence_terminator(&self) -> Option<usize> {
         self.tokens
             .iter()
@@ -243,6 +265,8 @@ impl Document {
             })
     }
 
+    /// Get an iterator over token slices that represent the individual
+    /// sentences in a document.
     pub fn sentences(&self) -> impl Iterator<Item = &'_ [Token]> + '_ {
         let first_sentence = self
             .sentence_terminators()
@@ -501,6 +525,7 @@ impl Document {
     }
 }
 
+/// Creates functions necessary to implement [`TokenStringExt]` on a document.
 macro_rules! create_fns_on_doc {
     ($thing:ident) => {
         paste! {

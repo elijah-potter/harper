@@ -1,5 +1,7 @@
 use smallvec::SmallVec;
 
+/// A char sequence that improves cache locality.
+/// Most English words are fewer than 6 characters.
 pub type CharString = SmallVec<[char; 6]>;
 
 pub trait CharStringExt {

@@ -2,8 +2,9 @@
 
 use std::sync::Mutex;
 
+use harper_core::linting::{LintGroup, Linter};
 use harper_core::parsers::Markdown;
-use harper_core::{remove_overlaps, Document, FullDictionary, LintGroup, Linter, Lrc};
+use harper_core::{remove_overlaps, Document, FullDictionary, Lrc};
 use once_cell::sync::Lazy;
 use wasm_bindgen::prelude::wasm_bindgen;
 
@@ -62,7 +63,7 @@ pub fn apply_suggestion(
     let span: harper_core::Span = span.into();
 
     match &suggestion.inner {
-        harper_core::Suggestion::ReplaceWith(chars) => {
+        harper_core::linting::Suggestion::ReplaceWith(chars) => {
             // Avoid allocation if possible
             if chars.len() == span.len() {
                 for (index, c) in chars.iter().enumerate() {
@@ -75,7 +76,7 @@ pub fn apply_suggestion(
                 source.extend(popped.into_iter().skip(span.len()));
             }
         }
-        harper_core::Suggestion::Remove => {
+        harper_core::linting::Suggestion::Remove => {
             for i in span.end..source.len() {
                 source[i - span.len()] = source[i];
             }
@@ -89,7 +90,7 @@ pub fn apply_suggestion(
 
 #[wasm_bindgen]
 pub struct Suggestion {
-    inner: harper_core::Suggestion
+    inner: harper_core::linting::Suggestion
 }
 
 #[wasm_bindgen]
@@ -100,7 +101,7 @@ pub enum SuggestionKind {
 
 #[wasm_bindgen]
 impl Suggestion {
-    pub(crate) fn new(inner: harper_core::Suggestion) -> Self {
+    pub(crate) fn new(inner: harper_core::linting::Suggestion) -> Self {
         Self { inner }
     }
 
@@ -109,28 +110,28 @@ impl Suggestion {
     /// string.
     pub fn get_replacement_text(&self) -> String {
         match &self.inner {
-            harper_core::Suggestion::Remove => "".to_string(),
-            harper_core::Suggestion::ReplaceWith(chars) => chars.iter().collect()
+            harper_core::linting::Suggestion::Remove => "".to_string(),
+            harper_core::linting::Suggestion::ReplaceWith(chars) => chars.iter().collect()
         }
     }
 
     pub fn kind(&self) -> SuggestionKind {
         match &self.inner {
-            harper_core::Suggestion::Remove => SuggestionKind::Remove,
-            harper_core::Suggestion::ReplaceWith(_) => SuggestionKind::Replace
+            harper_core::linting::Suggestion::Remove => SuggestionKind::Remove,
+            harper_core::linting::Suggestion::ReplaceWith(_) => SuggestionKind::Replace
         }
     }
 }
 
 #[wasm_bindgen]
 pub struct Lint {
-    inner: harper_core::Lint,
+    inner: harper_core::linting::Lint,
     source: Lrc<Vec<char>>
 }
 
 #[wasm_bindgen]
 impl Lint {
-    pub(crate) fn new(inner: harper_core::Lint, source: Lrc<Vec<char>>) -> Self {
+    pub(crate) fn new(inner: harper_core::linting::Lint, source: Lrc<Vec<char>>) -> Self {
         Self { inner, source }
     }
 

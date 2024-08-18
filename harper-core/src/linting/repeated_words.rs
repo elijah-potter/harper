@@ -1,8 +1,8 @@
 use hashbrown::HashSet;
 
-use super::{Lint, LintKind, Linter};
+use super::{Lint, LintKind, Linter, Suggestion};
 use crate::token::{Token, TokenKind, TokenStringExt};
-use crate::{CharString, Document, Span, Suggestion};
+use crate::{CharString, Document, Span};
 
 #[derive(Debug, Clone)]
 pub struct RepeatedWords {
