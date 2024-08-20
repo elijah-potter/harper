@@ -91,7 +91,7 @@ impl Backend {
         Some(config.file_dict_path.join(Self::file_dict_name(url)?))
     }
 
-    /// Load a speCific file's dictionary
+    /// Load a specific file's dictionary
     async fn load_file_dictionary(&self, url: &Url) -> Option<FullDictionary> {
         match load_dict(self.get_file_dict_path(url).await?).await {
             Ok(dict) => Some(dict),
@@ -201,6 +201,12 @@ impl Backend {
             doc_lock.remove(url);
             return Ok(());
         };
+        self.client
+            .log_message(
+                MessageType::INFO,
+                format!("Language id identified as {language_id}"),
+            )
+            .await;
 
         doc_state.document =
             if let Some(mut ts_parser) = CommentParser::new_from_language_id(language_id) {
@@ -222,7 +228,7 @@ impl Backend {
                 }
 
                 Document::new_from_vec(source, &mut ts_parser, &doc_state.dict)
-            } else if language_id == "tex" {
+            } else if language_id == "latex" {
                 Document::new(text, &mut LatexParser::default(), &doc_state.dict)
             } else if language_id == "markdown" {
                 Document::new(text, &mut Markdown, &doc_state.dict)
