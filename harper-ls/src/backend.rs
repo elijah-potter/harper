@@ -7,13 +7,7 @@ use harper_comments::CommentParser;
 use harper_core::linting::{LintGroup, Linter};
 use harper_core::parsers::{Markdown, PlainEnglish};
 use harper_core::{
-    Dictionary,
-    Document,
-    FullDictionary,
-    MergedDictionary,
-    Token,
-    TokenKind,
-    WordMetadata
+    Dictionary, Document, FullDictionary, MergedDictionary, Token, TokenKind, WordMetadata,
 };
 use harper_html::HtmlParser;
 use harper_latex::LatexParser;
@@ -40,19 +34,6 @@ use crate::document_state::DocumentState;
 use crate::git_commit_parser::GitCommitParser;
 use crate::pos_conv::range_to_span;
 
-<<<<<<< HEAD
-=======
-#[derive(Default)]
-struct DocumentState {
-    document: Document,
-    ident_dict: Lrc<FullDictionary>,
-    dict: Lrc<MergedDictionary<FullDictionary>>,
-    linter: LintGroup<Lrc<MergedDictionary<FullDictionary>>>,
-    language_id: Option<String>,
-}
-
-/// Deallocate
->>>>>>> 5440b62 (move latex parser to seperate crate and add support for language in harper-comments and harper-ls)
 pub struct Backend {
     client: Client,
     config: RwLock<Config>,
@@ -95,7 +76,7 @@ impl Backend {
     async fn load_file_dictionary(&self, url: &Url) -> Option<FullDictionary> {
         match load_dict(self.get_file_dict_path(url).await?).await {
             Ok(dict) => Some(dict),
-            Err(_err) => Some(FullDictionary::new())
+            Err(_err) => Some(FullDictionary::new()),
         }
     }
 
@@ -114,7 +95,7 @@ impl Backend {
 
         match load_dict(&config.user_dict_path).await {
             Ok(dict) => dict,
-            Err(_err) => FullDictionary::new()
+            Err(_err) => FullDictionary::new(),
         }
     }
 
