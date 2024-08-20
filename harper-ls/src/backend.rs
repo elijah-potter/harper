@@ -201,12 +201,6 @@ impl Backend {
             doc_lock.remove(url);
             return Ok(());
         };
-        self.client
-            .log_message(
-                MessageType::INFO,
-                format!("Language id identified as {language_id}"),
-            )
-            .await;
 
         doc_state.document =
             if let Some(mut ts_parser) = CommentParser::new_from_language_id(language_id) {
@@ -228,7 +222,7 @@ impl Backend {
                 }
 
                 Document::new_from_vec(source, &mut ts_parser, &doc_state.dict)
-            } else if language_id == "latex" {
+            } else if language_id == "tex" {
                 Document::new(text, &mut LatexParser::default(), &doc_state.dict)
             } else if language_id == "markdown" {
                 Document::new(text, &mut Markdown, &doc_state.dict)

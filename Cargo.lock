@@ -590,7 +590,6 @@ dependencies = [
  "tree-sitter-go",
  "tree-sitter-java",
  "tree-sitter-javascript",
- "tree-sitter-latex",
  "tree-sitter-lua",
  "tree-sitter-python",
  "tree-sitter-ruby",

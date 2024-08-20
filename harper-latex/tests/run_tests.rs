@@ -5,7 +5,6 @@ use harper_core::{Document, FullDictionary, LintGroup, LintGroupConfig, Linter};
 macro_rules! create_test {
     ($filename:ident.tex, $correct_expected:expr) => {
         paste::paste! {
-            #[ignore]
             #[test]
             fn [<lints_ $filename _correctly>](){
                  let source = include_str!(
