@@ -1,11 +1,11 @@
 # Format both Rust and JavaScript
 format:
   cargo +nightly fmt  
-  cd {{justfile_directory()}}/packages; yarn prettier -w .
+  cd "{{justfile_directory()}}/packages"; yarn prettier -w .
 
 # Build the WebAssembly for a specific target (usually either `web` or `bundler`)
 build-wasm target:
-  cd {{justfile_directory()}}/harper-wasm && wasm-pack build --target {{target}}
+  cd "{{justfile_directory()}}/harper-wasm" && wasm-pack build --target {{target}}
 
 # Compile the web demo's dependencies and start a development server. Note that if you make changes to `harper-wasm`, you will have to re-run this command.
 dev-web:
@@ -14,7 +14,7 @@ dev-web:
 
   just build-wasm bundler
 
-  cd {{justfile_directory()}}/packages/web
+  cd "{{justfile_directory()}}/packages/web"
   yarn install -f
   yarn dev
 
@@ -23,7 +23,7 @@ build-web:
   set -eo pipefail
   just build-wasm bundler
   
-  cd {{justfile_directory()}}/packages/web
+  cd "{{justfile_directory()}}/packages/web"
   yarn install -f
   yarn run build
 
@@ -32,7 +32,7 @@ build-obsidian:
   set -eo pipefail
   
   just build-wasm web
-  cd {{justfile_directory()}}/packages/obsidian-plugin
+  cd "{{justfile_directory()}}/packages/obsidian-plugin"
 
   yarn install -f
   yarn build
@@ -43,7 +43,7 @@ build-vscode:
   #! /bin/bash
   set -eo pipefail
 
-  cd {{justfile_directory()}}/packages/vscode-plugin
+  cd "{{justfile_directory()}}/packages/vscode-plugin"
   yarn install -f 
   yarn compile
 
@@ -54,7 +54,7 @@ check:
   cargo +nightly fmt --check
   cargo clippy -- -Dwarnings
 
-  cd {{justfile_directory()}}/packages
+  cd "{{justfile_directory()}}/packages"
   yarn install
   yarn prettier --check .
   yarn eslint .
