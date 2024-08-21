@@ -36,3 +36,4 @@ create_test!(preexisting.md, 0);
 create_test!(issue_109.md, 0);
 create_test!(issue_109_ext.md, 0);
 create_test!(chinese_lorem_ipsum.md, 2);
+create_test!(obsidian_links.md, 2);

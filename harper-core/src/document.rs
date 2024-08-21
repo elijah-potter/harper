@@ -548,6 +548,7 @@ impl TokenStringExt for Document {
     create_fns_on_doc!(word);
     create_fns_on_doc!(space);
     create_fns_on_doc!(apostrophe);
+    create_fns_on_doc!(pipe);
     create_fns_on_doc!(quote);
     create_fns_on_doc!(number);
     create_fns_on_doc!(at);

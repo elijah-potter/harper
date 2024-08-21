@@ -58,6 +58,18 @@ pub enum TokenKind {
 }
 
 impl TokenKind {
+    pub fn is_open_square(&self) -> bool {
+        matches!(self, TokenKind::Punctuation(Punctuation::OpenSquare))
+    }
+
+    pub fn is_close_square(&self) -> bool {
+        matches!(self, TokenKind::Punctuation(Punctuation::CloseSquare))
+    }
+
+    pub fn is_pipe(&self) -> bool {
+        matches!(self, TokenKind::Punctuation(Punctuation::Pipe))
+    }
+
     /// Checks that `self` is the same enum variant as `other`, regardless of
     /// whether the inner metadata is also equal.
     pub fn matches_variant_of(&self, other: &Self) -> bool {
@@ -234,6 +246,7 @@ pub trait TokenStringExt {
     create_decl_for!(word);
     create_decl_for!(space);
     create_decl_for!(apostrophe);
+    create_decl_for!(pipe);
     create_decl_for!(quote);
     create_decl_for!(number);
     create_decl_for!(at);
@@ -243,6 +256,7 @@ impl TokenStringExt for [Token] {
     create_fns_for!(word);
     create_fns_for!(space);
     create_fns_for!(apostrophe);
+    create_fns_for!(pipe);
     create_fns_for!(quote);
     create_fns_for!(number);
     create_fns_for!(at);
