@@ -1,0 +1,12 @@
+[package]
+name = "harper-wiktionary-client"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+anyhow = "1.0.86"
+harper-core = { path = "../harper-core", version = "0.9.0", features = ["concurrent"] }
+reqwest = { version = "0.12.5", features = ["json"] }
+serde = { version = "1.0.208", features = ["derive"] }
+urlencoding = "2.1.3"
+tokio = { version = "1.39.2", features = ["full"] }
