@@ -9,7 +9,11 @@ pub struct LatexParser {
 
 impl LatexParser {
     fn node_condition(n: &Node) -> bool {
-        n.kind() == "text"
+        let mut cursor = n.walk();
+        n.kind() == "word"
+            && n.children(&mut cursor)
+                .into_iter()
+                .all(|c| c.kind().contains("command"))
     }
 }
 
