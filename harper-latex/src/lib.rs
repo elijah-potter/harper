@@ -9,11 +9,24 @@ pub struct LatexParser {
 
 impl LatexParser {
     fn node_condition(n: &Node) -> bool {
+        fn ancestor_contains(node: &Node, s: &str) -> bool {
+            if let Some(parent) = &node.parent() {
+                if parent.kind().contains(s) {
+                    true
+                } else {
+                    ancestor_contains(parent, s)
+                }
+            } else {
+                false
+            }
+        }
+
         let mut cursor = n.walk();
         n.kind() == "word"
             && n.children(&mut cursor)
                 .into_iter()
                 .all(|c| c.kind().contains("command"))
+            && !ancestor_contains(n, "include")
     }
 }
 
