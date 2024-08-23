@@ -3,11 +3,27 @@
 	"displayName": "Harper",
 	"description": "The grammar checker for developers",
 	"version": "0.0.1",
+	"private": true,
+	"author": "Elijah Potter",
+	"publisher": "elijah-potter",
+	"license": "Apache-2.0",
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/elijah-potter/harper"
+	},
+	"bugs": {
+		"url": "https://github.com/elijah-potter/harper/issues"
+	},
 	"engines": {
 		"vscode": "^1.89.0"
 	},
 	"categories": [
 		"Other"
+	],
+	"keywords": [
+		"grammar",
+		"spellcheck",
+		"writing"
 	],
 	"activationEvents": [
 		"onLanguage:markdown",
@@ -30,7 +46,7 @@
 		"onLanguage:html",
 		"onLanguage:java"
 	],
-	"main": "./dist/extension.js",
+	"main": "./build/extension.js",
 	"contributes": {
 		"commands": [],
 		"configuration": {
