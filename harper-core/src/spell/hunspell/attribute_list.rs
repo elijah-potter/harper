@@ -15,12 +15,12 @@ pub struct AttributeList {
 }
 
 impl AttributeList {
-    pub fn to_human_readable(&self) -> HumanReadableAttributeList {
+    pub fn into_human_readable(self) -> HumanReadableAttributeList {
         HumanReadableAttributeList {
             affixes: self
                 .affixes
-                .iter()
-                .map(|(affix, exp)| (*affix, exp.to_human_readable()))
+                .into_iter()
+                .map(|(affix, exp)| (affix, exp.into_human_readable()))
                 .collect()
         }
     }
@@ -33,7 +33,7 @@ impl AttributeList {
     pub fn expand_marked_word(
         &self,
         word: MarkedWord,
-        metadata: WordMetadata,
+        mut metadata: WordMetadata,
         dest: &mut HashMap<CharString, WordMetadata>
     ) {
         dest.reserve(word.attributes.len() + 1);
@@ -44,6 +44,7 @@ impl AttributeList {
                 continue;
             };
 
+            gifted_metadata.append(&expansion.gifts_metadata);
             let mut new_words: HashMap<CharString, WordMetadata> = HashMap::new();
 
             for replacement in &expansion.replacements {
@@ -51,12 +52,10 @@ impl AttributeList {
                     Self::apply_replacement(replacement, &word.letters, expansion.suffix)
                 {
                     if let Some(val) = new_words.get_mut(&replaced) {
-                        *val = val.or(&expansion.adds_metadata);
+                        val.append(&expansion.adds_metadata);
                     } else {
                         new_words.insert(replaced, expansion.adds_metadata.or(&metadata));
                     }
-
-                    gifted_metadata = gifted_metadata.or(&expansion.gifts_metadata);
                 }
             }
 
@@ -89,7 +88,7 @@ impl AttributeList {
             } else {
                 for (key, value) in new_words.into_iter() {
                     if let Some(val) = dest.get_mut(&key) {
-                        *val = val.or(&value);
+                        val.append(&value);
                     } else {
                         dest.insert(key, value);
                     }
@@ -97,8 +96,12 @@ impl AttributeList {
             }
         }
 
-        if !dest.contains_key(&word.letters) {
-            dest.insert(word.letters, metadata.or(&gifted_metadata));
+        metadata.append(&gifted_metadata);
+        if let Some(prev_val) = dest.get(&word.letters) {
+            metadata.append(prev_val);
+            dest.insert(word.letters, metadata);
+        } else {
+            dest.insert(word.letters, metadata);
         }
     }
 
@@ -177,11 +180,11 @@ pub struct HumanReadableAttributeList {
 }
 
 impl HumanReadableAttributeList {
-    pub fn to_normal(&self) -> Result<AttributeList, Error> {
+    pub fn into_normal(self) -> Result<AttributeList, Error> {
         let mut affixes = HashMap::with_capacity(self.affixes.len());
 
-        for (affix, expansion) in &self.affixes {
-            affixes.insert(*affix, expansion.to_normal()?);
+        for (affix, expansion) in self.affixes.into_iter() {
+            affixes.insert(affix, expansion.into_normal()?);
         }
 
         Ok(AttributeList { affixes })

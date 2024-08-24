@@ -142,13 +142,11 @@ impl Dictionary for FullDictionary {
 
     fn get_word_metadata(&self, word: &[char]) -> WordMetadata {
         let normalized = seq_to_normalized(word);
-        let lowercase: SmallVec<_> = normalized.iter().flat_map(|c| c.to_lowercase()).collect();
 
         self.word_map
             .get(normalized.as_ref())
-            .or(self.word_map.get(&lowercase))
-            .copied()
-            .unwrap_or_default()
+            .cloned()
+            .unwrap_or(WordMetadata::default())
     }
 
     fn contains_word(&self, word: &[char]) -> bool {

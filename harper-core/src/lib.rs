@@ -27,7 +27,7 @@ pub use spell::{Dictionary, FullDictionary, MergedDictionary};
 pub use sync::Lrc;
 pub use token::{FatToken, Token, TokenKind, TokenStringExt};
 pub use vec_ext::VecExt;
-pub use word_metadata::{Tense, WordKind, WordMetadata};
+pub use word_metadata::{Tense, WordMetadata};
 
 /// A utility function that removes overlapping lints in a vector,
 /// keeping the more important ones.

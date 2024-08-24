@@ -10,16 +10,16 @@ pub struct Expansion {
     pub suffix: bool,
     pub cross_product: bool,
     pub replacements: Vec<AffixReplacement>,
-    /// When the expansion is applied, the resulting word will have fields
-    /// overwritten with the non-null properties from here.
+    /// When the expansion is applied, the resulting word will have this
+    /// metadata appended to it.
     pub adds_metadata: WordMetadata,
-    /// When the expansion is applied, the __parent__ word will have the fields
-    /// overwritten with the non-null properties from here.
+    /// When the expansion is applied, the __parent__ word will have this
+    /// metadata appended to it.
     pub gifts_metadata: WordMetadata
 }
 
 impl Expansion {
-    pub fn to_human_readable(&self) -> HumanReadableExpansion {
+    pub fn into_human_readable(self) -> HumanReadableExpansion {
         HumanReadableExpansion {
             suffix: self.suffix,
             cross_product: self.cross_product,
@@ -44,7 +44,7 @@ pub struct HumanReadableExpansion {
 }
 
 impl HumanReadableExpansion {
-    pub fn to_normal(&self) -> Result<Expansion, Error> {
+    pub fn into_normal(self) -> Result<Expansion, Error> {
         let mut replacements = Vec::with_capacity(self.replacements.len());
 
         for replacement in &self.replacements {

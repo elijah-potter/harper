@@ -208,6 +208,8 @@ macro_rules! create_decl_for {
         paste! {
             fn [< first_ $thing >](&self) -> Option<Token> ;
 
+            fn [< last_ $thing >](&self) -> Option<Token> ;
+
             fn [<iter_ $thing _indices>](&self) -> impl Iterator<Item = usize> + '_;
 
             fn [<iter_ $thing s>](&self) -> impl Iterator<Item = Token> + '_;
@@ -220,6 +222,10 @@ macro_rules! create_fns_for {
         paste! {
             fn [< first_ $thing >](&self) -> Option<Token> {
                 self.iter().find(|v| v.kind.[<is_ $thing>]()).copied()
+            }
+
+            fn [< last_ $thing >](&self) -> Option<Token> {
+                self.iter().rev().find(|v| v.kind.[<is_ $thing>]()).copied()
             }
 
             fn [<iter_ $thing _indices>](&self) -> impl Iterator<Item = usize> + '_ {
@@ -250,6 +256,9 @@ pub trait TokenStringExt {
     create_decl_for!(quote);
     create_decl_for!(number);
     create_decl_for!(at);
+
+    fn iter_linking_verb_indices(&self) -> impl Iterator<Item = usize> + '_;
+    fn iter_linking_verbs(&self) -> impl Iterator<Item = Token> + '_;
 }
 
 impl TokenStringExt for [Token] {
@@ -281,5 +290,20 @@ impl TokenStringExt for [Token] {
 
     fn span(&self) -> Option<Span> {
         Some(Span::new(self.first()?.span.start, self.last()?.span.end))
+    }
+
+    fn iter_linking_verb_indices(&self) -> impl Iterator<Item = usize> + '_ {
+        self.iter_word_indices().filter(|idx| {
+            let word = self[*idx];
+            let TokenKind::Word(word) = word.kind else {
+                panic!("Should be unreachable.");
+            };
+
+            word.is_linking_verb()
+        })
+    }
+
+    fn iter_linking_verbs(&self) -> impl Iterator<Item = Token> + '_ {
+        self.iter_linking_verb_indices().map(|idx| self[idx])
     }
 }

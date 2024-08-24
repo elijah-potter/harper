@@ -533,6 +533,10 @@ macro_rules! create_fns_on_doc {
                 self.tokens.[< first_ $thing >]()
             }
 
+            fn [< last_ $thing >](&self) -> Option<Token> {
+                self.tokens.[< last_ $thing >]()
+            }
+
             fn [<iter_ $thing _indices>](&self) -> impl Iterator<Item = usize> + '_ {
                 self.tokens.[< iter_ $thing _indices >]()
             }
@@ -563,6 +567,14 @@ impl TokenStringExt for Document {
 
     fn span(&self) -> Option<Span> {
         self.tokens.span()
+    }
+
+    fn iter_linking_verb_indices(&self) -> impl Iterator<Item = usize> + '_ {
+        self.tokens.iter_linking_verb_indices()
+    }
+
+    fn iter_linking_verbs(&self) -> impl Iterator<Item = Token> + '_ {
+        self.tokens.iter_linking_verbs()
     }
 }
 
