@@ -80,7 +80,10 @@ fn starts_with_vowel(word: &[char]) -> bool {
 
     if matches!(
         word,
-        [] | ['u', 'k', ..] | ['e', 'u', 'p', 'h', ..] | ['e', 'u', 'g' | 'l' | 'c', ..]
+        [] | ['u', 'k', ..]
+            | ['e', 'u', 'p', 'h', ..]
+            | ['e', 'u', 'g' | 'l' | 'c', ..]
+            | ['o', 'n', 'c', 'e']
     ) {
         return false;
     }
@@ -165,5 +168,10 @@ mod tests {
     #[test]
     fn detects_llm_as_vowel() {
         assert_lint_count("Here is a LLM document.", AnA, 1);
+    }
+
+    #[test]
+    fn once_over() {
+        assert_lint_count("give this a once-over.", AnA, 0);
     }
 }
