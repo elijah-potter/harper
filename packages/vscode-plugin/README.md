@@ -2,36 +2,29 @@
 
 Currently, `harper-ls` needs to be in your `PATH` for this extension to work. [Read here to see how to install it](/harper-ls/README.md#installation).
 
-## Packaging and Installing
+## Manually Packaging and Installing
 
 ### Requirements
 
-- [`yarn`](https://yarnpkg.com)
-- [`vsce`](https://github.com/microsoft/vscode-vsce)
+- [`yarn`](https://classic.yarnpkg.com/en), as the package manager
+- [`just`](https://just.systems), as the command runner
 
 ### Steps
 
-- Clone or download the Harper repository:
+1. Clone or download the Harper repository:
 
-  ```console
-  git clone https://github.com/elijah-potter/harper
-  ```
+   ```console
+   git clone https://github.com/elijah-potter/harper && cd harper
+   ```
 
-- Navigate to `packages/vscode-plugin`.
-- Install dependencies:
+2. Package the extension:
 
-  ```console
-  yarn install
-  ```
+   ```console
+   just package-vscode
+   ```
 
-- Package the extension:
+3. Install the extension:
 
-  ```console
-  vsce package
-  ```
-
-- Install the extension:
-
-  ```console
-  code --install-extension harper-0.0.1.vsix
-  ```
+   ```console
+   code --install-extension packages/vscode-plugin/harper-0.0.1.vsix
+   ```

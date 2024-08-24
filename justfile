@@ -47,6 +47,17 @@ build-vscode:
   yarn install -f 
   yarn compile
 
+package-vscode:
+  #! /bin/bash
+  set -eo pipefail
+
+  path="{{justfile_directory()}}/packages/vscode-plugin"
+  cp LICENSE "${path}/LICENSE"
+  cd "$path"
+
+  yarn install -f
+  yarn package-extension
+
 check:
   #! /bin/bash
   set -eo pipefail
