@@ -3,7 +3,7 @@ use std::sync::Arc;
 use hashbrown::HashMap;
 
 use super::dictionary::Dictionary;
-use crate::{CharString, Lrc, WordMetadata};
+use crate::{CharString, WordMetadata};
 
 /// A simple wrapper over [`Dictionary`] that allows
 /// one to merge multiple dictionaries without copying.

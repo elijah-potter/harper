@@ -1,6 +1,6 @@
 use blanket::blanket;
 
-use crate::{Lrc, WordMetadata};
+use crate::WordMetadata;
 
 #[cfg(not(feature = "concurrent"))]
 #[blanket(derive(Rc))]
