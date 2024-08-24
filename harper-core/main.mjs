@@ -56,14 +56,11 @@ async function main(){
   /// Remove the line count
   lines.shift();
 
-  // This loop could probably concurrent, but we're rate limited so it doesn't really matter.
+  // This loop could probably be concurrent, but we're rate limited so it doesn't really matter.
   for (let line of lines){
-    if (!line.includes('\/')){
-      console.log(line); 
-      continue;
-    }
-
     let word = line.split('\/')[0];
+    let prevAffixes = line.split('\/')[1] ?? "";
+    
     let def = await getDefinition(word);
 
     if (def.en){
@@ -71,8 +68,9 @@ async function main(){
       // Dedup values
       kinds = [...new Set(kinds)];
 
-      let affixes = kinds.reduce((prev, v) => `${prev}${v}`);
-      console.log(`${line}${affixes}`);
+      let affixes = prevAffixes + kinds.reduce((prev, v) => `${prev}${v}`);
+
+      console.log(`${word}/${affixes}`);
     }else{
       console.log(line);
     }
