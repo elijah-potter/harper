@@ -16,6 +16,8 @@ jobs:
     steps:
     - uses: actions/checkout@v4
     - uses: actions/setup-node@v4
+      with:
+        node-version: 20
     - name: Install Rust Nightly
       run: rustup toolchain install nightly && rustup component add rustfmt --toolchain nightly
     - uses: extractions/setup-just@v1
