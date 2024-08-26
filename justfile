@@ -39,14 +39,6 @@ build-obsidian:
 
   zip harper-obsidian-plugin.zip manifest.json main.js
 
-build-vscode:
-  #! /bin/bash
-  set -eo pipefail
-
-  cd "{{justfile_directory()}}/packages/vscode-plugin"
-  yarn install -f 
-  yarn compile
-
 package-vscode:
   #! /bin/bash
   set -eo pipefail
@@ -87,7 +79,7 @@ precommit:
   cargo bench
 
   just build-obsidian
-  just build-vscode
+  just package-vscode 
   just build-web
 
 install:
