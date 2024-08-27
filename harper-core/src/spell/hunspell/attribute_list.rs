@@ -33,7 +33,6 @@ impl AttributeList {
     pub fn expand_marked_word(
         &self,
         word: MarkedWord,
-        mut metadata: WordMetadata,
         dest: &mut HashMap<CharString, WordMetadata>
     ) {
         dest.reserve(word.attributes.len() + 1);
@@ -54,7 +53,7 @@ impl AttributeList {
                     if let Some(val) = new_words.get_mut(&replaced) {
                         val.append(&expansion.adds_metadata);
                     } else {
-                        new_words.insert(replaced, expansion.adds_metadata.or(&metadata));
+                        new_words.insert(replaced, expansion.adds_metadata);
                     }
                 }
             }
@@ -78,12 +77,13 @@ impl AttributeList {
                 for (new_word, metadata) in new_words {
                     self.expand_marked_word(
                         MarkedWord {
-                            letters: new_word,
+                            letters: new_word.clone(),
                             attributes: opp_attr.clone()
                         },
-                        metadata,
                         dest
                     );
+                    let t_metadata = dest.get_mut(&new_word).unwrap();
+                    t_metadata.append(&metadata);
                 }
             } else {
                 for (key, value) in new_words.into_iter() {
@@ -96,12 +96,10 @@ impl AttributeList {
             }
         }
 
-        metadata.append(&gifted_metadata);
         if let Some(prev_val) = dest.get(&word.letters) {
-            metadata.append(prev_val);
-            dest.insert(word.letters, metadata);
+            dest.insert(word.letters, gifted_metadata.or(prev_val));
         } else {
-            dest.insert(word.letters, metadata);
+            dest.insert(word.letters, gifted_metadata);
         }
     }
 
@@ -110,11 +108,11 @@ impl AttributeList {
     /// unique.
     pub fn expand_marked_words(
         &self,
-        words: impl IntoIterator<Item = (MarkedWord, WordMetadata)>,
+        words: impl IntoIterator<Item = MarkedWord>,
         dest: &mut HashMap<CharString, WordMetadata>
     ) {
-        for (word, word_metadata) in words {
-            self.expand_marked_word(word, word_metadata, dest);
+        for word in words {
+            self.expand_marked_word(word, dest);
         }
     }
 

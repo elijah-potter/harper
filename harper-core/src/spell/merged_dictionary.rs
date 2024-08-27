@@ -74,4 +74,14 @@ where
                 .flat_map(move |c| c.words_with_len_iter(len))
         )
     }
+
+    fn contains_word_str(&self, word: &str) -> bool {
+        let chars: CharString = word.chars().collect();
+        self.contains_word(&chars)
+    }
+
+    fn get_word_metadata_str(&self, word: &str) -> WordMetadata {
+        let chars: CharString = word.chars().collect();
+        self.get_word_metadata(&chars)
+    }
 }

@@ -3,6 +3,7 @@ use serde::{Deserialize, Serialize};
 
 use super::an_a::AnA;
 use super::correct_number_suffix::CorrectNumberSuffix;
+use super::linking_verbs::LinkingVerbs;
 use super::long_sentences::LongSentences;
 use super::matcher::Matcher;
 use super::multiple_sequential_pronouns::MultipleSequentialPronouns;
@@ -105,7 +106,8 @@ create_lint_group_config!(
     Matcher => true,
     CorrectNumberSuffix => true,
     NumberSuffixCapitalization => true,
-    MultipleSequentialPronouns => true
+    MultipleSequentialPronouns => true,
+    LinkingVerbs => true
 );
 
 impl<T: Dictionary + Default> Default for LintGroup<T> {

@@ -87,10 +87,7 @@ mod tests {
 
         let mut expanded = HashMap::new();
 
-        attributes.expand_marked_words(
-            words.into_iter().map(|w| (w, WordMetadata::default())),
-            &mut expanded
-        );
+        attributes.expand_marked_words(words, &mut expanded);
         let expanded: Vec<String> = expanded
             .into_iter()
             .map(|v| v.0.into_iter().collect())
@@ -157,10 +154,7 @@ mod tests {
 
         let mut expanded: HashMap<CharString, WordMetadata> = HashMap::new();
 
-        attributes.expand_marked_words(
-            words.into_iter().map(|w| (w, WordMetadata::default())),
-            &mut expanded
-        );
+        attributes.expand_marked_words(words, &mut expanded);
 
         let giant_data = expanded.get(&split("giant")).unwrap();
         assert!(giant_data.is_noun());
@@ -175,10 +169,7 @@ mod tests {
 
         let mut expanded = HashMap::new();
 
-        attributes.expand_marked_words(
-            words.into_iter().map(|w| (w, WordMetadata::default())),
-            &mut expanded
-        );
+        attributes.expand_marked_words(words, &mut expanded);
 
         expanded
     }

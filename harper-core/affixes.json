@@ -337,7 +337,11 @@
           "condition": "[^sxzhy]"
         }
       ],
-      "adds_metadata": {},
+      "adds_metadata": {
+        "noun": {
+          "is_plural": true
+        }
+      },
       "gifts_metadata": {}
     },
     "D": {
@@ -387,7 +391,10 @@
           "condition": "[^e]"
         }
       ],
-      "adds_metadata": {},
+      "adds_metadata": {
+        "verb": {},
+        "noun": null
+      },
       "gifts_metadata": {}
     },
     "Q": {
@@ -476,9 +483,7 @@
       "replacements": [],
       "adds_metadata": {},
       "gifts_metadata": {
-        "kind": {
-          "kind": "Noun"
-        }
+        "noun": {}
       }
     },
     "2": {

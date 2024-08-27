@@ -1,5 +1,6 @@
 mod an_a;
 mod correct_number_suffix;
+mod linking_verbs;
 mod lint;
 mod lint_group;
 mod long_sentences;
@@ -16,6 +17,7 @@ mod wrong_quotes;
 
 pub use an_a::AnA;
 pub use correct_number_suffix::CorrectNumberSuffix;
+pub use linking_verbs::LinkingVerbs;
 pub use lint::{Lint, LintKind, Suggestion};
 pub use lint_group::{LintGroup, LintGroupConfig};
 pub use long_sentences::LongSentences;
