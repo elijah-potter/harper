@@ -100,7 +100,7 @@ impl Backend {
     async fn load_file_dictionary(&self, url: &Url) -> Option<FullDictionary> {
         match load_dict(self.get_file_dict_path(url).await?).await {
             Ok(dict) => Some(dict),
-            Err(err) => Some(FullDictionary::new())
+            Err(_err) => Some(FullDictionary::new())
         }
     }
 
