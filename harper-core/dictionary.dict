@@ -49643,12 +49643,14 @@ TOML/M2
 Ambien/SM1
 config/SM14
 royale/SM15
-KanBan/M
-Pandoc/M
-Sioyek/M
+KanBan/M1
+Pandoc/M1
+Sioyek/M1
 Firestore/M
 substring/SM14
 Rosenthal/SM2
 ACM/M1
 scatterplot/SMG14
 Wikilink/MS1
+stacktrace/SM1
+scrollbar/SM1
