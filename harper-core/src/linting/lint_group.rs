@@ -107,7 +107,7 @@ create_lint_group_config!(
     CorrectNumberSuffix => true,
     NumberSuffixCapitalization => true,
     MultipleSequentialPronouns => true,
-    LinkingVerbs => true
+    LinkingVerbs => false
 );
 
 impl<T: Dictionary + Default> Default for LintGroup<T> {
