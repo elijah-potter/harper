@@ -218,7 +218,7 @@ impl Document {
     /// Here is an example, it is short.
     /// ```
     pub fn chunks(&self) -> impl Iterator<Item = &'_ [Token]> + '_ {
-        let first_sentence = self
+        let first_chunk = self
             .chunk_terminators()
             .next()
             .map(|first_term| &self.tokens[0..=first_term]);
@@ -238,7 +238,7 @@ impl Document {
             Some(self.tokens.as_slice())
         };
 
-        first_sentence.into_iter().chain(rest).chain(last)
+        first_chunk.into_iter().chain(rest).chain(last)
     }
 
     /// Iterate over the locations of the sentence terminators in the document.
@@ -594,7 +594,9 @@ fn is_chunk_terminator(token: &TokenKind) -> bool {
     }
 
     match token {
-        TokenKind::Punctuation(punct) => [Punctuation::Comma].contains(punct),
+        TokenKind::Punctuation(punct) => {
+            matches!(punct, Punctuation::Comma | Punctuation::Quote { .. })
+        }
         _ => false
     }
 }

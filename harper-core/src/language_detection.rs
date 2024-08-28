@@ -22,10 +22,6 @@ pub fn is_likely_english(doc: &Document, dict: &impl Dictionary) -> bool {
         }
     }
 
-    dbg!(total_words);
-    dbg!(valid_words);
-    dbg!(punctuation);
-
     if (punctuation as f32 * 1.25) > valid_words as f32 {
         return false;
     }

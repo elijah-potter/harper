@@ -47,7 +47,12 @@ mod tests {
     }
 
     #[test]
-    fn working() {
+    fn working_wrong() {
         assert_lint_count("working is not a noun.", LinkingVerbs, 1);
+    }
+
+    #[test]
+    fn working_right() {
+        assert_lint_count("\"working\" is a noun.", LinkingVerbs, 0);
     }
 }

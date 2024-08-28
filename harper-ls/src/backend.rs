@@ -70,18 +70,14 @@ struct DocumentState {
 /// Deallocate
 pub struct Backend {
     client: Client,
-    static_dictionary: Arc<FullDictionary>,
     config: RwLock<Config>,
     doc_state: Mutex<HashMap<Url, DocumentState>>
 }
 
 impl Backend {
     pub fn new(client: Client, config: Config) -> Self {
-        let dictionary = FullDictionary::curated();
-
         Self {
             client,
-            static_dictionary: dictionary,
             doc_state: Mutex::new(HashMap::new()),
             config: RwLock::new(config)
         }
@@ -131,15 +127,6 @@ impl Backend {
     async fn load_user_dictionary(&self) -> FullDictionary {
         let config = self.config.read().await;
 
-        info!(
-            "Loading user dictionary from `{}`",
-            config
-                .user_dict_path
-                .clone()
-                .into_os_string()
-                .to_string_lossy()
-        );
-
         match load_dict(&config.user_dict_path).await {
             Ok(dict) => dict,
             Err(_err) => FullDictionary::new()
@@ -149,21 +136,12 @@ impl Backend {
     async fn save_user_dictionary(&self, dict: impl Dictionary) -> anyhow::Result<()> {
         let config = self.config.read().await;
 
-        info!(
-            "Saving user dictionary to `{}`",
-            config
-                .user_dict_path
-                .clone()
-                .into_os_string()
-                .to_string_lossy()
-        );
-
         Ok(save_dict(&config.user_dict_path, dict).await?)
     }
 
     async fn generate_global_dictionary(&self) -> anyhow::Result<MergedDictionary<FullDictionary>> {
         let mut dict = MergedDictionary::new();
-        dict.add_dictionary(self.static_dictionary.clone());
+        dict.add_dictionary(FullDictionary::curated());
         let user_dict = self.load_user_dictionary().await;
         dict.add_dictionary(Arc::new(user_dict));
         Ok(dict)
@@ -224,14 +202,14 @@ impl Backend {
 
         // TODO: Only reset linter when underlying dictionaries change
 
+        let dict = Arc::new(self.generate_file_dictionary(url).await?);
+
         let mut doc_state = DocumentState {
-            linter: LintGroup::new(
-                config_lock.lint_config,
-                self.generate_file_dictionary(url).await?.into()
-            ),
+            linter: LintGroup::new(config_lock.lint_config, dict.clone()),
             language_id: language_id
                 .map(|v| v.to_string())
                 .or(prev_state.and_then(|s| s.language_id.clone())),
+            dict: dict.clone(),
             ..Default::default()
         };
 

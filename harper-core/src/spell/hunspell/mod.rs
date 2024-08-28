@@ -216,6 +216,15 @@ mod tests {
         assert!(!has.unwrap().is_noun(),)
     }
 
+    #[test]
+    fn is_is_linking_verb() {
+        let expanded = build_expanded();
+
+        let is = expanded.get(&split("is"));
+        assert!(is.is_some());
+        assert!(is.unwrap().is_linking_verb());
+    }
+
     fn split(text: &str) -> CharString {
         text.chars().collect()
     }
