@@ -22,7 +22,7 @@ unicode-blocks = "0.1.9"
 unicode-width = "0.1.11"
 
 [dev-dependencies]
-divan = "0.1.14"
+criterion = "0.3"
 rand = "0.8.5"
 
 [[bench]]
