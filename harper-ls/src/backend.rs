@@ -114,11 +114,7 @@ impl Backend {
     async fn load_file_dictionary(&self, url: &Url) -> Option<FullDictionary> {
         match load_dict(self.get_file_dict_path(url).await?).await {
             Ok(dict) => Some(dict),
-            Err(err) => {
-                error!("Problem loading file dictionary: {}", err);
-
-                Some(FullDictionary::new())
-            }
+            Err(err) => Some(FullDictionary::new())
         }
     }
 
@@ -146,11 +142,7 @@ impl Backend {
 
         match load_dict(&config.user_dict_path).await {
             Ok(dict) => dict,
-            Err(err) => {
-                error!("Problem loading user dictionary: {}", err);
-
-                FullDictionary::new()
-            }
+            Err(_err) => FullDictionary::new()
         }
     }
 
@@ -435,8 +427,6 @@ impl LanguageServer for Backend {
     }
 
     async fn did_save(&self, params: DidSaveTextDocumentParams) {
-        info!("File saved");
-
         let _ = self
             .update_document_from_file(&params.text_document.uri, None)
             .await;
@@ -445,8 +435,6 @@ impl LanguageServer for Backend {
     }
 
     async fn did_open(&self, params: DidOpenTextDocumentParams) {
-        info!("File opened");
-
         let _ = self
             .update_document(
                 &params.text_document.uri,
@@ -463,17 +451,13 @@ impl LanguageServer for Backend {
             return;
         };
 
-        info!("File changed");
-
         self.update_document(&params.text_document.uri, &last.text, None)
             .await
             .unwrap();
         self.publish_diagnostics(&params.text_document.uri).await;
     }
 
-    async fn did_close(&self, _params: DidCloseTextDocumentParams) {
-        info!("File closed");
-    }
+    async fn did_close(&self, _params: DidCloseTextDocumentParams) {}
 
     async fn execute_command(&self, params: ExecuteCommandParams) -> Result<Option<Value>> {
         let mut string_args = params
@@ -550,8 +534,6 @@ impl LanguageServer for Backend {
     }
 
     async fn did_change_configuration(&self, params: DidChangeConfigurationParams) {
-        info!("Changing user configuration.");
-
         self.update_config_from_obj(params.settings).await;
     }
 
