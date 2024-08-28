@@ -7,7 +7,7 @@ use crate::{CharString, WordMetadata};
 
 /// A simple wrapper over [`Dictionary`] that allows
 /// one to merge multiple dictionaries without copying.
-#[derive(Clone)]
+#[derive(Clone, PartialEq)]
 pub struct MergedDictionary<T>
 where
     T: Dictionary + Clone

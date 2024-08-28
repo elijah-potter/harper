@@ -8,6 +8,7 @@ mod backend;
 mod config;
 mod diagnostics;
 mod dictionary_io;
+mod document_state;
 mod git_commit_parser;
 mod pos_conv;
 

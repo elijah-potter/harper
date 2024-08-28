@@ -10,7 +10,6 @@ use harper_core::{
     Dictionary,
     Document,
     FullDictionary,
-    Lrc,
     MergedDictionary,
     Token,
     TokenKind,
@@ -55,19 +54,10 @@ use tracing::{error, info};
 use crate::config::Config;
 use crate::diagnostics::{lint_to_code_actions, lints_to_diagnostics};
 use crate::dictionary_io::{load_dict, save_dict};
+use crate::document_state::DocumentState;
 use crate::git_commit_parser::GitCommitParser;
 use crate::pos_conv::range_to_span;
 
-#[derive(Default)]
-struct DocumentState {
-    document: Document,
-    ident_dict: Lrc<FullDictionary>,
-    dict: Lrc<MergedDictionary<FullDictionary>>,
-    linter: LintGroup<Lrc<MergedDictionary<FullDictionary>>>,
-    language_id: Option<String>
-}
-
-/// Deallocate
 pub struct Backend {
     client: Client,
     config: RwLock<Config>,
@@ -198,20 +188,19 @@ impl Backend {
         let mut doc_lock = self.doc_state.lock().await;
         let config_lock = self.config.read().await;
 
-        let prev_state = doc_lock.get(url);
-
-        // TODO: Only reset linter when underlying dictionaries change
-
         let dict = Arc::new(self.generate_file_dictionary(url).await?);
 
-        let mut doc_state = DocumentState {
+        let doc_state = doc_lock.entry(url.clone()).or_insert(DocumentState {
             linter: LintGroup::new(config_lock.lint_config, dict.clone()),
-            language_id: language_id
-                .map(|v| v.to_string())
-                .or(prev_state.and_then(|s| s.language_id.clone())),
+            language_id: language_id.map(|v| v.to_string()),
             dict: dict.clone(),
             ..Default::default()
-        };
+        });
+
+        if doc_state.dict != dict {
+            doc_state.dict = dict.clone();
+            doc_state.linter = LintGroup::new(config_lock.lint_config, dict.clone());
+        }
 
         let Some(language_id) = &doc_state.language_id else {
             doc_lock.remove(url);
@@ -250,8 +239,6 @@ impl Backend {
                 doc_lock.remove(url);
                 return Ok(());
             };
-
-        doc_lock.insert(url.clone(), doc_state);
 
         Ok(())
     }

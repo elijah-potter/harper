@@ -14,6 +14,7 @@ use crate::{Dictionary, FatToken, FullDictionary, Lrc, Token, TokenKind, TokenSt
 
 /// A document containing some amount of lexed and parsed English text.
 /// This is
+#[derive(Debug, Clone)]
 pub struct Document {
     source: Lrc<Vec<char>>,
     tokens: Vec<Token>
