@@ -2,17 +2,20 @@
 
 use std::sync::Mutex;
 
-use harper_core::linting::{LintGroup, Linter};
+use harper_core::linting::{LintGroup, LintGroupConfig, Linter};
 use harper_core::parsers::Markdown;
 use harper_core::{remove_overlaps, Document, FullDictionary, Lrc};
 use once_cell::sync::Lazy;
 use wasm_bindgen::prelude::wasm_bindgen;
+use wasm_bindgen::JsValue;
 
 static LINTER: Lazy<Mutex<LintGroup<Lrc<FullDictionary>>>> = Lazy::new(|| {
-    Mutex::new(LintGroup::new(
-        Default::default(),
-        FullDictionary::curated()
-    ))
+    let lint_config = LintGroupConfig {
+        spell_check: Some(false),
+        ..Default::default()
+    };
+
+    Mutex::new(LintGroup::new(lint_config, FullDictionary::curated()))
 });
 
 /// Setup the WebAssembly module's logging.
@@ -32,6 +35,19 @@ pub fn setup() {
 pub fn use_spell_check(set: bool) {
     let mut linter = LINTER.lock().unwrap();
     linter.config.spell_check = Some(set);
+}
+
+#[wasm_bindgen]
+pub fn get_lint_config_as_object() -> JsValue {
+    let linter = LINTER.lock().unwrap();
+    serde_wasm_bindgen::to_value(&linter.config).unwrap()
+}
+
+#[wasm_bindgen]
+pub fn set_lint_config_from_object(object: JsValue) -> Result<(), String> {
+    let mut linter = LINTER.lock().unwrap();
+    linter.config = serde_wasm_bindgen::from_value(object).map_err(|v| v.to_string())?;
+    Ok(())
 }
 
 /// Perform the configured linting on the provided text.

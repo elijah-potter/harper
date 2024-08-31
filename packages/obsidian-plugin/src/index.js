@@ -1,7 +1,13 @@
 import { linter } from './lint';
 import { Plugin } from 'obsidian';
 import wasm from 'wasm/harper_wasm_bg.wasm';
-import init, { lint, use_spell_check } from 'wasm';
+import init, {
+	lint,
+	use_spell_check,
+	get_lint_config_as_object,
+	set_lint_config_from_object
+} from 'wasm';
+import { HarperSettingTab } from './HarperSettingTab';
 
 function suggestionToLabel(sug) {
 	if (sug.kind() == 'Remove') {
@@ -60,7 +66,27 @@ const harperLinter = linter(
 );
 
 export default class HarperPlugin extends Plugin {
+	/** @public
+	 * @returns {Promise<Record<string, any>>} */
+	async getSettings() {
+		await init(await wasm());
+
+		return { lintSettings: await get_lint_config_as_object() };
+	}
+
+	/** @public
+	 * @param {Record<string, any>} settings
+	 * @returns {Promise<void>} */
+	async setSettings(settings) {
+		await init(await wasm());
+		await set_lint_config_from_object(settings.lintSettings);
+		this.saveData(settings);
+	}
+
 	async onload() {
 		this.registerEditorExtension([harperLinter]);
+
+		this.addSettingTab(new HarperSettingTab(this.app, this));
+		await this.setSettings(await this.loadData());
 	}
 }
