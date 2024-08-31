@@ -4160,6 +4160,13 @@ rollup-plugin-peer-deps-external@^2.2.4:
   resolved "https://registry.yarnpkg.com/rollup-plugin-peer-deps-external/-/rollup-plugin-peer-deps-external-2.2.4.tgz#8a420bbfd6dccc30aeb68c9bf57011f2f109570d"
   integrity sha512-AWdukIM1+k5JDdAqV/Cxd+nejvno2FVLVeZ74NKggm3Q5s9cbbcOgUPGdbxPi4BXu7xGaZ8HG12F+thImYu/0g==
 
+rollup-plugin-svg-import@^3.0.0:
+  version "3.0.0"
+  resolved "https://registry.yarnpkg.com/rollup-plugin-svg-import/-/rollup-plugin-svg-import-3.0.0.tgz#4aa62b6ccc8b675fa8b579b23cd983bb2907d6f1"
+  integrity sha512-5fUESTM5hdqJojrwO53JQUO7NespLNx4iLeMsToQfuaGGqGT5sz85Ns5gCDNxLO6yBPbn7p0A/6YA+Rq3clg4Q==
+  dependencies:
+    "@rollup/pluginutils" "^5.0.1"
+
 rollup@^3.27.1:
   version "3.29.4"
   resolved "https://registry.yarnpkg.com/rollup/-/rollup-3.29.4.tgz#4d70c0f9834146df8705bfb69a9a19c9e1109981"
@@ -5112,6 +5119,7 @@ vscode-languageserver-types@3.17.5:
 
 "wasm@link:../harper-wasm/pkg":
   version "0.0.0"
+  uid ""
 
 whatwg-encoding@^3.1.1:
   version "3.1.1"

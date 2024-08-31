@@ -1,5 +1,5 @@
-import HarperPlugin from './index.js';
-import { App, PluginSettingTab, Setting } from 'obsidian';
+import './index.js';
+import { PluginSettingTab, Setting } from 'obsidian';
 
 export class HarperSettingTab extends PluginSettingTab {
 	/** @type HarperPlugin
