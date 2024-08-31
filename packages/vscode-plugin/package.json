@@ -131,6 +131,12 @@
 					"default": true,
 					"description": "Detect improper sequences of pronouns."
 				},
+				"harper-ls.linters.linking_verbs": {
+					"scope": "resource",
+					"type": "boolean",
+					"default": true,
+					"description": "Detect improper use of linking verbs."
+				},
 				"harper-ls.diagnosticSeverity": {
 					"scope": "resource",
 					"type": "string",
