@@ -342,8 +342,6 @@ impl Backend {
             .await
             .unwrap();
 
-        info!("Changing user configuration.");
-
         if let Some(first) = new_config.pop() {
             self.update_config_from_obj(first).await;
         }
@@ -448,10 +446,7 @@ impl LanguageServer for Backend {
 
                 let mut dict = self.load_user_dictionary().await;
                 dict.append_word(word, WordMetadata::default());
-                if let Err(err) = self.save_user_dictionary(dict).await {
-                    error!("Unable to save user dictionary: {}", err);
-                }
-
+                let _ = self.save_user_dictionary(dict).await;
                 let _ = self.update_document_from_file(&file_url, None).await;
                 self.publish_diagnostics(&file_url).await;
             }
@@ -470,10 +465,7 @@ impl LanguageServer for Backend {
                 };
                 dict.append_word(word, WordMetadata::default());
 
-                if let Err(err) = self.save_file_dictionary(&file_url, dict).await {
-                    error!("Unable to save file dictionary: {}", err);
-                }
-
+                let _ = self.save_file_dictionary(&file_url, dict).await;
                 let _ = self.update_document_from_file(&file_url, None).await;
                 self.publish_diagnostics(&file_url).await;
             }
