@@ -76,7 +76,7 @@ pub fn lex_number(source: &[char]) -> Option<FoundToken> {
 
         if let Ok(n) = s.parse::<f64>() {
             return Some(FoundToken {
-                token: TokenKind::Number(n, None),
+                token: TokenKind::Number(n.into(), None),
                 next_index: end + 1
             });
         }

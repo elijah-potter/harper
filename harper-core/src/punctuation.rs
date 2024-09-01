@@ -1,7 +1,9 @@
 use is_macro::Is;
 use serde::{Deserialize, Serialize};
 
-#[derive(Debug, Is, Clone, Copy, Serialize, Deserialize, PartialEq, Eq, PartialOrd, Default)]
+#[derive(
+    Debug, Is, Clone, Copy, Serialize, Deserialize, PartialEq, Eq, PartialOrd, Default, Hash,
+)]
 #[serde(tag = "kind")]
 pub enum Punctuation {
     /// `…`
@@ -119,7 +121,7 @@ impl Punctuation {
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, PartialOrd)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, PartialOrd, Hash)]
 pub struct Quote {
     /// The location of the matching quote, if it exists.
     pub twin_loc: Option<usize>

@@ -15,7 +15,7 @@ use super::spell_check::SpellCheck;
 use super::spelled_numbers::SpelledNumbers;
 use super::unclosed_quotes::UnclosedQuotes;
 use super::wrong_quotes::WrongQuotes;
-use super::{Lint, Linter};
+use super::{Lint, Linter, PatternLinter};
 use crate::{Dictionary, Document};
 
 macro_rules! create_lint_group_config {

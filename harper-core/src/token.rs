@@ -1,5 +1,6 @@
 use is_macro::Is;
 use itertools::Itertools;
+use ordered_float::OrderedFloat;
 use paste::paste;
 use serde::{Deserialize, Serialize};
 
@@ -37,12 +38,14 @@ pub struct FatToken {
     pub kind: TokenKind
 }
 
-#[derive(Debug, Is, Clone, Copy, Serialize, Deserialize, PartialEq, Default, PartialOrd)]
+#[derive(
+    Debug, Is, Clone, Copy, Serialize, Deserialize, Default, PartialOrd, Hash, Eq, PartialEq,
+)]
 #[serde(tag = "kind", content = "value")]
 pub enum TokenKind {
     Word(WordMetadata),
     Punctuation(Punctuation),
-    Number(f64, Option<NumberSuffix>),
+    Number(OrderedFloat<f64>, Option<NumberSuffix>),
     /// A sequence of " " spaces.
     Space(usize),
     /// A sequence of "\n" newlines
@@ -98,7 +101,9 @@ impl TokenKind {
     }
 }
 
-#[derive(Debug, Serialize, Deserialize, Default, PartialEq, PartialOrd, Clone, Copy, Is)]
+#[derive(
+    Debug, Serialize, Deserialize, Default, PartialEq, PartialOrd, Clone, Copy, Is, Hash, Eq,
+)]
 pub enum NumberSuffix {
     #[default]
     Th,
@@ -108,7 +113,9 @@ pub enum NumberSuffix {
 }
 
 impl NumberSuffix {
-    pub fn correct_suffix_for(number: f64) -> Option<Self> {
+    pub fn correct_suffix_for(number: impl Into<f64>) -> Option<Self> {
+        let number = number.into();
+
         if number < 0.0 || number - number.floor() > f64::EPSILON || number > u64::MAX as f64 {
             return None;
         }

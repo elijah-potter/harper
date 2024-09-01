@@ -12,6 +12,7 @@ impl Linter for SpelledNumbers {
 
         for number_tok in document.iter_numbers() {
             let (number, _suffix) = number_tok.kind.number().unwrap();
+            let number: f64 = number.into();
 
             if (number - number.floor()).abs() < f64::EPSILON && number <= 100. {
                 lints.push(Lint {

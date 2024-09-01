@@ -9,6 +9,7 @@ mod lexing;
 pub mod linting;
 mod mask;
 pub mod parsers;
+pub mod patterns;
 mod punctuation;
 mod span;
 mod spell;

@@ -6,6 +6,7 @@ use itertools::Itertools;
 use paste::paste;
 
 use crate::parsers::{Markdown, Parser, PlainEnglish};
+use crate::patterns::Pattern;
 use crate::punctuation::Punctuation;
 use crate::span::Span;
 use crate::token::NumberSuffix;
@@ -309,6 +310,14 @@ impl Document {
 
     pub fn get_full_content(&self) -> &[char] {
         &self.source
+    }
+
+    pub fn get_source(&self) -> &[char] {
+        &self.source
+    }
+
+    pub fn get_tokens(&self) -> &[Token] {
+        &self.tokens
     }
 
     /// Searches for quotation marks and fills the
