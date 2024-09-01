@@ -2,12 +2,7 @@ import logoSvg from '../logo.svg';
 import { linter } from './lint';
 import { Plugin, addIcon, Menu } from 'obsidian';
 import wasm from 'wasm/harper_wasm_bg.wasm';
-import init, {
-	lint,
-	use_spell_check,
-	get_lint_config_as_object,
-	set_lint_config_from_object
-} from 'wasm';
+import init, { lint, get_lint_config_as_object, set_lint_config_from_object } from 'wasm';
 import { HarperSettingTab } from './HarperSettingTab';
 
 function suggestionToLabel(sug) {
@@ -29,7 +24,6 @@ const harperLinter = (plugin) =>
 
 			await init(await wasm());
 
-			use_spell_check(false);
 			const lints = lint(text);
 
 			return lints.map((lint) => {

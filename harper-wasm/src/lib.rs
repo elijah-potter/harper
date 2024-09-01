@@ -29,14 +29,6 @@ pub fn setup() {
     tracing_wasm::set_as_global_default();
 }
 
-/// Configure Harper whether to include spell checking in the linting provided
-/// by the [`lint`] function.
-#[wasm_bindgen]
-pub fn use_spell_check(set: bool) {
-    let mut linter = LINTER.lock().unwrap();
-    linter.config.spell_check = Some(set);
-}
-
 #[wasm_bindgen]
 pub fn get_lint_config_as_object() -> JsValue {
     let linter = LINTER.lock().unwrap();
