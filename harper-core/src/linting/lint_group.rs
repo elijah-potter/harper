@@ -2,6 +2,7 @@ use paste::paste;
 use serde::{Deserialize, Serialize};
 
 use super::an_a::AnA;
+use super::avoid_curses::AvoidCurses;
 use super::correct_number_suffix::CorrectNumberSuffix;
 use super::linking_verbs::LinkingVerbs;
 use super::long_sentences::LongSentences;
@@ -107,7 +108,8 @@ create_lint_group_config!(
     CorrectNumberSuffix => true,
     NumberSuffixCapitalization => true,
     MultipleSequentialPronouns => true,
-    LinkingVerbs => false
+    LinkingVerbs => false,
+    AvoidCurses => true
 );
 
 impl<T: Dictionary + Default> Default for LintGroup<T> {

@@ -73,6 +73,16 @@ impl TokenKind {
         matches!(self, TokenKind::Punctuation(Punctuation::Pipe))
     }
 
+    pub fn is_swear(&self) -> bool {
+        matches!(
+            self,
+            TokenKind::Word(WordMetadata {
+                swear: Some(true),
+                ..
+            })
+        )
+    }
+
     /// Checks that `self` is the same enum variant as `other`, regardless of
     /// whether the inner metadata is also equal.
     pub fn matches_variant_of(&self, other: &Self) -> bool {

@@ -3,10 +3,11 @@ use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Default, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, PartialOrd, Hash)]
 pub struct WordMetadata {
-    noun: Option<NounData>,
-    verb: Option<VerbData>,
-    adjective: Option<AdjectiveData>,
-    adverb: Option<AdverbData>
+    pub noun: Option<NounData>,
+    pub verb: Option<VerbData>,
+    pub adjective: Option<AdjectiveData>,
+    pub adverb: Option<AdverbData>,
+    pub swear: Option<bool>
 }
 
 impl WordMetadata {
@@ -16,7 +17,8 @@ impl WordMetadata {
             noun: self.noun.or(other.noun),
             verb: self.verb.or(other.verb),
             adjective: self.adjective.or(other.adjective),
-            adverb: self.adverb.or(other.adverb)
+            adverb: self.adverb.or(other.adverb),
+            swear: self.swear.or(other.swear)
         }
     }
 
@@ -74,6 +76,11 @@ impl WordMetadata {
                 ..
             })
         )
+    }
+
+    /// Checks whether a word is _definitely_ a swear.
+    pub fn is_swear(&self) -> bool {
+        matches!(self.swear, Some(true))
     }
 
     /// Same thing as [`Self::or`], except in-place rather than a copy.

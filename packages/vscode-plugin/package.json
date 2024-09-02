@@ -137,6 +137,12 @@
 					"default": true,
 					"description": "Detect improper use of linking verbs."
 				},
+				"harper-ls.linters.avoid_curses": {
+					"scope": "resource",
+					"type": "boolean",
+					"default": true,
+					"description": "Catch use of curse/swear words."
+				},
 				"harper-ls.diagnosticSeverity": {
 					"scope": "resource",
 					"type": "string",

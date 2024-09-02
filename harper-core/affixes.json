@@ -525,6 +525,17 @@
       "gifts_metadata": {
         "adjective": {}
       }
+    },
+    "6": {
+      "suffix": true,
+      "cross_product": true,
+      "replacements": [],
+      "adds_metadata": {
+        "swear": true
+      },
+      "gifts_metadata": {
+        "swear": true
+      }
     }
   }
 }

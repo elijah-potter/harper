@@ -1,4 +1,5 @@
 mod an_a;
+mod avoid_curses;
 mod correct_number_suffix;
 mod linking_verbs;
 mod lint;
