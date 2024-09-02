@@ -204,6 +204,30 @@ impl TokenKind {
         matches!(self, TokenKind::Punctuation(Punctuation::At))
     }
 
+    pub fn is_verb(&self) -> bool {
+        let TokenKind::Word(metadata) = self else {
+            return false;
+        };
+
+        metadata.is_verb()
+    }
+
+    pub fn is_linking_verb(&self) -> bool {
+        let TokenKind::Word(metadata) = self else {
+            return false;
+        };
+
+        metadata.is_linking_verb()
+    }
+
+    pub fn is_noun(&self) -> bool {
+        let TokenKind::Word(metadata) = self else {
+            return false;
+        };
+
+        metadata.is_noun()
+    }
+
     /// Checks whether the token is whitespace.
     pub fn is_whitespace(&self) -> bool {
         matches!(self, TokenKind::Space(_) | TokenKind::Newline(_))

@@ -1,4 +1,4 @@
-use super::{Lint, LintKind, Linter, PatternLinter, Suggestion};
+use super::{Lint, LintKind, PatternLinter, Suggestion};
 use crate::patterns::{Pattern, SequencePattern, WordPatternGroup};
 use crate::token::{Token, TokenStringExt};
 
@@ -48,11 +48,13 @@ impl PatternLinter for RepeatedWords {
         self.pattern.as_ref()
     }
 
-    fn match_to_lint(&self, matched_tokens: &[Token], _source: &[char]) -> Lint {
+    fn match_to_lint(&self, matched_tokens: &[Token], source: &[char]) -> Lint {
         Lint {
-            span: matched_tokens[1..].span().unwrap(),
+            span: matched_tokens.span().unwrap(),
             lint_kind: LintKind::Repetition,
-            suggestions: vec![Suggestion::Remove],
+            suggestions: vec![Suggestion::ReplaceWith(
+                matched_tokens[0].span.get_content(source).to_vec()
+            )],
             message: "Did you mean to repeat this word?".to_string(),
             ..Default::default()
         }

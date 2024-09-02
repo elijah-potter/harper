@@ -1,6 +1,7 @@
 use hashbrown::HashSet;
+use paste::paste;
 
-use super::token_pattern::TokenPattern;
+use super::whitespace_pattern::WhitespacePattern;
 use super::{Pattern, RepeatingPattern};
 use crate::{Lrc, Token, TokenKind};
 
@@ -10,39 +11,81 @@ pub struct SequencePattern {
     token_patterns: Vec<Box<dyn Pattern>>
 }
 
+macro_rules! gen_then_from_is {
+    ($quality:ident) => {
+        paste! {
+            fn [< then_$quality >] (&mut self){
+                self.token_patterns.push(Box::new(|tok: &Token, _source: &[char]| {
+                    tok.kind.[< is_$quality >]()
+                }))
+            }
+        }
+    };
+}
+
 impl SequencePattern {
+    gen_then_from_is!(noun);
+    gen_then_from_is!(verb);
+    gen_then_from_is!(linking_verb);
+
     pub fn then_exact_word(&mut self, word: &'static str) -> &mut Self {
         self.token_patterns
-            .push(Box::new(TokenPattern::WordExact(word)));
+            .push(Box::new(|tok: &Token, source: &[char]| {
+                if !tok.kind.is_word() {
+                    return false;
+                }
+
+                let tok_chars = tok.span.get_content(source);
+
+                let mut w_char_count = 0;
+                for (i, w_char) in word.chars().enumerate() {
+                    w_char_count += 1;
+
+                    if tok_chars.get(i).cloned() != Some(w_char) {
+                        return false;
+                    }
+                }
+
+                w_char_count == tok_chars.len()
+            }));
         self
     }
 
     pub fn then_loose(&mut self, kind: TokenKind) -> &mut Self {
         self.token_patterns
-            .push(Box::new(TokenPattern::KindLoose(kind)));
+            .push(Box::new(move |tok: &Token, _source: &[char]| {
+                kind.with_default_data() == tok.kind.with_default_data()
+            }));
+
         self
     }
 
     pub fn then_any_word(&mut self) -> &mut Self {
         self.token_patterns
-            .push(Box::new(TokenPattern::KindLoose(TokenKind::blank_word())));
+            .push(Box::new(|tok: &Token, _source: &[char]| tok.kind.is_word()));
         self
     }
 
     pub fn then_strict(&mut self, kind: TokenKind) -> &mut Self {
         self.token_patterns
-            .push(Box::new(TokenPattern::KindStrict(kind)));
+            .push(Box::new(move |tok: &Token, _source: &[char]| {
+                tok.kind == kind
+            }));
         self
     }
 
     pub fn then_whitespace(&mut self) -> &mut Self {
-        self.token_patterns.push(Box::new(TokenPattern::WhiteSpace));
+        self.token_patterns.push(Box::new(WhitespacePattern));
         self
     }
 
     pub fn then_any_word_in(&mut self, word_set: Lrc<HashSet<&'static str>>) -> &mut Self {
         self.token_patterns
-            .push(Box::new(TokenPattern::WordInSet(word_set)));
+            .push(Box::new(move |tok: &Token, source: &[char]| {
+                let tok_chars = tok.span.get_content(source);
+                let word: String = tok_chars.iter().collect();
+                word_set.contains(word.as_str())
+            }));
         self
     }
 

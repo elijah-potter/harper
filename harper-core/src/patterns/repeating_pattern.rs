@@ -33,13 +33,15 @@ impl Pattern for RepeatingPattern {
 #[cfg(test)]
 mod tests {
     use super::RepeatingPattern;
-    use crate::patterns::{Pattern, TokenPattern};
+    use crate::patterns::{AnyPattern, Pattern};
     use crate::Document;
 
     #[test]
     fn matches_anything() {
-        let doc = Document::new_plain_english_curated("This matcher will match anything!");
-        let pat = RepeatingPattern::new(Box::new(TokenPattern::Any));
+        let doc = Document::new_plain_english_curated(
+            "This matcher will match the entirety of any document!"
+        );
+        let pat = RepeatingPattern::new(Box::new(AnyPattern));
 
         assert_eq!(
             pat.matches(doc.get_tokens(), doc.get_source()),
