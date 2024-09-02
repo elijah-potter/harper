@@ -6,6 +6,7 @@ use crate::CharString;
 
 /// A pattern collection to look for patterns that start with a specific
 /// word.
+#[derive(Default)]
 pub struct WordPatternGroup<P>
 where
     P: Pattern
@@ -14,13 +15,15 @@ where
 }
 
 impl WordPatternGroup<NaivePatternGroup> {
-    pub fn add(&mut self, word: &[char], pat: Box<dyn Pattern>) {
-        if let Some(group) = self.patterns.get_mut(word) {
+    pub fn add(&mut self, word: &str, pat: Box<dyn Pattern>) {
+        let chars = word.chars().collect();
+
+        if let Some(group) = self.patterns.get_mut(&chars) {
             group.push(pat);
         } else {
             let mut group = NaivePatternGroup::default();
             group.push(pat);
-            self.patterns.insert(word.into(), group);
+            self.patterns.insert(chars, group);
         }
     }
 }
