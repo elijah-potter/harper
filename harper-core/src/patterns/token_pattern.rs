@@ -14,7 +14,9 @@ pub enum TokenPattern {
     KindStrict(TokenKind),
     WhiteSpace,
     WordExact(&'static str),
-    WordInSet(Lrc<HashSet<&'static str>>)
+    WordInSet(Lrc<HashSet<&'static str>>),
+    /// Matches any single token.
+    Any
 }
 
 impl Pattern for TokenPattern {
@@ -73,6 +75,7 @@ impl Pattern for TokenPattern {
                     0
                 }
             }
+            TokenPattern::Any => 1
         }
     }
 }

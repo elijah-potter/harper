@@ -1,14 +1,14 @@
 use hashbrown::HashSet;
 
 use super::pattern_linter::PatternLinter;
-use crate::linting::{LintKind, Linter};
-use crate::patterns::{Pattern, TokenSequencePattern};
-use crate::{CharString, Document, Lint, Lrc, Span, Token, TokenStringExt};
+use crate::linting::LintKind;
+use crate::patterns::{Pattern, SequencePattern};
+use crate::{Lint, Lrc, Token, TokenStringExt};
 
 /// Linter that checks if multiple pronouns are being used right after each
 /// other. This is a common mistake to make during the revision process.
 pub struct MultipleSequentialPronouns {
-    pattern: Box<dyn Pattern + Send + Sync>
+    pattern: Box<dyn Pattern>
 }
 
 impl MultipleSequentialPronouns {
@@ -21,11 +21,15 @@ impl MultipleSequentialPronouns {
 
         let pronouns = Lrc::new(pronouns);
 
-        let mut pattern = TokenSequencePattern::default();
-        pattern
-            .then_any_word_in(pronouns.clone())
+        let mut subsq_pat = SequencePattern::default();
+        subsq_pat
             .then_whitespace()
             .then_any_word_in(pronouns.clone());
+
+        let mut pattern = SequencePattern::default();
+        pattern
+            .then_any_word_in(pronouns.clone())
+            .then_one_or_more(Box::new(subsq_pat));
 
         Self {
             pattern: Box::new(pattern)

@@ -1,7 +1,9 @@
 use super::Pattern;
+use crate::Token;
 
 /// A naive pattern collection that naively iterates through a list of patterns,
 /// returning the first one that matches..
+#[derive(Default)]
 pub struct NaivePatternGroup {
     patterns: Vec<Box<dyn Pattern>>
 }
@@ -13,7 +15,7 @@ impl NaivePatternGroup {
 }
 
 impl Pattern for NaivePatternGroup {
-    fn matches(&self, tokens: &[crate::Token], source: &[char]) -> usize {
+    fn matches(&self, tokens: &[Token], source: &[char]) -> usize {
         self.patterns
             .iter()
             .find_map(|p| {
@@ -26,13 +28,5 @@ impl Pattern for NaivePatternGroup {
                 }
             })
             .unwrap_or_default()
-    }
-}
-
-impl Default for NaivePatternGroup {
-    fn default() -> Self {
-        Self {
-            patterns: Default::default()
-        }
     }
 }
