@@ -14,7 +14,7 @@ is-macro = "0.3.6"
 itertools = "0.13.0"
 paste = "1.0.14"
 pulldown-cmark = "0.11.0"
-serde = { version = "1.0.197", features = ["derive"] }
+serde = { version = "1.0.209", features = ["derive"] }
 serde_json = "1.0.121"
 smallvec = { version = "1.13.2", features = ["serde"] }
 thiserror = "1.0.57"
