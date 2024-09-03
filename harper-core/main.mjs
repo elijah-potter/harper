@@ -43,6 +43,8 @@ function partOfSpeechToAffix(partOfSpeech){
       return "4";
     case "Adjective":
       return "5";
+    case "Conjunction":
+      return "7";
   }
 
   return ""; 
