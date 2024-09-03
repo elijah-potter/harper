@@ -7,6 +7,7 @@ pub struct WordMetadata {
     pub verb: Option<VerbData>,
     pub adjective: Option<AdjectiveData>,
     pub adverb: Option<AdverbData>,
+    pub conjunction: Option<ConjunctionData>,
     pub swear: Option<bool>
 }
 
@@ -18,12 +19,17 @@ impl WordMetadata {
             verb: self.verb.or(other.verb),
             adjective: self.adjective.or(other.adjective),
             adverb: self.adverb.or(other.adverb),
+            conjunction: self.conjunction.or(other.conjunction),
             swear: self.swear.or(other.swear)
         }
     }
 
     pub fn is_noun(&self) -> bool {
         self.noun.is_some()
+    }
+
+    pub fn is_conjunction(&self) -> bool {
+        self.conjunction.is_some()
     }
 
     pub fn is_verb(&self) -> bool {
@@ -145,6 +151,16 @@ impl AdjectiveData {
 pub struct AdverbData {}
 
 impl AdverbData {
+    /// Produce a copy of `self` with the known properties of `other` set.
+    pub fn or(&self, _other: &Self) -> Self {
+        Self {}
+    }
+}
+
+#[derive(Debug, Clone, Copy, Serialize, Deserialize, PartialEq, PartialOrd, Eq, Hash)]
+pub struct ConjunctionData {}
+
+impl ConjunctionData {
     /// Produce a copy of `self` with the known properties of `other` set.
     pub fn or(&self, _other: &Self) -> Self {
         Self {}

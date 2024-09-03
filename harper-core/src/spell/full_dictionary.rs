@@ -191,4 +191,11 @@ mod tests {
         assert!(dict.get_word_metadata_str("this").is_noun());
         assert!(dict.get_word_metadata_str("This").is_noun());
     }
+
+    #[test]
+    fn than_is_conjunction() {
+        let dict = FullDictionary::curated();
+        assert!(dict.get_word_metadata_str("than").is_conjunction());
+        assert!(dict.get_word_metadata_str("Than").is_conjunction());
+    }
 }
