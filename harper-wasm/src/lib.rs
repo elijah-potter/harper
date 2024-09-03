@@ -10,12 +10,10 @@ use wasm_bindgen::prelude::wasm_bindgen;
 use wasm_bindgen::JsValue;
 
 static LINTER: Lazy<Mutex<LintGroup<Lrc<FullDictionary>>>> = Lazy::new(|| {
-    let lint_config = LintGroupConfig {
-        spell_check: Some(false),
-        ..Default::default()
-    };
-
-    Mutex::new(LintGroup::new(lint_config, FullDictionary::curated()))
+    Mutex::new(LintGroup::new(
+        LintGroupConfig::default(),
+        FullDictionary::curated()
+    ))
 });
 
 /// Setup the WebAssembly module's logging.

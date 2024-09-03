@@ -83,7 +83,10 @@ export default class HarperPlugin extends Plugin {
 	async getSettings() {
 		await init(await wasm());
 		this.lintSettingChanged();
-		return { lintSettings: await get_lint_config_as_object() };
+
+		let lintSettings = await get_lint_config_as_object();
+
+		return { lintSettings };
 	}
 
 	/** @public
@@ -91,6 +94,19 @@ export default class HarperPlugin extends Plugin {
 	 * @returns {Promise<void>} */
 	async setSettings(settings) {
 		await init(await wasm());
+
+		if (settings == null) {
+			settings = {};
+		}
+
+		if (settings.lintSettings == undefined) {
+			settings.lintSettings = {};
+		}
+
+		if (settings.lintSettings.spell_check == undefined) {
+			settings.lintSettings.spell_check = false;
+		}
+
 		set_lint_config_from_object(settings.lintSettings);
 		this.lintSettingChanged();
 		this.saveData(settings);
