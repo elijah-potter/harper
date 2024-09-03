@@ -14,6 +14,7 @@ use crate::{Dictionary, FatToken, FullDictionary, Lrc, Token, TokenKind, TokenSt
 
 /// A document containing some amount of lexed and parsed English text.
 /// This is
+#[derive(Debug, Clone)]
 pub struct Document {
     source: Lrc<Vec<char>>,
     tokens: Vec<Token>
@@ -218,7 +219,7 @@ impl Document {
     /// Here is an example, it is short.
     /// ```
     pub fn chunks(&self) -> impl Iterator<Item = &'_ [Token]> + '_ {
-        let first_sentence = self
+        let first_chunk = self
             .chunk_terminators()
             .next()
             .map(|first_term| &self.tokens[0..=first_term]);
@@ -238,7 +239,7 @@ impl Document {
             Some(self.tokens.as_slice())
         };
 
-        first_sentence.into_iter().chain(rest).chain(last)
+        first_chunk.into_iter().chain(rest).chain(last)
     }
 
     /// Iterate over the locations of the sentence terminators in the document.
@@ -308,6 +309,14 @@ impl Document {
 
     pub fn get_full_content(&self) -> &[char] {
         &self.source
+    }
+
+    pub fn get_source(&self) -> &[char] {
+        &self.source
+    }
+
+    pub fn get_tokens(&self) -> &[Token] {
+        &self.tokens
     }
 
     /// Searches for quotation marks and fills the
@@ -533,6 +542,10 @@ macro_rules! create_fns_on_doc {
                 self.tokens.[< first_ $thing >]()
             }
 
+            fn [< last_ $thing >](&self) -> Option<Token> {
+                self.tokens.[< last_ $thing >]()
+            }
+
             fn [<iter_ $thing _indices>](&self) -> impl Iterator<Item = usize> + '_ {
                 self.tokens.[< iter_ $thing _indices >]()
             }
@@ -548,6 +561,7 @@ impl TokenStringExt for Document {
     create_fns_on_doc!(word);
     create_fns_on_doc!(space);
     create_fns_on_doc!(apostrophe);
+    create_fns_on_doc!(pipe);
     create_fns_on_doc!(quote);
     create_fns_on_doc!(number);
     create_fns_on_doc!(at);
@@ -562,6 +576,14 @@ impl TokenStringExt for Document {
 
     fn span(&self) -> Option<Span> {
         self.tokens.span()
+    }
+
+    fn iter_linking_verb_indices(&self) -> impl Iterator<Item = usize> + '_ {
+        self.tokens.iter_linking_verb_indices()
+    }
+
+    fn iter_linking_verbs(&self) -> impl Iterator<Item = Token> + '_ {
+        self.tokens.iter_linking_verbs()
     }
 }
 
@@ -581,7 +603,9 @@ fn is_chunk_terminator(token: &TokenKind) -> bool {
     }
 
     match token {
-        TokenKind::Punctuation(punct) => [Punctuation::Comma].contains(punct),
+        TokenKind::Punctuation(punct) => {
+            matches!(punct, Punctuation::Comma | Punctuation::Quote { .. })
+        }
         _ => false
     }
 }

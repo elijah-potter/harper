@@ -8,7 +8,7 @@ Like if you break up words you shouldn't.
 
 Harper works everywhere, even offline. Since you r data
 never leaves your device, you don't ned to worry aout us 
-selling it or using it to train LLMs.
+selling it or using it to train large language models.
 
 The best part: Harper can give you feedback instantly.
 For most documents, Harper can serve  up suggestions in

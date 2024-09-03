@@ -2,15 +2,16 @@
 
 use std::sync::Mutex;
 
-use harper_core::linting::{LintGroup, Linter};
+use harper_core::linting::{LintGroup, LintGroupConfig, Linter};
 use harper_core::parsers::Markdown;
 use harper_core::{remove_overlaps, Document, FullDictionary, Lrc};
 use once_cell::sync::Lazy;
 use wasm_bindgen::prelude::wasm_bindgen;
+use wasm_bindgen::JsValue;
 
 static LINTER: Lazy<Mutex<LintGroup<Lrc<FullDictionary>>>> = Lazy::new(|| {
     Mutex::new(LintGroup::new(
-        Default::default(),
+        LintGroupConfig::default(),
         FullDictionary::curated()
     ))
 });
@@ -26,12 +27,17 @@ pub fn setup() {
     tracing_wasm::set_as_global_default();
 }
 
-/// Configure Harper whether to include spell checking in the linting provided
-/// by the [`lint`] function.
 #[wasm_bindgen]
-pub fn use_spell_check(set: bool) {
+pub fn get_lint_config_as_object() -> JsValue {
+    let linter = LINTER.lock().unwrap();
+    serde_wasm_bindgen::to_value(&linter.config).unwrap()
+}
+
+#[wasm_bindgen]
+pub fn set_lint_config_from_object(object: JsValue) -> Result<(), String> {
     let mut linter = LINTER.lock().unwrap();
-    linter.config.spell_check = Some(set);
+    linter.config = serde_wasm_bindgen::from_value(object).map_err(|v| v.to_string())?;
+    Ok(())
 }
 
 /// Perform the configured linting on the provided text.

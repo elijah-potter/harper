@@ -34,10 +34,7 @@ fn uncached_inner_new() -> Lrc<FullDictionary> {
     // There will be at _least_ this number of words
     let mut word_map = HashMap::with_capacity(word_list.len());
 
-    attr_list.expand_marked_words(
-        word_list.into_iter().map(|w| (w, WordMetadata::default())),
-        &mut word_map
-    );
+    attr_list.expand_marked_words(word_list, &mut word_map);
 
     let mut words: Vec<CharString> = word_map.iter().map(|(v, _)| v.clone()).collect();
     words.sort();
@@ -142,20 +139,30 @@ impl Dictionary for FullDictionary {
 
     fn get_word_metadata(&self, word: &[char]) -> WordMetadata {
         let normalized = seq_to_normalized(word);
-        let lowercase: SmallVec<_> = normalized.iter().flat_map(|c| c.to_lowercase()).collect();
+        let lowercase: CharString = normalized.iter().flat_map(|c| c.to_lowercase()).collect();
 
         self.word_map
             .get(normalized.as_ref())
-            .or(self.word_map.get(&lowercase))
-            .copied()
-            .unwrap_or_default()
+            .cloned()
+            .or(self.word_map.get(lowercase.as_ref()).cloned())
+            .unwrap_or(WordMetadata::default())
     }
 
     fn contains_word(&self, word: &[char]) -> bool {
         let normalized = seq_to_normalized(word);
-        let lowercase: SmallVec<_> = normalized.iter().flat_map(|c| c.to_lowercase()).collect();
+        let lowercase: CharString = normalized.iter().flat_map(|c| c.to_lowercase()).collect();
 
         self.word_map.contains_key(normalized.as_ref()) || self.word_map.contains_key(&lowercase)
+    }
+
+    fn contains_word_str(&self, word: &str) -> bool {
+        let chars: CharString = word.chars().collect();
+        self.contains_word(&chars)
+    }
+
+    fn get_word_metadata_str(&self, word: &str) -> WordMetadata {
+        let chars: CharString = word.chars().collect();
+        self.get_word_metadata(&chars)
     }
 }
 
@@ -169,5 +176,19 @@ mod tests {
     fn curated_contains_no_duplicates() {
         let dict = FullDictionary::curated();
         assert!(dict.words_iter().all_unique());
+    }
+
+    #[test]
+    fn curated_matches_capitalized() {
+        let dict = FullDictionary::curated();
+        assert!(dict.contains_word_str("this"));
+        assert!(dict.contains_word_str("This"));
+    }
+
+    #[test]
+    fn this_is_noun() {
+        let dict = FullDictionary::curated();
+        assert!(dict.get_word_metadata_str("this").is_noun());
+        assert!(dict.get_word_metadata_str("This").is_noun());
     }
 }

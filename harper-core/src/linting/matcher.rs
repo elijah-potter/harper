@@ -186,8 +186,6 @@ impl Matcher {
             "that","s" => "that is",
             "That","s" => "that is",
             "ms" => "milliseconds",
-            "LLM" => "large language model",
-            "LLMs" => "large language models",
             "t","he" => "the",
             "the","hing" => "the thing",
             "The","hing" => "The thing",

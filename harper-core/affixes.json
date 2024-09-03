@@ -268,12 +268,12 @@
         }
       ],
       "adds_metadata": {
-        "possessive": true
+        "noun": {
+          "is_possessive": true
+        }
       },
       "gifts_metadata": {
-        "kind": {
-          "kind": "Noun"
-        }
+        "noun": {}
       }
     },
     "F": {
@@ -338,9 +338,8 @@
         }
       ],
       "adds_metadata": {
-        "kind": {
-          "kind": "Noun",
-          "plural": true
+        "noun": {
+          "is_plural": true
         }
       },
       "gifts_metadata": {}
@@ -375,12 +374,7 @@
           "kind": "Adjective"
         }
       },
-      "gifts_metadata": {
-        "kind": {
-          "kind": "Noun",
-          "is_proper": null
-        }
-      }
+      "gifts_metadata": {}
     },
     "G": {
       "suffix": true,
@@ -398,15 +392,10 @@
         }
       ],
       "adds_metadata": {
-        "kind": {
-          "kind": "Adjective"
-        }
+        "verb": {},
+        "noun": null
       },
-      "gifts_metadata": {
-        "kind": {
-          "kind": "Verb"
-        }
-      }
+      "gifts_metadata": {}
     },
     "Q": {
       "suffix": true,
@@ -487,6 +476,66 @@
       ],
       "adds_metadata": {},
       "gifts_metadata": {}
+    },
+    "1": {
+      "suffix": true,
+      "cross_product": true,
+      "replacements": [],
+      "adds_metadata": {},
+      "gifts_metadata": {
+        "noun": {}
+      }
+    },
+    "2": {
+      "suffix": true,
+      "cross_product": true,
+      "replacements": [],
+      "adds_metadata": {},
+      "gifts_metadata": {
+        "noun": {
+          "is_proper": true
+        }
+      }
+    },
+    "3": {
+      "suffix": true,
+      "cross_product": true,
+      "replacements": [],
+      "adds_metadata": {},
+      "gifts_metadata": {
+        "verb": {
+          "is_linking": true
+        }
+      }
+    },
+    "4": {
+      "suffix": true,
+      "cross_product": true,
+      "replacements": [],
+      "adds_metadata": {},
+      "gifts_metadata": {
+        "verb": {}
+      }
+    },
+    "5": {
+      "suffix": true,
+      "cross_product": true,
+      "replacements": [],
+      "adds_metadata": {},
+      "gifts_metadata": {
+        "adjective": {}
+      }
+    },
+    "6": {
+      "suffix": true,
+      "cross_product": true,
+      "replacements": [],
+      "adds_metadata": {
+        "swear": true
+      },
+      "gifts_metadata": {
+        "swear": true
+      }
     }
   }
 }

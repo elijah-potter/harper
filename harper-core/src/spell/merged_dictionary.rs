@@ -1,16 +1,19 @@
 use std::sync::Arc;
 
+use hashbrown::HashMap;
+
 use super::dictionary::Dictionary;
-use crate::WordMetadata;
+use crate::{CharString, WordMetadata};
 
 /// A simple wrapper over [`Dictionary`] that allows
 /// one to merge multiple dictionaries without copying.
-#[derive(Clone)]
+#[derive(Clone, PartialEq)]
 pub struct MergedDictionary<T>
 where
     T: Dictionary + Clone
 {
-    children: Vec<Arc<T>>
+    children: Vec<Arc<T>>,
+    merged: HashMap<CharString, WordMetadata>
 }
 
 impl<T> MergedDictionary<T>
@@ -19,7 +22,8 @@ where
 {
     pub fn new() -> Self {
         Self {
-            children: Vec::new()
+            children: Vec::new(),
+            merged: HashMap::new()
         }
     }
 
@@ -53,8 +57,9 @@ where
     fn get_word_metadata(&self, word: &[char]) -> WordMetadata {
         let mut found_metadata = WordMetadata::default();
         for child in &self.children {
-            found_metadata = found_metadata.or(&child.get_word_metadata(word));
+            found_metadata.append(&child.get_word_metadata(word));
         }
+
         found_metadata
     }
 
@@ -68,5 +73,15 @@ where
                 .iter()
                 .flat_map(move |c| c.words_with_len_iter(len))
         )
+    }
+
+    fn contains_word_str(&self, word: &str) -> bool {
+        let chars: CharString = word.chars().collect();
+        self.contains_word(&chars)
+    }
+
+    fn get_word_metadata_str(&self, word: &str) -> WordMetadata {
+        let chars: CharString = word.chars().collect();
+        self.get_word_metadata(&chars)
     }
 }

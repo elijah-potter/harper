@@ -10,7 +10,6 @@ use harper_core::{
     Dictionary,
     Document,
     FullDictionary,
-    Lrc,
     MergedDictionary,
     Token,
     TokenKind,
@@ -55,33 +54,20 @@ use tracing::{error, info};
 use crate::config::Config;
 use crate::diagnostics::{lint_to_code_actions, lints_to_diagnostics};
 use crate::dictionary_io::{load_dict, save_dict};
+use crate::document_state::DocumentState;
 use crate::git_commit_parser::GitCommitParser;
 use crate::pos_conv::range_to_span;
 
-#[derive(Default)]
-struct DocumentState {
-    document: Document,
-    ident_dict: Lrc<FullDictionary>,
-    dict: Lrc<MergedDictionary<FullDictionary>>,
-    linter: LintGroup<Lrc<MergedDictionary<FullDictionary>>>,
-    language_id: Option<String>
-}
-
-/// Deallocate
 pub struct Backend {
     client: Client,
-    static_dictionary: Arc<FullDictionary>,
     config: RwLock<Config>,
     doc_state: Mutex<HashMap<Url, DocumentState>>
 }
 
 impl Backend {
     pub fn new(client: Client, config: Config) -> Self {
-        let dictionary = FullDictionary::curated();
-
         Self {
             client,
-            static_dictionary: dictionary,
             doc_state: Mutex::new(HashMap::new()),
             config: RwLock::new(config)
         }
@@ -114,11 +100,7 @@ impl Backend {
     async fn load_file_dictionary(&self, url: &Url) -> Option<FullDictionary> {
         match load_dict(self.get_file_dict_path(url).await?).await {
             Ok(dict) => Some(dict),
-            Err(err) => {
-                error!("Problem loading file dictionary: {}", err);
-
-                Some(FullDictionary::new())
-            }
+            Err(_err) => Some(FullDictionary::new())
         }
     }
 
@@ -135,43 +117,21 @@ impl Backend {
     async fn load_user_dictionary(&self) -> FullDictionary {
         let config = self.config.read().await;
 
-        info!(
-            "Loading user dictionary from `{}`",
-            config
-                .user_dict_path
-                .clone()
-                .into_os_string()
-                .to_string_lossy()
-        );
-
         match load_dict(&config.user_dict_path).await {
             Ok(dict) => dict,
-            Err(err) => {
-                error!("Problem loading user dictionary: {}", err);
-
-                FullDictionary::new()
-            }
+            Err(_err) => FullDictionary::new()
         }
     }
 
     async fn save_user_dictionary(&self, dict: impl Dictionary) -> anyhow::Result<()> {
         let config = self.config.read().await;
 
-        info!(
-            "Saving user dictionary to `{}`",
-            config
-                .user_dict_path
-                .clone()
-                .into_os_string()
-                .to_string_lossy()
-        );
-
         Ok(save_dict(&config.user_dict_path, dict).await?)
     }
 
     async fn generate_global_dictionary(&self) -> anyhow::Result<MergedDictionary<FullDictionary>> {
         let mut dict = MergedDictionary::new();
-        dict.add_dictionary(self.static_dictionary.clone());
+        dict.add_dictionary(FullDictionary::curated());
         let user_dict = self.load_user_dictionary().await;
         dict.add_dictionary(Arc::new(user_dict));
         Ok(dict)
@@ -228,20 +188,19 @@ impl Backend {
         let mut doc_lock = self.doc_state.lock().await;
         let config_lock = self.config.read().await;
 
-        let prev_state = doc_lock.get(url);
+        let dict = Arc::new(self.generate_file_dictionary(url).await?);
 
-        // TODO: Only reset linter when underlying dictionaries change
-
-        let mut doc_state = DocumentState {
-            linter: LintGroup::new(
-                config_lock.lint_config,
-                self.generate_file_dictionary(url).await?.into()
-            ),
-            language_id: language_id
-                .map(|v| v.to_string())
-                .or(prev_state.and_then(|s| s.language_id.clone())),
+        let doc_state = doc_lock.entry(url.clone()).or_insert(DocumentState {
+            linter: LintGroup::new(config_lock.lint_config, dict.clone()),
+            language_id: language_id.map(|v| v.to_string()),
+            dict: dict.clone(),
             ..Default::default()
-        };
+        });
+
+        if doc_state.dict != dict {
+            doc_state.dict = dict.clone();
+            doc_state.linter = LintGroup::new(config_lock.lint_config, dict.clone());
+        }
 
         let Some(language_id) = &doc_state.language_id else {
             doc_lock.remove(url);
@@ -280,8 +239,6 @@ impl Backend {
                 doc_lock.remove(url);
                 return Ok(());
             };
-
-        doc_lock.insert(url.clone(), doc_state);
 
         Ok(())
     }
@@ -385,8 +342,6 @@ impl Backend {
             .await
             .unwrap();
 
-        info!("Changing user configuration.");
-
         if let Some(first) = new_config.pop() {
             self.update_config_from_obj(first).await;
         }
@@ -435,8 +390,6 @@ impl LanguageServer for Backend {
     }
 
     async fn did_save(&self, params: DidSaveTextDocumentParams) {
-        info!("File saved");
-
         let _ = self
             .update_document_from_file(&params.text_document.uri, None)
             .await;
@@ -445,8 +398,6 @@ impl LanguageServer for Backend {
     }
 
     async fn did_open(&self, params: DidOpenTextDocumentParams) {
-        info!("File opened");
-
         let _ = self
             .update_document(
                 &params.text_document.uri,
@@ -463,17 +414,13 @@ impl LanguageServer for Backend {
             return;
         };
 
-        info!("File changed");
-
         self.update_document(&params.text_document.uri, &last.text, None)
             .await
             .unwrap();
         self.publish_diagnostics(&params.text_document.uri).await;
     }
 
-    async fn did_close(&self, _params: DidCloseTextDocumentParams) {
-        info!("File closed");
-    }
+    async fn did_close(&self, _params: DidCloseTextDocumentParams) {}
 
     async fn execute_command(&self, params: ExecuteCommandParams) -> Result<Option<Value>> {
         let mut string_args = params
@@ -499,10 +446,7 @@ impl LanguageServer for Backend {
 
                 let mut dict = self.load_user_dictionary().await;
                 dict.append_word(word, WordMetadata::default());
-                if let Err(err) = self.save_user_dictionary(dict).await {
-                    error!("Unable to save user dictionary: {}", err);
-                }
-
+                let _ = self.save_user_dictionary(dict).await;
                 let _ = self.update_document_from_file(&file_url, None).await;
                 self.publish_diagnostics(&file_url).await;
             }
@@ -521,10 +465,7 @@ impl LanguageServer for Backend {
                 };
                 dict.append_word(word, WordMetadata::default());
 
-                if let Err(err) = self.save_file_dictionary(&file_url, dict).await {
-                    error!("Unable to save file dictionary: {}", err);
-                }
-
+                let _ = self.save_file_dictionary(&file_url, dict).await;
                 let _ = self.update_document_from_file(&file_url, None).await;
                 self.publish_diagnostics(&file_url).await;
             }
@@ -550,8 +491,6 @@ impl LanguageServer for Backend {
     }
 
     async fn did_change_configuration(&self, params: DidChangeConfigurationParams) {
-        info!("Changing user configuration.");
-
         self.update_config_from_obj(params.settings).await;
     }
 

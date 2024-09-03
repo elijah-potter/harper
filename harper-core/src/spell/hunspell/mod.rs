@@ -22,7 +22,7 @@ pub fn parse_default_attribute_list() -> AttributeList {
             .expect("The built-in affix list should always be valid.");
 
     human_readable
-        .to_normal()
+        .into_normal()
         .expect("All expressions in the built-in attribute list should be valid.")
 }
 
@@ -34,7 +34,7 @@ mod tests {
     use super::word_list::parse_word_list;
     use super::{parse_default_attribute_list, parse_default_word_list};
     use crate::spell::hunspell::attribute_list::HumanReadableAttributeList;
-    use crate::{CharString, WordKind, WordMetadata};
+    use crate::{CharString, WordMetadata};
 
     pub const TEST_WORD_LIST: &str = "3\nhello\ntry/B\nwork/AB";
 
@@ -83,14 +83,11 @@ mod tests {
             }
         }))
         .unwrap();
-        let attributes = attributes.to_normal().unwrap();
+        let attributes = attributes.into_normal().unwrap();
 
         let mut expanded = HashMap::new();
 
-        attributes.expand_marked_words(
-            words.into_iter().map(|w| (w, WordMetadata::default())),
-            &mut expanded
-        );
+        attributes.expand_marked_words(words, &mut expanded);
         let expanded: Vec<String> = expanded
             .into_iter()
             .map(|v| v.0.into_iter().collect())
@@ -129,15 +126,12 @@ mod tests {
                       }
                     ],
                     "adds_metadata": {
-                        "kind": {
-                            "kind": "Noun",
+                        "noun": {
                             "is_plural": true
                         }
                     },
                     "gifts_metadata": {
-                        "kind": {
-                            "kind": "Noun",
-                        }
+                        "noun": {}
                     }
                 },
                 "M": {
@@ -150,47 +144,23 @@ mod tests {
                         "condition": "."
                       }
                     ],
-                    "adds_metadata": {
-                      "kind": null,
-                      "tense": null
-                    },
+                    "adds_metadata": {},
                     "gifts_metadata": {}
                 }
             }
         }))
         .unwrap();
-        let attributes = attributes.to_normal().unwrap();
+        let attributes = attributes.into_normal().unwrap();
 
         let mut expanded: HashMap<CharString, WordMetadata> = HashMap::new();
 
-        attributes.expand_marked_words(
-            words.into_iter().map(|w| (w, WordMetadata::default())),
-            &mut expanded
-        );
+        attributes.expand_marked_words(words, &mut expanded);
 
-        assert_eq!(
-            expanded.get(&split("giant")),
-            Some(&WordMetadata {
-                kind: Some(WordKind::Noun {
-                    is_proper: None,
-                    is_plural: None
-                }),
-                tense: None,
-                possessive: None
-            })
-        );
+        let giant_data = expanded.get(&split("giant")).unwrap();
+        assert!(giant_data.is_noun());
 
-        assert_eq!(
-            expanded.get(&split("giants")),
-            Some(&WordMetadata {
-                kind: Some(WordKind::Noun {
-                    is_proper: None,
-                    is_plural: Some(true)
-                }),
-                tense: None,
-                possessive: None
-            })
-        )
+        let giants_data = expanded.get(&split("giants")).unwrap();
+        assert!(giants_data.is_plural_noun());
     }
 
     fn build_expanded() -> HashMap<CharString, WordMetadata> {
@@ -199,10 +169,7 @@ mod tests {
 
         let mut expanded = HashMap::new();
 
-        attributes.expand_marked_words(
-            words.into_iter().map(|w| (w, WordMetadata::default())),
-            &mut expanded
-        );
+        attributes.expand_marked_words(words, &mut expanded);
 
         expanded
     }
@@ -233,13 +200,10 @@ mod tests {
 
     #[test]
     fn expanded_contains_possessive_abandonment() {
-        assert_eq!(
-            build_expanded()
-                .get(&split("abandonment's"))
-                .unwrap()
-                .possessive,
-            Some(true)
-        )
+        assert!(build_expanded()
+            .get(&split("abandonment's"))
+            .unwrap()
+            .is_possessive_noun())
     }
 
     #[test]
@@ -249,7 +213,16 @@ mod tests {
         let has = expanded.get(&split("has"));
         assert!(has.is_some());
 
-        assert!(!matches!(has.unwrap().kind, Some(WordKind::Noun { .. })))
+        assert!(!has.unwrap().is_noun(),)
+    }
+
+    #[test]
+    fn is_is_linking_verb() {
+        let expanded = build_expanded();
+
+        let is = expanded.get(&split("is"));
+        assert!(is.is_some());
+        assert!(is.unwrap().is_linking_verb());
     }
 
     fn split(text: &str) -> CharString {

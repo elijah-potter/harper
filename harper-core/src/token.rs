@@ -1,5 +1,6 @@
 use is_macro::Is;
 use itertools::Itertools;
+use ordered_float::OrderedFloat;
 use paste::paste;
 use serde::{Deserialize, Serialize};
 
@@ -37,12 +38,14 @@ pub struct FatToken {
     pub kind: TokenKind
 }
 
-#[derive(Debug, Is, Clone, Copy, Serialize, Deserialize, PartialEq, Default, PartialOrd)]
+#[derive(
+    Debug, Is, Clone, Copy, Serialize, Deserialize, Default, PartialOrd, Hash, Eq, PartialEq,
+)]
 #[serde(tag = "kind", content = "value")]
 pub enum TokenKind {
     Word(WordMetadata),
     Punctuation(Punctuation),
-    Number(f64, Option<NumberSuffix>),
+    Number(OrderedFloat<f64>, Option<NumberSuffix>),
     /// A sequence of " " spaces.
     Space(usize),
     /// A sequence of "\n" newlines
@@ -58,6 +61,28 @@ pub enum TokenKind {
 }
 
 impl TokenKind {
+    pub fn is_open_square(&self) -> bool {
+        matches!(self, TokenKind::Punctuation(Punctuation::OpenSquare))
+    }
+
+    pub fn is_close_square(&self) -> bool {
+        matches!(self, TokenKind::Punctuation(Punctuation::CloseSquare))
+    }
+
+    pub fn is_pipe(&self) -> bool {
+        matches!(self, TokenKind::Punctuation(Punctuation::Pipe))
+    }
+
+    pub fn is_swear(&self) -> bool {
+        matches!(
+            self,
+            TokenKind::Word(WordMetadata {
+                swear: Some(true),
+                ..
+            })
+        )
+    }
+
     /// Checks that `self` is the same enum variant as `other`, regardless of
     /// whether the inner metadata is also equal.
     pub fn matches_variant_of(&self, other: &Self) -> bool {
@@ -86,7 +111,9 @@ impl TokenKind {
     }
 }
 
-#[derive(Debug, Serialize, Deserialize, Default, PartialEq, PartialOrd, Clone, Copy, Is)]
+#[derive(
+    Debug, Serialize, Deserialize, Default, PartialEq, PartialOrd, Clone, Copy, Is, Hash, Eq,
+)]
 pub enum NumberSuffix {
     #[default]
     Th,
@@ -96,7 +123,9 @@ pub enum NumberSuffix {
 }
 
 impl NumberSuffix {
-    pub fn correct_suffix_for(number: f64) -> Option<Self> {
+    pub fn correct_suffix_for(number: impl Into<f64>) -> Option<Self> {
+        let number = number.into();
+
         if number < 0.0 || number - number.floor() > f64::EPSILON || number > u64::MAX as f64 {
             return None;
         }
@@ -185,6 +214,30 @@ impl TokenKind {
         matches!(self, TokenKind::Punctuation(Punctuation::At))
     }
 
+    pub fn is_verb(&self) -> bool {
+        let TokenKind::Word(metadata) = self else {
+            return false;
+        };
+
+        metadata.is_verb()
+    }
+
+    pub fn is_linking_verb(&self) -> bool {
+        let TokenKind::Word(metadata) = self else {
+            return false;
+        };
+
+        metadata.is_linking_verb()
+    }
+
+    pub fn is_noun(&self) -> bool {
+        let TokenKind::Word(metadata) = self else {
+            return false;
+        };
+
+        metadata.is_noun()
+    }
+
     /// Checks whether the token is whitespace.
     pub fn is_whitespace(&self) -> bool {
         matches!(self, TokenKind::Space(_) | TokenKind::Newline(_))
@@ -195,6 +248,8 @@ macro_rules! create_decl_for {
     ($thing:ident) => {
         paste! {
             fn [< first_ $thing >](&self) -> Option<Token> ;
+
+            fn [< last_ $thing >](&self) -> Option<Token> ;
 
             fn [<iter_ $thing _indices>](&self) -> impl Iterator<Item = usize> + '_;
 
@@ -208,6 +263,10 @@ macro_rules! create_fns_for {
         paste! {
             fn [< first_ $thing >](&self) -> Option<Token> {
                 self.iter().find(|v| v.kind.[<is_ $thing>]()).copied()
+            }
+
+            fn [< last_ $thing >](&self) -> Option<Token> {
+                self.iter().rev().find(|v| v.kind.[<is_ $thing>]()).copied()
             }
 
             fn [<iter_ $thing _indices>](&self) -> impl Iterator<Item = usize> + '_ {
@@ -234,15 +293,20 @@ pub trait TokenStringExt {
     create_decl_for!(word);
     create_decl_for!(space);
     create_decl_for!(apostrophe);
+    create_decl_for!(pipe);
     create_decl_for!(quote);
     create_decl_for!(number);
     create_decl_for!(at);
+
+    fn iter_linking_verb_indices(&self) -> impl Iterator<Item = usize> + '_;
+    fn iter_linking_verbs(&self) -> impl Iterator<Item = Token> + '_;
 }
 
 impl TokenStringExt for [Token] {
     create_fns_for!(word);
     create_fns_for!(space);
     create_fns_for!(apostrophe);
+    create_fns_for!(pipe);
     create_fns_for!(quote);
     create_fns_for!(number);
     create_fns_for!(at);
@@ -267,5 +331,20 @@ impl TokenStringExt for [Token] {
 
     fn span(&self) -> Option<Span> {
         Some(Span::new(self.first()?.span.start, self.last()?.span.end))
+    }
+
+    fn iter_linking_verb_indices(&self) -> impl Iterator<Item = usize> + '_ {
+        self.iter_word_indices().filter(|idx| {
+            let word = self[*idx];
+            let TokenKind::Word(word) = word.kind else {
+                panic!("Should be unreachable.");
+            };
+
+            word.is_linking_verb()
+        })
+    }
+
+    fn iter_linking_verbs(&self) -> impl Iterator<Item = Token> + '_ {
+        self.iter_linking_verb_indices().map(|idx| self[idx])
     }
 }

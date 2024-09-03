@@ -1,41 +1,41 @@
-use divan::{black_box, AllocProfiler, Bencher};
+use criterion::{black_box, criterion_group, criterion_main, Criterion};
 use harper_core::linting::{LintGroup, LintGroupConfig, Linter};
 use harper_core::{Document, FullDictionary};
 
-#[global_allocator]
-static ALLOC: AllocProfiler = AllocProfiler::system();
-
 static DEMO: &str = include_str!("../../demo.md");
 
-#[divan::bench]
-fn parse_demo(bencher: Bencher) {
-    bencher.bench_local(|| {
-        let _document = Document::new_markdown_curated(black_box(DEMO));
+fn parse_demo(c: &mut Criterion) {
+    c.bench_function("parse_demo", |b| {
+        b.iter(|| Document::new_markdown_curated(black_box(DEMO)))
     });
 }
 
-#[divan::bench]
-fn lint_demo(bencher: Bencher) {
+fn lint_demo(c: &mut Criterion) {
     let dictionary = FullDictionary::curated();
     let mut lint_set = LintGroup::new(Default::default(), dictionary);
     let document = Document::new_markdown_curated(black_box(DEMO));
 
-    bencher.bench_local(|| {
-        lint_set.lint(&document);
+    c.bench_function("lint_demo", |b| {
+        b.iter(|| lint_set.lint(&document));
     });
 }
 
-#[divan::bench]
-fn lint_demo_uncached(bencher: Bencher) {
-    let dictionary = FullDictionary::curated();
-    bencher.bench_local(|| {
-        let mut lint_set = LintGroup::new(LintGroupConfig::default(), dictionary.clone());
-        let document = Document::new_markdown_curated(black_box(DEMO));
-
-        lint_set.lint(&document);
+fn lint_demo_uncached(c: &mut Criterion) {
+    c.bench_function("lint_demo_uncached", |b| {
+        b.iter(|| {
+            let dictionary = FullDictionary::curated();
+            let mut lint_set = LintGroup::new(LintGroupConfig::default(), dictionary.clone());
+            let document = Document::new_markdown(black_box(DEMO), &dictionary);
+            lint_set.lint(&document)
+        })
     });
 }
 
-fn main() {
-    divan::main();
+pub fn criterion_benchmark(c: &mut Criterion) {
+    parse_demo(c);
+    lint_demo(c);
+    lint_demo_uncached(c);
 }
+
+criterion_group!(benches, criterion_benchmark);
+criterion_main!(benches);

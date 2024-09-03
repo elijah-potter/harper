@@ -1,78 +1,67 @@
-use crate::linting::{LintKind, Linter};
-use crate::{CharString, Document, Lint, Span, Token, TokenStringExt};
+use hashbrown::HashSet;
+
+use super::pattern_linter::PatternLinter;
+use super::Suggestion;
+use crate::linting::LintKind;
+use crate::patterns::{Pattern, SequencePattern};
+use crate::{Lint, Lrc, Token, TokenStringExt};
 
 /// Linter that checks if multiple pronouns are being used right after each
 /// other. This is a common mistake to make during the revision process.
-#[derive(Debug)]
 pub struct MultipleSequentialPronouns {
-    /// Since there aren't many pronouns, it's faster to store this as a vector.
-    pronouns: Vec<CharString>
+    pattern: Box<dyn Pattern>
 }
 
 impl MultipleSequentialPronouns {
     fn new() -> Self {
-        let pronoun_strs = [
+        let pronouns: HashSet<_> = [
             "me", "my", "I", "we", "you", "he", "him", "her", "she", "it", "they"
-        ];
+        ]
+        .into_iter()
+        .collect();
 
-        let mut pronouns: Vec<CharString> = pronoun_strs
-            .iter()
-            .map(|s| s.chars().collect::<CharString>())
-            .collect();
+        let pronouns = Lrc::new(pronouns);
 
-        pronouns.sort();
+        let mut subsq_pat = SequencePattern::default();
+        subsq_pat
+            .then_whitespace()
+            .then_any_word_in(pronouns.clone());
 
-        Self { pronouns }
-    }
+        let mut pattern = SequencePattern::default();
+        pattern
+            .then_any_word_in(pronouns.clone())
+            .then_one_or_more(Box::new(subsq_pat));
 
-    fn is_pronoun(&self, word: &[char]) -> bool {
-        self.pronouns
-            .binary_search_by_key(&word, |w| w.as_slice())
-            .is_ok()
+        Self {
+            pattern: Box::new(pattern)
+        }
     }
 }
 
-impl Linter for MultipleSequentialPronouns {
-    fn lint(&mut self, document: &Document) -> Vec<Lint> {
-        let mut lints = Vec::new();
+impl PatternLinter for MultipleSequentialPronouns {
+    fn pattern(&self) -> &dyn crate::patterns::Pattern {
+        self.pattern.as_ref()
+    }
 
-        let mut found_pronouns = Vec::new();
+    fn match_to_lint(&self, matched_tokens: &[Token], source: &[char]) -> Lint {
+        let mut suggestions = Vec::new();
 
-        let mut emit_lint = |found_pronouns: &mut Vec<Token>| {
-            let first: &Token = found_pronouns.first().unwrap();
-            let last: &Token = found_pronouns.last().unwrap();
-
-            lints.push(Lint {
-                span: Span::new(first.span.start, last.span.end),
-                lint_kind: LintKind::Repetition,
-                message: "There are too many personal pronouns in sequence here.".to_owned(),
-                priority: 63,
-                ..Default::default()
-            });
-            found_pronouns.clear();
-        };
-
-        for chunk in document.chunks() {
-            for word in chunk.iter_words() {
-                let word_chars = document.get_span_content(word.span);
-
-                if self.is_pronoun(word_chars) {
-                    found_pronouns.push(word);
-                } else if found_pronouns.len() == 1 {
-                    found_pronouns.clear();
-                } else if found_pronouns.len() > 1 {
-                    emit_lint(&mut found_pronouns);
-                }
-            }
-
-            if found_pronouns.len() > 1 {
-                emit_lint(&mut found_pronouns);
-            }
-
-            found_pronouns.clear();
+        if matched_tokens.len() == 3 {
+            suggestions.push(Suggestion::ReplaceWith(
+                matched_tokens[0].span.get_content(source).to_vec()
+            ));
+            suggestions.push(Suggestion::ReplaceWith(
+                matched_tokens[2].span.get_content(source).to_vec()
+            ));
         }
 
-        lints
+        Lint {
+            span: matched_tokens.span().unwrap(),
+            lint_kind: LintKind::Repetition,
+            message: "There are too many personal pronouns in sequence here.".to_owned(),
+            priority: 63,
+            suggestions
+        }
     }
 }
 

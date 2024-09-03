@@ -74,7 +74,9 @@ lspconfig.harper_ls.setup {
         matcher = true,
         correct_number_suffix = true,
         number_suffix_capitalization = true,
-        multiple_sequential_pronouns = true
+        multiple_sequential_pronouns = true,
+        linking_verbs = false,
+        avoid_curses = true,
       }
     }
   },
