@@ -67,10 +67,11 @@ async function main(){
 
     if (def.en){
       let kinds = def.en.map(v => v.partOfSpeech).map(partOfSpeechToAffix)
-      // Dedup values
-      kinds = [...new Set(kinds)];
 
-      let affixes = prevAffixes + kinds.reduce((prev, v) => `${prev}${v}`);
+      // Dedup values
+      kinds = [...new Set([...kinds, ...prevAffixes.split('')])];
+
+      let affixes = kinds.reduce((prev, v) => `${prev}${v}`);
 
       console.log(`${word}/${affixes}`);
     }else{
