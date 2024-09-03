@@ -16,8 +16,18 @@ impl Parser for Unit {
         let mut tokens = Vec::new();
 
         let mut chars_traversed = 0;
+        let mut in_code_fence = false;
 
         for line in source.split(|c| *c == '\n') {
+            if line_is_code_fence(line) {
+                in_code_fence = !in_code_fence;
+            }
+
+            if in_code_fence {
+                chars_traversed += line.len() + 1;
+                continue;
+            }
+
             let mut new_tokens = parse_line(line);
 
             new_tokens.push(Token::new(
@@ -55,4 +65,13 @@ fn parse_line(source: &[char]) -> Vec<Token> {
         .for_each(|t| t.span.push_by(actual.start));
 
     new_tokens
+}
+
+fn line_is_code_fence(source: &[char]) -> bool {
+    let actual = without_initiators(source);
+    let actual_chars = actual.get_content(source);
+
+    dbg!(actual_chars);
+
+    matches!(actual_chars, ['`', '`', '`', ..])
 }

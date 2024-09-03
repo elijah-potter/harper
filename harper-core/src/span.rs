@@ -44,6 +44,9 @@ impl Span {
     /// invalid.
     pub fn try_get_content<'a>(&self, source: &'a [char]) -> Option<&'a [char]> {
         if (self.start > self.end) || (self.start >= source.len()) || (self.end > source.len()) {
+            if self.is_empty() {
+                return Some(&source[0..0]);
+            }
             return None;
         }
 
