@@ -221,6 +221,8 @@ mod tests {
         let expanded = build_expanded();
 
         let is = expanded.get(&split("is"));
+
+        dbg!(&is);
         assert!(is.is_some());
         assert!(is.unwrap().is_linking_verb());
     }

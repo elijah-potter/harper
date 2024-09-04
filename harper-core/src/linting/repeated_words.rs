@@ -29,12 +29,15 @@ impl Default for RepeatedWords {
         let mut pattern = WordPatternGroup::default();
 
         for word in words {
-            let mut rep = SequencePattern::default();
-            rep.then_exact_word(word)
-                .then_whitespace()
-                .then_exact_word(word);
-
-            pattern.add(word, Box::new(rep));
+            pattern.add(
+                word,
+                Box::new(
+                    SequencePattern::default()
+                        .then_exact_word(word)
+                        .then_whitespace()
+                        .then_exact_word(word)
+                )
+            );
         }
 
         Self {

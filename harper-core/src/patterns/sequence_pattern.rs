@@ -14,10 +14,12 @@ pub struct SequencePattern {
 macro_rules! gen_then_from_is {
     ($quality:ident) => {
         paste! {
-            fn [< then_$quality >] (&mut self){
+            pub fn [< then_$quality >] (mut self) -> Self{
                 self.token_patterns.push(Box::new(|tok: &Token, _source: &[char]| {
                     tok.kind.[< is_$quality >]()
-                }))
+                }));
+
+                self
             }
         }
     };
@@ -27,8 +29,12 @@ impl SequencePattern {
     gen_then_from_is!(noun);
     gen_then_from_is!(verb);
     gen_then_from_is!(linking_verb);
+    gen_then_from_is!(pronoun);
+    gen_then_from_is!(punctuation);
+    gen_then_from_is!(conjunction);
+    gen_then_from_is!(comma);
 
-    pub fn then_exact_word(&mut self, word: &'static str) -> &mut Self {
+    pub fn then_exact_word(mut self, word: &'static str) -> Self {
         self.token_patterns
             .push(Box::new(|tok: &Token, source: &[char]| {
                 if !tok.kind.is_word() {
@@ -51,7 +57,7 @@ impl SequencePattern {
         self
     }
 
-    pub fn then_loose(&mut self, kind: TokenKind) -> &mut Self {
+    pub fn then_loose(mut self, kind: TokenKind) -> Self {
         self.token_patterns
             .push(Box::new(move |tok: &Token, _source: &[char]| {
                 kind.with_default_data() == tok.kind.with_default_data()
@@ -60,13 +66,13 @@ impl SequencePattern {
         self
     }
 
-    pub fn then_any_word(&mut self) -> &mut Self {
+    pub fn then_any_word(mut self) -> Self {
         self.token_patterns
             .push(Box::new(|tok: &Token, _source: &[char]| tok.kind.is_word()));
         self
     }
 
-    pub fn then_strict(&mut self, kind: TokenKind) -> &mut Self {
+    pub fn then_strict(mut self, kind: TokenKind) -> Self {
         self.token_patterns
             .push(Box::new(move |tok: &Token, _source: &[char]| {
                 tok.kind == kind
@@ -74,12 +80,12 @@ impl SequencePattern {
         self
     }
 
-    pub fn then_whitespace(&mut self) -> &mut Self {
+    pub fn then_whitespace(mut self) -> Self {
         self.token_patterns.push(Box::new(WhitespacePattern));
         self
     }
 
-    pub fn then_any_word_in(&mut self, word_set: Lrc<HashSet<&'static str>>) -> &mut Self {
+    pub fn then_any_word_in(mut self, word_set: Lrc<HashSet<&'static str>>) -> Self {
         self.token_patterns
             .push(Box::new(move |tok: &Token, source: &[char]| {
                 let tok_chars = tok.span.get_content(source);
@@ -89,7 +95,7 @@ impl SequencePattern {
         self
     }
 
-    pub fn then_one_or_more(&mut self, pat: Box<dyn Pattern>) -> &mut Self {
+    pub fn then_one_or_more(mut self, pat: Box<dyn Pattern>) -> Self {
         self.token_patterns
             .push(Box::new(RepeatingPattern::new(pat)));
         self
@@ -124,8 +130,10 @@ mod tests {
 
     #[test]
     fn matches_n_whitespace_tokens() {
-        let mut pat = SequencePattern::default();
-        pat.then_any_word().then_whitespace().then_any_word();
+        let mut pat = SequencePattern::default()
+            .then_any_word()
+            .then_whitespace()
+            .then_any_word();
         let doc = Document::new_plain_english_curated("word\n    \nword");
 
         assert_eq!(
@@ -136,8 +144,8 @@ mod tests {
 
     #[test]
     fn matches_specific_words() {
-        let mut pat = SequencePattern::default();
-        pat.then_exact_word("she")
+        let mut pat = SequencePattern::default()
+            .then_exact_word("she")
             .then_whitespace()
             .then_exact_word("her");
         let doc = Document::new_plain_english_curated("she her");
@@ -155,8 +163,8 @@ mod tests {
         pronouns.insert("hers");
         let pronouns = Lrc::new(pronouns);
 
-        let mut pat = SequencePattern::default();
-        pat.then_exact_word("it")
+        let mut pat = SequencePattern::default()
+            .then_exact_word("it")
             .then_whitespace()
             .then_exact_word("was")
             .then_whitespace()

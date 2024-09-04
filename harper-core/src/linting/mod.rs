@@ -14,6 +14,7 @@ mod sentence_capitalization;
 mod spaces;
 mod spell_check;
 mod spelled_numbers;
+mod terminating_conjunctions;
 mod unclosed_quotes;
 mod wrong_quotes;
 

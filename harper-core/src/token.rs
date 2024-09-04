@@ -6,6 +6,7 @@ use serde::{Deserialize, Serialize};
 
 use crate::punctuation::Punctuation;
 use crate::span::Span;
+use crate::word_metadata::{ConjunctionData, NounData};
 use crate::{Quote, WordMetadata};
 
 #[derive(Debug, Clone, Copy, Serialize, Deserialize, PartialEq, Default)]
@@ -71,6 +72,29 @@ impl TokenKind {
 
     pub fn is_pipe(&self) -> bool {
         matches!(self, TokenKind::Punctuation(Punctuation::Pipe))
+    }
+
+    pub fn is_pronoun(&self) -> bool {
+        matches!(
+            self,
+            TokenKind::Word(WordMetadata {
+                noun: Some(NounData {
+                    is_pronoun: Some(true),
+                    ..
+                }),
+                ..
+            })
+        )
+    }
+
+    pub fn is_conjunction(&self) -> bool {
+        matches!(
+            self,
+            TokenKind::Word(WordMetadata {
+                conjunction: Some(ConjunctionData {}),
+                ..
+            })
+        )
     }
 
     pub fn is_swear(&self) -> bool {
@@ -236,6 +260,10 @@ impl TokenKind {
         };
 
         metadata.is_noun()
+    }
+
+    pub fn is_comma(&self) -> bool {
+        matches!(self, TokenKind::Punctuation(Punctuation::Comma))
     }
 
     /// Checks whether the token is whitespace.

@@ -1,6 +1,7 @@
 use crate::Token;
 
 mod any_pattern;
+mod consumes_remaining_pattern;
 mod naive_pattern_group;
 mod repeating_pattern;
 mod sequence_pattern;
@@ -9,6 +10,7 @@ mod whitespace_pattern;
 mod word_pattern_group;
 
 pub use any_pattern::AnyPattern;
+pub use consumes_remaining_pattern::ConsumesRemainingPattern;
 pub use naive_pattern_group::NaivePatternGroup;
 pub use repeating_pattern::RepeatingPattern;
 pub use sequence_pattern::SequencePattern;
