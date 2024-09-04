@@ -545,6 +545,17 @@
       "gifts_metadata": {
         "conjunction": {}
       }
+    },
+    "8": {
+      "suffix": true,
+      "cross_product": true,
+      "replacements": [],
+      "adds_metadata": {},
+      "gifts_metadata": {
+        "noun": {
+          "is_pronoun": true
+        }
+      }
     }
   }
 }

@@ -198,4 +198,11 @@ mod tests {
         assert!(dict.get_word_metadata_str("than").is_conjunction());
         assert!(dict.get_word_metadata_str("Than").is_conjunction());
     }
+
+    #[test]
+    fn herself_is_pronoun() {
+        let dict = FullDictionary::curated();
+        assert!(dict.get_word_metadata_str("than").is_conjunction());
+        assert!(dict.get_word_metadata_str("Than").is_conjunction());
+    }
 }
