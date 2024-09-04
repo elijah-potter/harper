@@ -45,6 +45,8 @@ function partOfSpeechToAffix(partOfSpeech){
       return "5";
     case "Conjunction":
       return "7";
+    case "Pronoun":
+      return "8";
   }
 
   return ""; 
