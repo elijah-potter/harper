@@ -71,7 +71,5 @@ fn line_is_code_fence(source: &[char]) -> bool {
     let actual = without_initiators(source);
     let actual_chars = actual.get_content(source);
 
-    dbg!(actual_chars);
-
     matches!(actual_chars, ['`', '`', '`', ..])
 }
