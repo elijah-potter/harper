@@ -55,7 +55,7 @@ check:
   set -eo pipefail
 
   cargo +nightly fmt --check
-  cargo clippy -- -Dwarnings
+  cargo clippy -- -Dwarnings -D clippy::dbg_macro
 
   cd "{{justfile_directory()}}/packages"
   yarn install

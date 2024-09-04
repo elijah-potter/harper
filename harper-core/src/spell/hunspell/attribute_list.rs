@@ -1,6 +1,6 @@
 use hashbrown::HashMap;
 use serde::{Deserialize, Serialize};
-use smallvec::{smallvec, ToSmallVec};
+use smallvec::ToSmallVec;
 
 use super::affix_replacement::AffixReplacement;
 use super::expansion::{Expansion, HumanReadableExpansion};
@@ -68,10 +68,6 @@ impl AttributeList {
                     if attr_def.suffix != expansion.suffix {
                         opp_attr.push(*attr);
                     }
-                }
-
-                if new_words.get(&smallvec!['h', 'a', 's']).is_some() {
-                    dbg!(&word);
                 }
 
                 for (new_word, metadata) in new_words {
