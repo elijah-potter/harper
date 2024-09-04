@@ -74,6 +74,16 @@ impl WordMetadata {
         )
     }
 
+    pub fn is_pronoun(&self) -> bool {
+        matches!(
+            self.noun,
+            Some(NounData {
+                is_pronoun: Some(true),
+                ..
+            })
+        )
+    }
+
     pub fn is_linking_verb(&self) -> bool {
         matches!(
             self.verb,
@@ -123,7 +133,8 @@ impl VerbData {
 pub struct NounData {
     pub is_proper: Option<bool>,
     pub is_plural: Option<bool>,
-    pub is_possessive: Option<bool>
+    pub is_possessive: Option<bool>,
+    pub is_pronoun: Option<bool>
 }
 
 impl NounData {
@@ -132,7 +143,8 @@ impl NounData {
         Self {
             is_proper: self.is_proper.or(other.is_proper),
             is_plural: self.is_plural.or(other.is_plural),
-            is_possessive: self.is_possessive.or(other.is_possessive)
+            is_possessive: self.is_possessive.or(other.is_possessive),
+            is_pronoun: self.is_pronoun.or(other.is_pronoun)
         }
     }
 }
