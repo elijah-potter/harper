@@ -8,19 +8,30 @@ pub struct WordMetadata {
     pub adjective: Option<AdjectiveData>,
     pub adverb: Option<AdverbData>,
     pub conjunction: Option<ConjunctionData>,
-    pub swear: Option<bool>
+    pub swear: Option<bool>,
 }
 
 impl WordMetadata {
     /// Produce a copy of `self` with the known properties of `other` set.
     pub fn or(&self, other: &Self) -> Self {
+        macro_rules! merge {
+            ($a:expr, $b:expr) => {
+                match ($a, $b) {
+                    (Some(a), Some(b)) => Some(a.or(&b)),
+                    (Some(a), None) => Some(a),
+                    (None, Some(b)) => Some(b),
+                    (None, None) => None,
+                }
+            };
+        }
+
         Self {
-            noun: self.noun.or(other.noun),
-            verb: self.verb.or(other.verb),
-            adjective: self.adjective.or(other.adjective),
-            adverb: self.adverb.or(other.adverb),
-            conjunction: self.conjunction.or(other.conjunction),
-            swear: self.swear.or(other.swear)
+            noun: merge!(self.noun, other.noun),
+            verb: merge!(self.verb, other.verb),
+            adjective: merge!(self.adjective, other.adjective),
+            adverb: merge!(self.adverb, other.adverb),
+            conjunction: merge!(self.conjunction, other.conjunction),
+            swear: self.swear.or(other.swear),
         }
     }
 
@@ -110,13 +121,13 @@ impl WordMetadata {
 pub enum Tense {
     Past,
     Present,
-    Future
+    Future,
 }
 
 #[derive(Debug, Clone, Copy, Serialize, Deserialize, PartialEq, PartialOrd, Eq, Hash)]
 pub struct VerbData {
     pub is_linking: Option<bool>,
-    pub tense: Option<Tense>
+    pub tense: Option<Tense>,
 }
 
 impl VerbData {
@@ -124,7 +135,7 @@ impl VerbData {
     pub fn or(&self, other: &Self) -> Self {
         Self {
             is_linking: self.is_linking.or(other.is_linking),
-            tense: self.tense.or(other.tense)
+            tense: self.tense.or(other.tense),
         }
     }
 }
@@ -134,7 +145,7 @@ pub struct NounData {
     pub is_proper: Option<bool>,
     pub is_plural: Option<bool>,
     pub is_possessive: Option<bool>,
-    pub is_pronoun: Option<bool>
+    pub is_pronoun: Option<bool>,
 }
 
 impl NounData {
@@ -144,7 +155,7 @@ impl NounData {
             is_proper: self.is_proper.or(other.is_proper),
             is_plural: self.is_plural.or(other.is_plural),
             is_possessive: self.is_possessive.or(other.is_possessive),
-            is_pronoun: self.is_pronoun.or(other.is_pronoun)
+            is_pronoun: self.is_pronoun.or(other.is_pronoun),
         }
     }
 }
