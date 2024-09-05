@@ -89,10 +89,11 @@ install:
 # Run `harper-cli` on the Harper repository
 dogfood:
   #! /bin/bash
+  cargo build --release
   for file in `fd -e rs`
   do
     echo Linting $file
-    cargo run --bin harper-cli --release --quiet -- lint $file
+    ./target/release/harper-cli lint $file
   done
 
 test:
