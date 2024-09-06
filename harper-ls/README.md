@@ -42,13 +42,14 @@ You can add to the user dictionary with code actions on misspelled words.
 #### Configuration
 
 You don't have to stick with the default locations (listed above).
-If you use Neovim, you can set the location of the dictionary with the `userDictPath` key:
+If you use Neovim, you can set the location of the user dictionary with the `userDictPath` key, and the file dictionary with the `fileDictPath` key:
 
 ```lua
 lspconfig.harper_ls.setup {
   settings = {
     ["harper-ls"] = {
-      userDictPath = "~/dict.txt"
+      userDictPath = "~/dict.txt",
+      fileDictPath = "~/.harper/",
     }
   },
 }
