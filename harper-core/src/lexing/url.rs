@@ -104,7 +104,7 @@ fn valid_scheme_char(c: char) -> bool {
 }
 
 fn is_reserved(c: char) -> bool {
-    matches!(c, ';' | '/' | '?' | ':' | '@' | '&' | '=')
+    matches!(c, ';' | '/' | '?' | ':' | '@' | '&' | '=' | '#')
 }
 
 fn is_safe(c: char) -> bool {
@@ -229,6 +229,11 @@ mod tests {
     #[test]
     fn consumes_with_path() {
         assert_consumes_full("https://elijahpotter.dev/articles/quantifying_hope_on_a_global_scale")
+    }
+
+    #[test]
+    fn consumes_issue_142() {
+        assert_consumes_full("https://github.com/nodesource/distributions#debinstall")
     }
 
     /// Tests that the URL parser will not throw a panic under some random
