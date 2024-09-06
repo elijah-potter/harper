@@ -93,6 +93,14 @@ impl Config {
             }
         }
 
+        if let Some(v) = value.get("fileDictPath") {
+            if let Value::String(path) = v {
+                base.file_dict_path = path.try_resolve()?.to_path_buf();
+            } else {
+                return Err(anyhow::format_err!("fileDict path must be a string."));
+            }
+        }
+
         if let Some(v) = value.get("linters") {
             base.lint_config = serde_json::from_value(v.clone())?;
         }
