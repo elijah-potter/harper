@@ -43,7 +43,7 @@ pub async fn load_dict(path: impl AsRef<Path>) -> io::Result<FullDictionary> {
 }
 
 /// This function could definitely be optimized to use less memory.
-/// Right now, it isn't an issue.
+/// Right now it isn't an issue.
 async fn dict_from_word_list(mut r: impl AsyncRead + Unpin) -> io::Result<FullDictionary> {
     let mut str = String::new();
 
