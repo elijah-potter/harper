@@ -18,8 +18,15 @@ use tower_lsp::{LspService, Server};
 use tracing::Level;
 use tracing_subscriber::FmtSubscriber;
 
+static DEFAULT_ADDRESS: &str = "127.0.0.1:4000";
+
+/// Start a language server to provide grammar checking inside of developer
+/// environments.
+///
+/// Will listen on 127.0.0.1:4000 by default.
 #[derive(Debug, Parser)]
 struct Args {
+    /// Set to listen on standard input / output rather than TCP.
     #[arg(short, long, default_value_t = false)]
     stdio: bool
 }
@@ -43,9 +50,8 @@ async fn main() -> anyhow::Result<()> {
         let stdout = tokio::io::stdout();
         Server::new(stdin, stdout, socket).serve(service).await;
     } else {
-        let address = "127.0.0.1:4000";
-        let listener = TcpListener::bind(address).await.unwrap();
-        println!("Listening on {}", address);
+        let listener = TcpListener::bind(DEFAULT_ADDRESS).await.unwrap();
+        println!("Listening on {}", DEFAULT_ADDRESS);
         let (stream, _) = listener.accept().await.unwrap();
         let (read, write) = tokio::io::split(stream);
         Server::new(read, write, socket).serve(service).await;
