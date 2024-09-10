@@ -28,7 +28,7 @@ pub fn parse_default_attribute_list() -> AttributeList {
 
 #[cfg(test)]
 mod tests {
-    use hashbrown::HashMap;
+    use hashbrown::{HashMap, HashSet};
     use serde_json::json;
 
     use super::word_list::parse_word_list;
@@ -88,7 +88,7 @@ mod tests {
         let mut expanded = HashMap::new();
 
         attributes.expand_marked_words(words, &mut expanded);
-        let expanded: Vec<String> = expanded
+        let expanded: HashSet<String> = expanded
             .into_iter()
             .map(|v| v.0.into_iter().collect())
             .collect();
@@ -96,6 +96,9 @@ mod tests {
         assert_eq!(
             expanded,
             vec!["hello", "tried", "reworked", "rework", "worked", "work", "try"]
+                .into_iter()
+                .map(|v| v.into())
+                .collect()
         )
     }
 
