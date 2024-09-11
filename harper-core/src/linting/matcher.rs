@@ -272,7 +272,8 @@ impl Matcher {
             "Tree", "sitter" => "Tree-sitter",
             "all", "of", "the" => "all the",
             "an", "other" => "another",
-            "not", "longer" => "no longer"
+            "not", "longer" => "no longer",
+            "to", "towards" => "towards"
         };
 
         // TODO: Improve the description for this lint specifically.

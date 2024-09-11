@@ -78,6 +78,7 @@ lspconfig.harper_ls.setup {
         multiple_sequential_pronouns = true,
         linking_verbs = false,
         avoid_curses = true,
+        terminating_conjunctions = true
       }
     }
   },
