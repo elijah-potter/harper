@@ -5,7 +5,7 @@ use super::whitespace_pattern::WhitespacePattern;
 use super::{Pattern, RepeatingPattern};
 use crate::{Lrc, Token, TokenKind};
 
-/// A pattern that checks that a sequence of [`TokenPattern`] matches.
+/// A pattern that checks that a sequence of others patterns match.
 #[derive(Default)]
 pub struct SequencePattern {
     token_patterns: Vec<Box<dyn Pattern>>
