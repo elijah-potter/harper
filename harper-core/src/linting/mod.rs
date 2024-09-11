@@ -34,6 +34,7 @@ pub use sentence_capitalization::SentenceCapitalization;
 pub use spaces::Spaces;
 pub use spell_check::SpellCheck;
 pub use spelled_numbers::SpelledNumbers;
+pub use terminating_conjunctions::TerminatingConjunctions;
 pub use unclosed_quotes::UnclosedQuotes;
 pub use wrong_quotes::WrongQuotes;
 
