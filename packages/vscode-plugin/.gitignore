@@ -1,3 +1,4 @@
 build
 *.vsix
 LICENSE
+bin
