@@ -48,7 +48,13 @@
 	],
 	"main": "./build/extension.js",
 	"contributes": {
-		"commands": [],
+		"commands": [
+			{
+				"command": "harper-ls.restart",
+				"title": "Harper: Restart Language Server",
+				"description": "Restart harper-ls"
+			}
+		],
 		"configuration": {
 			"type": "object",
 			"title": "Harper",
