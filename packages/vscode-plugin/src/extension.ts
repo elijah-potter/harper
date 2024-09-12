@@ -1,7 +1,7 @@
 import type { ExtensionContext } from 'vscode';
 import type { Executable, LanguageClientOptions } from 'vscode-languageclient/node';
 
-import { Uri, window } from 'vscode';
+import { commands, Uri, window } from 'vscode';
 import { LanguageClient, TransportKind } from 'vscode-languageclient/node';
 
 let client: LanguageClient | undefined = undefined;
@@ -38,6 +38,8 @@ export async function activate(context: ExtensionContext): Promise<void> {
 
 	clientOptions.outputChannel = window.createOutputChannel('Harper');
 	context.subscriptions.push(clientOptions.outputChannel);
+
+	context.subscriptions.push(commands.registerCommand('harper-ls.restart', startLanguageServer));
 
 	await startLanguageServer();
 }
