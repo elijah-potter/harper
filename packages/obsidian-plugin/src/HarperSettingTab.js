@@ -1,4 +1,5 @@
 import './index.js';
+import { startCase } from 'lodash-es';
 import { PluginSettingTab, Setting } from 'obsidian';
 
 export class HarperSettingTab extends PluginSettingTab {
@@ -32,7 +33,7 @@ export class HarperSettingTab extends PluginSettingTab {
 			let value = this.settings.lintSettings[setting];
 
 			new Setting(containerEl)
-				.setName(setting)
+				.setName(startCase(setting))
 				.setDesc(`Whether to include the ${setting} grammar rule.`)
 				.addDropdown((dropdown) =>
 					dropdown

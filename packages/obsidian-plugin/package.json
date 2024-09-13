@@ -30,6 +30,7 @@
 	},
 	"dependencies": {
 		"crelt": "^1.0.5",
+		"lodash-es": "^4.17.21",
 		"wasm": "link:../../harper-wasm/pkg"
 	}
 }
