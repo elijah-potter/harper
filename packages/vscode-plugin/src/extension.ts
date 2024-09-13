@@ -1,10 +1,10 @@
 import type { ExtensionContext } from 'vscode';
 import type { Executable, LanguageClientOptions } from 'vscode-languageclient/node';
 
-import { commands, Uri, window } from 'vscode';
+import { commands, Uri, window, workspace } from 'vscode';
 import { LanguageClient, TransportKind } from 'vscode-languageclient/node';
 
-let client: LanguageClient | undefined = undefined;
+let client: LanguageClient | undefined;
 const serverOptions: Executable = { command: '', transport: TransportKind.stdio };
 const clientOptions: LanguageClientOptions = {
 	documentSelector: [
@@ -39,13 +39,33 @@ export async function activate(context: ExtensionContext): Promise<void> {
 	clientOptions.outputChannel = window.createOutputChannel('Harper');
 	context.subscriptions.push(clientOptions.outputChannel);
 
+	try {
+		const manifest: { contributes: { configuration: { properties: { [key: string]: object } } } } =
+			(
+				await import(Uri.joinPath(context.extensionUri, 'package.json').fsPath, {
+					with: { type: 'json' }
+				})
+			).default;
+		const configs = Object.keys(manifest.contributes.configuration.properties);
+		context.subscriptions.push(
+			workspace.onDidChangeConfiguration(async (event) => {
+				if (configs.find((c) => event.affectsConfiguration(c))) {
+					clientOptions.outputChannel?.appendLine('Configuration changed, restarting server');
+					await startLanguageServer();
+				}
+			})
+		);
+	} catch (error) {
+		showError('Failed to import manifest file', error);
+	}
+
 	context.subscriptions.push(commands.registerCommand('harper-ls.restart', startLanguageServer));
 
 	await startLanguageServer();
 }
 
 async function startLanguageServer(): Promise<void> {
-	if (client) {
+	if (client && client.needsStop()) {
 		if (client.diagnostics) {
 			client.diagnostics.clear();
 		}
