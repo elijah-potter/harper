@@ -13,11 +13,9 @@ impl Default for TerminatingConjunctions {
                 SequencePattern::default()
                     .then_any_word_in(Lrc::new(
                         [
-                            "after",
                             "although",
                             "as",
                             "because",
-                            "before",
                             "if",
                             "lest",
                             "once",
