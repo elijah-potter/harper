@@ -289,12 +289,6 @@ impl Matcher {
             replace_with: vecword!("–")
         });
 
-        // And this ellipsis
-        triggers.push(Rule {
-            pattern: vec![pt!(Period), pt!(Period), pt!(Period)],
-            replace_with: vecword!("…")
-        });
-
         triggers.push(Rule {
             pattern: vec![pt!("L"), pt!(Period), pt!("L"), pt!(Period), pt!("M")],
             replace_with: vecword!("large language model")
@@ -378,14 +372,6 @@ mod tests {
     #[test]
     fn matches_therefore() {
         let document = Document::new_plain_english_curated("There fore.");
-        let mut matcher = Matcher::new();
-        let lints = matcher.lint(&document);
-        assert_eq!(lints.len(), 1);
-    }
-
-    #[test]
-    fn matches_ellipsis() {
-        let document = Document::new_plain_english_curated("...");
         let mut matcher = Matcher::new();
         let lints = matcher.lint(&document);
         assert_eq!(lints.len(), 1);

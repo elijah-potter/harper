@@ -1,4 +1,6 @@
-use crate::Token;
+use std::collections::VecDeque;
+
+use crate::{Span, Token, VecExt};
 
 mod any_pattern;
 mod consumes_remaining_pattern;
@@ -26,6 +28,49 @@ pub trait Pattern {
 #[cfg(feature = "concurrent")]
 pub trait Pattern: Send + Sync {
     fn matches(&self, tokens: &[Token], source: &[char]) -> usize;
+}
+
+pub trait PatternExt {
+    /// Search through all tokens to locate all non-overlapping pattern matches.
+    fn find_all_matches(&self, tokens: &[Token], source: &[char]) -> Vec<Span>;
+}
+
+impl<P> PatternExt for P
+where
+    P: Pattern
+{
+    fn find_all_matches(&self, tokens: &[Token], source: &[char]) -> Vec<Span> {
+        let mut found = Vec::new();
+
+        for i in 0..tokens.len() {
+            let len = self.matches(&tokens[i..], source);
+
+            if len > 0 {
+                found.push(Span::new_with_len(i, len));
+            }
+        }
+
+        if found.len() < 2 {
+            return found;
+        }
+
+        found.sort_by_key(|s| s.start);
+
+        let mut remove_indices = VecDeque::new();
+
+        for i in 0..found.len() - 1 {
+            let cur = &found[i];
+            let next = &found[i + 1];
+
+            if cur.overlaps_with(*next) {
+                remove_indices.push_back(i + 1);
+            }
+        }
+
+        found.remove_indices(remove_indices);
+
+        found
+    }
 }
 
 #[cfg(feature = "concurrent")]

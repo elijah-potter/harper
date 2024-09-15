@@ -6,6 +6,7 @@ use itertools::Itertools;
 use paste::paste;
 
 use crate::parsers::{Markdown, Parser, PlainEnglish};
+use crate::patterns::{PatternExt, RepeatingPattern, SequencePattern};
 use crate::punctuation::Punctuation;
 use crate::span::Span;
 use crate::token::NumberSuffix;
@@ -87,6 +88,7 @@ impl Document {
     /// Should be run after every change to the underlying [`Self::source`].
     fn parse(&mut self, dictionary: &impl Dictionary) {
         self.condense_spaces();
+        self.condense_ellipsis();
         self.condense_newlines();
         self.newlines_to_breaks();
         self.condense_contractions();
@@ -493,6 +495,40 @@ impl Document {
         self.tokens.remove_indices(to_remove);
     }
 
+    fn uncached_ellipsis_pattern() -> Lrc<RepeatingPattern> {
+        let period = SequencePattern::default().then_period();
+        Lrc::new(RepeatingPattern::new(Box::new(period)))
+    }
+
+    thread_local! {
+        static ELLIPSIS_PATTERN: Lrc<RepeatingPattern> = Document::uncached_ellipsis_pattern();
+    }
+
+    fn condense_ellipsis(&mut self) {
+        let found = Self::ELLIPSIS_PATTERN
+            .with(|v| v.clone())
+            .find_all_matches(&self.tokens, &self.source);
+        let mut to_remove = VecDeque::new();
+
+        for found_slice in found {
+            if found_slice.len() <= 2 {
+                continue;
+            }
+
+            let found_toks = &mut self.tokens[found_slice.start..found_slice.end];
+
+            let end_char = found_toks.last().unwrap().span.end;
+            let first = found_toks.first_mut().unwrap();
+            first.kind = TokenKind::Punctuation(Punctuation::Ellipsis);
+            first.span.end = end_char;
+            for i in found_slice.start + 1..found_slice.end {
+                to_remove.push_back(i)
+            }
+        }
+
+        self.tokens.remove_indices(to_remove);
+    }
+
     /// Searches for contractions and condenses them down into single
     /// tokens.
     fn condense_contractions(&mut self) {
@@ -733,5 +769,10 @@ mod tests {
     #[test]
     fn condenses_nsa() {
         assert_token_count(r#"Condenses words like "i.e.", "e.g." and "N.S.A.""#, 20);
+    }
+
+    #[test]
+    fn parses_ellipsis() {
+        assert_token_count("...", 1);
     }
 }
