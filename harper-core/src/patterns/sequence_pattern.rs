@@ -131,7 +131,7 @@ mod tests {
 
     #[test]
     fn matches_n_whitespace_tokens() {
-        let mut pat = SequencePattern::default()
+        let pat = SequencePattern::default()
             .then_any_word()
             .then_whitespace()
             .then_any_word();

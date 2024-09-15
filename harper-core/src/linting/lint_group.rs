@@ -4,6 +4,7 @@ use serde::{Deserialize, Serialize};
 use super::an_a::AnA;
 use super::avoid_curses::AvoidCurses;
 use super::correct_number_suffix::CorrectNumberSuffix;
+use super::ellipsis_length::EllipsisLength;
 use super::linking_verbs::LinkingVerbs;
 use super::long_sentences::LongSentences;
 use super::matcher::Matcher;
@@ -111,7 +112,8 @@ create_lint_group_config!(
     MultipleSequentialPronouns => true,
     LinkingVerbs => false,
     AvoidCurses => true,
-    TerminatingConjunctions => true
+    TerminatingConjunctions => true,
+    EllipsisLength => true
 );
 
 impl<T: Dictionary + Default> Default for LintGroup<T> {

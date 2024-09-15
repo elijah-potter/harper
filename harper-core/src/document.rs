@@ -511,7 +511,7 @@ impl Document {
         let mut to_remove = VecDeque::new();
 
         for found_slice in found {
-            if found_slice.len() <= 2 {
+            if found_slice.len() <= 1 {
                 continue;
             }
 
@@ -601,6 +601,7 @@ impl TokenStringExt for Document {
     create_fns_on_doc!(quote);
     create_fns_on_doc!(number);
     create_fns_on_doc!(at);
+    create_fns_on_doc!(ellipsis);
 
     fn first_sentence_word(&self) -> Option<Token> {
         self.tokens.first_sentence_word()
@@ -774,5 +775,15 @@ mod tests {
     #[test]
     fn parses_ellipsis() {
         assert_token_count("...", 1);
+    }
+
+    #[test]
+    fn parses_long_ellipsis() {
+        assert_token_count(".....", 1);
+    }
+
+    #[test]
+    fn parses_short_ellipsis() {
+        assert_token_count("..", 1);
     }
 }

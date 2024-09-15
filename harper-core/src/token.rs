@@ -97,6 +97,10 @@ impl TokenKind {
         )
     }
 
+    pub fn is_ellipsis(&self) -> bool {
+        matches!(self, TokenKind::Punctuation(Punctuation::Ellipsis))
+    }
+
     pub fn is_swear(&self) -> bool {
         matches!(
             self,
@@ -325,6 +329,7 @@ pub trait TokenStringExt {
     create_decl_for!(quote);
     create_decl_for!(number);
     create_decl_for!(at);
+    create_decl_for!(ellipsis);
 
     fn iter_linking_verb_indices(&self) -> impl Iterator<Item = usize> + '_;
     fn iter_linking_verbs(&self) -> impl Iterator<Item = Token> + '_;
@@ -338,6 +343,7 @@ impl TokenStringExt for [Token] {
     create_fns_for!(quote);
     create_fns_for!(number);
     create_fns_for!(at);
+    create_fns_for!(ellipsis);
 
     fn first_non_whitespace(&self) -> Option<Token> {
         self.iter().find(|t| !t.kind.is_whitespace()).copied()

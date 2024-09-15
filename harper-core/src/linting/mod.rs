@@ -1,6 +1,7 @@
 mod an_a;
 mod avoid_curses;
 mod correct_number_suffix;
+mod ellipsis_length;
 mod linking_verbs;
 mod lint;
 mod lint_group;
