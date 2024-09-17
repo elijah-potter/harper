@@ -15,6 +15,12 @@ impl Linter for AnA {
         for (first, second) in document.iter_words().tuple_windows() {
             let chars_first = document.get_span_content(first.span);
             let chars_second = document.get_span_content(second.span);
+            // Break the second word on hyphens for this lint.
+            // Example: "An ML-based" is an acceptable noun phrase.
+            let chars_second = chars_second
+                .split(|c| !c.is_alphanumeric())
+                .next()
+                .unwrap_or(chars_second);
 
             let is_a_an = match chars_first {
                 ['a'] => Some(true),
@@ -168,6 +174,16 @@ mod tests {
     #[test]
     fn detects_llm_as_vowel() {
         assert_lint_count("Here is a LLM document.", AnA, 1);
+    }
+
+    #[test]
+    fn detects_llm_hyphen_as_vowel() {
+        assert_lint_count("Here is a LLM-based system.", AnA, 1);
+    }
+
+    #[test]
+    fn capitalized_fourier() {
+        assert_lint_count("Then, perform a Fourier transform.", AnA, 0);
     }
 
     #[test]
