@@ -9,9 +9,26 @@
 			"name": "Run Extension",
 			"type": "extensionHost",
 			"request": "launch",
-			"args": ["--extensionDevelopmentPath=${workspaceFolder}"],
-			"outFiles": ["${workspaceFolder}/dist/**/*.js"],
+			"args": [
+				"--extensionDevelopmentPath=${workspaceFolder}",
+				"--disable-extensions",
+				"${workspaceFolder}/src/tests/fixtures"
+			],
+			"outFiles": ["${workspaceFolder}/build/**/*.js"],
 			"preLaunchTask": "${defaultBuildTask}"
+		},
+		{
+			"name": "Test Extension",
+			"type": "extensionHost",
+			"request": "launch",
+			"args": [
+				"--extensionDevelopmentPath=${workspaceFolder}",
+				"--extensionTestsPath=${workspaceFolder}/build/tests/suite",
+				"--disable-extensions",
+				"${workspaceFolder}/src/tests/fixtures"
+			],
+			"outFiles": ["${workspaceFolder}/build/tests/**/*.js"],
+			"preLaunchTask": "npm: pretest"
 		}
 	]
 }

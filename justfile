@@ -51,7 +51,7 @@ package-vscode:
   cd "$path"
 
   yarn install -f
-  yarn package-extension
+  yarn package
 
 check-rust:
   #! /bin/bash

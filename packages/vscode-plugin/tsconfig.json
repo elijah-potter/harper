@@ -5,6 +5,7 @@
 		"lib": ["ES2022", "DOM"],
 		"sourceMap": true,
 		"rootDir": "src",
+		"outDir": "build",
 		"strict": true
 	}
 }
