@@ -6,7 +6,10 @@ import path from 'node:path';
 		await runTests({
 			extensionDevelopmentPath: path.join(__dirname, '..', '..'),
 			extensionTestsPath: path.join(__dirname, 'suite'),
-			launchArgs: ['--disable-extensions']
+			launchArgs: [
+				'--disable-extensions',
+				path.join(__dirname, '..', '..', 'src', 'tests', 'fixtures')
+			]
 		});
 	} catch (error) {
 		console.error('Failed to run tests', error);
