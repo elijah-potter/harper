@@ -15,3 +15,7 @@ If those scripts don't work in your environment, we run `just precommit` through
 
 If this sounds intimidating, don't worry.
 We are entirely willing to work with you to make sure your code can make it into Harper, just know it might take a little longer.
+
+## How does it work?
+
+Please take a read of the [architecture document](./ARCHITECTURE.md).
