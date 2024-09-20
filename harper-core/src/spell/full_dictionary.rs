@@ -205,4 +205,10 @@ mod tests {
         assert!(dict.get_word_metadata_str("than").is_conjunction());
         assert!(dict.get_word_metadata_str("Than").is_conjunction());
     }
+
+    #[test]
+    fn discussion_171() {
+        let dict = FullDictionary::curated();
+        assert!(dict.contains_word_str("natively"));
+    }
 }
