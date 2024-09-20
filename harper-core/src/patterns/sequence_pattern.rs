@@ -145,7 +145,7 @@ mod tests {
 
     #[test]
     fn matches_specific_words() {
-        let mut pat = SequencePattern::default()
+        let pat = SequencePattern::default()
             .then_exact_word("she")
             .then_whitespace()
             .then_exact_word("her");
