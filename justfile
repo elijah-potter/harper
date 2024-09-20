@@ -105,3 +105,31 @@ parse file:
 
 lint file:
   cargo run --bin harper-cli -- lint {{file}}
+
+# Add a noun to Harper's curated dictionary.
+addnoun noun:
+  #! /bin/bash
+  DICT_FILE=./harper-core/dictionary.dict 
+
+  cat $DICT_FILE | grep {{noun}} 
+
+  if [ $? -eq 0 ]
+  then
+    echo "That noun may already be in the dictionary."
+    exit 0
+  fi
+
+  echo "{{noun}}/SM" >> $DICT_FILE
+
+# Search Harper's curated dictionary for a specific word
+searchdictfor word:
+  cargo run --bin harper-cli -- words | rg {{word}}
+
+# Find words in the user's `harper-ls/dictionary.txt` for words already in the curated dictionary.
+userdictoverlap:
+  #! /bin/bash
+  USER_DICT_FILE="$HOME/.config/harper-ls/dictionary.txt"
+
+  while read -r line; do
+    just searchdictfor $line 2> /dev/null
+  done < $USER_DICT_FILE

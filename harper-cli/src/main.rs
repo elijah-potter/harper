@@ -1,5 +1,6 @@
 #![doc = include_str!("../README.md")]
 
+use std::iter::once;
 use std::path::{Path, PathBuf};
 
 use anyhow::format_err;
@@ -8,7 +9,7 @@ use clap::Parser;
 use harper_comments::CommentParser;
 use harper_core::linting::{LintGroup, LintGroupConfig, Linter};
 use harper_core::parsers::Markdown;
-use harper_core::{remove_overlaps, Document, FullDictionary};
+use harper_core::{remove_overlaps, Dictionary, Document, FullDictionary};
 
 #[derive(Debug, Parser)]
 enum Args {
@@ -25,7 +26,9 @@ enum Args {
     Parse {
         /// The file you wish to parse.
         file: PathBuf
-    }
+    },
+    /// Emit decompressed, line-separated list of words in Harper's dictionary.
+    Words
 }
 
 fn main() -> anyhow::Result<()> {
@@ -77,6 +80,20 @@ fn main() -> anyhow::Result<()> {
 
             for token in doc.tokens() {
                 println!("{:?}", token);
+            }
+
+            Ok(())
+        }
+        Args::Words => {
+            let dict = FullDictionary::curated();
+
+            let mut word_str = String::new();
+
+            for word in dict.words_iter() {
+                word_str.clear();
+                word_str.extend(word);
+
+                println!("{}", word_str);
             }
 
             Ok(())
