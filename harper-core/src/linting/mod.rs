@@ -22,6 +22,7 @@ mod wrong_quotes;
 pub use an_a::AnA;
 pub use avoid_curses::AvoidCurses;
 pub use correct_number_suffix::CorrectNumberSuffix;
+pub use ellipsis_length::EllipsisLength;
 pub use linking_verbs::LinkingVerbs;
 pub use lint::{Lint, LintKind, Suggestion};
 pub use lint_group::{LintGroup, LintGroupConfig};
