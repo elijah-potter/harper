@@ -41,6 +41,25 @@ build-obsidian:
 
   zip harper-obsidian-plugin.zip manifest.json main.js
 
+# This assumes that `harper-ls` has been compiled and is located at `target/release`.
+test-vscode:
+  #! /bin/bash
+  set -eo pipefail
+
+  ext_dir="{{justfile_directory()}}/packages/vscode-plugin"
+  bin_dir="${ext_dir}/bin"
+
+  mkdir "$bin_dir"
+  cp "{{justfile_directory()}}/target/release/harper-ls"* "$bin_dir"
+  cd "$ext_dir"
+
+  yarn install -f
+  if [[ "$GITHUB_ACTIONS" == "true" ]] && [[ "$RUNNER_OS" == "Linux" ]]; then
+    xvfb-run --auto-servernum yarn test
+  else
+    yarn test
+  fi
+
 # Build and package the Visual Studio Code extension.
 # This assumes that `harper-ls` or `harper-ls.exe` exists in `packages/vscode-plugin/bin`.
 package-vscode target:
@@ -101,7 +120,7 @@ precommit:
   cargo bench
 
   just build-obsidian
-  just package-vscode 
+  just test-vscode
   just build-web
 
 # Install `harper-cli` and `harper-ls` to your machine via `cargo`
