@@ -4,6 +4,7 @@
 	import Section from '$lib/Section.svelte';
 	import GutterCenter from '$lib/GutterCenter.svelte';
 	import Logo from '$lib/Logo.svelte';
+	import GitHubLogo from '$lib/GitHubLogo.svelte';
 	import { DarkMode } from 'flowbite-svelte';
 
 	let width = window.innerWidth;
@@ -29,13 +30,7 @@
 		<a
 			href="https://github.com/elijah-potter/harper"
 			class="flex flex-row items-center [&>*]:m-2 dark:text-white"
-			><img
-				width="40"
-				height="40"
-				class="hover:scale-105 transition-all bg-white rounded-full"
-				src="/icons/github.svg"
-				alt="Project Repository"
-			/>GitHub</a
+			><GitHubLogo width="40px" height="40px" />GitHub</a
 		>
 		<a href="https://elijahpotter.dev" class="flex flex-row items-center [&>*]:m-2 dark:text-white"
 			><img
@@ -82,7 +77,8 @@
 				class="underline"
 				href="https://github.com/elijah-potter/harper/tree/master/harper-ls">language server</a
 			>, and through WebAssembly, so you can get fantastic grammar checking anywhere you work.
-			<br /><br /> That said, we take extra care to make sure the Neovim integration is amazing.</span
+			<br /><br /> That said, we take extra care to make sure the Neovim and
+			<a class="underline" href="/obsidian">Obsidian</a> integration is amazing.</span
 		>
 
 		<img
