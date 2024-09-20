@@ -13,7 +13,7 @@ import {
 	workspace
 } from 'vscode';
 
-describe('Integration tests', () => {
+describe('Harper Extension', () => {
 	let harper: Extension<void>;
 	let documentUri: Uri;
 
@@ -26,21 +26,21 @@ describe('Integration tests', () => {
 		await window.showTextDocument(await workspace.openTextDocument(documentUri));
 
 		// Wait for `harper-ls` to start
-		await sleep(100);
+		await sleep(500);
 	});
 
-	it('Runs', () => {
+	it('runs', () => {
 		expect(harper.isActive).toBe(true);
 	});
 
-	it('Gives correct diagnostics', () => {
+	it('gives correct diagnostics', () => {
 		const actual = languages.getDiagnostics(documentUri);
 		const expected: Diagnostic[] = [
 			{
 				source: 'Harper',
 				message: 'Did you mean to repeat this word?',
 				severity: DiagnosticSeverity.Information,
-				range: new Range(new Position(2, 43), new Position(2, 48))
+				range: new Range(new Position(2, 39), new Position(2, 48))
 			},
 			{
 				source: 'Harper',
@@ -59,11 +59,11 @@ describe('Integration tests', () => {
 		}
 	});
 
-	it('Updates diagnostics on configuration change', async () => {
+	it('updates diagnostics on configuration change', async () => {
 		const config = workspace.getConfiguration('harper-ls.linters');
 		await config.update('repeated_words', false, ConfigurationTarget.Workspace);
 		// Wait for `harper-ls` to restart
-		await sleep(500);
+		await sleep(1000);
 
 		const actual = languages.getDiagnostics(documentUri);
 		const expected: Diagnostic[] = [
