@@ -1,6 +1,5 @@
 #![doc = include_str!("../README.md")]
 
-use std::iter::once;
 use std::path::{Path, PathBuf};
 
 use anyhow::format_err;
