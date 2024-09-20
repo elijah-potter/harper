@@ -42,16 +42,17 @@ build-obsidian:
   zip harper-obsidian-plugin.zip manifest.json main.js
 
 # Build and package the Visual Studio Code extension.
-package-vscode:
+# This assumes that `harper-ls` or `harper-ls.exe` exists in `packages/vscode-plugin/bin`.
+package-vscode target:
   #! /bin/bash
   set -eo pipefail
 
-  path="{{justfile_directory()}}/packages/vscode-plugin"
-  cp LICENSE "${path}/LICENSE"
-  cd "$path"
+  ext_dir="{{justfile_directory()}}/packages/vscode-plugin"
+  cp LICENSE "$ext_dir"
+  cd "$ext_dir"
 
   yarn install -f
-  yarn package
+  yarn package --target {{target}}
 
 check-rust:
   #! /bin/bash

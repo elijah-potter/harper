@@ -1,0 +1,75 @@
+name: Publish VS Code Plugin
+
+on:
+  push:
+    tags: ["harper-vscode*"]
+  workflow_dispatch:
+
+jobs:
+  package:
+    strategy:
+      matrix:
+        platform:
+          - os: windows-latest
+            rust_target: x86_64-pc-windows-gnu
+            code_target: win32-x64
+          - os: macOS-latest
+            rust_target: x86_64-apple-darwin
+            code_target: darwin-x64
+          - os: macOS-latest
+            rust_target: aarch64-apple-darwin
+            code_target: darwin-arm64
+          - os: ubuntu-20.04
+            rust_target: x86_64-unknown-linux-gnu
+            code_target: linux-x64
+          - os: ubuntu-20.04
+            rust_target: aarch64-unknown-linux-gnu
+            code_target: linux-arm64
+    name: Package - ${{ matrix.platform.code_target }}
+    runs-on: ${{ matrix.platform.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: extractions/setup-just@v2
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Build harper-ls
+        uses: houseabsolute/actions-rust-cross@v0
+        with:
+          target: ${{ matrix.platform.rust_target }}
+          args: "--locked --release --bin harper-ls"
+          strip: true
+      - name: Package extension
+        shell: bash
+        run: |
+          bin_dir="packages/vscode-plugin/bin"
+          release_dir="target/${{ matrix.platform.rust_target }}/release"
+
+          mkdir "$bin_dir"
+
+          if [[ "${{ matrix.platform.os }}" == "windows-latest" ]]; then
+            cp "${release_dir}/harper-ls.exe" "$bin_dir"
+          else
+            cp "${release_dir}/harper-ls" "$bin_dir"
+          fi
+
+          just package-vscode ${{ matrix.platform.code_target }}
+      - name: Upload extension
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.platform.code_target }}
+          path: "packages/vscode-plugin/*.vsix"
+
+  publish:
+    name: Publish
+    needs: package
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Publish extension
+        run: npx @vscode/vsce publish --packagePath $(find . -iname *.vsix)
+        env:
+          VSCE_PAT: ${{ secrets.VSCE_PAT }}
