@@ -3,7 +3,6 @@
 	import Section from '$lib/Section.svelte';
 	import Logo from '$lib/Logo.svelte';
 	import ObsidianLogo from '$lib/ObsidianLogo.svelte';
-	import { Card } from 'flowbite-svelte';
 	import GitHubLogo from '$lib/GitHubLogo.svelte';
 </script>
 
@@ -37,7 +36,11 @@
 			Unlike LanguageTool, Harper compiles to WebAssembly so your information never leaves Obsidian. <br
 			/><b>Your vault should be exactly that: secure.</b>
 		</span>
-		<img src="/images/obsidian_screenshot.webp" class="rounded-2xl" />
+		<img
+			src="/images/obsidian_screenshot.webp"
+			class="rounded-2xl"
+			alt="A screenshot of the Harper Obsidian plugin at work."
+		/>
 	</Section>
 
 	<Section>
@@ -49,6 +52,10 @@
 			<br /><br /> Finally, go back and enable the plugin.
 		</span>
 
-		<img src="/images/obsidian_install_screenshot.webp" class="rounded-2xl" />
+		<img
+			src="/images/obsidian_install_screenshot.webp"
+			class="rounded-2xl"
+			alt="A screenshot of the Harper Obsidian installation."
+		/>
 	</Section>
 </GutterCenter>
