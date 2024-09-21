@@ -1,4 +1,4 @@
-# Format both Rust and JavaScript
+# Format entire project
 format:
   cargo +nightly fmt  
   cd "{{justfile_directory()}}/packages"; yarn prettier -w .
@@ -7,7 +7,7 @@ format:
 build-wasm target:
   cd "{{justfile_directory()}}/harper-wasm" && wasm-pack build --target {{target}}
 
-# Compile the web demo's dependencies and start a development server. Note that if you make changes to `harper-wasm`, you will have to re-run this command.
+# Compile the website's dependencies and start a development server. Note that if you make changes to `harper-wasm`, you will have to re-run this command.
 dev-web:
   #! /bin/bash
   set -eo pipefail
@@ -18,6 +18,7 @@ dev-web:
   yarn install -f
   yarn dev
 
+# Build the Harper website.
 build-web:
   #! /bin/bash
   set -eo pipefail
@@ -27,6 +28,7 @@ build-web:
   yarn install -f
   yarn run build
 
+# Build the Harper Obsidian plugin.
 build-obsidian:
   #! /bin/bash
   set -eo pipefail
@@ -39,6 +41,7 @@ build-obsidian:
 
   zip harper-obsidian-plugin.zip manifest.json main.js
 
+# Build and package the Visual Studio Code extension.
 package-vscode:
   #! /bin/bash
   set -eo pipefail
@@ -50,6 +53,7 @@ package-vscode:
   yarn install -f
   yarn package-extension
 
+# Perform format and type checking.
 check:
   #! /bin/bash
   set -eo pipefail
@@ -66,6 +70,17 @@ check:
   just build-web
   yarn run check
 
+# Populate build caches and install necessary local tooling (tools callable via `yarn run <tool>`).
+setup:
+  #! /bin/bash
+  set -eo pipefail
+
+  cargo build
+  just build-obsidian
+  just package-vscode
+  just build-web
+
+# Perform full format and type checking, build all projects and run all tests. Run this before pushing your code.
 precommit:
   #! /bin/bash
   set -eo pipefail
@@ -82,6 +97,7 @@ precommit:
   just package-vscode 
   just build-web
 
+# Install `harper-cli` and `harper-ls` to your machine via `cargo`
 install:
   cargo install --path harper-ls
   cargo install --path harper-cli
@@ -96,13 +112,16 @@ dogfood:
     ./target/release/harper-cli lint $file
   done
 
+# Run all Rust unit tests.
 test:
   cargo test
   cargo test --release
 
+# Use `harper-cli` to parse a provided file and print out the resulting tokens.
 parse file:
   cargo run --bin harper-cli -- parse {{file}}
 
+# Lint a provided file, lint it, and print the results.
 lint file:
   cargo run --bin harper-cli -- lint {{file}}
 
