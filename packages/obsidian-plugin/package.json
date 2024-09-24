@@ -7,7 +7,7 @@
 		"@rollup/plugin-node-resolve": "^15.2.3",
 		"@rollup/plugin-typescript": "^11.1.6",
 		"@rollup/plugin-wasm": "^6.2.2",
-		"rollup": "^4.13.0",
+		"rollup": "^4.22.4",
 		"rollup-plugin-peer-deps-external": "^2.2.4",
 		"rollup-plugin-svg-import": "^3.0.0"
 	},
