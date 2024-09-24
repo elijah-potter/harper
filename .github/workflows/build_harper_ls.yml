@@ -54,6 +54,7 @@ jobs:
       - name: Build binary
         uses: houseabsolute/actions-rust-cross@v0
         with:
+          toolchain: nightly # we use the nightly version of the latest stable rustc
           command: ${{ matrix.platform.command }}
           target: ${{ matrix.platform.target }}
           args: "--locked --release --bin harper-ls"

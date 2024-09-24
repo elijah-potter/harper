@@ -1,0 +1,3 @@
+[toolchain]
+channel = "nightly-2024-07-18"
+targets = ["wasm32-unknown-unknown"]
