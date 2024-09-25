@@ -94,10 +94,19 @@ pub fn suggest_correct_spelling<'a>(
         found.extend(found_dist.into_iter().map(|v| v.0));
     }
 
-    // Finally, swap the lowest edit distance word with the shortest.
+    // Swap the lowest edit distance word with the shortest.
     if found.len() >= 3 {
         found.swap(0, 2);
     }
+
+    // Let common words bubble up.
+    found.sort_by_key(|v| {
+        if dictionary.get_word_metadata(v).common {
+            0
+        } else {
+            1
+        }
+    });
 
     found
 }
@@ -220,5 +229,14 @@ mod tests {
         dbg!(&results, results.iter().unique().collect_vec());
 
         assert_eq!(results.iter().unique().count(), results.len())
+    }
+
+    #[test]
+    fn issue_182() {
+        let results = suggest_correct_spelling_str("im", 100, 3, &FullDictionary::curated());
+
+        dbg!(&results);
+
+        assert!(results.iter().take(3).contains(&"I'm".to_string()));
     }
 }

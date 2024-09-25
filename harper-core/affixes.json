@@ -553,8 +553,18 @@
       "adds_metadata": {},
       "gifts_metadata": {
         "noun": {
-          "is_pronoun": true
+          "is_pronoun": true,
+          "is_common": true
         }
+      }
+    },
+    "~": {
+      "suffix": true,
+      "cross_product": true,
+      "replacements": [],
+      "adds_metadata": {},
+      "gifts_metadata": {
+        "common": true
       }
     }
   }
