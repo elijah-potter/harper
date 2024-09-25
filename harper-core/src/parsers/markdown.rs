@@ -124,8 +124,11 @@ impl Parser for Markdown {
         let mut english_parser = PlainEnglish;
 
         let source_str: String = source.iter().collect();
-        let md_parser =
-            pulldown_cmark::Parser::new_ext(&source_str, pulldown_cmark::Options::all());
+        let md_parser = pulldown_cmark::Parser::new_ext(
+            &source_str,
+            pulldown_cmark::Options::all()
+                .difference(pulldown_cmark::Options::ENABLE_SMART_PUNCTUATION)
+        );
 
         let mut tokens = Vec::new();
 
