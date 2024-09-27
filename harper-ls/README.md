@@ -45,7 +45,7 @@ Each user of `harper-ls` has their own dictionary, located in the following dire
 | MacOS            | `$HOME/Library/Application Support/harper-ls/` |
 | Windows          |           `{FOLDERID_LocalAppData}/harper-ls/` |
 
-This dictionary is a simple word list in plain-text.
+This dictionary is a simple line-separated word list in plain-text.
 You can add and remove words at will.
 You can add to the user dictionary with code actions on misspelled words.
 
@@ -147,4 +147,5 @@ The static dictionary is built into the binary and is (as of now) immutable.
 It contains almost all words you could possibly encounter.
 
 I _do_ take pull requests or issues for adding words to the static dictionary.
-It is composed of two files: `harper-core/dictionary.dict` and `harper-core/dictionary.dict`
+It is composed of two files: `harper-core/dictionary.dict` and `harper-core/affixes.json`
+If you just want to add a proper noun, try running `just addnoun <your noun>`.

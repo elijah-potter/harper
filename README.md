@@ -11,7 +11,7 @@
 Harper is an English grammar checker designed to be _just right._
 I created it after years of dealing with the shortcomings of the competition.
 
-Grammarly was too expensive and too overbearing. 
+Grammarly was too expensive and too overbearing.
 Its suggestions lacked context, and were often just plain _wrong_.
 Not to mention: it's a privacy nightmare.
 Everything you write with Grammarly is sent to their servers.
@@ -22,7 +22,7 @@ LanguageTool is great, if you have gigabytes of RAM to spare and are willing to 
 Besides the memory requirements, I found LanguageTool too slow: it would take several seconds to lint even a moderate-size document.
 
 That's why I created Harper: it is the grammar checker that fits my needs.
-Not only does it take milliseconds to lint a document, take less than 1/50th of LanguageTool's memory footprint, 
+Not only does it take milliseconds to lint a document, take less than 1/50th of LanguageTool's memory footprint,
 but it is also completely private.
 
 Harper is even small enough to load via [WebAssembly.](https://writewithharper.com)
@@ -33,7 +33,7 @@ If you want to use Harper on your machine, you have two choices.
 
 ### `harper-ls`
 
-`harper-ls` provides an integration that works for most code editors. 
+`harper-ls` provides an integration that works for most code editors.
 
 [Read more here.](./harper-ls/README.md)
 

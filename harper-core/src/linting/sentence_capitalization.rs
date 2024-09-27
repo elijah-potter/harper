@@ -93,4 +93,13 @@ mod tests {
             1,
         )
     }
+
+    #[test]
+    fn unphased_ellipsis() {
+        assert_lint_count(
+            "the linter should not be affected by... that ellipsis.",
+            SentenceCapitalization,
+            1
+        )
+    }
 }

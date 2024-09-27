@@ -136,7 +136,7 @@ addnoun noun:
   #! /bin/bash
   DICT_FILE=./harper-core/dictionary.dict 
 
-  cat $DICT_FILE | grep {{noun}} 
+  cat $DICT_FILE | grep "^{{noun}}/"
 
   if [ $? -eq 0 ]
   then

@@ -4609,9 +4609,9 @@ Hyundai/1M
 Hz/M
 I'd/
 I'll/
-I'm/
+I'm/~
 I've/
-I/81M
+I/81M~
 IA/21
 IBM/21M
 ICBM/1SM
@@ -10782,7 +10782,7 @@ Zworykin/M
 Zyrtec/M
 Zyuganov/M
 Zzz
-a/14857S
+a/14857S~
 aah/14
 aardvark/1SM
 ab/14SDY
@@ -10872,7 +10872,7 @@ abortion/1MS
 abortionist/1MS
 abortive/514Y
 abound/4DSG
-about/5
+about/5~
 above/51M
 aboveboard/5
 abracadabra/1M
@@ -11662,7 +11662,7 @@ alkalinity/1M
 alkalize/4DSG
 alkaloid/15SM
 alkyd/1MS
-all/8175M
+all/8175M~
 allay/41GDS
 allegation/1MS
 allege/4GDS
@@ -11748,7 +11748,7 @@ alphanumerical/51Y
 alpine/51S
 already/
 alright/5
-also/
+also/~
 alt/15S
 altar/1MS
 altarpiece/1SM
@@ -11918,7 +11918,7 @@ amusing/45Y
 amygdala/1
 amylase/1M
 amyloid/15
-an/71CS
+an/71CS~
 anabolism/1M
 anachronism/1SM
 anachronistic/5
@@ -11979,7 +11979,7 @@ anchovy/1SM
 ancient/51SPMRYT
 ancientness/1M
 ancillary/51SM
-and/714
+and/714~
 andante/15SM
 andiron/1SM
 androgen/1M
@@ -12258,7 +12258,7 @@ anvil/14MS
 anxiety/1SM
 anxious/5YP
 anxiousness/1M
-any/8
+any/8~
 anybody/8SM
 anyhow/
 anymore/
@@ -12829,7 +12829,7 @@ asymptomatic/51
 asymptotic/5
 asymptotically/
 asynchronous/5Y
-at/148
+at/148~
 atavism/1M
 atavist/1SM
 atavistic/5
@@ -13161,7 +13161,7 @@ bachelorhood/1M
 bacillary/5
 bacilli/1
 bacillus/1M
-back/514SJZGMDR
+back/514SJZGMDR~
 backache/1MS
 backbench/51S
 backbit/4
@@ -13616,7 +13616,7 @@ bazillion/1S
 bazooka/14SM
 bbl/1
 bdrm
-be/41
+be/41~
 beach/14MDSG
 beachcomber/1SM
 beachfront/51
@@ -13676,7 +13676,7 @@ beaver/14SGMD
 bebop/14MS
 becalm/4GSD
 became/4
-because/7
+because/7~
 beck/14SM
 beckon/41SGD
 becloud/4GDS
@@ -15367,7 +15367,7 @@ busy/514DRSTGP
 busybody/14SM
 busyness/1M
 busywork/1M
-but/714ACS
+but/714ACS~
 butane/1M
 butch/514MRSZ
 butcher/145MDG
@@ -15408,7 +15408,7 @@ buzzkill/1SM
 buzzword/1SM
 bx
 bxs
-by/51M
+by/51M~
 bye/15SM
 bygone/51SM
 bylaw/1SM
@@ -17444,7 +17444,7 @@ combust/451SGVD
 combustibility/1M
 combustible/51MS
 combustion/1M
-come/41IMZGRS
+come/41IMZGRS~
 comeback/14MS
 comedian/1MS
 comedic/5
@@ -18490,7 +18490,7 @@ couchette/1S
 cougar/1SM
 cough/41MDG
 coughs/14
-could/41
+could/41~
 could've/4
 couldn't/4
 coulee/1SM
@@ -19392,7 +19392,7 @@ davit/1MS
 dawdle/41ZGDRS
 dawdler/1M
 dawn/41SGMD
-day/14SM
+day/14SM~
 daybed/1MS
 daybreak/1M
 daycare/1M
@@ -20667,7 +20667,7 @@ dizzily/
 dizziness/1M
 dizzy/541DRSPTG
 djellaba/1MS
-do/41SJMRHZG
+do/41SJMRHZG~
 doable/51
 dob/41S
 dobbed/4
@@ -22471,7 +22471,7 @@ evasion/1SM
 evasive/5YP
 evasiveness/1M
 eve/1ASM
-even/541MDRYTGSJP
+even/541MDRYTGSJP~
 evenhanded/5Y
 evening/14M
 evenness/1UM
@@ -23566,7 +23566,7 @@ firm/154MDRYPTGS
 firmament/1SM
 firmness/1M
 firmware/1M
-first/514SMY
+first/514SMY~
 firstborn/15SM
 firsthand/5
 firth/1M
@@ -24039,7 +24039,7 @@ fop/1SM
 foppery/1M
 foppish/5P
 foppishness/1M
-for/7H
+for/7H~
 fora/1
 forage/14DRSMZG
 forager/1M
@@ -24477,7 +24477,7 @@ frolicked/4
 frolicker/1SM
 frolicking/41
 frolicsome/5
-from/
+from/~
 frond/1SM
 front's
 front/154FSDG
@@ -25074,7 +25074,7 @@ gesticulation/1M
 gestural/5
 gesture/14MGDS
 gesundheit/
-get/41S
+get/41S~
 getaway/15SM
 getting/41
 getup/1M
@@ -25175,7 +25175,7 @@ girths/1
 gist/14M
 git/142S
 gite/1S
-give/41ZGJRS
+give/41ZGJRS~
 giveaway/15MS
 giveback/1MS
 given/415SM
@@ -25335,7 +25335,7 @@ gnome/1SM
 gnomic/5
 gnomish/5
 gnu/1SM
-go/415JMRHZG
+go/415JMRHZG~
 goad/14MDGS
 goal/14MS
 goalie/14SM
@@ -25420,7 +25420,7 @@ gonorrheal/5
 gonzo/51
 goo/14M
 goober/14SM
-good/514MYSP
+good/514MYSP~
 goodbye/14MS
 goodhearted/5
 goodish/5
@@ -26353,7 +26353,7 @@ haunt/41SMDRZG
 haunter/1M
 haunting/451Y
 hauteur/1M
-have/41MGS
+have/41MGS~
 haven't/4
 haven/14SM
 haversack/1SM
@@ -26390,7 +26390,7 @@ hazy/5RTP
 hdqrs/1
 he'd/
 he'll/
-he/81M
+he/81M~
 head/154MDRZGJS
 headache/1MS
 headband/1MS
@@ -27252,7 +27252,7 @@ hoverboard/14MS
 hovercraft/1MS
 how'd/
 how're/
-how/71SM
+how/71SM~
 howbeit/7
 howdah/1M
 howdahs/1
@@ -27985,7 +27985,7 @@ impure/54RYT
 impurity/1SM
 imputation/1SM
 impute/4BDSG
-in/415ASM
+in/415ASM~
 inaccuracy/1S
 inaction/1M
 inadequacy/1S
@@ -29006,7 +29006,7 @@ isthmian/51
 isthmus/1MS
 it'd/
 it'll/
-it/815USM
+it/815USM~
 ital/15
 italic/51SM
 italicization/1M
@@ -30683,7 +30683,7 @@ longways/
 loo/14
 loofah/14M
 loofahs/14
-look/41MDRSZG
+look/41MDRSZG~
 lookalike/1MS
 looker/1M
 lookout/1MS
@@ -31538,7 +31538,7 @@ mayst/4
 maze/14MS
 mazurka/1MS
 mdse
-me/81DSH
+me/81DSH~
 mead/1M
 meadow/14MS
 meadowlark/1MS
@@ -32725,7 +32725,7 @@ mosquitoes/1
 moss/14MS
 mossback/1SM
 mossy/51TR
-most/581MY
+most/581MY~
 mot/1SM
 mote's
 mote/14KCXSVN
@@ -33069,7 +33069,7 @@ muzak/14
 muzzily/
 muzzle/14DSMG
 muzzy/51P
-my/
+my/~
 mycologist/1SM
 mycology/1M
 myelitis/1M
@@ -33433,7 +33433,7 @@ nevermore/
 nevertheless/
 nevi/1
 nevus/1M
-new/514STMRYP
+new/514STMRYP~
 newbie/1MS
 newborn/51SM
 newcomer/1SM
@@ -33977,7 +33977,7 @@ nostalgically/
 nostril/1MS
 nostrum/1MS
 nosy/514RPT
-not/71B
+not/71B~
 notability/1SM
 notable/51SM
 notably/
@@ -34031,7 +34031,7 @@ novena/1MS
 novene/5
 novice/1MS
 novitiate/1MS
-now/5714M
+now/5714M~
 nowadays/M
 noway/S
 nowhere/51M
@@ -34340,7 +34340,7 @@ oedipal/5
 oenology/1M
 oenophile/1SM
 oeuvre/1MS
-of/4
+of/4~
 off/541SZGDRJ
 offal/1M
 offbeat/15MS
@@ -34457,14 +34457,14 @@ omniscient/51
 omnivore/1MS
 omnivorous/5PY
 omnivorousness/1M
-on/541Y
+on/541Y~
 onboard/54
 once/71M
 oncogene/1SM
 oncologist/1SM
 oncology/1M
 oncoming/154
-one/1854SXMNP
+one/1854SXMNP~
 oneness/1M
 onerous/5PY
 onerousness/1M
@@ -34581,7 +34581,7 @@ optometry/1M
 opulence/1M
 opulent/5Y
 opus/1MS
-or/715
+or/715~
 oracle/14SM
 oracular/5
 oral/51MYS
@@ -34726,7 +34726,7 @@ ostler/1S
 ostracism/1M
 ostracize/4GDS
 ostrich/1MS
-other/514MSP
+other/514MSP~
 otherwise/5
 otherworldly/5
 otiose/5
@@ -34737,11 +34737,11 @@ ouch/14
 ought/481
 oughtn't/4
 ounce/1MS
-our/4S
+our/4S~
 ourselves/8
 oust/4ZGDRS
 ouster/14M
-out/145SJGMDR
+out/145SJGMDR~
 outage/1SM
 outargue/4GDS
 outback/154MS
@@ -34897,7 +34897,7 @@ oven/14MS
 ovenbird/1SM
 ovenproof/5
 ovenware/1
-over/514MYS
+over/514MYS~
 overabundance/1M
 overabundant/5
 overachieve/4ZGDRS
@@ -35968,7 +35968,7 @@ penury/1M
 peon/1MS
 peonage/1M
 peony/1SM
-people/14MGDS
+people/14MGDS~
 pep/41SM
 pepped/4
 pepper/14GMDS
@@ -40602,7 +40602,7 @@ saxifrage/1SM
 saxophone/14MS
 saxophonist/1SM
 say's
-say/41USG
+say/41USG~
 saying/41SM
 scab/14MS
 scabbard/14MS
@@ -41103,7 +41103,7 @@ seductive/5YP
 seductiveness/1M
 seductress/1MS
 sedulous/5Y
-see/41RSMZ
+see/41RSMZ~
 seed's
 seed/14AGDS
 seedbed/1MS
@@ -41550,7 +41550,7 @@ shawl/14MS
 shay/1MS
 she'd/
 she'll/
-she/81DSM
+she/81DSM~
 sheaf/14M
 shear/415MDRSZG
 shearer/1M
@@ -42616,7 +42616,7 @@ snuggest/5
 snugging/4
 snuggle/14MGDS
 snugness/1M
-so/7581
+so/7581~
 soak/41MDGSJ
 soaking/415M
 soap/14MDGS
@@ -42756,7 +42756,7 @@ somatosensory/5
 somber/54PY
 somberness/1M
 sombrero/1MS
-some/8
+some/8~
 somebody/81SM
 someday/
 somehow/
@@ -44912,7 +44912,7 @@ tailspin/14SM
 tailwind/14SM
 taint/14MDSG
 tainted/54U
-take/41AIMS
+take/41AIMS~
 takeaway/51S
 taken/54A
 takeoff/1MS
@@ -45448,7 +45448,7 @@ thalami/1
 thalamus/1M
 thalidomide/1M
 thallium/1M
-than/7
+than/7~
 thane/1SM
 thank/14SDG
 thankful/5YP
@@ -45458,12 +45458,12 @@ thanklessness/1M
 thanksgiving/1SM
 that'd/
 that'll/
-that/781M
+that/781M~
 thatch/14MDRSZG
 thatcher/1M
 thatching/14M
 thaw/41MDGS
-the/81JG
+the/81JG~
 theater/1SM
 theatergoer/1SM
 theatrical/51YS
@@ -45472,16 +45472,16 @@ theatricals/1M
 theatrics/1M
 thee/841S
 theft/1SM
-their/S
+their/S~
 theism/1M
 theist/1SM
 theistic/5
-them/8
+them/8~
 thematic/51
 thematically/
 theme/14DSM
 themselves/8
-then/517M
+then/517M~
 thence/
 thenceforth/
 thenceforward/
@@ -45507,7 +45507,7 @@ therapeutically/
 therapeutics/1M
 therapist/1SM
 therapy/14SM
-there/18M
+there/18M~
 thereabout/S
 thereafter/1
 thereat/
@@ -45540,12 +45540,12 @@ thermostatic/5
 thermostatically/
 thesauri/1
 thesaurus/1MS
-these/8S
+these/8S~
 thesis/1M
 thespian/51SM
 theta/1SM
 thew/14MS
-they/8
+they/8~
 they'd/
 they'll/
 they're/
@@ -45578,7 +45578,7 @@ thingamajig/1SM
 thingumabob/1S
 thingummy/1S
 thingy/158S
-think/41SRBZG
+think/41SRBZG~
 thinkable/5U
 thinker/1M
 thinking's
@@ -45598,7 +45598,7 @@ thirteenths/1
 thirtieth/51M
 thirtieths/1
 thirty/1HSM
-this/81
+this/81~
 thistle/1MS
 thistledown/1M
 thither/5
@@ -45911,7 +45911,7 @@ tizz/1
 tizzy/1SM
 tn/1
 tnpk/1
-to/IU
+to/IU~
 toad/14MS
 toadstool/1MS
 toady/145DSMG
@@ -47447,7 +47447,7 @@ unworthy/51T
 unwound/4
 unwrapping/41
 unyielding/5
-up/514S
+up/514S~
 upbeat/51MS
 upbraid/41SGD
 upbringing/1MS
@@ -47560,7 +47560,7 @@ urticaria/1M
 usability/1M
 usable/5UA
 usage/1SM
-use/14AEDSMG
+use/14AEDSMG~
 used/45U
 useful/5PY
 usefulness/1M
@@ -48336,7 +48336,7 @@ wannabee/1S
 wanner/5
 wanness/1M
 wannest/5
-want/41MDGS
+want/41MDGS~
 wanted/54U
 wanton/514MDYSPG
 wantonness/1M
@@ -48496,7 +48496,7 @@ waxiness/1M
 waxwing/1SM
 waxwork/1SM
 waxy/51RPT
-way/145SM
+way/145SM~
 waybill/14SM
 wayfarer/1MS
 wayfaring/514SM
@@ -48507,7 +48507,7 @@ wayside/15SM
 wayward/5PY
 waywardness/1M
 wazoo/1S
-we/8
+we/8~
 we'd/
 we'll/
 we're/
@@ -48618,7 +48618,7 @@ weld/14MDRBSZG
 welder/1M
 welfare/14M
 welkin/1M
-well/514MDPSG
+well/514MDPSG~
 wellhead/1SM
 wellie/1
 wellington/1MS
@@ -48725,7 +48725,7 @@ whetted/54
 whetting/41
 whew/4
 whey/1M
-which/8
+which/8~
 whichever/8
 whiff/145SMDG
 whiffletree/1MS
@@ -48805,7 +48805,7 @@ who'd/
 who'll/
 who're/
 who've/
-who/81M
+who/81M~
 whoa/4
 whodunit/1MS
 whoever/8
@@ -48903,7 +48903,7 @@ wildness/1M
 wilds/14M
 wile/14MGDS
 wiliness/1M
-will/41MDS
+will/41MDS~
 willful/5PY
 willfulness/1M
 willies/1M
@@ -49025,7 +49025,7 @@ wit/14SM
 witch/14MDSG
 witchcraft/1M
 witchery/1M
-with/1
+with/1~
 withal/
 withdraw/41SG
 withdrawal/1MS
@@ -49170,7 +49170,7 @@ wordsmiths/14
 wordy/5TPR
 wore/4
 work's
-work/14ADJSG
+work/14ADJSG~
 workable/5U
 workaday/51
 workaholic/15SM
@@ -49249,7 +49249,7 @@ worthy/514UPRT
 wot/48
 wotcha/
 would've/
-would/41S
+would/41S~
 wouldn't/4
 wouldst/4
 wound/14SGMDR
@@ -49418,7 +49418,7 @@ ye/81RST
 yea/71SM
 yeah/1M
 yeahs/1
-year/1MYS
+year/1MYS~
 yearbook/1MS
 yearling/1MS
 yearlong/5
@@ -49479,11 +49479,11 @@ you'd/
 you'll/
 you're/
 you've/
-you/841SMH
+you/841SMH~
 young/514TMR
 youngish/5
 youngster/1MS
-your/S
+your/S~
 yourself/8
 yourselves/8
 youth/1M
@@ -49686,3 +49686,6 @@ Foddy/SM
 Hasan/SM
 Sharman/SM
 Labriola/SM
+TCP/SM
+UDP/SM
+QUIC/SM

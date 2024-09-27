@@ -26,7 +26,7 @@ I would highly recommend that you run `just setup` to populate your build caches
 
 ## Committing
 
-Harper follows [conventional commit practices](https://www.conventionalcommits.org/en/v1.0.0/). 
+Harper follows [conventional commit practices](https://www.conventionalcommits.org/en/v1.0.0/).
 Before creating a pull request, please make sure all your commits follow the linked conventions.
 
 Additionally, to minimize the labor required to review your commit, we run a relatively strict suite of formatting and linting programs.

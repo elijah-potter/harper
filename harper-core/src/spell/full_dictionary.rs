@@ -211,4 +211,10 @@ mod tests {
         let dict = FullDictionary::curated();
         assert!(dict.contains_word_str("natively"));
     }
+
+    #[test]
+    fn im_is_common() {
+        let dict = FullDictionary::curated();
+        assert!(dict.get_word_metadata_str("I'm").common);
+    }
 }
