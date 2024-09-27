@@ -53,14 +53,20 @@ package-vscode:
   yarn install -f
   yarn package-extension
 
+check-rust:
+  #! /bin/bash
+  set -eo pipefail
+
+  cargo fmt -- --check
+  cargo clippy -- -Dwarnings -D clippy::dbg_macro
+
 # Perform format and type checking.
 check:
   #! /bin/bash
   set -eo pipefail
 
-  cargo +nightly fmt --check
-  cargo clippy -- -Dwarnings -D clippy::dbg_macro
-
+  just check-rust
+  
   cd "{{justfile_directory()}}/packages"
   yarn install
   yarn prettier --check .
