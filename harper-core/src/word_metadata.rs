@@ -11,7 +11,7 @@ pub struct WordMetadata {
     pub swear: Option<bool>,
     /// Whether the word is considered especially common.
     #[serde(default = "default_common")]
-    pub common: bool
+    pub common: bool,
 }
 
 fn default_common() -> bool {
@@ -39,7 +39,7 @@ impl WordMetadata {
             adverb: merge!(self.adverb, other.adverb),
             conjunction: merge!(self.conjunction, other.conjunction),
             swear: self.swear.or(other.swear),
-            common: self.common || other.common
+            common: self.common || other.common,
         }
     }
 

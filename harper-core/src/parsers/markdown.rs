@@ -127,7 +127,7 @@ impl Parser for Markdown {
         let md_parser = pulldown_cmark::Parser::new_ext(
             &source_str,
             pulldown_cmark::Options::all()
-                .difference(pulldown_cmark::Options::ENABLE_SMART_PUNCTUATION)
+                .difference(pulldown_cmark::Options::ENABLE_SMART_PUNCTUATION),
         );
 
         let mut tokens = Vec::new();
