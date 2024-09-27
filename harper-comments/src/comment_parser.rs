@@ -40,7 +40,7 @@ impl CommentParser {
 
         let comment_parser: Box<dyn Parser> = match language_id {
             "javascriptreact" | "typescript" | "typescriptreact" | "javascript" => Box::new(JsDoc),
-            "java" => Box::new(JavaDoc::default()),
+            "java" => Box::<JavaDoc>::default(),
             "go" => Box::new(Go),
             _ => Box::new(Unit)
         };

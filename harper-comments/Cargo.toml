@@ -26,6 +26,7 @@ tree-sitter-toml = "0.20.0"
 tree-sitter-lua = "0.0.19"
 tree-sitter-bash = "0.20.0"
 tree-sitter-java = "0.20.0"
+tree-sitter-latex = { git = "https://github.com/latex-lsp/tree-sitter-latex", rev = "a6c812704b3d3e1541b0853aa0d6d561301320e1" }
 itertools = "0.13.0"
 
 [dev-dependencies]

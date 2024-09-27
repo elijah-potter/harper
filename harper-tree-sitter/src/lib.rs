@@ -120,19 +120,28 @@ impl Masker for TreeSitterMasker {
 ///
 /// If any spans overlap, it will remove the second one.
 fn byte_spans_to_char_spans(byte_spans: &mut Vec<Span>, source: &str) {
-    byte_spans.sort_by_key(|s| s.start);
+    let mut len = byte_spans.len();
 
-    let cloned = byte_spans.clone();
+    loop {
+        byte_spans.sort_by_key(|s| s.start);
 
-    let mut i: usize = 0;
-    byte_spans.retain(|cur| {
-        i += 1;
-        if let Some(prev) = cloned.get(i.wrapping_sub(2)) {
-            !cur.overlaps_with(*prev)
-        } else {
-            true
+        let cloned = byte_spans.clone();
+
+        let mut i: usize = 0;
+        byte_spans.retain(|cur| {
+            i += 1;
+            if let Some(prev) = cloned.get(i.wrapping_sub(2)) {
+                !cur.overlaps_with(*prev)
+            } else {
+                true
+            }
+        });
+
+        if byte_spans.len() == len {
+            break;
         }
-    });
+        len = byte_spans.len();
+    }
 
     let mut last_byte_pos = 0;
     let mut last_char_pos = 0;

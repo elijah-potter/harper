@@ -9,6 +9,7 @@ use harper_comments::CommentParser;
 use harper_core::linting::{LintGroup, LintGroupConfig, Linter};
 use harper_core::parsers::Markdown;
 use harper_core::{remove_overlaps, Dictionary, Document, FullDictionary};
+use harper_latex::LatexParser;
 
 #[derive(Debug, Parser)]
 enum Args {
@@ -19,15 +20,15 @@ enum Args {
         /// Whether to merely print out the number of errors encountered,
         /// without further details.
         #[arg(short, long)]
-        count: bool
+        count: bool,
     },
     /// Parse a provided document and print the detected symbols.
     Parse {
         /// The file you wish to parse.
-        file: PathBuf
+        file: PathBuf,
     },
     /// Emit decompressed, line-separated list of words in Harper's dictionary.
-    Words
+    Words,
 }
 
 fn main() -> anyhow::Result<()> {
@@ -65,7 +66,7 @@ fn main() -> anyhow::Result<()> {
                 report_builder = report_builder.with_label(
                     Label::new((&filename, lint.span.into()))
                         .with_message(lint.message)
-                        .with_color(primary_color)
+                        .with_color(primary_color),
                 );
             }
 
@@ -104,14 +105,14 @@ fn load_file(file: &Path) -> anyhow::Result<(Document, String)> {
     let source = std::fs::read_to_string(file)?;
 
     let mut parser: Box<dyn harper_core::parsers::Parser> =
-        if let Some("md") = file.extension().map(|v| v.to_str().unwrap()) {
-            Box::new(Markdown)
-        } else {
-            Box::new(
+        match file.extension().map(|v| v.to_str().unwrap()) {
+            Some("md") => Box::new(Markdown),
+            Some("tex") => Box::<LatexParser>::default(),
+            _ => Box::new(
                 CommentParser::new_from_filename(file)
                     .map(Box::new)
-                    .ok_or(format_err!("Could not detect language ID."))?
-            )
+                    .ok_or(format_err!("Could not detect language ID."))?,
+            ),
         };
 
     Ok((Document::new_curated(&source, &mut parser), source))
