@@ -60,6 +60,34 @@ pub enum Suggestion {
     Remove
 }
 
+impl Suggestion {
+    /// Apply a suggestion to a given text.
+    pub fn apply(&self, span: Span, source: &mut Vec<char>) {
+        match self {
+            Self::ReplaceWith(chars) => {
+                // Avoid allocation if possible
+                if chars.len() == span.len() {
+                    for (index, c) in chars.iter().enumerate() {
+                        source[index + span.start] = *c
+                    }
+                } else {
+                    let popped = source.split_off(span.start);
+
+                    source.extend(chars);
+                    source.extend(popped.into_iter().skip(span.len()));
+                }
+            }
+            Self::Remove => {
+                for i in span.end..source.len() {
+                    source[i - span.len()] = source[i];
+                }
+
+                source.truncate(source.len() - span.len());
+            }
+        }
+    }
+}
+
 impl Display for Suggestion {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {

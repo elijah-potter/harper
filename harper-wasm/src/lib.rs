@@ -68,28 +68,7 @@ pub fn apply_suggestion(
     let mut source: Vec<_> = text.chars().collect();
     let span: harper_core::Span = span.into();
 
-    match &suggestion.inner {
-        harper_core::linting::Suggestion::ReplaceWith(chars) => {
-            // Avoid allocation if possible
-            if chars.len() == span.len() {
-                for (index, c) in chars.iter().enumerate() {
-                    source[index + span.start] = *c
-                }
-            } else {
-                let popped = source.split_off(span.start);
-
-                source.extend(chars);
-                source.extend(popped.into_iter().skip(span.len()));
-            }
-        }
-        harper_core::linting::Suggestion::Remove => {
-            for i in span.end..source.len() {
-                source[i - span.len()] = source[i];
-            }
-
-            source.truncate(source.len() - span.len());
-        }
-    }
+    suggestion.inner.apply(span, &mut source);
 
     Ok(source.iter().collect())
 }

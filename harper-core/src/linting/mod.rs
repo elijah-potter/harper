@@ -1,6 +1,7 @@
 mod an_a;
 mod avoid_curses;
 mod correct_number_suffix;
+mod dot_initialisms;
 mod ellipsis_length;
 mod linking_verbs;
 mod lint;
@@ -22,6 +23,7 @@ mod wrong_quotes;
 pub use an_a::AnA;
 pub use avoid_curses::AvoidCurses;
 pub use correct_number_suffix::CorrectNumberSuffix;
+pub use dot_initialisms::DotInitialisms;
 pub use ellipsis_length::EllipsisLength;
 pub use linking_verbs::LinkingVerbs;
 pub use lint::{Lint, LintKind, Suggestion};
@@ -61,5 +63,24 @@ mod tests {
         let lints = linter.lint(&test);
         dbg!(&lints);
         assert_eq!(lints.len(), count);
+    }
+
+    /// Runs a provided linter on text, applies the first suggestion from each
+    /// lint and asserts that the result is equal to a given value.
+    pub fn assert_suggestion_result(text: &str, mut linter: impl Linter, expected_result: &str) {
+        let test = Document::new_markdown_curated(text);
+        let lints = linter.lint(&test);
+
+        let mut text: Vec<char> = text.chars().collect();
+
+        for lint in lints {
+            if let Some(sug) = lint.suggestions.first() {
+                sug.apply(lint.span, &mut text);
+            }
+        }
+
+        let transformed_str: String = text.iter().collect();
+
+        assert_eq!(transformed_str.as_str(), expected_result);
     }
 }
