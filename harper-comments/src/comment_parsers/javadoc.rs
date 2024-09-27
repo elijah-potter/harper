@@ -8,7 +8,7 @@ use super::without_initiators;
 
 #[derive(Default)]
 pub struct JavaDoc {
-    html_parser: HtmlParser
+    html_parser: HtmlParser,
 }
 
 impl Parser for JavaDoc {

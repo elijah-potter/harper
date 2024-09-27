@@ -24,7 +24,7 @@ impl Linter for NumberSuffixCapitalization {
                     lint_kind: LintKind::Capitalization,
                     message: "This suffix should be lowercase".to_string(),
                     suggestions: vec![Suggestion::ReplaceWith(
-                        chars.iter().map(|c| c.to_ascii_lowercase()).collect()
+                        chars.iter().map(|c| c.to_ascii_lowercase()).collect(),
                     )],
                     ..Default::default()
                 })

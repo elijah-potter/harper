@@ -38,7 +38,7 @@ pub mod tests {
             r#"example.org"#,
             r#"strange.example.com"#,
             r#"example.org"#,
-            r#"example.org"#
+            r#"example.org"#,
         ]
         .into_iter()
         .map(|s| s.chars().collect())

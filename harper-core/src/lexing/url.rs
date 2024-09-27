@@ -14,7 +14,7 @@ pub fn lex_url(source: &[char]) -> Option<FoundToken> {
 
     Some(FoundToken {
         next_index: url_end + sep + 1,
-        token: TokenKind::Url
+        token: TokenKind::Url,
     })
 }
 
@@ -92,7 +92,7 @@ fn lex_hostport(source: &[char]) -> Option<usize> {
                     c.is_ascii_digit()
                 })
                 .map(|(i, _)| i)
-                .unwrap_or(source.len())
+                .unwrap_or(source.len()),
         )
     } else {
         Some(hostname_end)

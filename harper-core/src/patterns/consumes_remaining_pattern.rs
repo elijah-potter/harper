@@ -5,7 +5,7 @@ use crate::Token;
 /// If the wrapped pattern matches the remainder of the input, it returns the
 /// input's length. Otherwise, it matches nothing.
 pub struct ConsumesRemainingPattern {
-    inner: Box<dyn Pattern>
+    inner: Box<dyn Pattern>,
 }
 
 impl ConsumesRemainingPattern {

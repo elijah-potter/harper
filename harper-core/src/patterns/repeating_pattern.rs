@@ -5,7 +5,7 @@ use crate::Token;
 ///
 /// Somewhat reminiscent of the `.*` operator in Regex.
 pub struct RepeatingPattern {
-    inner: Box<dyn Pattern>
+    inner: Box<dyn Pattern>,
 }
 
 impl RepeatingPattern {
@@ -39,7 +39,7 @@ mod tests {
     #[test]
     fn matches_anything() {
         let doc = Document::new_plain_english_curated(
-            "This matcher will match the entirety of any document!"
+            "This matcher will match the entirety of any document!",
         );
         let pat = RepeatingPattern::new(Box::new(AnyPattern));
 

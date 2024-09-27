@@ -74,7 +74,7 @@ pub enum Punctuation {
     /// `|`
     Pipe,
     /// `_`
-    Underscore
+    Underscore,
 }
 
 impl Punctuation {
@@ -114,7 +114,7 @@ impl Punctuation {
             '$' => Punctuation::Dollar,
             '|' => Punctuation::Pipe,
             '_' => Punctuation::Underscore,
-            _ => return None
+            _ => return None,
         };
 
         Some(punct)
@@ -124,5 +124,5 @@ impl Punctuation {
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, PartialOrd, Hash)]
 pub struct Quote {
     /// The location of the matching quote, if it exists.
-    pub twin_loc: Option<usize>
+    pub twin_loc: Option<usize>,
 }

@@ -22,7 +22,7 @@ pub struct FullDictionary {
     /// that has a word whose index is that length.
     word_len_starts: Vec<usize>,
     /// All English words
-    word_map: HashMap<CharString, WordMetadata>
+    word_map: HashMap<CharString, WordMetadata>,
 }
 
 /// The uncached function that is used to produce the original copy of the
@@ -43,7 +43,7 @@ fn uncached_inner_new() -> Lrc<FullDictionary> {
     Lrc::new(FullDictionary {
         word_map,
         word_len_starts: FullDictionary::create_len_starts(&mut words),
-        words
+        words,
     })
 }
 
@@ -56,7 +56,7 @@ impl FullDictionary {
         Self {
             words: Vec::new(),
             word_len_starts: Vec::new(),
-            word_map: HashMap::new()
+            word_map: HashMap::new(),
         }
     }
 
@@ -71,7 +71,7 @@ impl FullDictionary {
     /// distinct calls to this function.
     pub fn extend_words(
         &mut self,
-        words: impl IntoIterator<Item = (impl AsRef<[char]>, WordMetadata)>
+        words: impl IntoIterator<Item = (impl AsRef<[char]>, WordMetadata)>,
     ) {
         let pairs: Vec<_> = words
             .into_iter()

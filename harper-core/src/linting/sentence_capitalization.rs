@@ -28,11 +28,11 @@ impl Linter for SentenceCapitalization {
                             span: first_word.span.with_len(1),
                             lint_kind: LintKind::Capitalization,
                             suggestions: vec![Suggestion::ReplaceWith(
-                                first_letter.to_uppercase().collect_vec()
+                                first_letter.to_uppercase().collect_vec(),
                             )],
                             priority: 31,
                             message: "This sentence does not start with a capital letter"
-                                .to_string()
+                                .to_string(),
                         })
                     }
                 }
@@ -63,7 +63,7 @@ mod tests {
         assert_lint_count(
             "i have complete conviction. she is guilty",
             SentenceCapitalization,
-            2
+            2,
         )
     }
 
@@ -72,7 +72,7 @@ mod tests {
         assert_lint_count(
             "53 is the length of the longest word.",
             SentenceCapitalization,
-            0
+            0,
         );
     }
 
@@ -81,7 +81,7 @@ mod tests {
         assert_lint_count(
             "[`misspelled_word`] is assumed to be quite small (n < 100). ",
             SentenceCapitalization,
-            0
+            0,
         )
     }
 
@@ -90,7 +90,7 @@ mod tests {
         assert_lint_count(
             "the linter should not be affected by `this` unlintable.",
             SentenceCapitalization,
-            1
+            1,
         )
     }
 }

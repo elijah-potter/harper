@@ -19,10 +19,10 @@ impl Linter for SpelledNumbers {
                     span: number_tok.span,
                     lint_kind: LintKind::Readability,
                     suggestions: vec![Suggestion::ReplaceWith(
-                        spell_out_number(number as u64).unwrap().chars().collect()
+                        spell_out_number(number as u64).unwrap().chars().collect(),
                     )],
                     message: "Try to spell out numbers less than a hundred.".to_string(),
-                    priority: 63
+                    priority: 63,
                 })
             }
         }

@@ -17,7 +17,7 @@ impl Parser for JsDoc {
 
             new_tokens.push(Token::new(
                 Span::new_with_len(line.len(), 1),
-                harper_core::TokenKind::Newline(1)
+                harper_core::TokenKind::Newline(1),
             ));
 
             new_tokens

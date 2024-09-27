@@ -19,7 +19,7 @@ pub fn suggest_correct_spelling<'a>(
     misspelled_word: &[char],
     result_limit: usize,
     max_edit_dist: u8,
-    dictionary: &'a impl Dictionary
+    dictionary: &'a impl Dictionary,
 ) -> Vec<&'a [char]> {
     let misspelled_word = seq_to_normalized(misspelled_word);
 
@@ -87,7 +87,7 @@ pub fn suggest_correct_spelling<'a>(
                 .into_iter()
                 .enumerate()
                 .filter(|(i, _)| *i != a && *i != b)
-                .map(|v| v.1 .0)
+                .map(|v| v.1 .0),
         );
     } else {
         // Push the rest
@@ -108,7 +108,7 @@ pub fn suggest_correct_spelling_str(
     misspelled_word: impl AsRef<str>,
     result_limit: usize,
     max_edit_dist: u8,
-    dictionary: &FullDictionary
+    dictionary: &FullDictionary,
 ) -> Vec<String> {
     let chars: Vec<char> = misspelled_word.as_ref().chars().collect();
 
@@ -127,7 +127,7 @@ fn edit_distance_min_alloc(
     source: &[char],
     target: &[char],
     previous_row: &mut Vec<u8>,
-    current_row: &mut Vec<u8>
+    current_row: &mut Vec<u8>,
 ) -> u8 {
     if cfg!(debug_assertions) {
         assert!(source.len() <= 255 && target.len() <= 255);
@@ -175,7 +175,7 @@ fn seq_to_normalized(seq: &[char]) -> Cow<'_, [char]> {
 fn char_to_normalized(c: char) -> char {
     match c {
         '’' => '\'',
-        _ => c
+        _ => c,
     }
 }
 

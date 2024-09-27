@@ -1,6 +1,6 @@
 # Format entire project
 format:
-  cargo +nightly fmt  
+  cargo fmt  
   cd "{{justfile_directory()}}/packages"; yarn prettier -w .
 
 # Build the WebAssembly for a specific target (usually either `web` or `bundler`)
@@ -66,7 +66,7 @@ check:
   set -eo pipefail
 
   just check-rust
-  
+
   cd "{{justfile_directory()}}/packages"
   yarn install
   yarn prettier --check .

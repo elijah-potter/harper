@@ -24,7 +24,7 @@ impl Linter for Spaces {
                             "There are {} spaces where there should be only one.",
                             count
                         ),
-                        priority: 15
+                        priority: 15,
                     })
                 }
             }
@@ -54,7 +54,7 @@ impl Linter for Spaces {
                     lint_kind: LintKind::Formatting,
                     suggestions: vec![Suggestion::Remove],
                     message: "Unnecessary space at the end of the sentence.".to_string(),
-                    priority: 63
+                    priority: 63,
                 })
             }
         }

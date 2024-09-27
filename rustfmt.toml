@@ -1,14 +1,2 @@
 newline_style = "Unix"
 use_field_init_shorthand = true
-
-unstable_features = true
-combine_control_expr = false
-condense_wildcard_suffixes = true
-error_on_line_overflow = true
-error_on_unformatted = true
-format_strings = true
-imports_layout = "HorizontalVertical"
-imports_granularity = "Module"
-group_imports = "StdExternalCrate"
-wrap_comments = true
-trailing_comma = "Never"

@@ -3,7 +3,7 @@ use crate::patterns::{Pattern, SequencePattern, WordPatternGroup};
 use crate::token::{Token, TokenStringExt};
 
 pub struct RepeatedWords {
-    pattern: Box<dyn Pattern>
+    pattern: Box<dyn Pattern>,
 }
 
 impl RepeatedWords {
@@ -23,7 +23,7 @@ impl Default for RepeatedWords {
             "people", "into", "year", "your", "good", "some", "could", "them", "see", "other",
             "than", "then", "now", "look", "only", "come", "its", "over", "think", "also", "back",
             "after", "use", "two", "how", "our", "work", "first", "well", "way", "even", "new",
-            "want", "because", "any", "these", "give", "day", "most", "us", "are"
+            "want", "because", "any", "these", "give", "day", "most", "us", "are",
         ];
 
         let mut pattern = WordPatternGroup::default();
@@ -35,13 +35,13 @@ impl Default for RepeatedWords {
                     SequencePattern::default()
                         .then_exact_word(word)
                         .then_whitespace()
-                        .then_exact_word(word)
-                )
+                        .then_exact_word(word),
+                ),
             );
         }
 
         Self {
-            pattern: Box::new(pattern)
+            pattern: Box::new(pattern),
         }
     }
 }
@@ -56,7 +56,7 @@ impl PatternLinter for RepeatedWords {
             span: matched_tokens.span().unwrap(),
             lint_kind: LintKind::Repetition,
             suggestions: vec![Suggestion::ReplaceWith(
-                matched_tokens[0].span.get_content(source).to_vec()
+                matched_tokens[0].span.get_content(source).to_vec(),
             )],
             message: "Did you mean to repeat this word?".to_string(),
             ..Default::default()

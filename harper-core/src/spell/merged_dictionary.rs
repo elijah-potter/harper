@@ -10,20 +10,20 @@ use crate::{CharString, WordMetadata};
 #[derive(Clone, PartialEq)]
 pub struct MergedDictionary<T>
 where
-    T: Dictionary + Clone
+    T: Dictionary + Clone,
 {
     children: Vec<Arc<T>>,
-    merged: HashMap<CharString, WordMetadata>
+    merged: HashMap<CharString, WordMetadata>,
 }
 
 impl<T> MergedDictionary<T>
 where
-    T: Dictionary + Clone
+    T: Dictionary + Clone,
 {
     pub fn new() -> Self {
         Self {
             children: Vec::new(),
-            merged: HashMap::new()
+            merged: HashMap::new(),
         }
     }
 
@@ -34,7 +34,7 @@ where
 
 impl<T> Default for MergedDictionary<T>
 where
-    T: Dictionary + Clone
+    T: Dictionary + Clone,
 {
     fn default() -> Self {
         Self::new()
@@ -43,7 +43,7 @@ where
 
 impl<T> Dictionary for MergedDictionary<T>
 where
-    T: Dictionary + Clone
+    T: Dictionary + Clone,
 {
     fn contains_word(&self, word: &[char]) -> bool {
         for child in &self.children {
@@ -71,7 +71,7 @@ where
         Box::new(
             self.children
                 .iter()
-                .flat_map(move |c| c.words_with_len_iter(len))
+                .flat_map(move |c| c.words_with_len_iter(len)),
         )
     }
 

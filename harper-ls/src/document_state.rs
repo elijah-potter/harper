@@ -7,5 +7,5 @@ pub struct DocumentState {
     pub ident_dict: Lrc<FullDictionary>,
     pub dict: Lrc<MergedDictionary<FullDictionary>>,
     pub linter: LintGroup<Lrc<MergedDictionary<FullDictionary>>>,
-    pub language_id: Option<String>
+    pub language_id: Option<String>,
 }
