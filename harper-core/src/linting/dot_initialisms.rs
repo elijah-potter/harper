@@ -6,7 +6,7 @@ use crate::{Token, TokenStringExt};
 
 pub struct DotInitialisms {
     pattern: Box<dyn Pattern>,
-    corrections: HashMap<&'static str, &'static str>
+    corrections: HashMap<&'static str, &'static str>,
 }
 
 impl Default for DotInitialisms {
@@ -27,7 +27,7 @@ impl Default for DotInitialisms {
 
         Self {
             pattern: Box::new(patterns),
-            corrections
+            corrections,
         }
     }
 }
@@ -48,7 +48,7 @@ impl PatternLinter for DotInitialisms {
             lint_kind: LintKind::Formatting,
             suggestions: vec![Suggestion::ReplaceWith(correction.chars().collect())],
             message: "Initialisms should have dot-separated letters.".to_owned(),
-            priority: 63
+            priority: 63,
         }
     }
 }
@@ -63,7 +63,7 @@ mod tests {
         assert_suggestion_result(
             "Some text here (eg. more text).",
             DotInitialisms::default(),
-            "Some text here (e.g. more text)."
+            "Some text here (e.g. more text).",
         )
     }
 }
