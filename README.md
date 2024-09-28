@@ -41,6 +41,11 @@ If you want to use Harper on your machine, you have two choices.
 
 If you use [Obsidian](https://obsidian.md/), you may install the [Harper Obsidian Plugin](https://github.com/elijah-potter/harper-obsidian-plugin) by searching for "Harper" in the community plugin store.
 
+### Zed Plugin
+
+If you use [Zed](https://zed.dev/), [Stef16Robbe](https://github.com/Stef16Robbe) has developed a fantastic [plugin](https://github.com/Stef16Robbe/harper_zed) that works out-of-the box.
+No setup required.
+
 ## Performance Issues
 
 We consider long lint times bugs.

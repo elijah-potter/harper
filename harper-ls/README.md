@@ -14,6 +14,10 @@ If you happen to use [`mason.nvim`](https://github.com/williamboman/mason.nvim),
 
 If you __don't__ install your LSPs through Mason, we have binary releases available on [GitHub](https://github.com/elijah-potter/harper/releases) or you can use one of a number of package managers.
 
+### Zed
+
+The [Zed plugin](https://github.com/Stef16Robbe/harper_zed) will automatically download `harper-ls` to your system if you don't already have it.
+
 ### Cargo
 
 If you have [Rust installed](https://www.rust-lang.org/tools/install), you're in luck!

@@ -77,9 +77,11 @@
 				class="underline"
 				href="https://github.com/elijah-potter/harper/tree/master/harper-ls">language server</a
 			>, and through WebAssembly, so you can get fantastic grammar checking anywhere you work.
-			<br /><br /> That said, we take extra care to make sure the Neovim and
-			<a class="underline" href="/obsidian">Obsidian</a> integration is amazing.</span
-		>
+			<br /><br /> That said, we take extra care to make sure the Neovim,
+			<a class="underline" href="https://github.com/Stef16Robbe/harper_zed">Zed</a>
+			and
+			<a class="underline" href="/obsidian">Obsidian</a> integration is amazing.
+		</span>
 
 		<img
 			src="/images/example_nvim.webp"
