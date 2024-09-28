@@ -25,7 +25,7 @@ impl Linter for AnA {
             let is_a_an = match chars_first {
                 ['a'] => Some(true),
                 ['a', 'n'] => Some(false),
-                _ => None
+                _ => None,
             };
 
             let Some(a_an) = is_a_an else {
@@ -37,7 +37,7 @@ impl Linter for AnA {
             if a_an != should_be_a_an {
                 let replacement = match a_an {
                     true => vec!['a', 'n'],
-                    false => vec!['a']
+                    false => vec!['a'],
                 };
 
                 lints.push(Lint {
@@ -45,7 +45,7 @@ impl Linter for AnA {
                     lint_kind: LintKind::Miscellaneous,
                     suggestions: vec![Suggestion::ReplaceWith(replacement)],
                     message: "Incorrect indefinite article.".to_string(),
-                    priority: 31
+                    priority: 31,
                 })
             }
         }
@@ -59,7 +59,7 @@ fn to_lower_word(word: &[char]) -> Cow<'_, [char]> {
         Cow::Owned(
             word.iter()
                 .flat_map(|c| c.to_lowercase())
-                .collect::<Vec<_>>()
+                .collect::<Vec<_>>(),
         )
     } else {
         Cow::Borrowed(word)

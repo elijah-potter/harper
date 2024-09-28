@@ -9,9 +9,9 @@ use crate::CharString;
 #[derive(Default)]
 pub struct WordPatternGroup<P>
 where
-    P: Pattern
+    P: Pattern,
 {
-    patterns: HashMap<CharString, P>
+    patterns: HashMap<CharString, P>,
 }
 
 impl WordPatternGroup<NaivePatternGroup> {
@@ -30,7 +30,7 @@ impl WordPatternGroup<NaivePatternGroup> {
 
 impl<P> Pattern for WordPatternGroup<P>
 where
-    P: Pattern
+    P: Pattern,
 {
     fn matches(&self, tokens: &[crate::Token], source: &[char]) -> usize {
         let Some(first) = tokens.first() else {

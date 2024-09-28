@@ -28,7 +28,7 @@ impl Linter for EllipsisLength {
                     lint_kind: LintKind::Formatting,
                     suggestions: vec![Suggestion::ReplaceWith(vec!['.', '.', '.'])],
                     message: "Horizontal ellipsis must have 3 dots.".to_string(),
-                    priority: 31
+                    priority: 31,
                 })
             }
         }

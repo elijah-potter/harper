@@ -18,7 +18,7 @@ pub trait PatternLinter: Send + Sync {
 
 impl<L> Linter for L
 where
-    L: PatternLinter
+    L: PatternLinter,
 {
     fn lint(&mut self, document: &crate::Document) -> Vec<Lint> {
         let mut lints = Vec::new();

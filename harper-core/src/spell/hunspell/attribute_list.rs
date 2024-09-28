@@ -11,7 +11,7 @@ use crate::{CharString, Span, WordMetadata};
 #[derive(Debug, Clone)]
 pub struct AttributeList {
     /// Key = Affix Flag
-    affixes: HashMap<char, Expansion>
+    affixes: HashMap<char, Expansion>,
 }
 
 impl AttributeList {
@@ -21,7 +21,7 @@ impl AttributeList {
                 .affixes
                 .into_iter()
                 .map(|(affix, exp)| (affix, exp.into_human_readable()))
-                .collect()
+                .collect(),
         }
     }
 
@@ -33,7 +33,7 @@ impl AttributeList {
     pub fn expand_marked_word(
         &self,
         word: MarkedWord,
-        dest: &mut HashMap<CharString, WordMetadata>
+        dest: &mut HashMap<CharString, WordMetadata>,
     ) {
         dest.reserve(word.attributes.len() + 1);
         let mut gifted_metadata = WordMetadata::default();
@@ -74,9 +74,9 @@ impl AttributeList {
                     self.expand_marked_word(
                         MarkedWord {
                             letters: new_word.clone(),
-                            attributes: opp_attr.clone()
+                            attributes: opp_attr.clone(),
                         },
-                        dest
+                        dest,
                     );
                     let t_metadata = dest.get_mut(&new_word).unwrap();
                     t_metadata.append(&metadata);
@@ -105,7 +105,7 @@ impl AttributeList {
     pub fn expand_marked_words(
         &self,
         words: impl IntoIterator<Item = MarkedWord>,
-        dest: &mut HashMap<CharString, WordMetadata>
+        dest: &mut HashMap<CharString, WordMetadata>,
     ) {
         for word in words {
             self.expand_marked_word(word, dest);
@@ -115,7 +115,7 @@ impl AttributeList {
     fn apply_replacement(
         replacement: &AffixReplacement,
         letters: &[char],
-        suffix: bool
+        suffix: bool,
     ) -> Option<CharString> {
         if replacement.condition.len() > letters.len() {
             return None;
@@ -170,7 +170,7 @@ impl AttributeList {
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct HumanReadableAttributeList {
-    affixes: HashMap<char, HumanReadableExpansion>
+    affixes: HashMap<char, HumanReadableExpansion>,
 }
 
 impl HumanReadableAttributeList {

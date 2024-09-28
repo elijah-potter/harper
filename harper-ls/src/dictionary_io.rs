@@ -52,7 +52,7 @@ async fn dict_from_word_list(mut r: impl AsyncRead + Unpin) -> io::Result<FullDi
     let mut dict = FullDictionary::new();
     dict.extend_words(
         str.lines()
-            .map(|l| (l.chars().collect::<Vec<char>>(), WordMetadata::default()))
+            .map(|l| (l.chars().collect::<Vec<char>>(), WordMetadata::default())),
     );
 
     Ok(dict)

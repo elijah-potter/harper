@@ -1,6 +1,6 @@
 # Format entire project
 format:
-  cargo +nightly fmt  
+  cargo fmt  
   cd "{{justfile_directory()}}/packages"; yarn prettier -w .
 
 # Build the WebAssembly for a specific target (usually either `web` or `bundler`)
@@ -53,13 +53,19 @@ package-vscode:
   yarn install -f
   yarn package-extension
 
+check-rust:
+  #! /bin/bash
+  set -eo pipefail
+
+  cargo fmt -- --check
+  cargo clippy -- -Dwarnings -D clippy::dbg_macro
+
 # Perform format and type checking.
 check:
   #! /bin/bash
   set -eo pipefail
 
-  cargo +nightly fmt --check
-  cargo clippy -- -Dwarnings -D clippy::dbg_macro
+  just check-rust
 
   cd "{{justfile_directory()}}/packages"
   yarn install

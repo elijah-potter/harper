@@ -2,14 +2,8 @@ use std::collections::HashMap;
 
 use harper_core::linting::{Lint, Suggestion};
 use tower_lsp::lsp_types::{
-    CodeAction,
-    CodeActionKind,
-    CodeActionOrCommand,
-    Command,
-    Diagnostic,
-    TextEdit,
-    Url,
-    WorkspaceEdit
+    CodeAction, CodeActionKind, CodeActionOrCommand, Command, Diagnostic, TextEdit, Url,
+    WorkspaceEdit,
 };
 
 use crate::config::{CodeActionConfig, DiagnosticSeverity};
@@ -18,7 +12,7 @@ use crate::pos_conv::span_to_range;
 pub fn lints_to_diagnostics(
     source: &[char],
     lints: &[Lint],
-    severity: DiagnosticSeverity
+    severity: DiagnosticSeverity,
 ) -> Vec<Diagnostic> {
     lints
         .iter()
@@ -30,7 +24,7 @@ pub fn lint_to_code_actions<'a>(
     lint: &'a Lint,
     url: &'a Url,
     source: &'a [char],
-    config: &CodeActionConfig
+    config: &CodeActionConfig,
 ) -> Vec<CodeActionOrCommand> {
     let mut results = Vec::new();
 
@@ -42,7 +36,7 @@ pub fn lint_to_code_actions<'a>(
 
                 let replace_string = match suggestion {
                     Suggestion::ReplaceWith(with) => with.iter().collect(),
-                    Suggestion::Remove => "".to_string()
+                    Suggestion::Remove => "".to_string(),
                 };
 
                 Some(CodeAction {
@@ -54,19 +48,19 @@ pub fn lint_to_code_actions<'a>(
                             url.clone(),
                             vec![TextEdit {
                                 range,
-                                new_text: replace_string
-                            }]
+                                new_text: replace_string,
+                            }],
                         )])),
                         document_changes: None,
-                        change_annotations: None
+                        change_annotations: None,
                     }),
                     command: None,
                     is_preferred: None,
                     disabled: None,
-                    data: None
+                    data: None,
                 })
             })
-            .map(CodeActionOrCommand::CodeAction)
+            .map(CodeActionOrCommand::CodeAction),
     );
 
     if lint.lint_kind.is_spelling() {
@@ -75,13 +69,13 @@ pub fn lint_to_code_actions<'a>(
         results.push(CodeActionOrCommand::Command(Command::new(
             format!("Add \"{}\" to the global dictionary.", orig),
             "HarperAddToUserDict".to_string(),
-            Some(vec![orig.clone().into(), url.to_string().into()])
+            Some(vec![orig.clone().into(), url.to_string().into()]),
         )));
 
         results.push(CodeActionOrCommand::Command(Command::new(
             format!("Add \"{}\" to the file dictionary.", orig),
             "HarperAddToFileDict".to_string(),
-            Some(vec![orig.into(), url.to_string().into()])
+            Some(vec![orig.into(), url.to_string().into()]),
         )));
 
         if config.force_stable {
@@ -104,6 +98,6 @@ fn lint_to_diagnostic(lint: &Lint, source: &[char], severity: DiagnosticSeverity
         message: lint.message.clone(),
         related_information: None,
         tags: None,
-        data: None
+        data: None,
     }
 }

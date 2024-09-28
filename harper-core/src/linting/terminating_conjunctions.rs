@@ -3,7 +3,7 @@ use crate::patterns::{ConsumesRemainingPattern, Pattern, SequencePattern};
 use crate::{Lrc, TokenStringExt};
 
 pub struct TerminatingConjunctions {
-    pattern: Box<dyn Pattern>
+    pattern: Box<dyn Pattern>,
 }
 
 impl Default for TerminatingConjunctions {
@@ -39,13 +39,13 @@ impl Default for TerminatingConjunctions {
                             "or",
                             "nor",
                             "so",
-                            "and"
+                            "and",
                         ]
                         .into_iter()
-                        .collect()
+                        .collect(),
                     ))
-                    .then_comma()
-            )))
+                    .then_comma(),
+            ))),
         }
     }
 }
@@ -67,7 +67,7 @@ impl PatternLinter for TerminatingConjunctions {
                 "Subordinating conjunctions like “{word}” should not appear at the end of a \
                  clause."
             ),
-            priority: 63
+            priority: 63,
         }
     }
 }
@@ -82,7 +82,7 @@ mod tests {
         assert_lint_count(
             "More often than, we cannot foresee that of our community.",
             TerminatingConjunctions::default(),
-            1
+            1,
         )
     }
 

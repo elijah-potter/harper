@@ -14,7 +14,7 @@ impl Linter for AvoidCurses {
                 lint_kind: LintKind::Miscellaneous,
                 suggestions: vec![],
                 message: "Try to avoid offensive language.".to_string(),
-                priority: 63
+                priority: 63,
             })
             .collect()
     }

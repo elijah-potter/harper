@@ -7,14 +7,14 @@ use tree_sitter::{Language, Node, Tree, TreeCursor};
 /// allowing you to selectively parse only specific tree-sitter nodes.
 pub struct TreeSitterMasker {
     language: Language,
-    node_condition: fn(&Node) -> bool
+    node_condition: fn(&Node) -> bool,
 }
 
 impl TreeSitterMasker {
     pub fn new(language: Language, node_condition: fn(&Node) -> bool) -> Self {
         Self {
             language,
-            node_condition
+            node_condition,
         }
     }
 

@@ -12,7 +12,7 @@ pub enum DiagnosticSeverity {
     Error,
     Warning,
     Information,
-    Hint
+    Hint,
 }
 
 impl DiagnosticSeverity {
@@ -24,7 +24,7 @@ impl DiagnosticSeverity {
             DiagnosticSeverity::Information => {
                 tower_lsp::lsp_types::DiagnosticSeverity::INFORMATION
             }
-            DiagnosticSeverity::Hint => tower_lsp::lsp_types::DiagnosticSeverity::HINT
+            DiagnosticSeverity::Hint => tower_lsp::lsp_types::DiagnosticSeverity::HINT,
         }
     }
 }
@@ -38,7 +38,7 @@ pub struct CodeActionConfig {
     ///
     /// For example, we always want to allow users to add "misspelled" elements
     /// to dictionary, regardless of the spelling suggestions.
-    pub force_stable: bool
+    pub force_stable: bool,
 }
 
 impl CodeActionConfig {
@@ -68,7 +68,7 @@ pub struct Config {
     pub file_dict_path: PathBuf,
     pub lint_config: LintGroupConfig,
     pub diagnostic_severity: DiagnosticSeverity,
-    pub code_action_config: CodeActionConfig
+    pub code_action_config: CodeActionConfig,
 }
 
 impl Config {
@@ -126,7 +126,7 @@ impl Default for Config {
                 .join("harper-ls/file_dictionaries/"),
             lint_config: LintGroupConfig::default(),
             diagnostic_severity: DiagnosticSeverity::Hint,
-            code_action_config: CodeActionConfig::default()
+            code_action_config: CodeActionConfig::default(),
         }
     }
 }

@@ -23,7 +23,7 @@ impl Parser for PlainEnglish {
             if let Some(FoundToken { token, next_index }) = lex_token(&source[cursor..]) {
                 tokens.push(Token {
                     span: Span::new(cursor, cursor + next_index),
-                    kind: token
+                    kind: token,
                 });
                 cursor += next_index;
             } else {

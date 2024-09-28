@@ -37,7 +37,7 @@ pub trait PatternExt {
 
 impl<P> PatternExt for P
 where
-    P: Pattern
+    P: Pattern,
 {
     fn find_all_matches(&self, tokens: &[Token], source: &[char]) -> Vec<Span> {
         let mut found = Vec::new();
@@ -77,7 +77,7 @@ where
 impl<F> Pattern for F
 where
     F: Fn(&Token, &[char]) -> bool,
-    F: Send + Sync
+    F: Send + Sync,
 {
     fn matches(&self, tokens: &[Token], source: &[char]) -> usize {
         if tokens.is_empty() {
@@ -97,7 +97,7 @@ where
 #[cfg(not(feature = "concurrent"))]
 impl<F> Pattern for F
 where
-    F: Fn(&Token, &[char]) -> bool
+    F: Fn(&Token, &[char]) -> bool,
 {
     fn matches(&self, tokens: &[Token], source: &[char]) -> usize {
         if tokens.is_empty() {

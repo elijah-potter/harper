@@ -31,7 +31,7 @@ impl CharExt for char {
             unicode_blocks::EMOTICONS,
             unicode_blocks::MISCELLANEOUS_SYMBOLS,
             unicode_blocks::VARIATION_SELECTORS,
-            unicode_blocks::SUPPLEMENTAL_SYMBOLS_AND_PICTOGRAPHS
+            unicode_blocks::SUPPLEMENTAL_SYMBOLS_AND_PICTOGRAPHS,
         ];
 
         blocks.contains(&block)
@@ -66,7 +66,7 @@ impl CharExt for char {
             unicode_blocks::CJK_COMPATIBILITY_IDEOGRAPHS_SUPPLEMENT,
             unicode_blocks::CJK_RADICALS_SUPPLEMENT,
             unicode_blocks::ENCLOSED_CJK_LETTERS_AND_MONTHS,
-            unicode_blocks::HIRAGANA
+            unicode_blocks::HIRAGANA,
         ];
 
         blocks.contains(&block)

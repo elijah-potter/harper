@@ -8,7 +8,7 @@ use crate::{Lrc, Token, TokenKind};
 /// A pattern that checks that a sequence of others patterns match.
 #[derive(Default)]
 pub struct SequencePattern {
-    token_patterns: Vec<Box<dyn Pattern>>
+    token_patterns: Vec<Box<dyn Pattern>>,
 }
 
 macro_rules! gen_then_from_is {
@@ -164,7 +164,7 @@ mod tests {
         pronouns.insert("hers");
         let pronouns = Lrc::new(pronouns);
 
-        let mut pat = SequencePattern::default()
+        let pat = SequencePattern::default()
             .then_exact_word("it")
             .then_whitespace()
             .then_exact_word("was")

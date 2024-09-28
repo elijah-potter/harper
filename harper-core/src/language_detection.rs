@@ -18,7 +18,7 @@ pub fn is_likely_english(doc: &Document, dict: &impl Dictionary) -> bool {
                 }
             }
             TokenKind::Punctuation(_) => punctuation += 1,
-            _ => ()
+            _ => (),
         }
     }
 
@@ -62,7 +62,7 @@ mod tests {
     #[test]
     fn detects_french() {
         assert_not_english(
-            "C'est du français. Il ne devrait pas être marqué comme anglais par Harper."
+            "C'est du français. Il ne devrait pas être marqué comme anglais par Harper.",
         );
     }
 
@@ -100,7 +100,7 @@ def fibIter(n):
     for _ in range(2, n):
         fibPrev, fib = fib, fib + fibPrev
     return fib
-        "#
+        "#,
         );
     }
 }

@@ -12,7 +12,7 @@ use wasm_bindgen::JsValue;
 static LINTER: Lazy<Mutex<LintGroup<Lrc<FullDictionary>>>> = Lazy::new(|| {
     Mutex::new(LintGroup::new(
         LintGroupConfig::default(),
-        FullDictionary::curated()
+        FullDictionary::curated(),
     ))
 });
 
@@ -63,7 +63,7 @@ pub fn lint(text: String) -> Vec<Lint> {
 pub fn apply_suggestion(
     text: String,
     span: Span,
-    suggestion: &Suggestion
+    suggestion: &Suggestion,
 ) -> Result<String, String> {
     let mut source: Vec<_> = text.chars().collect();
     let span: harper_core::Span = span.into();
@@ -75,13 +75,13 @@ pub fn apply_suggestion(
 
 #[wasm_bindgen]
 pub struct Suggestion {
-    inner: harper_core::linting::Suggestion
+    inner: harper_core::linting::Suggestion,
 }
 
 #[wasm_bindgen]
 pub enum SuggestionKind {
     Replace,
-    Remove
+    Remove,
 }
 
 #[wasm_bindgen]
@@ -96,14 +96,14 @@ impl Suggestion {
     pub fn get_replacement_text(&self) -> String {
         match &self.inner {
             harper_core::linting::Suggestion::Remove => "".to_string(),
-            harper_core::linting::Suggestion::ReplaceWith(chars) => chars.iter().collect()
+            harper_core::linting::Suggestion::ReplaceWith(chars) => chars.iter().collect(),
         }
     }
 
     pub fn kind(&self) -> SuggestionKind {
         match &self.inner {
             harper_core::linting::Suggestion::Remove => SuggestionKind::Remove,
-            harper_core::linting::Suggestion::ReplaceWith(_) => SuggestionKind::Replace
+            harper_core::linting::Suggestion::ReplaceWith(_) => SuggestionKind::Replace,
         }
     }
 }
@@ -111,7 +111,7 @@ impl Suggestion {
 #[wasm_bindgen]
 pub struct Lint {
     inner: harper_core::linting::Lint,
-    source: Lrc<Vec<char>>
+    source: Lrc<Vec<char>>,
 }
 
 #[wasm_bindgen]
@@ -154,7 +154,7 @@ impl Lint {
 #[wasm_bindgen]
 pub struct Span {
     pub start: usize,
-    pub end: usize
+    pub end: usize,
 }
 
 #[wasm_bindgen]

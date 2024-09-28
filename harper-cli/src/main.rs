@@ -19,15 +19,15 @@ enum Args {
         /// Whether to merely print out the number of errors encountered,
         /// without further details.
         #[arg(short, long)]
-        count: bool
+        count: bool,
     },
     /// Parse a provided document and print the detected symbols.
     Parse {
         /// The file you wish to parse.
-        file: PathBuf
+        file: PathBuf,
     },
     /// Emit decompressed, line-separated list of words in Harper's dictionary.
-    Words
+    Words,
 }
 
 fn main() -> anyhow::Result<()> {
@@ -65,7 +65,7 @@ fn main() -> anyhow::Result<()> {
                 report_builder = report_builder.with_label(
                     Label::new((&filename, lint.span.into()))
                         .with_message(lint.message)
-                        .with_color(primary_color)
+                        .with_color(primary_color),
                 );
             }
 
@@ -110,7 +110,7 @@ fn load_file(file: &Path) -> anyhow::Result<(Document, String)> {
             Box::new(
                 CommentParser::new_from_filename(file)
                     .map(Box::new)
-                    .ok_or(format_err!("Could not detect language ID."))?
+                    .ok_or(format_err!("Could not detect language ID."))?,
             )
         };
 

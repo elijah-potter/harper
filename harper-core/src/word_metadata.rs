@@ -11,7 +11,7 @@ pub struct WordMetadata {
     pub swear: Option<bool>,
     /// Whether the word is considered especially common.
     #[serde(default = "default_common")]
-    pub common: bool
+    pub common: bool,
 }
 
 fn default_common() -> bool {
@@ -27,7 +27,7 @@ impl WordMetadata {
                     (Some(a), Some(b)) => Some(a.or(&b)),
                     (Some(a), None) => Some(a),
                     (None, Some(b)) => Some(b),
-                    (None, None) => None
+                    (None, None) => None,
                 }
             };
         }
@@ -39,7 +39,7 @@ impl WordMetadata {
             adverb: merge!(self.adverb, other.adverb),
             conjunction: merge!(self.conjunction, other.conjunction),
             swear: self.swear.or(other.swear),
-            common: self.common || other.common
+            common: self.common || other.common,
         }
     }
 
@@ -129,13 +129,13 @@ impl WordMetadata {
 pub enum Tense {
     Past,
     Present,
-    Future
+    Future,
 }
 
 #[derive(Debug, Clone, Copy, Serialize, Deserialize, PartialEq, PartialOrd, Eq, Hash)]
 pub struct VerbData {
     pub is_linking: Option<bool>,
-    pub tense: Option<Tense>
+    pub tense: Option<Tense>,
 }
 
 impl VerbData {
@@ -143,7 +143,7 @@ impl VerbData {
     pub fn or(&self, other: &Self) -> Self {
         Self {
             is_linking: self.is_linking.or(other.is_linking),
-            tense: self.tense.or(other.tense)
+            tense: self.tense.or(other.tense),
         }
     }
 }
@@ -153,7 +153,7 @@ pub struct NounData {
     pub is_proper: Option<bool>,
     pub is_plural: Option<bool>,
     pub is_possessive: Option<bool>,
-    pub is_pronoun: Option<bool>
+    pub is_pronoun: Option<bool>,
 }
 
 impl NounData {
@@ -163,7 +163,7 @@ impl NounData {
             is_proper: self.is_proper.or(other.is_proper),
             is_plural: self.is_plural.or(other.is_plural),
             is_possessive: self.is_possessive.or(other.is_possessive),
-            is_pronoun: self.is_pronoun.or(other.is_pronoun)
+            is_pronoun: self.is_pronoun.or(other.is_pronoun),
         }
     }
 }

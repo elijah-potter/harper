@@ -127,7 +127,7 @@ impl Parser for Markdown {
         let md_parser = pulldown_cmark::Parser::new_ext(
             &source_str,
             pulldown_cmark::Options::all()
-                .difference(pulldown_cmark::Options::ENABLE_SMART_PUNCTUATION)
+                .difference(pulldown_cmark::Options::ENABLE_SMART_PUNCTUATION),
         );
 
         let mut tokens = Vec::new();
@@ -149,19 +149,19 @@ impl Parser for Markdown {
                 pulldown_cmark::Event::SoftBreak => {
                     tokens.push(Token {
                         span: Span::new_with_len(traversed_chars, 1),
-                        kind: TokenKind::Newline(1)
+                        kind: TokenKind::Newline(1),
                     });
                 }
                 pulldown_cmark::Event::HardBreak => {
                     tokens.push(Token {
                         span: Span::new_with_len(traversed_chars, 1),
-                        kind: TokenKind::Newline(2)
+                        kind: TokenKind::Newline(2),
                     });
                 }
                 pulldown_cmark::Event::Start(pulldown_cmark::Tag::List(v)) => {
                     tokens.push(Token {
                         span: Span::new_with_len(traversed_chars, 0),
-                        kind: TokenKind::Newline(2)
+                        kind: TokenKind::Newline(2),
                     });
                     stack.push(pulldown_cmark::Tag::List(v));
                 }
@@ -172,7 +172,7 @@ impl Parser for Markdown {
                 | pulldown_cmark::Event::End(pulldown_cmark::TagEnd::TableCell) => {
                     tokens.push(Token {
                         span: Span::new_with_len(traversed_chars, 0),
-                        kind: TokenKind::Newline(2)
+                        kind: TokenKind::Newline(2),
                     });
                     stack.pop();
                 }
@@ -186,7 +186,7 @@ impl Parser for Markdown {
 
                     tokens.push(Token {
                         span: Span::new_with_len(traversed_chars, chunk_len),
-                        kind: TokenKind::Unlintable
+                        kind: TokenKind::Unlintable,
                     });
                 }
                 pulldown_cmark::Event::Text(text) => {
@@ -198,7 +198,7 @@ impl Parser for Markdown {
                         if matches!(tag, Tag::CodeBlock(..)) {
                             tokens.push(Token {
                                 span: Span::new_with_len(traversed_chars, text.chars().count()),
-                                kind: TokenKind::Unlintable
+                                kind: TokenKind::Unlintable,
                             });
                             continue;
                         }
@@ -225,7 +225,7 @@ impl Parser for Markdown {
 
                     tokens.append(&mut new_tokens);
                 }
-                _ => ()
+                _ => (),
             }
         }
 

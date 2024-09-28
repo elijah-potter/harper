@@ -8,7 +8,7 @@ use serde::{Deserialize, Serialize};
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Matcher {
     /// Position-based operators.
-    operators: Vec<Operator>
+    operators: Vec<Operator>,
 }
 
 impl Matcher {
@@ -42,7 +42,7 @@ impl Matcher {
                     }
                 }
                 '.' => operators.push(Operator::Any),
-                _ => operators.push(Operator::Literal(c))
+                _ => operators.push(Operator::Literal(c)),
             }
 
             char_idx += 1;
@@ -93,7 +93,7 @@ impl Display for Matcher {
 
                     write!(f, "]")?;
                 }
-                Operator::Any => write!(f, ".")?
+                Operator::Any => write!(f, ".")?,
             }
         }
 
@@ -106,7 +106,7 @@ enum Operator {
     Literal(char),
     MatchOne(Vec<char>),
     MatchNone(Vec<char>),
-    Any
+    Any,
 }
 
 impl Operator {
@@ -115,7 +115,7 @@ impl Operator {
             Operator::Literal(b) => a == *b,
             Operator::MatchOne(b) => b.contains(&a),
             Operator::MatchNone(b) => !b.contains(&a),
-            Operator::Any => true
+            Operator::Any => true,
         }
     }
 }
@@ -123,7 +123,7 @@ impl Operator {
 #[derive(Debug, Clone, Copy, thiserror::Error)]
 pub enum Error {
     #[error("Unmatched bracket at index: {index}")]
-    UnmatchedBracket { index: usize }
+    UnmatchedBracket { index: usize },
 }
 
 #[cfg(test)]

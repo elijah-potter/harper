@@ -28,7 +28,7 @@ static DEFAULT_ADDRESS: &str = "127.0.0.1:4000";
 struct Args {
     /// Set to listen on standard input / output rather than TCP.
     #[arg(short, long, default_value_t = false)]
-    stdio: bool
+    stdio: bool,
 }
 
 #[tokio::main]

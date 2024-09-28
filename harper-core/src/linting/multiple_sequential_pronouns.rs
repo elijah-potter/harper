@@ -9,13 +9,13 @@ use crate::{Lint, Lrc, Token, TokenStringExt};
 /// Linter that checks if multiple pronouns are being used right after each
 /// other. This is a common mistake to make during the revision process.
 pub struct MultipleSequentialPronouns {
-    pattern: Box<dyn Pattern>
+    pattern: Box<dyn Pattern>,
 }
 
 impl MultipleSequentialPronouns {
     fn new() -> Self {
         let pronouns: HashSet<_> = [
-            "me", "my", "I", "we", "you", "he", "him", "her", "she", "it", "they"
+            "me", "my", "I", "we", "you", "he", "him", "her", "she", "it", "they",
         ]
         .into_iter()
         .collect();
@@ -29,9 +29,9 @@ impl MultipleSequentialPronouns {
                     .then_one_or_more(Box::new(
                         SequencePattern::default()
                             .then_whitespace()
-                            .then_any_word_in(pronouns.clone())
-                    ))
-            )
+                            .then_any_word_in(pronouns.clone()),
+                    )),
+            ),
         }
     }
 }
@@ -46,10 +46,10 @@ impl PatternLinter for MultipleSequentialPronouns {
 
         if matched_tokens.len() == 3 {
             suggestions.push(Suggestion::ReplaceWith(
-                matched_tokens[0].span.get_content(source).to_vec()
+                matched_tokens[0].span.get_content(source).to_vec(),
             ));
             suggestions.push(Suggestion::ReplaceWith(
-                matched_tokens[2].span.get_content(source).to_vec()
+                matched_tokens[2].span.get_content(source).to_vec(),
             ));
         }
 
@@ -58,7 +58,7 @@ impl PatternLinter for MultipleSequentialPronouns {
             lint_kind: LintKind::Repetition,
             message: "There are too many personal pronouns in sequence here.".to_owned(),
             priority: 63,
-            suggestions
+            suggestions,
         }
     }
 }
@@ -79,7 +79,7 @@ mod tests {
         assert_lint_count(
             "...little bit about my I want to do.",
             MultipleSequentialPronouns::new(),
-            1
+            1,
         )
     }
 
@@ -88,7 +88,7 @@ mod tests {
         assert_lint_count(
             "...little bit about my I you want to do.",
             MultipleSequentialPronouns::new(),
-            1
+            1,
         )
     }
 
@@ -97,7 +97,7 @@ mod tests {
         assert_lint_count(
             "...little bit about I want to do.",
             MultipleSequentialPronouns::new(),
-            0
+            0,
         )
     }
 
@@ -106,7 +106,7 @@ mod tests {
         assert_lint_count(
             "...little bit about I want to do to me you.",
             MultipleSequentialPronouns::new(),
-            1
+            1,
         )
     }
 

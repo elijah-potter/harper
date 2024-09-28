@@ -17,7 +17,7 @@ pub struct Mask {
     // Right now, there aren't any use-cases where we can't treat this as a stack.
     //
     // Assumed that no elements overlap and exist in sorted order.
-    pub(self) allowed: Vec<Span>
+    pub(self) allowed: Vec<Span>,
 }
 
 impl Mask {
@@ -25,13 +25,13 @@ impl Mask {
     /// disallowed.
     pub fn new_blank() -> Self {
         Self {
-            allowed: Vec::new()
+            allowed: Vec::new(),
         }
     }
 
     pub fn iter_allowed<'a>(
         &'a self,
-        source: &'a [char]
+        source: &'a [char],
     ) -> impl Iterator<Item = (Span, &'a [char])> + '_ {
         self.allowed.iter().map(|s| (*s, s.get_content(source)))
     }

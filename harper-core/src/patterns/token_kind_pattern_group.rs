@@ -5,7 +5,7 @@ use crate::{Token, TokenKind};
 
 pub struct TokenKindPatternGroup {
     /// These are patterns whose first token's kind must be strictly equal.
-    strict_patterns: HashMap<TokenKind, Box<dyn Pattern>>
+    strict_patterns: HashMap<TokenKind, Box<dyn Pattern>>,
 }
 
 impl Pattern for TokenKindPatternGroup {

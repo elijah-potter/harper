@@ -5,7 +5,7 @@ use crate::Token;
 /// returning the first one that matches..
 #[derive(Default)]
 pub struct NaivePatternGroup {
-    patterns: Vec<Box<dyn Pattern>>
+    patterns: Vec<Box<dyn Pattern>>,
 }
 
 impl NaivePatternGroup {
