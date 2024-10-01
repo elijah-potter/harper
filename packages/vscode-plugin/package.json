@@ -50,7 +50,7 @@
 	"contributes": {
 		"commands": [
 			{
-				"command": "harper-ls.restart",
+				"command": "harper.languageserver.restart",
 				"title": "Harper: Restart Language Server",
 				"description": "Restart harper-ls"
 			}
@@ -87,13 +87,13 @@
 					"scope": "resource",
 					"type": "boolean",
 					"default": true,
-					"description": "Make sure you close you quotation marks."
+					"description": "Make sure you close your quotation marks."
 				},
 				"harper-ls.linters.wrong_quotes": {
 					"scope": "resource",
 					"type": "boolean",
 					"default": false,
-					"description": "Make sure you use the correct unicode characters for you quotation marks."
+					"description": "Make sure you use the correct unicode characters for your quotation marks."
 				},
 				"harper-ls.linters.long_sentences": {
 					"scope": "resource",
@@ -167,7 +167,7 @@
 	"scripts": {
 		"watch:esbuild": "node esbuild.cjs --watch",
 		"watch:tsc": "tsc --noEmit --watch",
-		"pretest": "yarn run lint && tsc && node esbuild.cjs",
+		"pretest": "yarn lint && tsc && node esbuild.cjs",
 		"test": "node build/tests/runTests.js",
 		"vscode:prepublish": "yarn lint && tsc --noEmit && node esbuild.cjs --production",
 		"package": "vsce package",
