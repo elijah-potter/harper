@@ -570,6 +570,7 @@ dependencies = [
  "clap",
  "harper-comments",
  "harper-core",
+ "serde_json",
 ]
 
 [[package]]

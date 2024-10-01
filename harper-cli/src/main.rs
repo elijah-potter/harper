@@ -78,7 +78,8 @@ fn main() -> anyhow::Result<()> {
             let (doc, _) = load_file(&file)?;
 
             for token in doc.tokens() {
-                println!("{:?}", token);
+                let json = serde_json::to_string(&token)?;
+                println!("{}", json);
             }
 
             Ok(())
