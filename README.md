@@ -27,9 +27,13 @@ but it is also completely private.
 
 Harper is even small enough to load via [WebAssembly.](https://writewithharper.com)
 
+## Language Support
+
+Harper currently only supports American English, but the core is extensible to support other languages, so we welcome contributions that allow for other language support.
+
 ## Installation
 
-If you want to use Harper on your machine, you have two choices.
+If you want to use Harper on your machine, you have three choices.
 
 ### `harper-ls`
 
