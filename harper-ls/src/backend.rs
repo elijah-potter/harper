@@ -360,10 +360,6 @@ impl LanguageServer for Backend {
         self.pull_config().await;
     }
 
-    async fn shutdown(&self) -> Result<()> {
-        Ok(())
-    }
-
     async fn did_save(&self, params: DidSaveTextDocumentParams) {
         let _ = self
             .update_document_from_file(&params.text_document.uri, None)
@@ -475,5 +471,24 @@ impl LanguageServer for Backend {
             .await?;
 
         Ok(Some(actions))
+    }
+
+    async fn shutdown(&self) -> Result<()> {
+        let doc_states = self.doc_state.lock().await;
+
+        // Clears the diagnostics for open buffers.
+        for url in doc_states.keys() {
+            let result = PublishDiagnosticsParams {
+                uri: url.clone(),
+                diagnostics: vec![],
+                version: None,
+            };
+
+            self.client
+                .send_notification::<PublishDiagnostics>(result)
+                .await;
+        }
+
+        Ok(())
     }
 }
