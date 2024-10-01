@@ -41,7 +41,6 @@ build-obsidian:
 
   zip harper-obsidian-plugin.zip manifest.json main.js
 
-# This assumes that `harper-ls` has been compiled and is located at `target/release`.
 test-vscode:
   #! /bin/bash
   set -eo pipefail
@@ -49,29 +48,52 @@ test-vscode:
   ext_dir="{{justfile_directory()}}/packages/vscode-plugin"
   bin_dir="${ext_dir}/bin"
 
-  mkdir "$bin_dir"
+  if ! [[ -d "$bin_dir" ]]; then
+    mkdir "$bin_dir"
+  fi
+
+  cargo build --release
   cp "{{justfile_directory()}}/target/release/harper-ls"* "$bin_dir"
+
   cd "$ext_dir"
 
   yarn install -f
-  if [[ "$GITHUB_ACTIONS" == "true" ]] && [[ "$RUNNER_OS" == "Linux" ]]; then
+  # For environments without displays like CI servers or containers
+  if [[ "$(uname)" == "Linux" ]] && [[ -z "$DISPLAY" ]]; then
     xvfb-run --auto-servernum yarn test
   else
     yarn test
   fi
 
 # Build and package the Visual Studio Code extension.
-# This assumes that `harper-ls` or `harper-ls.exe` exists in `packages/vscode-plugin/bin`.
-package-vscode target:
+# If `target` is passed, it is assumed that `harper-ls` has been compiled beforehand and is in `packages/vscode-plugin/bin`. This is used in CI when publishing the extension.
+package-vscode target="":
   #! /bin/bash
   set -eo pipefail
 
   ext_dir="{{justfile_directory()}}/packages/vscode-plugin"
+  bin_dir="${ext_dir}/bin"
+
   cp LICENSE "$ext_dir"
+
+  if [[ -z "{{target}}" ]]; then
+    cargo build --release
+
+    if ! [[ -d "$bin_dir" ]]; then
+      mkdir "$bin_dir"
+    fi
+
+    cp "{{justfile_directory()}}/target/release/harper-ls"* "$bin_dir"
+  fi
+
   cd "$ext_dir"
 
   yarn install -f
-  yarn package --target {{target}}
+  if [[ -n "{{target}}" ]]; then
+    yarn package --target {{target}}
+  else
+    yarn package
+  fi
 
 check-rust:
   #! /bin/bash
