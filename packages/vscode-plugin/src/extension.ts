@@ -59,7 +59,9 @@ export async function activate(context: ExtensionContext): Promise<void> {
 		showError('Failed to import manifest file', error);
 	}
 
-	context.subscriptions.push(commands.registerCommand('harper-ls.restart', startLanguageServer));
+	context.subscriptions.push(
+		commands.registerCommand('harper.languageserver.restart', startLanguageServer)
+	);
 
 	await startLanguageServer();
 }
