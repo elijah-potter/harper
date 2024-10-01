@@ -1,3 +1,4 @@
+mod cases;
 mod markdown;
 mod mask;
 mod plain_english;
