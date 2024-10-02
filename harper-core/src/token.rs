@@ -330,6 +330,7 @@ pub trait TokenStringExt {
     create_decl_for!(number);
     create_decl_for!(at);
     create_decl_for!(ellipsis);
+    create_decl_for!(unlintable);
 
     fn iter_linking_verb_indices(&self) -> impl Iterator<Item = usize> + '_;
     fn iter_linking_verbs(&self) -> impl Iterator<Item = Token> + '_;
@@ -344,6 +345,7 @@ impl TokenStringExt for [Token] {
     create_fns_for!(number);
     create_fns_for!(at);
     create_fns_for!(ellipsis);
+    create_fns_for!(unlintable);
 
     fn first_non_whitespace(&self) -> Option<Token> {
         self.iter().find(|t| !t.kind.is_whitespace()).copied()

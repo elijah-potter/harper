@@ -12,41 +12,51 @@ impl Linter for AnA {
     fn lint(&mut self, document: &Document) -> Vec<Lint> {
         let mut lints = Vec::new();
 
-        for (first, second) in document.iter_words().tuple_windows() {
-            let chars_first = document.get_span_content(first.span);
-            let chars_second = document.get_span_content(second.span);
-            // Break the second word on hyphens for this lint.
-            // Example: "An ML-based" is an acceptable noun phrase.
-            let chars_second = chars_second
-                .split(|c| !c.is_alphanumeric())
-                .next()
-                .unwrap_or(chars_second);
+        for chunk in document.chunks() {
+            for (first_idx, second_idx) in chunk.iter_word_indices().tuple_windows() {
+                // [`TokenKind::Unlintable`] might be semantic words.
+                if chunk[first_idx..second_idx].iter_unlintables().count() > 0 {
+                    continue;
+                }
 
-            let is_a_an = match chars_first {
-                ['a'] => Some(true),
-                ['a', 'n'] => Some(false),
-                _ => None,
-            };
+                let first = chunk[first_idx];
+                let second = chunk[second_idx];
 
-            let Some(a_an) = is_a_an else {
-                continue;
-            };
+                let chars_first = document.get_span_content(first.span);
+                let chars_second = document.get_span_content(second.span);
+                // Break the second word on hyphens for this lint.
+                // Example: "An ML-based" is an acceptable noun phrase.
+                let chars_second = chars_second
+                    .split(|c| !c.is_alphanumeric())
+                    .next()
+                    .unwrap_or(chars_second);
 
-            let should_be_a_an = !starts_with_vowel(chars_second);
-
-            if a_an != should_be_a_an {
-                let replacement = match a_an {
-                    true => vec!['a', 'n'],
-                    false => vec!['a'],
+                let is_a_an = match chars_first {
+                    ['a'] => Some(true),
+                    ['a', 'n'] => Some(false),
+                    _ => None,
                 };
 
-                lints.push(Lint {
-                    span: first.span,
-                    lint_kind: LintKind::Miscellaneous,
-                    suggestions: vec![Suggestion::ReplaceWith(replacement)],
-                    message: "Incorrect indefinite article.".to_string(),
-                    priority: 31,
-                })
+                let Some(a_an) = is_a_an else {
+                    continue;
+                };
+
+                let should_be_a_an = !starts_with_vowel(chars_second);
+
+                if a_an != should_be_a_an {
+                    let replacement = match a_an {
+                        true => vec!['a', 'n'],
+                        false => vec!['a'],
+                    };
+
+                    lints.push(Lint {
+                        span: first.span,
+                        lint_kind: LintKind::Miscellaneous,
+                        suggestions: vec![Suggestion::ReplaceWith(replacement)],
+                        message: "Incorrect indefinite article.".to_string(),
+                        priority: 31,
+                    })
+                }
             }
         }
 
@@ -189,5 +199,10 @@ mod tests {
     #[test]
     fn once_over() {
         assert_lint_count("give this a once-over.", AnA, 0);
+    }
+
+    #[test]
+    fn issue_196() {
+        assert_lint_count("This is formatted as an `ext4` file system.", AnA, 0);
     }
 }

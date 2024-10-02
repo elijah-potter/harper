@@ -601,6 +601,7 @@ impl TokenStringExt for Document {
     create_fns_on_doc!(number);
     create_fns_on_doc!(at);
     create_fns_on_doc!(ellipsis);
+    create_fns_on_doc!(unlintable);
 
     fn first_sentence_word(&self) -> Option<Token> {
         self.tokens.first_sentence_word()
