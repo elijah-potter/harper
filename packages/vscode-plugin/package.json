@@ -7,6 +7,11 @@
 	"author": "Elijah Potter",
 	"publisher": "elijah-potter",
 	"license": "Apache-2.0",
+	"icon": "icon.png",
+	"galleryBanner": {
+		"color": "#F2F2F2",
+		"theme": "light"
+	},
 	"repository": {
 		"type": "git",
 		"url": "https://github.com/elijah-potter/harper"
