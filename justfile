@@ -125,7 +125,7 @@ setup:
 
   cargo build
   just build-obsidian
-  just package-vscode
+  just test-vscode
   just build-web
 
 # Perform full format and type checking, build all projects and run all tests. Run this before pushing your code.
