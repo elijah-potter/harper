@@ -114,6 +114,31 @@ mod tests {
     }
 
     #[test]
+    fn kebab_collapse() {
+        let source = "This is a separated-identifier, wow!";
+        let default_dict = FullDictionary::curated();
+
+        let tokens = Cases::new(
+            Box::new(PlainEnglish),
+            &Lrc::new(default_dict.clone().into()),
+        )
+        .parse_str(source);
+        assert_eq!(tokens.len(), 13);
+
+        let mut dict = FullDictionary::new();
+        dict.append_word(
+            "separated-identifier".chars().collect_vec(),
+            WordMetadata::default(),
+        );
+
+        let mut merged_dict = MergedDictionary::from(default_dict);
+        merged_dict.add_dictionary(Lrc::new(dict));
+
+        let tokens = Cases::new(Box::new(PlainEnglish), &Lrc::new(merged_dict)).parse_str(source);
+        assert_eq!(tokens.len(), 10);
+    }
+
+    #[test]
     fn double_collapse() {
         let source = "This is a separated_identifier_token, wow!";
         let default_dict = FullDictionary::curated();
