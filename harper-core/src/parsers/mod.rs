@@ -4,6 +4,7 @@ mod mask;
 mod plain_english;
 
 use blanket::blanket;
+pub use cases::Cases;
 pub use markdown::Markdown;
 pub use mask::Mask;
 pub use plain_english::PlainEnglish;
