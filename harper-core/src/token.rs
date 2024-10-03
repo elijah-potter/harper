@@ -242,6 +242,11 @@ impl TokenKind {
         matches!(self, TokenKind::Punctuation(Punctuation::At))
     }
 
+    pub fn is_case_separator(&self) -> bool {
+        matches!(self, TokenKind::Punctuation(Punctuation::Underscore))
+            || matches!(self, TokenKind::Punctuation(Punctuation::Hyphen))
+    }
+
     pub fn is_verb(&self) -> bool {
         let TokenKind::Word(metadata) = self else {
             return false;
