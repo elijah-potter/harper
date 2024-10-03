@@ -41,11 +41,9 @@ export async function activate(context: ExtensionContext): Promise<void> {
 
 	try {
 		const manifest: { contributes: { configuration: { properties: { [key: string]: object } } } } =
-			(
-				await import(Uri.joinPath(context.extensionUri, 'package.json').fsPath, {
-					with: { type: 'json' }
-				})
-			).default;
+			JSON.parse(
+				(await workspace.fs.readFile(Uri.joinPath(context.extensionUri, 'package.json'))).toString()
+			);
 		const configs = Object.keys(manifest.contributes.configuration.properties);
 		context.subscriptions.push(
 			workspace.onDidChangeConfiguration(async (event) => {
@@ -56,7 +54,7 @@ export async function activate(context: ExtensionContext): Promise<void> {
 			})
 		);
 	} catch (error) {
-		showError('Failed to import manifest file', error);
+		showError('Failed to read manifest file', error);
 	}
 
 	context.subscriptions.push(
