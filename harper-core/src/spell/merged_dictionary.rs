@@ -32,6 +32,18 @@ where
     }
 }
 
+impl<T> From<Arc<T>> for MergedDictionary<T>
+where
+    T: Dictionary + Clone,
+{
+    fn from(value: Arc<T>) -> Self {
+        Self {
+            children: vec![value],
+            ..Default::default()
+        }
+    }
+}
+
 impl<T> Default for MergedDictionary<T>
 where
     T: Dictionary + Clone,

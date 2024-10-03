@@ -1,22 +1,26 @@
 use std::collections::VecDeque;
 use std::rc::Rc as Lrc;
+use std::sync::Arc;
 
 use itertools::Itertools;
 
 use super::{Parser, TokenKind};
 use crate::patterns::{PatternExt, SequencePattern};
-use crate::{Dictionary, FullDictionary, Span, Token, VecExt, WordMetadata};
+use crate::{Dictionary, FullDictionary, MergedDictionary, Span, Token, VecExt, WordMetadata};
 
 /// A parser that wraps any other parser to collapse token strings that match
 /// the pattern word_word or word-word.
 pub struct Cases {
     inner: Box<dyn Parser>,
-    dict: FullDictionary,
+    dict: Arc<MergedDictionary<FullDictionary>>,
 }
 
 impl Cases {
-    pub fn new(inner: Box<dyn Parser>, dict: FullDictionary) -> Self {
-        Self { inner, dict }
+    pub fn new(inner: Box<dyn Parser>, dict: &Arc<MergedDictionary<FullDictionary>>) -> Self {
+        Self {
+            inner,
+            dict: dict.clone(),
+        }
     }
 }
 
@@ -79,19 +83,20 @@ mod tests {
 
     #[test]
     fn no_collapse() {
-        let dict = FullDictionary::new();
+        let mut dict = FullDictionary::curated();
         let source = "This is a test.";
 
-        let tokens = Cases::new(Box::new(PlainEnglish), dict).parse_str(source);
+        let tokens = Cases::new(Box::new(PlainEnglish), &Arc::new(dict.into())).parse_str(source);
         assert_eq!(tokens.len(), 8);
     }
 
     #[test]
     fn one_collapse() {
         let source = "This is a separated_identifier, wow!";
-        let mut dict = FullDictionary::new();
+        let mut dict = FullDictionary::curated();
 
-        let tokens = Cases::new(Box::new(PlainEnglish), dict.clone()).parse_str(source);
+        let tokens =
+            Cases::new(Box::new(PlainEnglish), &Arc::new(dict.clone().into())).parse_str(source);
         assert_eq!(tokens.len(), 13);
 
         dict.append_word(
@@ -99,37 +104,39 @@ mod tests {
             WordMetadata::default(),
         );
 
-        let tokens = Cases::new(Box::new(PlainEnglish), dict).parse_str(source);
+        let tokens = Cases::new(Box::new(PlainEnglish), &Arc::new(dict.into())).parse_str(source);
         assert_eq!(tokens.len(), 10);
     }
 
     #[test]
     fn double_collapse() {
         let source = "This is a separated_identifier_token, wow!";
-        let mut dict = FullDictionary::new();
+        let mut dict = FullDictionary::curated();
 
-        let tokens = Cases::new(Box::new(PlainEnglish), dict.clone()).parse_str(source);
+        let tokens = Cases::new(Box::new(PlainEnglish), &Arc::new(dict.into())).parse_str(source);
         assert_eq!(tokens.len(), 15);
 
-        dict.append_word(
+        let mut new_dict = FullDictionary::new();
+        new_dict.append_word(
             "separated_identifier".chars().collect_vec(),
             WordMetadata::default(),
         );
-        dict.append_word(
+        new_dict.append_word(
             "separated_identifier_token".chars().collect_vec(),
             WordMetadata::default(),
         );
+        dict.add_dictionary(Arc::new(new_dict));
 
-        let tokens = Cases::new(Box::new(PlainEnglish), dict).parse_str(source);
+        let tokens = Cases::new(Box::new(PlainEnglish), &dict).parse_str(source);
         assert_eq!(tokens.len(), 10);
     }
 
     #[test]
     fn two_collapses() {
         let source = "This is a separated_identifier, wow! separated_identifier";
-        let mut dict = FullDictionary::new();
+        let mut dict = FullDictionary::curated();
 
-        let tokens = Cases::new(Box::new(PlainEnglish), dict.clone()).parse_str(source);
+        let tokens = Cases::new(Box::new(PlainEnglish), &dict).parse_str(source);
         assert_eq!(tokens.len(), 17);
 
         dict.append_word(
@@ -137,7 +144,7 @@ mod tests {
             WordMetadata::default(),
         );
 
-        let tokens = Cases::new(Box::new(PlainEnglish), dict).parse_str(source);
+        let tokens = Cases::new(Box::new(PlainEnglish), &dict).parse_str(source);
         assert_eq!(tokens.len(), 12);
     }
 }
