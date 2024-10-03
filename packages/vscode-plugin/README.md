@@ -1,6 +1,6 @@
 # Harper for VS Code
 
-Read [main readme](/README.md) or visit [website](https://writewithharper.com).
+Harper is the grammar checker for developers. It checks for spelling and grammar errors in your Markdown files and code comments. You can find out more by checking the [project's readme](/README.md) or by visiting the [website](https://writewithharper.com).
 
 ## Installation
 
