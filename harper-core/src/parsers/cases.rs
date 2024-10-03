@@ -62,7 +62,6 @@ impl Parser for Cases {
             .filter(|(_, _, _, st)| self.dict.contains_word_str(st))
             .collect_vec();
 
-        // The indexes will be shifted after each removal, so this won't work
         replacements.into_iter().for_each(|(s, e, t, _)| {
             (s + 1..=e).for_each(|n| removal_indexes.push_front(n));
             tokens[s] = t;
