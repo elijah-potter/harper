@@ -38,7 +38,6 @@ impl Parser for Cases {
         let mut tokens = self.inner.parse(source);
 
         // TODO: change is_case_separator to is_underscore and is_hyphen
-        // TODO: Make Sequence Patterns thread_local statics
 
         let mut removal_indexes: VecDeque<usize> = VecDeque::default();
         let replacements = WORD_OR_NUMBER
@@ -89,75 +88,136 @@ mod tests {
         assert_eq!(tokens.len(), 8);
     }
 
-    // #[test]
-    // fn one_collapse() {
-    //     let source = "This is a separated_identifier, wow!";
-    //     let default_dict = FullDictionary::curated();
-    //
-    //     let tokens = Cases::new(
-    //         Box::new(PlainEnglish),
-    //         &Lrc::new(default_dict.clone().into()),
-    //     )
-    //     .parse_str(source);
-    //     assert_eq!(tokens.len(), 13);
-    //
-    //     let mut dict = FullDictionary::new();
-    //     dict.append_word(
-    //         "separated_identifier".chars().collect_vec(),
-    //         WordMetadata::default(),
-    //     );
-    //
-    //     let mut merged_dict = MergedDictionary::from(default_dict);
-    //     merged_dict.add_dictionary(Lrc::new(dict));
-    //
-    //     let tokens = Cases::new(Box::new(PlainEnglish), &Lrc::new(merged_dict)).parse_str(source);
-    //     assert_eq!(tokens.len(), 10);
-    // }
-    //
-    // #[test]
-    // fn double_collapse() {
-    //     let source = "This is a separated_identifier_token, wow!";
-    //     let default_dict = FullDictionary::curated();
-    //
-    //     let tokens = Cases::new(
-    //         Box::new(PlainEnglish),
-    //         &Lrc::new(default_dict.clone().into()),
-    //     )
-    //     .parse_str(source);
-    //     assert_eq!(tokens.len(), 15);
-    //
-    //     let mut dict = FullDictionary::new();
-    //     dict.append_word(
-    //         "separated_identifier".chars().collect_vec(),
-    //         WordMetadata::default(),
-    //     );
-    //
-    //     let mut merged_dict = MergedDictionary::from(default_dict);
-    //     merged_dict.add_dictionary(Lrc::new(dict));
-    //
-    //     let tokens = Cases::new(Box::new(PlainEnglish), &Lrc::new(merged_dict)).parse_str(source);
-    //     assert_eq!(tokens.len(), 10);
-    // }
-    //
-    // #[test]
-    // fn two_collapses() {
-    //     let source = "This is a separated_identifier, wow! separated_identifier";
-    //     let default_dict = FullDictionary::curated();
-    //
-    //     let tokens =
-    //         Cases::new(Box::new(PlainEnglish), &Lrc::new(default_dict.into())).parse_str(source);
-    //     assert_eq!(tokens.len(), 17);
-    //
-    //     let mut dict = FullDictionary::new();
-    //     dict.append_word(
-    //         "separated_identifier".chars().collect_vec(),
-    //         WordMetadata::default(),
-    //     );
-    //
-    //     let mut merged_dict = MergedDictionary::from(default_dict);
-    //     merged_dict.add_dictionary(Lrc::new(dict));
-    //
-    //     let tokens = Cases::new(Box::new(PlainEnglish), &Lrc::new(merged_dict)).parse_str(source);
-    //     assert_eq!(tokens.len(), 12);
-    // }
+    #[test]
+    fn one_collapse() {
+        let source = "This is a separated_identifier, wow!";
+        let default_dict = FullDictionary::curated();
+
+        let tokens = Cases::new(
+            Box::new(PlainEnglish),
+            &Lrc::new(default_dict.clone().into()),
+        )
+        .parse_str(source);
+        assert_eq!(tokens.len(), 13);
+
+        let mut dict = FullDictionary::new();
+        dict.append_word(
+            "separated_identifier".chars().collect_vec(),
+            WordMetadata::default(),
+        );
+
+        let mut merged_dict = MergedDictionary::from(default_dict);
+        merged_dict.add_dictionary(Lrc::new(dict));
+
+        let tokens = Cases::new(Box::new(PlainEnglish), &Lrc::new(merged_dict)).parse_str(source);
+        assert_eq!(tokens.len(), 10);
+    }
+
+    #[test]
+    fn double_collapse() {
+        let source = "This is a separated_identifier_token, wow!";
+        let default_dict = FullDictionary::curated();
+
+        let tokens = Cases::new(
+            Box::new(PlainEnglish),
+            &Lrc::new(default_dict.clone().into()),
+        )
+        .parse_str(source);
+        assert_eq!(tokens.len(), 15);
+
+        let mut dict = FullDictionary::new();
+        dict.append_word(
+            "separated_identifier_token".chars().collect_vec(),
+            WordMetadata::default(),
+        );
+
+        let mut merged_dict = MergedDictionary::from(default_dict);
+        merged_dict.add_dictionary(Lrc::new(dict));
+
+        let tokens = Cases::new(Box::new(PlainEnglish), &Lrc::new(merged_dict)).parse_str(source);
+        assert_eq!(tokens.len(), 10);
+    }
+
+    #[test]
+    fn two_collapses() {
+        let source = "This is a separated_identifier, wow! separated_identifier";
+        let default_dict = FullDictionary::curated();
+
+        let tokens = Cases::new(
+            Box::new(PlainEnglish),
+            &Lrc::new(default_dict.clone().into()),
+        )
+        .parse_str(source);
+        assert_eq!(tokens.len(), 17);
+
+        let mut dict = FullDictionary::new();
+        dict.append_word(
+            "separated_identifier".chars().collect_vec(),
+            WordMetadata::default(),
+        );
+
+        let mut merged_dict = MergedDictionary::from(default_dict);
+        merged_dict.add_dictionary(Lrc::new(dict));
+
+        let tokens = Cases::new(Box::new(PlainEnglish), &Lrc::new(merged_dict)).parse_str(source);
+        assert_eq!(tokens.len(), 12);
+    }
+
+    #[test]
+    fn overlapping_identifiers() {
+        let source = "This is a separated_identifier_token, wow!";
+        let default_dict = FullDictionary::curated();
+
+        let tokens = Cases::new(
+            Box::new(PlainEnglish),
+            &Lrc::new(default_dict.clone().into()),
+        )
+        .parse_str(source);
+        assert_eq!(tokens.len(), 15);
+
+        let mut dict = FullDictionary::new();
+        dict.append_word(
+            "separated_identifier".chars().collect_vec(),
+            WordMetadata::default(),
+        );
+        dict.append_word(
+            "identifier_token".chars().collect_vec(),
+            WordMetadata::default(),
+        );
+
+        let mut merged_dict = MergedDictionary::from(default_dict);
+        merged_dict.add_dictionary(Lrc::new(dict));
+
+        let tokens = Cases::new(Box::new(PlainEnglish), &Lrc::new(merged_dict)).parse_str(source);
+        assert_eq!(tokens.len(), 15);
+    }
+
+    #[test]
+    fn nested_identifiers() {
+        let source = "This is a separated_identifier_token, wow!";
+        let default_dict = FullDictionary::curated();
+
+        let tokens = Cases::new(
+            Box::new(PlainEnglish),
+            &Lrc::new(default_dict.clone().into()),
+        )
+        .parse_str(source);
+        assert_eq!(tokens.len(), 15);
+
+        let mut dict = FullDictionary::new();
+        dict.append_word(
+            "separated_identifier_token".chars().collect_vec(),
+            WordMetadata::default(),
+        );
+        dict.append_word(
+            "separated_identifier".chars().collect_vec(),
+            WordMetadata::default(),
+        );
+
+        let mut merged_dict = MergedDictionary::from(default_dict);
+        merged_dict.add_dictionary(Lrc::new(dict));
+
+        let tokens = Cases::new(Box::new(PlainEnglish), &Lrc::new(merged_dict)).parse_str(source);
+        assert_eq!(tokens.len(), 10);
+    }
 }
