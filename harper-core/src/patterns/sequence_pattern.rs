@@ -34,6 +34,7 @@ impl SequencePattern {
     gen_then_from_is!(conjunction);
     gen_then_from_is!(comma);
     gen_then_from_is!(period);
+    gen_then_from_is!(case_separator);
 
     pub fn then_exact_word(mut self, word: &'static str) -> Self {
         self.token_patterns

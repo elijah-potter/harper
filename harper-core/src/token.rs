@@ -242,6 +242,14 @@ impl TokenKind {
         matches!(self, TokenKind::Punctuation(Punctuation::At))
     }
 
+    /// Used by `crate::parsers::CollapseIdentifiers`
+    /// TODO: Separate this into two functions and add OR functionality to
+    /// pattern matching
+    pub fn is_case_separator(&self) -> bool {
+        matches!(self, TokenKind::Punctuation(Punctuation::Underscore))
+            || matches!(self, TokenKind::Punctuation(Punctuation::Hyphen))
+    }
+
     pub fn is_verb(&self) -> bool {
         let TokenKind::Word(metadata) = self else {
             return false;

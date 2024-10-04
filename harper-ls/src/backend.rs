@@ -5,7 +5,7 @@ use std::sync::Arc;
 use anyhow::anyhow;
 use harper_comments::CommentParser;
 use harper_core::linting::{LintGroup, Linter};
-use harper_core::parsers::{Markdown, PlainEnglish};
+use harper_core::parsers::{CollapseIdentifiers, Markdown, PlainEnglish};
 use harper_core::{
     Dictionary, Document, FullDictionary, MergedDictionary, Token, TokenKind, WordMetadata,
 };
@@ -199,9 +199,14 @@ impl Backend {
                         doc_state.linter = LintGroup::new(config_lock.lint_config, merged.clone());
                         doc_state.dict = merged.clone();
                     }
+                    Document::new_from_vec(
+                        source,
+                        &mut CollapseIdentifiers::new(Box::new(ts_parser), &doc_state.dict),
+                        &doc_state.dict,
+                    )
+                } else {
+                    Document::new_from_vec(source, &mut ts_parser, &doc_state.dict)
                 }
-
-                Document::new_from_vec(source, &mut ts_parser, &doc_state.dict)
             } else if language_id == "markdown" {
                 Document::new(text, &mut Markdown, &doc_state.dict)
             } else if language_id == "gitcommit" {
