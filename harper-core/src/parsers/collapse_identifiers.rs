@@ -32,12 +32,8 @@ thread_local! {
 }
 
 impl Parser for CollapseIdentifiers {
-    /// This implementation is quite gross to look at, but it works.
-    /// If any issues arise, it would likely help to refactor this out first.
     fn parse(&mut self, source: &[char]) -> Vec<Token> {
         let mut tokens = self.inner.parse(source);
-
-        // TODO: change is_case_separator to is_underscore and is_hyphen
 
         let mut removal_indexes: VecDeque<usize> = VecDeque::default();
         let replacements = WORD_OR_NUMBER
