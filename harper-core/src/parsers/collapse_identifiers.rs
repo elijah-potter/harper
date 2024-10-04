@@ -9,12 +9,12 @@ use crate::{Dictionary, FullDictionary, MergedDictionary, Span, Token, VecExt, W
 
 /// A parser that wraps any other parser to collapse token strings that match
 /// the pattern word_word or word-word.
-pub struct Cases {
+pub struct CollapseIdentifiers {
     inner: Box<dyn Parser>,
     dict: Lrc<MergedDictionary<FullDictionary>>,
 }
 
-impl Cases {
+impl CollapseIdentifiers {
     pub fn new(inner: Box<dyn Parser>, dict: &Lrc<MergedDictionary<FullDictionary>>) -> Self {
         Self {
             inner,
@@ -31,7 +31,7 @@ thread_local! {
         .then_any_word())));
 }
 
-impl Parser for Cases {
+impl Parser for CollapseIdentifiers {
     /// This implementation is quite gross to look at, but it works.
     /// If any issues arise, it would likely help to refactor this out first.
     fn parse(&mut self, source: &[char]) -> Vec<Token> {
@@ -83,7 +83,8 @@ mod tests {
         let dict = FullDictionary::curated();
         let source = "This is a test.";
 
-        let tokens = Cases::new(Box::new(PlainEnglish), &Lrc::new(dict.into())).parse_str(source);
+        let tokens = CollapseIdentifiers::new(Box::new(PlainEnglish), &Lrc::new(dict.into()))
+            .parse_str(source);
         assert_eq!(tokens.len(), 8);
     }
 
@@ -92,7 +93,7 @@ mod tests {
         let source = "This is a separated_identifier, wow!";
         let default_dict = FullDictionary::curated();
 
-        let tokens = Cases::new(
+        let tokens = CollapseIdentifiers::new(
             Box::new(PlainEnglish),
             &Lrc::new(default_dict.clone().into()),
         )
@@ -108,7 +109,8 @@ mod tests {
         let mut merged_dict = MergedDictionary::from(default_dict);
         merged_dict.add_dictionary(Lrc::new(dict));
 
-        let tokens = Cases::new(Box::new(PlainEnglish), &Lrc::new(merged_dict)).parse_str(source);
+        let tokens = CollapseIdentifiers::new(Box::new(PlainEnglish), &Lrc::new(merged_dict))
+            .parse_str(source);
         assert_eq!(tokens.len(), 10);
     }
 
@@ -117,7 +119,7 @@ mod tests {
         let source = "This is a separated-identifier, wow!";
         let default_dict = FullDictionary::curated();
 
-        let tokens = Cases::new(
+        let tokens = CollapseIdentifiers::new(
             Box::new(PlainEnglish),
             &Lrc::new(default_dict.clone().into()),
         )
@@ -133,7 +135,8 @@ mod tests {
         let mut merged_dict = MergedDictionary::from(default_dict);
         merged_dict.add_dictionary(Lrc::new(dict));
 
-        let tokens = Cases::new(Box::new(PlainEnglish), &Lrc::new(merged_dict)).parse_str(source);
+        let tokens = CollapseIdentifiers::new(Box::new(PlainEnglish), &Lrc::new(merged_dict))
+            .parse_str(source);
         assert_eq!(tokens.len(), 10);
     }
 
@@ -142,7 +145,7 @@ mod tests {
         let source = "This is a separated_identifier_token, wow!";
         let default_dict = FullDictionary::curated();
 
-        let tokens = Cases::new(
+        let tokens = CollapseIdentifiers::new(
             Box::new(PlainEnglish),
             &Lrc::new(default_dict.clone().into()),
         )
@@ -158,7 +161,8 @@ mod tests {
         let mut merged_dict = MergedDictionary::from(default_dict);
         merged_dict.add_dictionary(Lrc::new(dict));
 
-        let tokens = Cases::new(Box::new(PlainEnglish), &Lrc::new(merged_dict)).parse_str(source);
+        let tokens = CollapseIdentifiers::new(Box::new(PlainEnglish), &Lrc::new(merged_dict))
+            .parse_str(source);
         assert_eq!(tokens.len(), 10);
     }
 
@@ -167,7 +171,7 @@ mod tests {
         let source = "This is a separated_identifier, wow! separated_identifier";
         let default_dict = FullDictionary::curated();
 
-        let tokens = Cases::new(
+        let tokens = CollapseIdentifiers::new(
             Box::new(PlainEnglish),
             &Lrc::new(default_dict.clone().into()),
         )
@@ -183,7 +187,8 @@ mod tests {
         let mut merged_dict = MergedDictionary::from(default_dict);
         merged_dict.add_dictionary(Lrc::new(dict));
 
-        let tokens = Cases::new(Box::new(PlainEnglish), &Lrc::new(merged_dict)).parse_str(source);
+        let tokens = CollapseIdentifiers::new(Box::new(PlainEnglish), &Lrc::new(merged_dict))
+            .parse_str(source);
         assert_eq!(tokens.len(), 12);
     }
 
@@ -192,7 +197,7 @@ mod tests {
         let source = "This is a separated_identifier_token, wow!";
         let default_dict = FullDictionary::curated();
 
-        let tokens = Cases::new(
+        let tokens = CollapseIdentifiers::new(
             Box::new(PlainEnglish),
             &Lrc::new(default_dict.clone().into()),
         )
@@ -212,7 +217,8 @@ mod tests {
         let mut merged_dict = MergedDictionary::from(default_dict);
         merged_dict.add_dictionary(Lrc::new(dict));
 
-        let tokens = Cases::new(Box::new(PlainEnglish), &Lrc::new(merged_dict)).parse_str(source);
+        let tokens = CollapseIdentifiers::new(Box::new(PlainEnglish), &Lrc::new(merged_dict))
+            .parse_str(source);
         assert_eq!(tokens.len(), 15);
     }
 
@@ -221,7 +227,7 @@ mod tests {
         let source = "This is a separated_identifier_token, wow!";
         let default_dict = FullDictionary::curated();
 
-        let tokens = Cases::new(
+        let tokens = CollapseIdentifiers::new(
             Box::new(PlainEnglish),
             &Lrc::new(default_dict.clone().into()),
         )
@@ -241,7 +247,8 @@ mod tests {
         let mut merged_dict = MergedDictionary::from(default_dict);
         merged_dict.add_dictionary(Lrc::new(dict));
 
-        let tokens = Cases::new(Box::new(PlainEnglish), &Lrc::new(merged_dict)).parse_str(source);
+        let tokens = CollapseIdentifiers::new(Box::new(PlainEnglish), &Lrc::new(merged_dict))
+            .parse_str(source);
         assert_eq!(tokens.len(), 10);
     }
 }

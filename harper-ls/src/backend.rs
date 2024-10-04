@@ -5,7 +5,7 @@ use std::sync::Arc;
 use anyhow::anyhow;
 use harper_comments::CommentParser;
 use harper_core::linting::{LintGroup, Linter};
-use harper_core::parsers::{Cases, Markdown, PlainEnglish};
+use harper_core::parsers::{CollapseIdentifiers, Markdown, PlainEnglish};
 use harper_core::{
     Dictionary, Document, FullDictionary, MergedDictionary, Token, TokenKind, WordMetadata,
 };
@@ -201,7 +201,7 @@ impl Backend {
                     }
                     Document::new_from_vec(
                         source,
-                        &mut Cases::new(Box::new(ts_parser), &doc_state.dict),
+                        &mut CollapseIdentifiers::new(Box::new(ts_parser), &doc_state.dict),
                         &doc_state.dict,
                     )
                 } else {
