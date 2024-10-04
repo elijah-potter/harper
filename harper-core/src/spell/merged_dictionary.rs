@@ -1,4 +1,4 @@
-use std::sync::Arc;
+use crate::Lrc;
 
 use hashbrown::HashMap;
 
@@ -12,7 +12,7 @@ pub struct MergedDictionary<T>
 where
     T: Dictionary + Clone,
 {
-    children: Vec<Arc<T>>,
+    children: Vec<Lrc<T>>,
     merged: HashMap<CharString, WordMetadata>,
 }
 
@@ -27,16 +27,16 @@ where
         }
     }
 
-    pub fn add_dictionary(&mut self, dictionary: Arc<T>) {
+    pub fn add_dictionary(&mut self, dictionary: Lrc<T>) {
         self.children.push(dictionary.clone());
     }
 }
 
-impl<T> From<Arc<T>> for MergedDictionary<T>
+impl<T> From<Lrc<T>> for MergedDictionary<T>
 where
     T: Dictionary + Clone,
 {
-    fn from(value: Arc<T>) -> Self {
+    fn from(value: Lrc<T>) -> Self {
         Self {
             children: vec![value],
             ..Default::default()

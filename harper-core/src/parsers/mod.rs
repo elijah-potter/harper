@@ -11,6 +11,13 @@ pub use plain_english::PlainEnglish;
 
 pub use crate::token::{Token, TokenKind, TokenStringExt};
 
+#[cfg(not(feature = "concurrent"))]
+#[blanket(derive(Box))]
+pub trait Parser {
+    fn parse(&mut self, source: &[char]) -> Vec<Token>;
+}
+
+#[cfg(feature = "concurrent")]
 #[blanket(derive(Box))]
 pub trait Parser: Send + Sync {
     fn parse(&mut self, source: &[char]) -> Vec<Token>;
