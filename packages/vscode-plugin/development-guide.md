@@ -1,6 +1,6 @@
 # Development Guide
 
-This document details how to develop the extension locally. If you're interested in how it's published, you can checkout the [Publish VS Code Plugin](/.github/workflows/publish_vscode_plugin.yml) workflow.
+This document details how to develop the extension locally. If you're interested in how it's packaged for distribution, you can checkout the [Package VS Code Plugin](/.github/workflows/package_vscode_plugin.yml) workflow.
 
 ## Notes
 
