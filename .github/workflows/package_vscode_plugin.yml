@@ -1,9 +1,8 @@
-name: Publish VS Code Plugin
+name: Package VS Code Plugin
 
 on:
   push:
-    tags: ["harper-vscode*"]
-  workflow_dispatch:
+    branches: ["master"]
 
 jobs:
   package:
@@ -59,17 +58,3 @@ jobs:
         with:
           name: ${{ matrix.platform.code_target }}
           path: "packages/vscode-plugin/*.vsix"
-
-  publish:
-    name: Publish
-    needs: package
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/download-artifact@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 20
-      - name: Publish extension
-        run: npx @vscode/vsce publish --packagePath $(find . -iname *.vsix)
-        env:
-          VSCE_PAT: ${{ secrets.VSCE_PAT }}

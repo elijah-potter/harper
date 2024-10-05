@@ -66,7 +66,7 @@ test-vscode:
   fi
 
 # Build and package the Visual Studio Code extension.
-# If `target` is passed, it is assumed that `harper-ls` has been compiled beforehand and is in `packages/vscode-plugin/bin`. This is used in CI when publishing the extension.
+# If `target` is passed, it is assumed that `harper-ls` has been compiled beforehand and is in `packages/vscode-plugin/bin`. This is used in CI.
 package-vscode target="":
   #! /bin/bash
   set -eo pipefail
