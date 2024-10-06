@@ -125,26 +125,6 @@ impl Default for FullDictionary {
 }
 
 impl Dictionary for FullDictionary {
-    fn words_iter(&self) -> impl Iterator<Item = &'_ [char]> {
-        self.words.iter().map(|v| v.as_slice())
-    }
-
-    /// Iterate over all the words in the dictionary of a given length
-    fn words_with_len_iter(&self, len: usize) -> Box<dyn Iterator<Item = &'_ [char]> + '_> {
-        if len == 0 || len >= self.word_len_starts.len() {
-            return Box::new(std::iter::empty());
-        }
-
-        let start = self.word_len_starts[len];
-        let end = if len + 1 == self.word_len_starts.len() {
-            self.words.len()
-        } else {
-            self.word_len_starts[len + 1]
-        };
-
-        Box::new(self.words[start..end].iter().map(|v| v.as_slice()))
-    }
-
     fn get_word_metadata(&self, word: &[char]) -> WordMetadata {
         let normalized = seq_to_normalized(word);
         let lowercase: CharString = normalized.iter().flat_map(|c| c.to_lowercase()).collect();
@@ -172,6 +152,14 @@ impl Dictionary for FullDictionary {
         let chars: CharString = word.chars().collect();
         self.get_word_metadata(&chars)
     }
+
+    fn fuzzy_match(&self, word: &[char], max_distance: u8) -> Vec<(CharString, WordMetadata)> {
+        todo!()
+    }
+
+    fn fuzzy_match_str(&self, word: &str, max_distance: u8) -> Vec<(CharString, WordMetadata)> {
+        todo!()
+    }
 }
 
 #[cfg(test)]
@@ -183,7 +171,7 @@ mod tests {
     #[test]
     fn curated_contains_no_duplicates() {
         let dict = FullDictionary::curated();
-        assert!(dict.words_iter().all_unique());
+        assert!(dict.words.iter().all_unique());
     }
 
     #[test]
