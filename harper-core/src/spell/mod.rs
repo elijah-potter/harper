@@ -7,6 +7,7 @@ pub use self::full_dictionary::FullDictionary;
 pub use self::merged_dictionary::MergedDictionary;
 
 mod dictionary;
+mod fst_dictionary;
 mod full_dictionary;
 mod hunspell;
 mod merged_dictionary;
