@@ -1,6 +1,7 @@
 use std::fs::File;
 
 use fst::Map as FstMap;
+use fst::{automaton::Levenshtein, IntoStreamer};
 use memmap::Mmap;
 
 use super::hunspell::{parse_default_attribute_list, parse_default_word_list};
@@ -8,16 +9,14 @@ use crate::{CharString, Lrc, WordMetadata};
 
 use super::Dictionary;
 
-#[derive(Debug, Clone)]
+#[derive(Debug)]
 pub struct FstDictionary {
-    /// Copied from [`super::FullDictionary`], not sure if rationale there holds here yet.
-    /// All English words
-    words: Vec<CharString>,
+    /// Sorted by string in lexicographic order
     metadata: Vec<WordMetadata>,
     /// Used for fuzzy-finding the index of words or metadata
-    word_map: FstMap<String>,
+    word_map: FstMap<Mmap>,
 }
-///
+
 /// The uncached function that is used to produce the original copy of the
 /// curated dictionary.
 fn uncached_inner_new() -> Lrc<FstDictionary> {
@@ -34,11 +33,7 @@ fn uncached_inner_new() -> Lrc<FstDictionary> {
     words.sort();
     words.dedup();
 
-    Lrc::new(FstDictionary {
-        words,
-        metadata,
-        word_map,
-    })
+    Lrc::new(FstDictionary { metadata, word_map })
 }
 
 thread_local! {
@@ -54,10 +49,6 @@ impl Dictionary for FstDictionary {
         self.word_map.contains_key(word)
     }
 
-    fn words_iter(&self) -> impl Iterator<Item = &'_ [char]> {
-        self.words.iter().map(|v| v.as_slice())
-    }
-
     fn get_word_metadata(&self, word: &[char]) -> WordMetadata {
         let index: usize = self.word_map.get(word.iter().collect::<String>()).unwrap() as usize;
         self.metadata[index]
@@ -66,5 +57,33 @@ impl Dictionary for FstDictionary {
     fn get_word_metadata_str(&self, word: &str) -> WordMetadata {
         let index: usize = self.word_map.get(word).unwrap() as usize;
         self.metadata[index]
+    }
+
+    fn fuzzy_match(&self, word: &[char], max_distance: u8) -> Vec<(CharString, WordMetadata)> {
+        let aut = Levenshtein::new(&word.iter().collect::<String>(), max_distance as u32).unwrap();
+        let words = self
+            .word_map
+            .search(aut)
+            .into_stream()
+            .into_str_vec()
+            .unwrap();
+        words
+            .into_iter()
+            .map(|(word, i)| (word.chars().collect(), self.metadata[i as usize]))
+            .collect()
+    }
+
+    fn fuzzy_match_str(&self, word: &str, max_distance: u8) -> Vec<(CharString, WordMetadata)> {
+        let aut = Levenshtein::new(word, max_distance as u32).unwrap();
+        let words = self
+            .word_map
+            .search(aut)
+            .into_stream()
+            .into_str_vec()
+            .unwrap();
+        words
+            .into_iter()
+            .map(|(word, i)| (word.chars().collect(), self.metadata[i as usize]))
+            .collect()
     }
 }
