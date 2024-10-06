@@ -9,9 +9,11 @@ repository = "https://github.com/elijah-potter/harper"
 
 [dependencies]
 blanket = "0.4.0"
+fst = { version = "0.4.7", features = ["levenshtein"] }
 hashbrown = { version = "0.15.0", features = ["serde"] }
 is-macro = "0.3.6"
 itertools = "0.13.0"
+memmap = "0.7.0"
 ordered-float = { version = "4.5.0", features = ["serde"] }
 paste = "1.0.14"
 pulldown-cmark = "0.12.2"
@@ -25,6 +27,9 @@ unicode-width = "0.2.0"
 [dev-dependencies]
 criterion = { version = "0.5.1", default-features = false }
 rand = "0.8.5"
+
+[build-dependencies]
+fst = { version = "0.4.7", features = ["levenshtein"] }
 
 [[bench]]
 name = "parse_demo"
