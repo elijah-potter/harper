@@ -21,7 +21,7 @@ pub fn parse_word_list(source: &str) -> Vec<String> {
 }
 
 fn main() {
-    let mut wtr = io::BufWriter::new(File::create("dictionary.fst").unwrap());
+    let wtr = io::BufWriter::new(File::create("dictionary.fst").unwrap());
     let mut build = MapBuilder::new(wtr).unwrap();
 
     let mut word_list: Vec<String> = parse_word_list(include_str!("dictionary.dict"));
