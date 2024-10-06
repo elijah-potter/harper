@@ -133,7 +133,7 @@ impl TokenKind {
 }
 
 impl TokenKind {
-    /// Construct a [`TokenKind::Word`] with no metadata.
+    /// Construct a [`TokenKind::Word`] with no (default) metadata.
     pub fn blank_word() -> Self {
         Self::Word(WordMetadata::default())
     }

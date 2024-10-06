@@ -5,10 +5,10 @@ use itertools::Itertools;
 
 use super::{Parser, TokenKind};
 use crate::patterns::{PatternExt, SequencePattern};
-use crate::{Dictionary, FullDictionary, MergedDictionary, Span, Token, VecExt, WordMetadata};
+use crate::{Dictionary, FullDictionary, MergedDictionary, Span, Token, VecExt};
 
 /// A parser that wraps any other parser to collapse token strings that match
-/// the pattern word_word or word-word.
+/// the pattern `word_word` or `word-word`.
 pub struct CollapseIdentifiers {
     inner: Box<dyn Parser>,
     dict: Lrc<MergedDictionary<FullDictionary>>,
@@ -35,34 +35,23 @@ impl Parser for CollapseIdentifiers {
     fn parse(&mut self, source: &[char]) -> Vec<Token> {
         let mut tokens = self.inner.parse(source);
 
-        let mut removal_indexes: VecDeque<usize> = VecDeque::default();
-        let replacements = WORD_OR_NUMBER
+        let mut to_remove = VecDeque::default();
+
+        for tok_span in WORD_OR_NUMBER
             .with(|v| v.clone())
             .find_all_matches(&tokens, source)
-            .into_iter()
-            .map(|s| {
-                let start_tok = tokens
-                    .get(s.start)
-                    .expect("Token not at expected position.");
-                let end_tok = tokens
-                    .get(s.end - 1)
-                    .expect("Token not at expected position.");
-                let char_span = Span::new(start_tok.span.start, end_tok.span.end);
-                (
-                    s.start,
-                    s.end,
-                    Token::new(char_span, TokenKind::Word(WordMetadata::default())),
-                    char_span.get_content_string(source),
-                )
-            })
-            .filter(|(_, _, _, st)| self.dict.contains_word_str(st))
-            .collect_vec();
+        {
+            let start_tok = &tokens[tok_span.start];
+            let end_tok = &tokens[tok_span.end - 1];
+            let char_span = Span::new(start_tok.span.start, end_tok.span.end);
 
-        replacements.into_iter().for_each(|(s, e, t, _)| {
-            (s + 1..=e).for_each(|n| removal_indexes.push_front(n));
-            tokens[s] = t;
-        });
-        tokens.remove_indices(removal_indexes.into_iter().sorted().unique().collect());
+            if self.dict.contains_word(char_span.get_content(source)) {
+                tokens[tok_span.start] = Token::new(char_span, TokenKind::blank_word());
+                to_remove.extend(tok_span.start + 1..tok_span.end);
+            }
+        }
+
+        tokens.remove_indices(to_remove.into_iter().sorted().unique().collect());
 
         tokens
     }
@@ -70,9 +59,25 @@ impl Parser for CollapseIdentifiers {
 
 #[cfg(test)]
 mod tests {
-    use crate::parsers::{PlainEnglish, StrParser};
+    use crate::{
+        parsers::{PlainEnglish, StrParser},
+        WordMetadata,
+    };
 
     use super::*;
+
+    #[test]
+    fn matches_kebab() {
+        let source: Vec<_> = "kebab-case".chars().collect();
+
+        assert_eq!(
+            WORD_OR_NUMBER
+                .with(|v| v.clone())
+                .find_all_matches(&PlainEnglish.parse(&source), &source)
+                .len(),
+            1
+        );
+    }
 
     #[test]
     fn no_collapse() {
@@ -97,17 +102,14 @@ mod tests {
         assert_eq!(tokens.len(), 13);
 
         let mut dict = FullDictionary::new();
-        dict.append_word(
-            "separated_identifier".chars().collect_vec(),
-            WordMetadata::default(),
-        );
+        dict.append_word_str("separated_identifier", WordMetadata::default());
 
         let mut merged_dict = MergedDictionary::from(default_dict);
         merged_dict.add_dictionary(Lrc::new(dict));
 
         let tokens = CollapseIdentifiers::new(Box::new(PlainEnglish), &Lrc::new(merged_dict))
             .parse_str(source);
-        assert_eq!(tokens.len(), 10);
+        assert_eq!(tokens.len(), 11);
     }
 
     #[test]
@@ -120,20 +122,19 @@ mod tests {
             &Lrc::new(default_dict.clone().into()),
         )
         .parse_str(source);
+
         assert_eq!(tokens.len(), 13);
 
         let mut dict = FullDictionary::new();
-        dict.append_word(
-            "separated-identifier".chars().collect_vec(),
-            WordMetadata::default(),
-        );
+        dict.append_word_str("separated-identifier", WordMetadata::default());
 
         let mut merged_dict = MergedDictionary::from(default_dict);
         merged_dict.add_dictionary(Lrc::new(dict));
 
         let tokens = CollapseIdentifiers::new(Box::new(PlainEnglish), &Lrc::new(merged_dict))
             .parse_str(source);
-        assert_eq!(tokens.len(), 10);
+
+        assert_eq!(tokens.len(), 11);
     }
 
     #[test]
@@ -149,17 +150,14 @@ mod tests {
         assert_eq!(tokens.len(), 15);
 
         let mut dict = FullDictionary::new();
-        dict.append_word(
-            "separated_identifier_token".chars().collect_vec(),
-            WordMetadata::default(),
-        );
+        dict.append_word_str("separated_identifier_token", WordMetadata::default());
 
         let mut merged_dict = MergedDictionary::from(default_dict);
         merged_dict.add_dictionary(Lrc::new(dict));
 
         let tokens = CollapseIdentifiers::new(Box::new(PlainEnglish), &Lrc::new(merged_dict))
             .parse_str(source);
-        assert_eq!(tokens.len(), 10);
+        assert_eq!(tokens.len(), 11);
     }
 
     #[test]
@@ -175,17 +173,14 @@ mod tests {
         assert_eq!(tokens.len(), 17);
 
         let mut dict = FullDictionary::new();
-        dict.append_word(
-            "separated_identifier".chars().collect_vec(),
-            WordMetadata::default(),
-        );
+        dict.append_word_str("separated_identifier", WordMetadata::default());
 
         let mut merged_dict = MergedDictionary::from(default_dict);
         merged_dict.add_dictionary(Lrc::new(dict));
 
         let tokens = CollapseIdentifiers::new(Box::new(PlainEnglish), &Lrc::new(merged_dict))
             .parse_str(source);
-        assert_eq!(tokens.len(), 12);
+        assert_eq!(tokens.len(), 13);
     }
 
     #[test]
@@ -201,14 +196,8 @@ mod tests {
         assert_eq!(tokens.len(), 15);
 
         let mut dict = FullDictionary::new();
-        dict.append_word(
-            "separated_identifier".chars().collect_vec(),
-            WordMetadata::default(),
-        );
-        dict.append_word(
-            "identifier_token".chars().collect_vec(),
-            WordMetadata::default(),
-        );
+        dict.append_word_str("separated_identifier", WordMetadata::default());
+        dict.append_word_str("identifier_token", WordMetadata::default());
 
         let mut merged_dict = MergedDictionary::from(default_dict);
         merged_dict.add_dictionary(Lrc::new(dict));
@@ -231,20 +220,14 @@ mod tests {
         assert_eq!(tokens.len(), 15);
 
         let mut dict = FullDictionary::new();
-        dict.append_word(
-            "separated_identifier_token".chars().collect_vec(),
-            WordMetadata::default(),
-        );
-        dict.append_word(
-            "separated_identifier".chars().collect_vec(),
-            WordMetadata::default(),
-        );
+        dict.append_word_str("separated_identifier_token", WordMetadata::default());
+        dict.append_word_str("separated_identifier", WordMetadata::default());
 
         let mut merged_dict = MergedDictionary::from(default_dict);
         merged_dict.add_dictionary(Lrc::new(dict));
 
         let tokens = CollapseIdentifiers::new(Box::new(PlainEnglish), &Lrc::new(merged_dict))
             .parse_str(source);
-        assert_eq!(tokens.len(), 10);
+        assert_eq!(tokens.len(), 11);
     }
 }

@@ -91,6 +91,14 @@ impl FullDictionary {
         self.extend_words(std::iter::once((word.as_ref(), metadata)))
     }
 
+    /// Append a single string to the dictionary.
+    ///
+    /// If you are appending many words, consider using [`Self::extend_words`]
+    /// instead.
+    pub fn append_word_str(&mut self, word: &str, metadata: WordMetadata) {
+        self.append_word(word.chars().collect::<Vec<_>>(), metadata)
+    }
+
     /// Create a lookup table for finding words of a specific length in a word
     /// list. NOTE: This function will sort the original word list by its
     /// length. If the word list's order is changed after creating the
