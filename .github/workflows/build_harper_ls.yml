@@ -14,9 +14,9 @@ jobs:
         platform:
           - release_for: Windows-x86_64
             os: windows-latest
-            target: x86_64-pc-windows-gnu
+            target: x86_64-pc-windows-msvc
             bin: harper-ls.exe
-            name: harper-ls-x86_64-pc-windows-gnu.zip
+            name: harper-ls-x86_64-pc-windows-msvc.zip
             command: build
 
           - release_for: macOS-x86_64
