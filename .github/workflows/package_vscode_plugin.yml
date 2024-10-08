@@ -10,7 +10,7 @@ jobs:
       matrix:
         platform:
           - os: windows-latest
-            rust_target: x86_64-pc-windows-gnu
+            rust_target: x86_64-pc-windows-msvc
             code_target: win32-x64
           - os: macOS-latest
             rust_target: x86_64-apple-darwin
