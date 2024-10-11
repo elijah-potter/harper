@@ -37,7 +37,7 @@ In essence, it enables text editors and IDEs to access the capabilities of Harpe
 
 If you aren't familiar with what a language server does, I would suggest reading [this](https://tamerlan.dev/an-introduction-to-the-language-server-protocol/) or the [official language server protocol documentation](https://microsoft.github.io/language-server-protocol/).
 
-When Harper is getting used through Neovim, Visual Studio Code, Helix or Emacs, `harper-ls` is the interface.
+When Harper is used through Neovim, Visual Studio Code, Helix or Emacs, `harper-ls` is the interface.
 
 ## `harper-wasm`
 

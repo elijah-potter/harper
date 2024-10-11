@@ -6,7 +6,7 @@ If you have a feature request or bug to report, please [create an issue](https:/
 
 ## Setup Your Environment
 
-To use the tooling required to build and debug Harper, you'll need to the following tools available in your `PATH`.
+To use the tooling required to build and debug Harper, you'll need to the following programs available in your `PATH`.
 
 - [`just`](https://github.com/casey/just)
 - `bash`
