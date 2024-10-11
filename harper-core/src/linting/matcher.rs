@@ -272,7 +272,9 @@ impl Matcher {
             "all", "of", "the" => "all the",
             "an", "other" => "another",
             "not", "longer" => "no longer",
-            "to", "towards" => "towards"
+            "to", "towards" => "towards",
+            "though", "process" => "thought process",
+            "the", "this" => "that this"
         };
 
         // TODO: Improve the description for this lint specifically.
