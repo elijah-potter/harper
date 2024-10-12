@@ -154,6 +154,24 @@
 					"default": true,
 					"description": "Catch use of curse/swear words."
 				},
+				"harper-ls.linters.terminating_conjunctions": {
+					"scope": "resource",
+					"type": "boolean",
+					"default": true,
+					"description": "Catch improper use of conjuctions to terminate clauses."
+				},
+				"harper-ls.linters.ellipsis_length": {
+					"scope": "resource",
+					"type": "boolean",
+					"default": true,
+					"description": "Ensure ellipsis are always the correct length. Also useful for catching accidental double periods."
+				},
+				"harper-ls.linters.dot_initialisms": {
+					"scope": "resource",
+					"type": "boolean",
+					"default": true,
+					"description": "Make sure certain initialisms are correctly dot-separated."
+				},
 				"harper-ls.diagnosticSeverity": {
 					"scope": "resource",
 					"type": "string",
