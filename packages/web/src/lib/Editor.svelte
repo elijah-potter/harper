@@ -6,7 +6,7 @@
 	import { lintText, applySuggestion } from '$lib/analysis';
 	import { Lint, SuggestionKind } from 'wasm';
 
-	let content = demo;
+	export let content = demo;
 
 	let lints: Lint[] = [];
 	let lintCards: HTMLButtonElement[] = [];

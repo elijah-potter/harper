@@ -3,15 +3,7 @@
 	export let height = '100%';
 </script>
 
-<svg
-	id="custom-logo"
-	{width}
-	{height}
-	viewBox="0 0 512 512"
-	fill="none"
-	xmlns="http://www.w3.org/2000/svg"
-	style="height:100%;width:100%;"
->
+<svg {width} {height} viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
 	<defs>
 		<radialGradient
 			id="b"

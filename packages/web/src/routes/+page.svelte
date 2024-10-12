@@ -6,6 +6,7 @@
 	import Logo from '$lib/Logo.svelte';
 	import GitHubLogo from '$lib/GitHubLogo.svelte';
 	import { DarkMode } from 'flowbite-svelte';
+	import ObsidianLogo from '$lib/ObsidianLogo.svelte';
 
 	let width = window.innerWidth;
 
@@ -26,13 +27,18 @@
 	<h1 class="text-5xl font-bold text-center dark:text-white">Hi. I’m Harper.</h1>
 	<h2 class="text-3xl text-center dark:text-white">The Grammar Checker for Developers</h2>
 
-	<div class="flex flex-row justify-evenly mt-5">
+	<div class="flex flex-row justify-evenly mt-5 transition-all">
 		<a
 			href="https://github.com/elijah-potter/harper"
-			class="flex flex-row items-center [&>*]:m-2 dark:text-white"
+			class="flex flex-row items-center [&>*]:m-2 dark:text-white hover:scale-105"
 			><GitHubLogo width="40px" height="40px" />GitHub</a
 		>
-		<a href="https://elijahpotter.dev" class="flex flex-row items-center [&>*]:m-2 dark:text-white"
+		<a href="/obsidian" class="flex flex-row hover:scale-105 items-center [&>*]:m-2 dark:text-white"
+			><ObsidianLogo width="40px" height="40px" />Obsidian Plugin</a
+		>
+		<a
+			href="https://elijahpotter.dev"
+			class="flex flex-row items-center [&>*]:m-2 dark:text-white hover:scale-105"
 			><img
 				width="40"
 				height="40"
