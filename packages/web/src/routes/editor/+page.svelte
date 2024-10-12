@@ -6,4 +6,6 @@
 	let content = $page.url.searchParams.get('initialText') ?? '';
 </script>
 
-<Editor {content}></Editor>
+<div class="absolute top-0 left-0 w-full h-full">
+	<Editor {content}></Editor>
+</div>
