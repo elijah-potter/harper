@@ -58,7 +58,7 @@
 		</span>
 	</Section>
 
-	<div class="w-full lg:h-[600px] h-[800px] overflow-hidden">
+	<div class="w-full h-[800px] overflow-hidden">
 		<Editor />
 	</div>
 
