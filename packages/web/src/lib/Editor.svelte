@@ -16,7 +16,8 @@
 	$: lintText(content).then((newLints) => (lints = newLints));
 	$: boxHeight = calcHeight(content);
 	$: if (focused != null && lintCards[focused])
-		lintCards[focused].scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+		lintCards[focused].scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'nearest' });
+	$: if (focused != null && focused >= lints.length) focused = undefined;
 
 	$: if (editor != null && focused != null) {
 		let lint = lints[focused % lints.length];
@@ -34,7 +35,7 @@
 	}
 </script>
 
-<div class="flex flex-row w-full h-full p-5">
+<div class="flex lg:flex-row flex-col w-full h-full p-5">
 	<Card
 		class="flex-grow h-full p-5 grid z-10 max-w-full text-lg overflow-auto mr-5"
 		on:click={() => editor && editor.focus()}
@@ -51,7 +52,7 @@
 			<Underlines {content} bind:focusLintIndex={focused} />
 		</div>
 	</Card>
-	<Card class="flex-none basis-[400px] h-full p-1">
+	<Card class="flex-none basis-[400px] max-h-full p-1 hidden lg:flex">
 		<h2 class="text-2xl font-bold m-2">Suggestions</h2>
 		<div class="flex flex-col overflow-y-scroll overflow-x-hidden m-0 p-0">
 			{#each lints as lint, i}
@@ -65,7 +66,7 @@
 							<h3 class="font-bold">
 								{lint.lint_kind()} - “<span class="italic">
 									{lint.get_problem_text()}
-								</span> ”
+								</span>”
 							</h3>
 						</div>
 						<div
@@ -97,4 +98,32 @@
 			{/each}
 		</div>
 	</Card>
+	{#if focused != null}
+		<Card class="lg:hidden max-w-full w-full justify-between flex-row">
+			<div>
+				<h1 class="font-bold">{lints[focused].lint_kind()}</h1>
+				<p>{lints[focused].message()}</p>
+			</div>
+			<div class="flex flex-row">
+				{#each lints[focused].suggestions() as suggestion}
+					<div class="p-[4px]">
+						<Button
+							class="w-full"
+							style="height: 40px; margin: 5px 0px;"
+							on:click={() =>
+								applySuggestion(content, suggestion, lints[focused].span()).then(
+									(edited) => (content = edited)
+								)}
+						>
+							{#if suggestion.kind() == SuggestionKind.Remove}
+								Remove
+							{:else}
+								"{suggestion.get_replacement_text()}"
+							{/if}
+						</Button>
+					</div>
+				{/each}
+			</div>
+		</Card>
+	{/if}
 </div>

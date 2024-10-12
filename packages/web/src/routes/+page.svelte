@@ -58,11 +58,9 @@
 		</span>
 	</Section>
 
-	{#if width > 1080}
-		<div class="w-full h-[600px] overflow-hidden">
-			<Editor />
-		</div>
-	{/if}
+	<div class="w-full lg:h-[600px] h-[800px] overflow-hidden">
+		<Editor />
+	</div>
 
 	<Section>
 		<span slot="title">Private</span>

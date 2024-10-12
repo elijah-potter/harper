@@ -1,5 +1,5 @@
-There are some cases where the the standard grammar checkers
-don't cut it. That s where Harper comes in handy.
+There are some cases where the the standard grammar
+checkers don't cut it. That s where Harper comes in handy.
 
 Harper is an language checker for developers. it can detect
 improper capitalization and misspellled words,

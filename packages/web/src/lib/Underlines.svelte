@@ -22,8 +22,8 @@
 	$: if (focusLintIndex != null && lintHighlights[focusLintIndex] != null)
 		lintHighlights[focusLintIndex].scrollIntoView({
 			behavior: 'smooth',
-			block: 'center',
-			inline: 'center'
+			block: 'nearest',
+			inline: 'nearest'
 		});
 
 	function reOrgString(text: string): (string | undefined)[] {
