@@ -1,12 +1,14 @@
 .DS_Store
 node_modules
 build
+bin
 .svelte-kit
 package
 main.js
 .env
 .env.*
 !.env.example
+.vscode-test
 
 # Ignore files for PNPM, NPM and YARN
 pnpm-lock.yaml
