@@ -27,10 +27,6 @@
 		});
 
 	function reOrgString(text: string): (string | undefined)[] {
-		if (text.trim().length == 0) {
-			return [''];
-		}
-
 		let output: (string | undefined)[] = [];
 
 		for (let chunk of text.replaceAll(' ', '\u00A0').split('\n')) {
@@ -104,7 +100,7 @@
 			{#if chunk == null}
 				<br />
 			{:else if typeof chunk == 'string'}
-				<span class="">{chunk}</span>
+				<span class="whitespace-pre">{chunk}</span>
 			{:else}
 				<span class="pointer-events-auto" style={`margin-right: -4px;`}>
 					<button

@@ -37,7 +37,7 @@ impl Span {
     }
 
     pub fn overlaps_with(&self, other: Self) -> bool {
-        self.start.max(other.start) <= self.end.min(other.end)
+        (self.start < other.end) && (other.start < self.end)
     }
 
     /// Get the associated content. Will return [`None`] if any aspect is
@@ -130,5 +130,7 @@ mod tests {
         assert!(Span::new(0, 5).overlaps_with(Span::new(2, 3)));
         assert!(Span::new(0, 5).overlaps_with(Span::new(4, 5)));
         assert!(Span::new(0, 5).overlaps_with(Span::new(4, 4)));
+
+        assert!(!Span::new(0, 3).overlaps_with(Span::new(3, 5)));
     }
 }

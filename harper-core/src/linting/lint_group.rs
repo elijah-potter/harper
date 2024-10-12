@@ -36,6 +36,16 @@ macro_rules! create_lint_group_config {
             }
 
             impl LintGroupConfig {
+                /// Creates a config with all lints disabled.
+                pub fn none() -> Self{
+                    Self {
+                        $(
+                            [<$linter:snake>]: Some(false),
+                        )*
+                        spell_check: Some(false)
+                    }
+                }
+
                 /// Fills the [`None`] values in the configuration with the default values.
                 pub fn fill_default_values(&mut self){
                     $(
