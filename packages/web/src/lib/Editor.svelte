@@ -111,7 +111,7 @@
 							class="w-full"
 							style="height: 40px; margin: 5px 0px;"
 							on:click={() =>
-								focused &&
+								focused != null &&
 								applySuggestion(content, suggestion, lints[focused].span()).then(
 									(edited) => (content = edited)
 								)}
