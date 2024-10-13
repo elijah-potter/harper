@@ -25,8 +25,13 @@
 	<div class="flex flex-row justify-evenly mt-5">
 		<a
 			href="https://github.com/elijah-potter/harper-obsidian-plugin"
-			class="flex flex-row items-center [&>*]:m-2 dark:text-white"
+			class="flex flex-row items-center [&>*]:m-2 dark:text-white hover:scale-105 transition-all"
 			><GitHubLogo width="40px" height="40px" />GitHub</a
+		>
+		<a
+			href="/"
+			class="flex flex-row items-center [&>*]:m-2 dark:text-white hover:scale-105 transition-all"
+			><span class="text-4xl font-extrabold">?</span>What is Harper?</a
 		>
 	</div>
 
