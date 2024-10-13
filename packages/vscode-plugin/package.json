@@ -1,215 +1,215 @@
 {
-	"name": "harper",
-	"displayName": "Harper",
-	"description": "The grammar checker for developers",
-	"version": "0.0.1",
-	"private": true,
-	"author": "Elijah Potter",
-	"publisher": "elijah-potter",
-	"license": "Apache-2.0",
-	"icon": "icon.png",
-	"galleryBanner": {
-		"color": "#F2F2F2",
-		"theme": "light"
-	},
-	"repository": {
-		"type": "git",
-		"url": "https://github.com/elijah-potter/harper"
-	},
-	"bugs": {
-		"url": "https://github.com/elijah-potter/harper/issues"
-	},
-	"engines": {
-		"vscode": "^1.89.0"
-	},
-	"categories": [
-		"Other"
-	],
-	"keywords": [
-		"grammar",
-		"spellcheck",
-		"writing"
-	],
-	"activationEvents": [
-		"onLanguage:markdown",
-		"onLanguage:rust",
-		"onLanguage:ruby",
-		"onLanguage:go",
-		"onLanguage:cpp",
-		"onLanguage:c",
-		"onLanguage:javascript",
-		"onLanguage:javascriptreact",
-		"onLanguage:typescript",
-		"onLanguage:typescriptreact",
-		"onLanguage:bash",
-		"onLanguage:gitcommit",
-		"onLanguage:py",
-		"onLanguage:swift",
-		"onLanguage:toml",
-		"onLanguage:lua",
-		"onLanguage:csharp",
-		"onLanguage:html",
-		"onLanguage:java"
-	],
-	"main": "./build/extension.js",
-	"contributes": {
-		"commands": [
-			{
-				"command": "harper.languageserver.restart",
-				"title": "Harper: Restart Language Server",
-				"description": "Restart harper-ls"
-			}
-		],
-		"configuration": {
-			"type": "object",
-			"title": "Harper",
-			"properties": {
-				"harper-ls.linters.spell_check": {
-					"scope": "resource",
-					"type": "boolean",
-					"default": true,
-					"description": "Detect and provide suggestions for misspelled words."
-				},
-				"harper-ls.linters.spelled_numbers": {
-					"scope": "resource",
-					"type": "boolean",
-					"default": false,
-					"description": "Detect and fix instances where small numbers should be spelled out."
-				},
-				"harper-ls.linters.an_a": {
-					"scope": "resource",
-					"type": "boolean",
-					"default": true,
-					"description": "Detect and fix improper articles."
-				},
-				"harper-ls.linters.sentence_capitalization": {
-					"scope": "resource",
-					"type": "boolean",
-					"default": true,
-					"description": "Ensure your sentences are capitalized."
-				},
-				"harper-ls.linters.unclosed_quotes": {
-					"scope": "resource",
-					"type": "boolean",
-					"default": true,
-					"description": "Make sure you close your quotation marks."
-				},
-				"harper-ls.linters.wrong_quotes": {
-					"scope": "resource",
-					"type": "boolean",
-					"default": false,
-					"description": "Make sure you use the correct unicode characters for your quotation marks."
-				},
-				"harper-ls.linters.long_sentences": {
-					"scope": "resource",
-					"type": "boolean",
-					"default": true,
-					"description": "Warn about run-on sentences."
-				},
-				"harper-ls.linters.repeated_words": {
-					"scope": "resource",
-					"type": "boolean",
-					"default": true,
-					"description": "Detect and fix commonly repeated words."
-				},
-				"harper-ls.linters.spaces": {
-					"scope": "resource",
-					"type": "boolean",
-					"default": true,
-					"description": "Detect improper spacing between words."
-				},
-				"harper-ls.linters.matcher": {
-					"scope": "resource",
-					"type": "boolean",
-					"default": true,
-					"description": "A collection of hand-crafted common grammar mistakes."
-				},
-				"harper-ls.linters.correct_number_suffix": {
-					"scope": "resource",
-					"type": "boolean",
-					"default": true,
-					"description": "Make sure you provide the correct suffix for numbers."
-				},
-				"harper-ls.linters.number_suffix_capitalization": {
-					"scope": "resource",
-					"type": "boolean",
-					"default": true,
-					"description": "Make sure you correctly capitalize your number suffixes."
-				},
-				"harper-ls.linters.multiple_sequential_pronouns": {
-					"scope": "resource",
-					"type": "boolean",
-					"default": true,
-					"description": "Detect improper sequences of pronouns."
-				},
-				"harper-ls.linters.linking_verbs": {
-					"scope": "resource",
-					"type": "boolean",
-					"default": true,
-					"description": "Detect improper use of linking verbs."
-				},
-				"harper-ls.linters.avoid_curses": {
-					"scope": "resource",
-					"type": "boolean",
-					"default": true,
-					"description": "Catch use of curse/swear words."
-				},
-				"harper-ls.linters.terminating_conjunctions": {
-					"scope": "resource",
-					"type": "boolean",
-					"default": true,
-					"description": "Catch improper use of conjuctions to terminate clauses."
-				},
-				"harper-ls.linters.ellipsis_length": {
-					"scope": "resource",
-					"type": "boolean",
-					"default": true,
-					"description": "Ensure ellipsis are always the correct length. Also useful for catching accidental double periods."
-				},
-				"harper-ls.linters.dot_initialisms": {
-					"scope": "resource",
-					"type": "boolean",
-					"default": true,
-					"description": "Make sure certain initialisms are correctly dot-separated."
-				},
-				"harper-ls.diagnosticSeverity": {
-					"scope": "resource",
-					"type": "string",
-					"enum": [
-						"error",
-						"hint",
-						"information",
-						"warning"
-					],
-					"default": "information",
-					"description": "How severe do you want diagnostics to appear in the editor?"
-				}
-			}
-		}
-	},
-	"scripts": {
-		"watch:esbuild": "node esbuild.cjs --watch",
-		"watch:tsc": "tsc --noEmit --watch",
-		"pretest": "yarn lint && tsc && node esbuild.cjs",
-		"test": "node build/tests/runTests.js",
-		"vscode:prepublish": "yarn lint && tsc --noEmit && node esbuild.cjs --production",
-		"package": "vsce package",
-		"lint": "eslint src --ext ts"
-	},
-	"devDependencies": {
-		"@types/jasmine": "^5.1.4",
-		"@types/node": "20.x",
-		"@types/vscode": "^1.89.0",
-		"@typescript-eslint/eslint-plugin": "^7.7.1",
-		"@typescript-eslint/parser": "^7.7.1",
-		"@vscode/test-electron": "^2.3.9",
-		"@vscode/vsce": "^3.0.0",
-		"esbuild": "^0.20.2",
-		"eslint": "^8.57.0",
-		"jasmine": "^5.3.0",
-		"typescript": "^5.4.5"
-	},
-	"dependencies": {
-		"vscode-languageclient": "^9.0.1"
-	}
+  "name": "harper",
+  "displayName": "Harper",
+  "description": "The grammar checker for developers",
+  "version": "0.12.0",
+  "private": true,
+  "author": "Elijah Potter",
+  "publisher": "elijah-potter",
+  "license": "Apache-2.0",
+  "icon": "icon.png",
+  "galleryBanner": {
+    "color": "#F2F2F2",
+    "theme": "light"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/elijah-potter/harper"
+  },
+  "bugs": {
+    "url": "https://github.com/elijah-potter/harper/issues"
+  },
+  "engines": {
+    "vscode": "^1.89.0"
+  },
+  "categories": [
+    "Other"
+  ],
+  "keywords": [
+    "grammar",
+    "spellcheck",
+    "writing"
+  ],
+  "activationEvents": [
+    "onLanguage:markdown",
+    "onLanguage:rust",
+    "onLanguage:ruby",
+    "onLanguage:go",
+    "onLanguage:cpp",
+    "onLanguage:c",
+    "onLanguage:javascript",
+    "onLanguage:javascriptreact",
+    "onLanguage:typescript",
+    "onLanguage:typescriptreact",
+    "onLanguage:bash",
+    "onLanguage:gitcommit",
+    "onLanguage:py",
+    "onLanguage:swift",
+    "onLanguage:toml",
+    "onLanguage:lua",
+    "onLanguage:csharp",
+    "onLanguage:html",
+    "onLanguage:java"
+  ],
+  "main": "./build/extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "harper.languageserver.restart",
+        "title": "Harper: Restart Language Server",
+        "description": "Restart harper-ls"
+      }
+    ],
+    "configuration": {
+      "type": "object",
+      "title": "Harper",
+      "properties": {
+        "harper-ls.linters.spell_check": {
+          "scope": "resource",
+          "type": "boolean",
+          "default": true,
+          "description": "Detect and provide suggestions for misspelled words."
+        },
+        "harper-ls.linters.spelled_numbers": {
+          "scope": "resource",
+          "type": "boolean",
+          "default": false,
+          "description": "Detect and fix instances where small numbers should be spelled out."
+        },
+        "harper-ls.linters.an_a": {
+          "scope": "resource",
+          "type": "boolean",
+          "default": true,
+          "description": "Detect and fix improper articles."
+        },
+        "harper-ls.linters.sentence_capitalization": {
+          "scope": "resource",
+          "type": "boolean",
+          "default": true,
+          "description": "Ensure your sentences are capitalized."
+        },
+        "harper-ls.linters.unclosed_quotes": {
+          "scope": "resource",
+          "type": "boolean",
+          "default": true,
+          "description": "Make sure you close your quotation marks."
+        },
+        "harper-ls.linters.wrong_quotes": {
+          "scope": "resource",
+          "type": "boolean",
+          "default": false,
+          "description": "Make sure you use the correct unicode characters for your quotation marks."
+        },
+        "harper-ls.linters.long_sentences": {
+          "scope": "resource",
+          "type": "boolean",
+          "default": true,
+          "description": "Warn about run-on sentences."
+        },
+        "harper-ls.linters.repeated_words": {
+          "scope": "resource",
+          "type": "boolean",
+          "default": true,
+          "description": "Detect and fix commonly repeated words."
+        },
+        "harper-ls.linters.spaces": {
+          "scope": "resource",
+          "type": "boolean",
+          "default": true,
+          "description": "Detect improper spacing between words."
+        },
+        "harper-ls.linters.matcher": {
+          "scope": "resource",
+          "type": "boolean",
+          "default": true,
+          "description": "A collection of hand-crafted common grammar mistakes."
+        },
+        "harper-ls.linters.correct_number_suffix": {
+          "scope": "resource",
+          "type": "boolean",
+          "default": true,
+          "description": "Make sure you provide the correct suffix for numbers."
+        },
+        "harper-ls.linters.number_suffix_capitalization": {
+          "scope": "resource",
+          "type": "boolean",
+          "default": true,
+          "description": "Make sure you correctly capitalize your number suffixes."
+        },
+        "harper-ls.linters.multiple_sequential_pronouns": {
+          "scope": "resource",
+          "type": "boolean",
+          "default": true,
+          "description": "Detect improper sequences of pronouns."
+        },
+        "harper-ls.linters.linking_verbs": {
+          "scope": "resource",
+          "type": "boolean",
+          "default": true,
+          "description": "Detect improper use of linking verbs."
+        },
+        "harper-ls.linters.avoid_curses": {
+          "scope": "resource",
+          "type": "boolean",
+          "default": true,
+          "description": "Catch use of curse/swear words."
+        },
+        "harper-ls.linters.terminating_conjunctions": {
+          "scope": "resource",
+          "type": "boolean",
+          "default": true,
+          "description": "Catch improper use of conjuctions to terminate clauses."
+        },
+        "harper-ls.linters.ellipsis_length": {
+          "scope": "resource",
+          "type": "boolean",
+          "default": true,
+          "description": "Ensure ellipsis are always the correct length. Also useful for catching accidental double periods."
+        },
+        "harper-ls.linters.dot_initialisms": {
+          "scope": "resource",
+          "type": "boolean",
+          "default": true,
+          "description": "Make sure certain initialisms are correctly dot-separated."
+        },
+        "harper-ls.diagnosticSeverity": {
+          "scope": "resource",
+          "type": "string",
+          "enum": [
+            "error",
+            "hint",
+            "information",
+            "warning"
+          ],
+          "default": "information",
+          "description": "How severe do you want diagnostics to appear in the editor?"
+        }
+      }
+    }
+  },
+  "scripts": {
+    "watch:esbuild": "node esbuild.cjs --watch",
+    "watch:tsc": "tsc --noEmit --watch",
+    "pretest": "yarn lint && tsc && node esbuild.cjs",
+    "test": "node build/tests/runTests.js",
+    "vscode:prepublish": "yarn lint && tsc --noEmit && node esbuild.cjs --production",
+    "package": "vsce package",
+    "lint": "eslint src --ext ts"
+  },
+  "devDependencies": {
+    "@types/jasmine": "^5.1.4",
+    "@types/node": "20.x",
+    "@types/vscode": "^1.89.0",
+    "@typescript-eslint/eslint-plugin": "^7.7.1",
+    "@typescript-eslint/parser": "^7.7.1",
+    "@vscode/test-electron": "^2.3.9",
+    "@vscode/vsce": "^3.0.0",
+    "esbuild": "^0.20.2",
+    "eslint": "^8.57.0",
+    "jasmine": "^5.3.0",
+    "typescript": "^5.4.5"
+  },
+  "dependencies": {
+    "vscode-languageclient": "^9.0.1"
+  }
 }
