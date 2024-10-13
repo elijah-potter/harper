@@ -1,11 +1,11 @@
 [package]
 name = "harper-tree-sitter"
-version = "0.11.0"
+version = "0.12.0"
 edition = "2021"
 description = "The language checker for developers."
 license = "Apache-2.0"
 repository = "https://github.com/elijah-potter/harper"
 
 [dependencies]
-harper-core = { path = "../harper-core", version = "0.11.0" }
+harper-core = { path = "../harper-core", version = "0.12.0" }
 tree-sitter = "0.20.10"

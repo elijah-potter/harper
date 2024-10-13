@@ -2,7 +2,7 @@
 	"name": "harper",
 	"displayName": "Harper",
 	"description": "The grammar checker for developers",
-	"version": "0.0.1",
+	"version": "0.12.0",
 	"private": true,
 	"author": "Elijah Potter",
 	"publisher": "elijah-potter",
