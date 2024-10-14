@@ -6,6 +6,7 @@ on:
 
 jobs:
   package:
+    name: Package - ${{ matrix.platform.code_target }}
     strategy:
       matrix:
         platform:
@@ -24,7 +25,6 @@ jobs:
           - os: ubuntu-20.04
             rust_target: aarch64-unknown-linux-gnu
             code_target: linux-arm64
-    name: Package - ${{ matrix.platform.code_target }}
     runs-on: ${{ matrix.platform.os }}
     steps:
       - uses: actions/checkout@v4
