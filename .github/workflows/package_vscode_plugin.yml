@@ -3,6 +3,8 @@ name: Package VS Code Plugin
 on:
   push:
     branches: ["master"]
+  pull_request:
+    branches: ["master"]
 
 jobs:
   package:
