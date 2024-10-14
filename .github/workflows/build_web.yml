@@ -1,20 +1,19 @@
-name: 'Build Web'
+name: Build Web
 
 on:
   push:
-    branches: [ "master" ]
+    branches: ["master"]
   pull_request:
-    branches: [ "master" ]
+    branches: ["master"]
 
 jobs:
   build:
     runs-on: ubuntu-latest
-
     steps:
-    - uses: actions/checkout@v3
-    - uses: redhat-actions/buildah-build@v2
-      with:
-        image: web 
-        layers: false
-        containerfiles: |
-          Dockerfile
+      - uses: actions/checkout@v4
+      - uses: redhat-actions/buildah-build@v2
+        with:
+          image: web
+          layers: false
+          containerfiles: |
+            Dockerfile

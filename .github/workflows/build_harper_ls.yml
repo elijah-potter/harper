@@ -1,10 +1,10 @@
 name: Release
 
-on: 
-  push: 
-    branches: [ "master" ]
+on:
+  push:
+    branches: ["master"]
   pull_request:
-    branches: [ "master" ]
+    branches: ["master"]
 
 jobs:
   release:
@@ -18,39 +18,34 @@ jobs:
             bin: harper-ls.exe
             name: harper-ls-x86_64-pc-windows-msvc.zip
             command: build
-
           - release_for: macOS-x86_64
             os: macOS-latest
             target: x86_64-apple-darwin
             bin: harper-ls
             name: harper-ls-x86_64-apple-darwin.tar.gz
             command: build
-
           - release_for: macOS-aarch64
             os: macOS-latest
             target: aarch64-apple-darwin
             bin: harper-ls
             name: harper-ls-aarch64-apple-darwin.tar.gz
             command: build
-
           - release_for: Linux-x86_64-GNU
             os: ubuntu-20.04
             target: x86_64-unknown-linux-gnu
             bin: harper-ls
             name: harper-ls-x86_64-unknown-linux-gnu.tar.gz
             command: build
-            
           - release_for: Linux-aarch64-GNU
             os: ubuntu-20.04
             target: aarch64-unknown-linux-gnu
             bin: harper-ls
             name: harper-ls-aarch64-unknown-linux-gnu.tar.gz
             command: build
-
     runs-on: ${{ matrix.platform.os }}
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - name: Build binary
         uses: houseabsolute/actions-rust-cross@v0
         with:
@@ -77,6 +72,6 @@ jobs:
             github.ref == 'refs/tags/test-release' )
       - name: Upload Artifacts
         uses: actions/upload-artifact@v4
-        with: 
+        with:
           name: ${{ matrix.platform.bin }}-${{ matrix.platform.target }}
           path: harper-ls-*
