@@ -46,3 +46,7 @@ create_test!(merged_lines.ts, 1);
 create_test!(javadoc_clean_simple.java, 0);
 create_test!(javadoc_complex.java, 4);
 create_test!(issue_132.rs, 1);
+
+// These are to make sure nothing crashes.
+create_test!(empty.js, 0);
+create_test!(eof.rs, 0);
