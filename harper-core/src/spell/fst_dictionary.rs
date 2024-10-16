@@ -29,9 +29,10 @@ fn uncached_inner_new() -> Lrc<FstDictionary> {
     let mmap = unsafe { Mmap::map(&File::open("../../dictionary.fst").unwrap()).unwrap() };
     let word_map = FstMap::new(mmap).unwrap();
 
-    let mut words: Vec<CharString> = word_list.iter().map(|mw| mw.letters).collect();
+    let mut words: Vec<CharString> = word_list.iter().map(|mw| mw.letters.clone()).collect();
     words.sort();
     words.dedup();
+    let metadata: Vec<WordMetadata> = todo!();
 
     Lrc::new(FstDictionary { metadata, word_map })
 }
