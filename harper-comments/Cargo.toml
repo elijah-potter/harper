@@ -12,7 +12,7 @@ harper-core = { path = "../harper-core", version = "0.12.0" }
 harper-html = { path = "../harper-html", version = "0.12.0" }
 harper-tree-sitter = { path = "../harper-tree-sitter", version = "0.12.0" }
 tree-sitter = "0.20.10"
-tree-sitter-rust = "0.20.4"
+tree-sitter-rust = "0.21.2"
 tree-sitter-typescript = "0.20.3"
 tree-sitter-python = "0.20.4"
 tree-sitter-javascript = "0.20.1"
