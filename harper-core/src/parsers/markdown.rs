@@ -202,9 +202,14 @@ impl Parser for Markdown {
                             });
                             continue;
                         }
-
+                        if matches!(tag, Tag::Link { .. }) {
+                            tokens.push(Token {
+                                span: Span::new_with_len(traversed_chars, text.chars().count()),
+                                kind: TokenKind::Unlintable,
+                            });
+                            continue;
+                        }
                         if !(matches!(tag, Tag::Paragraph)
-                            || matches!(tag, Tag::Link { .. })
                             || matches!(tag, Tag::Heading { .. })
                             || matches!(tag, Tag::Item)
                             || matches!(tag, Tag::TableCell)
@@ -368,5 +373,16 @@ mod tests {
         let source = r#"The range of inputs from <ctrl-g> to ctrl-z"#;
         let tokens = Markdown.parse_str(source);
         assert_eq!(tokens.iter_unlintables().count(), 1);
+    }
+
+    #[test]
+    fn link_title_unlintable() {
+        let source = r#"[elijah-potter/harper](https://github.com/elijah-potter/harper)"#;
+        let tokens = Markdown.parse_str(source);
+        let token_kinds = tokens.iter().map(|t| t.kind).collect::<Vec<_>>();
+
+        dbg!(&token_kinds);
+
+        assert!(matches!(token_kinds.as_slice(), &[TokenKind::Unlintable]))
     }
 }
