@@ -1,5 +1,6 @@
 mod an_a;
 mod avoid_curses;
+mod boring_words;
 mod correct_number_suffix;
 mod dot_initialisms;
 mod ellipsis_length;
@@ -22,6 +23,7 @@ mod wrong_quotes;
 
 pub use an_a::AnA;
 pub use avoid_curses::AvoidCurses;
+pub use boring_words::BoringWords;
 pub use correct_number_suffix::CorrectNumberSuffix;
 pub use dot_initialisms::DotInitialisms;
 pub use ellipsis_length::EllipsisLength;

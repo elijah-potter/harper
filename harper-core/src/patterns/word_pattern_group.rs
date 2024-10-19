@@ -1,7 +1,7 @@
 use hashbrown::HashMap;
 
 use super::naive_pattern_group::NaivePatternGroup;
-use super::Pattern;
+use super::{Pattern, SequencePattern};
 use crate::CharString;
 
 /// A pattern collection to look for patterns that start with a specific
@@ -25,6 +25,14 @@ impl WordPatternGroup<NaivePatternGroup> {
             group.push(pat);
             self.patterns.insert(chars, group);
         }
+    }
+
+    /// Add a pattern that matches just a word on its own, without anything else required to match.
+    pub fn add_word(&mut self, word: &'static str) {
+        self.add(
+            word,
+            Box::new(SequencePattern::default().then_exact_word(word)),
+        );
     }
 }
 

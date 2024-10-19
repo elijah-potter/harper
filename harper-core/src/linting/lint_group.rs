@@ -3,6 +3,7 @@ use serde::{Deserialize, Serialize};
 
 use super::an_a::AnA;
 use super::avoid_curses::AvoidCurses;
+use super::boring_words::BoringWords;
 use super::correct_number_suffix::CorrectNumberSuffix;
 use super::dot_initialisms::DotInitialisms;
 use super::ellipsis_length::EllipsisLength;
@@ -125,7 +126,8 @@ create_lint_group_config!(
     AvoidCurses => true,
     TerminatingConjunctions => true,
     EllipsisLength => true,
-    DotInitialisms => true
+    DotInitialisms => true,
+    BoringWords => false
 );
 
 impl<T: Dictionary + Default> Default for LintGroup<T> {
