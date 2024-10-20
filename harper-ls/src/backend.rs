@@ -239,7 +239,7 @@ impl Backend {
         let source_chars = doc_state.document.get_full_content();
 
         // Find lints whole span overlaps with range
-        let span = range_to_span(source_chars, range);
+        let span = range_to_span(source_chars, range).with_len(1);
 
         let mut actions: Vec<CodeActionOrCommand> = lints
             .into_iter()
