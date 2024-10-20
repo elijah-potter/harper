@@ -21,7 +21,6 @@ impl Default for TerminatingConjunctions {
                             "once",
                             "only",
                             "since",
-                            "so",
                             "supposing",
                             "than",
                             "though",
@@ -38,7 +37,6 @@ impl Default for TerminatingConjunctions {
                             "while",
                             "or",
                             "nor",
-                            "so",
                             "and",
                         ]
                         .into_iter()
