@@ -1,6 +1,6 @@
 use super::{Lint, LintKind, PatternLinter};
 use crate::patterns::{ConsumesRemainingPattern, Pattern, SequencePattern};
-use crate::{Lrc, TokenStringExt};
+use crate::Lrc;
 
 pub struct TerminatingConjunctions {
     pattern: Box<dyn Pattern>,
@@ -54,11 +54,11 @@ impl PatternLinter for TerminatingConjunctions {
     }
 
     fn match_to_lint(&self, matched_tokens: &[crate::Token], source: &[char]) -> Lint {
-        let span = matched_tokens.span().unwrap();
-        let word = span.get_content_string(source);
+        let word_span = matched_tokens[0].span;
+        let word = word_span.get_content_string(source);
 
         Lint {
-            span,
+            span: word_span,
             lint_kind: LintKind::Miscellaneous,
             suggestions: vec![],
             message: format!(
