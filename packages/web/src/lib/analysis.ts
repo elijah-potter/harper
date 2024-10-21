@@ -25,3 +25,9 @@ export async function applySuggestion(
 	const applied = wasm.apply_suggestion(text, span, suggestion);
 	return applied;
 }
+
+export async function isLikelyEnglish(text: string): Promise<boolean> {
+	const wasm = await import('wasm');
+
+	return wasm.is_likely_english(text);
+}

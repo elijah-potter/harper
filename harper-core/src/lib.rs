@@ -4,7 +4,7 @@
 mod char_ext;
 mod char_string;
 mod document;
-mod language_detection;
+pub mod language_detection;
 mod lexing;
 pub mod linting;
 mod mask;

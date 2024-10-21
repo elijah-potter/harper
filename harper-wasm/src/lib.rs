@@ -2,6 +2,7 @@
 
 use std::sync::Mutex;
 
+use harper_core::language_detection::is_doc_likely_english;
 use harper_core::linting::{LintGroup, LintGroupConfig, Linter};
 use harper_core::parsers::Markdown;
 use harper_core::{remove_overlaps, Document, FullDictionary, Lrc};
@@ -25,6 +26,13 @@ pub fn setup() {
     console_error_panic_hook::set_once();
 
     tracing_wasm::set_as_global_default();
+}
+
+/// Helper method to quickly check if a Markdown string is likely intended to be English
+#[wasm_bindgen]
+pub fn is_likely_english(text: String) -> bool {
+    let document = Document::new_markdown_curated(&text);
+    is_doc_likely_english(&document, &FullDictionary::curated())
 }
 
 #[wasm_bindgen]
