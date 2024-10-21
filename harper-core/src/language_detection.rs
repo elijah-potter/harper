@@ -1,18 +1,22 @@
-use crate::{Dictionary, Document, TokenKind};
+use crate::{Dictionary, Document, Token, TokenKind};
+
+pub fn is_doc_likely_english(doc: &Document, dict: &impl Dictionary) -> bool {
+    is_likely_english(doc.get_tokens(), doc.get_source(), dict)
+}
 
 /// Check if the contents of the document are likely intended to represent
 /// English.
-pub fn is_likely_english(doc: &Document, dict: &impl Dictionary) -> bool {
+pub fn is_likely_english(toks: &[Token], source: &[char], dict: &impl Dictionary) -> bool {
     let mut total_words = 0;
     let mut valid_words = 0;
     let mut punctuation = 0;
 
-    for token in doc.tokens() {
+    for token in toks {
         match token.kind {
             TokenKind::Word(_) => {
                 total_words += 1;
 
-                let word_content = doc.get_span_content(token.span);
+                let word_content = token.span.get_content(source);
                 if dict.contains_word(word_content) {
                     valid_words += 1;
                 }
@@ -35,13 +39,13 @@ pub fn is_likely_english(doc: &Document, dict: &impl Dictionary) -> bool {
 
 #[cfg(test)]
 mod tests {
-    use super::is_likely_english;
+    use super::is_doc_likely_english;
     use crate::{Document, FullDictionary};
 
     fn assert_not_english(source: &'static str) {
         let dict = FullDictionary::curated();
         let doc = Document::new_plain_english(source, &dict);
-        let is_likely_english = is_likely_english(&doc, &dict);
+        let is_likely_english = is_doc_likely_english(&doc, &dict);
         dbg!(source);
         assert!(!is_likely_english);
     }
@@ -49,7 +53,7 @@ mod tests {
     fn assert_english(source: &'static str) {
         let dict = FullDictionary::curated();
         let doc = Document::new_plain_english(source, &dict);
-        let is_likely_english = is_likely_english(&doc, &dict);
+        let is_likely_english = is_doc_likely_english(&doc, &dict);
         dbg!(source);
         assert!(is_likely_english);
     }

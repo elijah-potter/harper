@@ -10,7 +10,7 @@ impl Linter for LongSentences {
     fn lint(&mut self, document: &Document) -> Vec<Lint> {
         let mut output = Vec::new();
 
-        for sentence in document.sentences() {
+        for sentence in document.iter_sentences() {
             let word_count = sentence.iter_words().count();
 
             if word_count > 40 {

@@ -12,7 +12,7 @@ impl Linter for AnA {
     fn lint(&mut self, document: &Document) -> Vec<Lint> {
         let mut lints = Vec::new();
 
-        for chunk in document.chunks() {
+        for chunk in document.iter_chunks() {
             for (first_idx, second_idx) in chunk.iter_word_indices().tuple_windows() {
                 // [`TokenKind::Unlintable`] might be semantic words.
                 if chunk[first_idx..second_idx].iter_unlintables().count() > 0 {

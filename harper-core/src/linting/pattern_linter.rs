@@ -1,6 +1,6 @@
 use super::{Lint, Linter};
 use crate::patterns::Pattern;
-use crate::Token;
+use crate::{Token, TokenStringExt};
 
 #[cfg(not(feature = "concurrent"))]
 pub trait PatternLinter {
@@ -24,7 +24,7 @@ where
         let mut lints = Vec::new();
         let source = document.get_source();
 
-        for chunk in document.chunks() {
+        for chunk in document.iter_chunks() {
             let mut tok_cursor = 0;
 
             loop {

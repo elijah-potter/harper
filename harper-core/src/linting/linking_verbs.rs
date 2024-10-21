@@ -10,7 +10,7 @@ impl Linter for LinkingVerbs {
     fn lint(&mut self, document: &Document) -> Vec<Lint> {
         let mut output = Vec::new();
 
-        for chunk in document.chunks() {
+        for chunk in document.iter_chunks() {
             // The word prior to "is" must be a noun.
             for idx in chunk.iter_linking_verb_indices() {
                 let linking_verb = chunk[idx];

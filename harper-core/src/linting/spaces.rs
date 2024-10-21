@@ -9,7 +9,7 @@ impl Linter for Spaces {
     fn lint(&mut self, document: &Document) -> Vec<Lint> {
         let mut output = Vec::new();
 
-        for sentence in document.sentences() {
+        for sentence in document.iter_sentences() {
             for space in sentence.iter_spaces() {
                 let TokenKind::Space(count) = space.kind else {
                     panic!("The space iterator should only return spaces.")

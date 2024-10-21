@@ -14,7 +14,7 @@ impl Linter for SentenceCapitalization {
     fn lint(&mut self, document: &Document) -> Vec<Lint> {
         let mut lints = Vec::new();
 
-        for sentence in document.sentences() {
+        for sentence in document.iter_sentences() {
             if let Some(first_word) = sentence.first_non_whitespace() {
                 if !first_word.kind.is_word() {
                     continue;
