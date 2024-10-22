@@ -205,4 +205,44 @@ mod tests {
     fn issue_196() {
         assert_lint_count("This is formatted as an `ext4` file system.", AnA, 0);
     }
+
+    #[test]
+    fn allows_lowercase_vowels() {
+        assert_lint_count("not an error", AnA, 0);
+    }
+
+    #[test]
+    fn allows_lowercase_consonants() {
+        assert_lint_count("not a crash", AnA, 0);
+    }
+
+    #[test]
+    fn disallows_lowercase_vowels() {
+        assert_lint_count("not a error", AnA, 1);
+    }
+
+    #[test]
+    fn disallows_lowercase_consonants() {
+        assert_lint_count("not an crash", AnA, 1);
+    }
+
+    #[test]
+    fn allows_uppercase_vowels() {
+        assert_lint_count("not an Error", AnA, 0);
+    }
+
+    #[test]
+    fn allows_uppercase_consonants() {
+        assert_lint_count("not a Crash", AnA, 0);
+    }
+
+    #[test]
+    fn disallows_uppercase_vowels() {
+        assert_lint_count("not a Error", AnA, 1);
+    }
+
+    #[test]
+    fn disallows_uppercase_consonants() {
+        assert_lint_count("not an Crash", AnA, 1);
+    }
 }
