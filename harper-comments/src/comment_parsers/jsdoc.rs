@@ -15,10 +15,12 @@ impl Parser for JsDoc {
         for line in source.split(|c| *c == '\n') {
             let mut new_tokens = parse_line(line);
 
-            new_tokens.push(Token::new(
-                Span::new_with_len(line.len(), 1),
-                harper_core::TokenKind::Newline(1),
-            ));
+            if chars_traversed + line.len() < source.len() {
+                new_tokens.push(Token::new(
+                    Span::new_with_len(line.len(), 1),
+                    harper_core::TokenKind::Newline(1),
+                ));
+            }
 
             new_tokens
                 .iter_mut()
@@ -197,7 +199,6 @@ mod tests {
                 TokenKind::Unlintable,
                 TokenKind::Unlintable,
                 TokenKind::Punctuation(Punctuation::Period),
-                TokenKind::Newline(1),
             ]
         ));
     }
