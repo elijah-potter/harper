@@ -102,6 +102,8 @@ impl Matcher {
         // This match list needs to be automatically expanded instead of explicitly
         // defined like it is now.
         let mut triggers = pt! {
+            "spacial","attention" => "special attention",
+            "wellbeing" => "well-being",
             "hashtable" => "hash table",
             "hashmap" => "hash map",
             "CCP" => "Chinese Communist Party",
