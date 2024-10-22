@@ -10,6 +10,7 @@ pub fn is_likely_english(toks: &[Token], source: &[char], dict: &impl Dictionary
     let mut total_words = 0;
     let mut valid_words = 0;
     let mut punctuation = 0;
+    let mut unlintable = 0;
 
     for token in toks {
         match token.kind {
@@ -22,8 +23,13 @@ pub fn is_likely_english(toks: &[Token], source: &[char], dict: &impl Dictionary
                 }
             }
             TokenKind::Punctuation(_) => punctuation += 1,
+            TokenKind::Unlintable => unlintable += 1,
             _ => (),
         }
+    }
+
+    if unlintable > valid_words {
+        return false;
     }
 
     if (punctuation as f32 * 1.25) > valid_words as f32 {

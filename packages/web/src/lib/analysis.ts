@@ -31,3 +31,9 @@ export async function isLikelyEnglish(text: string): Promise<boolean> {
 
 	return wasm.is_likely_english(text);
 }
+
+export async function isolateEnglish(text: string): Promise<string> {
+	const wasm = await import('wasm');
+
+	return wasm.isolate_english(text);
+}

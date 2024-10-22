@@ -1,12 +1,14 @@
 <script lang="ts">
-	import { isLikelyEnglish } from '$lib/analysis';
+	import { isLikelyEnglish, isolateEnglish } from '$lib/analysis';
 	import { Textarea, Select } from 'flowbite-svelte';
 	import demoText from '../../../../../demo.md?raw';
 
 	let isEnglish: boolean | null = null;
 	let text = '';
+	let strippedText = '';
 
 	$: isLikelyEnglish(text).then((v) => (isEnglish = v));
+	$: isolateEnglish(text).then((t) => (strippedText = t));
 
 	$: color = isEnglish == null ? '' : isEnglish ? 'bg-green-100' : 'bg-red-100';
 
@@ -49,4 +51,6 @@
 		bind:value={text}
 		placeholder="Is your text supposed to be English?"
 	/>
+
+	<Textarea rows={8} value={strippedText} />
 </div>

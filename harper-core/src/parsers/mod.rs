@@ -1,10 +1,12 @@
 mod collapse_identifiers;
+mod isolate_english;
 mod markdown;
 mod mask;
 mod plain_english;
 
 use blanket::blanket;
 pub use collapse_identifiers::CollapseIdentifiers;
+pub use isolate_english::IsolateEnglish;
 pub use markdown::Markdown;
 pub use mask::Mask;
 pub use plain_english::PlainEnglish;

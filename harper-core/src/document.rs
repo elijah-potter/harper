@@ -217,7 +217,7 @@ impl Document {
     /// [`Punctuation::Quote::twin_loc`] field. This is on a best effort
     /// basis.
     ///
-    /// Current algorithm is very basic and could use some work.
+    /// Current algorithm is basic and could use some work.
     fn match_quotes(&mut self) {
         let quote_indices: Vec<usize> = self.tokens.iter_quote_indices().collect();
 

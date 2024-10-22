@@ -4,7 +4,7 @@ use std::sync::Mutex;
 
 use harper_core::language_detection::is_doc_likely_english;
 use harper_core::linting::{LintGroup, LintGroupConfig, Linter};
-use harper_core::parsers::Markdown;
+use harper_core::parsers::{IsolateEnglish, Markdown, PlainEnglish};
 use harper_core::{remove_overlaps, Document, FullDictionary, Lrc};
 use once_cell::sync::Lazy;
 use wasm_bindgen::prelude::wasm_bindgen;
@@ -28,11 +28,24 @@ pub fn setup() {
     tracing_wasm::set_as_global_default();
 }
 
-/// Helper method to quickly check if a Markdown string is likely intended to be English
+/// Helper method to quickly check if a plain string is likely intended to be English
 #[wasm_bindgen]
 pub fn is_likely_english(text: String) -> bool {
-    let document = Document::new_markdown_curated(&text);
+    let document = Document::new_plain_english_curated(&text);
     is_doc_likely_english(&document, &FullDictionary::curated())
+}
+
+/// Helper method to remove non-English text from a plain English document.
+#[wasm_bindgen]
+pub fn isolate_english(text: String) -> String {
+    let dict = FullDictionary::curated();
+
+    let document = Document::new_curated(
+        &text,
+        &mut IsolateEnglish::new(Box::new(PlainEnglish), dict.clone()),
+    );
+
+    document.to_string()
 }
 
 #[wasm_bindgen]
