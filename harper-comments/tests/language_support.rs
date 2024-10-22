@@ -49,4 +49,5 @@ create_test!(issue_132.rs, 1);
 
 // These are to make sure nothing crashes.
 create_test!(empty.js, 0);
+create_test!(issue_229.js, 0);
 create_test!(eof.rs, 0);
