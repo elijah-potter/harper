@@ -26,6 +26,11 @@ macro_rules! create_test {
 
                  dbg!(&lints);
                  assert_eq!(lints.len(), $correct_expected);
+
+                 // Make sure that all generated tokens span real characters
+                 for token in document.tokens(){
+                     assert!(token.span.try_get_content(document.get_source()).is_some());
+                 }
             }
         }
     };
