@@ -22,7 +22,7 @@ impl CommentParser {
             "rust" => tree_sitter_rust::language(),
             "typescriptreact" => tree_sitter_typescript::language_tsx(),
             "typescript" => tree_sitter_typescript::language_typescript(),
-            "py" => tree_sitter_python::language(),
+            "python" => tree_sitter_python::language(),
             "javascript" => tree_sitter_javascript::language(),
             "javascriptreact" => tree_sitter_typescript::language_tsx(),
             "go" => tree_sitter_go::language(),
@@ -65,6 +65,7 @@ impl CommentParser {
     /// [`Self::new_from_language_id`]
     fn filename_to_filetype(path: &Path) -> Option<&'static str> {
         Some(match path.extension()?.to_str()? {
+            "py" => "python",
             "rs" => "rust",
             "ts" => "typescript",
             "tsx" => "typescriptreact",
