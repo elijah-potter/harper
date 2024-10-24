@@ -34,7 +34,7 @@
 	}
 </script>
 
-<div class="[&>*]:mt-12 p-4">
+<div class="[&>*]:mt-12 p-4 dark:[&>*]:text-white">
 	<h1 class="text-2xl">Language Detection Demo</h1>
 	<p>
 		This is demonstration of Harper's ability to quickly (under 1 ms for large documents) determine
@@ -51,6 +51,8 @@
 		bind:value={text}
 		placeholder="Is your text supposed to be English?"
 	/>
+
+	<p>This lower area will show the chunks of the provided text that are marked as English.</p>
 
 	<Textarea rows={8} value={strippedText} />
 </div>
