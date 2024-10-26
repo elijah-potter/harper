@@ -23,6 +23,7 @@ impl CommentParser {
             "typescriptreact" => tree_sitter_typescript::language_tsx(),
             "typescript" => tree_sitter_typescript::language_typescript(),
             "python" => tree_sitter_python::language(),
+            "nix" => tree_sitter_nix::language(),
             "javascript" => tree_sitter_javascript::language(),
             "javascriptreact" => tree_sitter_typescript::language_tsx(),
             "go" => tree_sitter_go::language(),
@@ -66,6 +67,7 @@ impl CommentParser {
     fn filename_to_filetype(path: &Path) -> Option<&'static str> {
         Some(match path.extension()?.to_str()? {
             "py" => "python",
+            "nix" => "nix",
             "rs" => "rust",
             "ts" => "typescript",
             "tsx" => "typescriptreact",
