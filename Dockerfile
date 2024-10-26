@@ -1,4 +1,4 @@
-FROM rust:latest as wasm-build
+FROM rust:latest AS wasm-build
 
 RUN mkdir -p /usr/build/
 WORKDIR /usr/build/
@@ -10,7 +10,7 @@ COPY . .
 WORKDIR /usr/build/harper-wasm
 RUN wasm-pack build --release
 
-FROM node:slim as node-build
+FROM node:slim AS node-build
 
 RUN mkdir -p /usr/build/
 WORKDIR /usr/build/
