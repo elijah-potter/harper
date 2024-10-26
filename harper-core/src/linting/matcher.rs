@@ -268,8 +268,6 @@ impl Matcher {
             "wee", "kend" => "weekend",
             "with", "in" => "within",
             "with", "out" => "without",
-            "TreeSitter" => "Tree-sitter",
-            "Treesitter" => "Tree-sitter",
             "Tree", "sitter" => "Tree-sitter",
             "all", "of", "the" => "all the",
             "an", "other" => "another",
