@@ -26,6 +26,7 @@ tree-sitter-toml = "0.20.0"
 tree-sitter-lua = "0.0.19"
 tree-sitter-bash = "0.20.0"
 tree-sitter-java = "0.20.0"
+tree-sitter-nix = "0.0.1"
 itertools = "0.13.0"
 
 [dev-dependencies]
