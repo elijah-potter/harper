@@ -501,6 +501,7 @@ impl TokenStringExt for Document {
     create_fns_on_doc!(unlintable);
     create_fns_on_doc!(sentence_terminator);
     create_fns_on_doc!(chunk_terminator);
+    create_fns_on_doc!(punctuation);
 
     fn first_sentence_word(&self) -> Option<Token> {
         self.tokens.first_sentence_word()

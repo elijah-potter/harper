@@ -1,11 +1,12 @@
 use crate::{Dictionary, Document, Token, TokenKind};
 
+/// Check if the contents of the document are likely intended to represent
+/// English.
 pub fn is_doc_likely_english(doc: &Document, dict: &impl Dictionary) -> bool {
     is_likely_english(doc.get_tokens(), doc.get_source(), dict)
 }
 
-/// Check if the contents of the document are likely intended to represent
-/// English.
+/// Check if given tokens are likely intended to represent English.
 pub fn is_likely_english(toks: &[Token], source: &[char], dict: &impl Dictionary) -> bool {
     let mut total_words = 0;
     let mut valid_words = 0;
@@ -28,6 +29,10 @@ pub fn is_likely_english(toks: &[Token], source: &[char], dict: &impl Dictionary
         }
     }
 
+    if total_words <= 7 && total_words - valid_words > 0 {
+        return false;
+    }
+
     if unlintable > valid_words {
         return false;
     }
@@ -36,7 +41,7 @@ pub fn is_likely_english(toks: &[Token], source: &[char], dict: &impl Dictionary
         return false;
     }
 
-    if (valid_words as f64 / total_words as f64) < 0.4 {
+    if (valid_words as f64 / total_words as f64) < 0.7 {
         return false;
     }
 
@@ -112,5 +117,27 @@ def fibIter(n):
     return fib
         "#,
         );
+    }
+
+    #[test]
+    fn mixed_french_english_park() {
+        assert_not_english("Je voudrais promener au the park a huit heures with ma voisine");
+    }
+
+    #[test]
+    fn mixed_french_english_drunk() {
+        assert_not_english("Je ne suis pas drunk, je suis only ivre by you");
+    }
+
+    #[test]
+    fn mixed_french_english_dress() {
+        assert_not_english(
+            "Je buy une robe nouveau chaque Tuesday, mais aujourd'hui, je don't have temps",
+        );
+    }
+
+    #[test]
+    fn english_motto() {
+        assert_english("I have a simple motto in life");
     }
 }

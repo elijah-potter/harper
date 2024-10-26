@@ -26,6 +26,14 @@
 			name: 'Chinese Lorem Ipsum',
 			value:
 				'食棵支每躲種。奶象打星爪子二細喜才記行在發像原斤！頁固點子衣點豆看身蝴看苗急午公何足，筆娘經色蝶行元香也要。麻了綠尼固世，色北書目登功；因告黑。'
+		},
+		{
+			name: 'Spanish English Mix',
+			value: 'En la mañana, como a dish de los huevos, un poquito of tocino, y a lot of leche.'
+		},
+		{
+			name: 'Polish English Chunked',
+			value: 'I have a simple motto in life: jeśli jesteś spragniony, napij się wody.'
 		}
 	];
 

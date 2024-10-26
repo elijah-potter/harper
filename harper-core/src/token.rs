@@ -104,7 +104,10 @@ impl TokenKind {
 
         match self {
             TokenKind::Punctuation(punct) => {
-                matches!(punct, Punctuation::Comma | Punctuation::Quote { .. })
+                matches!(
+                    punct,
+                    Punctuation::Comma | Punctuation::Quote { .. } | Punctuation::Colon
+                )
             }
             _ => false,
         }
@@ -373,6 +376,7 @@ pub trait TokenStringExt {
     create_decl_for!(unlintable);
     create_decl_for!(sentence_terminator);
     create_decl_for!(chunk_terminator);
+    create_decl_for!(punctuation);
 
     fn iter_linking_verb_indices(&self) -> impl Iterator<Item = usize> + '_;
     fn iter_linking_verbs(&self) -> impl Iterator<Item = Token> + '_;
@@ -400,6 +404,7 @@ impl TokenStringExt for [Token] {
     create_fns_for!(quote);
     create_fns_for!(number);
     create_fns_for!(at);
+    create_fns_for!(punctuation);
     create_fns_for!(ellipsis);
     create_fns_for!(unlintable);
     create_fns_for!(sentence_terminator);
