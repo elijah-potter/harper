@@ -63,3 +63,11 @@ Just make sure to read [our contribution guidelines first.](https://github.com/e
 ### Where did the name Harper come from?
 
 See [this blog post](https://elijahpotter.dev/articles/naming_harper).
+
+## Huge Thanks
+
+This project would not be possible without the hard work from those who [contribute](/CONTRIBUTING.md).
+
+<a href="https://github.com/elijah-potter/harper/graphs/contributors">
+  <img src="https://contrib.rocks/image?repo=elijah-potter/harper" />
+</a>
