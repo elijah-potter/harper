@@ -153,3 +153,11 @@ It contains almost all words you could possibly encounter.
 I _do_ take pull requests or issues for adding words to the static dictionary.
 It is composed of two files: `harper-core/dictionary.dict` and `harper-core/affixes.json`
 If you just want to add a proper noun, try running `just addnoun <your noun>`.
+
+## Huge Thanks
+
+This project would not be possible without the hard work from those who [contribute](/CONTRIBUTING.md).
+
+<a href="https://github.com/elijah-potter/harper/graphs/contributors">
+  <img src="https://contrib.rocks/image?repo=elijah-potter/harper" />
+</a>
