@@ -1,6 +1,7 @@
 use crate::Lrc;
 
 use hashbrown::HashMap;
+use itertools::Itertools;
 
 use super::dictionary::Dictionary;
 use crate::{CharString, WordMetadata};
@@ -85,11 +86,31 @@ where
         self.get_word_metadata(&chars)
     }
 
-    fn fuzzy_match(&self, word: &[char], max_distance: u8) -> Vec<(CharString, WordMetadata)> {
-        todo!()
+    fn fuzzy_match(
+        &self,
+        word: &[char],
+        max_distance: u8,
+        max_results: usize,
+    ) -> Vec<(&[char], u8, WordMetadata)> {
+        self.children
+            .iter()
+            .flat_map(|d| d.fuzzy_match(word, max_distance, max_results))
+            .sorted_by_key(|r| r.1)
+            .take(max_results)
+            .collect()
     }
 
-    fn fuzzy_match_str(&self, word: &str, max_distance: u8) -> Vec<(CharString, WordMetadata)> {
-        todo!()
+    fn fuzzy_match_str(
+        &self,
+        word: &str,
+        max_distance: u8,
+        max_results: usize,
+    ) -> Vec<(&[char], u8, WordMetadata)> {
+        self.children
+            .iter()
+            .flat_map(|d| d.fuzzy_match_str(word, max_distance, max_results))
+            .sorted_by_key(|r| r.1)
+            .take(max_results)
+            .collect()
     }
 }

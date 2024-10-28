@@ -5,7 +5,7 @@ use fst::{automaton::Levenshtein, IntoStreamer};
 use memmap::Mmap;
 
 use super::hunspell::{parse_default_attribute_list, parse_default_word_list};
-use crate::{CharString, Lrc, WordMetadata};
+use crate::{Lrc, WordMetadata};
 
 use super::Dictionary;
 
@@ -29,7 +29,10 @@ fn uncached_inner_new() -> Lrc<FstDictionary> {
     let mmap = unsafe { Mmap::map(&File::open("../../dictionary.fst").unwrap()).unwrap() };
     let word_map = FstMap::new(mmap).unwrap();
 
-    let mut words: Vec<CharString> = word_list.iter().map(|mw| mw.letters.clone()).collect();
+    let mut words: Vec<&[char]> = word_list
+        .iter()
+        .map(|mw| mw.letters.as_ref().into())
+        .collect();
     words.sort();
     words.dedup();
     let metadata: Vec<WordMetadata> = todo!();
@@ -60,31 +63,27 @@ impl Dictionary for FstDictionary {
         self.metadata[index]
     }
 
-    fn fuzzy_match(&self, word: &[char], max_distance: u8) -> Vec<(CharString, WordMetadata)> {
-        let aut = Levenshtein::new(&word.iter().collect::<String>(), max_distance as u32).unwrap();
-        let words = self
-            .word_map
-            .search(aut)
-            .into_stream()
-            .into_str_vec()
-            .unwrap();
-        words
-            .into_iter()
-            .map(|(word, i)| (word.chars().collect(), self.metadata[i as usize]))
-            .collect()
+    fn fuzzy_match(
+        &self,
+        word: &[char],
+        max_distance: u8,
+        max_results: usize,
+    ) -> Vec<(&[char], u8, WordMetadata)> {
+        self.fuzzy_match_str(&word.iter().collect::<String>(), max_distance, max_results)
     }
 
-    fn fuzzy_match_str(&self, word: &str, max_distance: u8) -> Vec<(CharString, WordMetadata)> {
+    fn fuzzy_match_str(
+        &self,
+        word: &str,
+        max_distance: u8,
+        max_results: usize,
+    ) -> Vec<(&[char], u8, WordMetadata)> {
         let aut = Levenshtein::new(word, max_distance as u32).unwrap();
-        let words = self
-            .word_map
-            .search(aut)
-            .into_stream()
-            .into_str_vec()
-            .unwrap();
+        let words: Vec<(Vec<u8>, u64)> = self.word_map.search(aut).into_stream().into_byte_vec();
         words
             .into_iter()
-            .map(|(word, i)| (word.chars().collect(), self.metadata[i as usize]))
+            .take(max_results)
+            .map(|(word, i)| (word, i as u8, self.metadata[i as usize]))
             .collect()
     }
 }
