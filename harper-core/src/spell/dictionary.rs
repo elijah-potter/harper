@@ -1,6 +1,6 @@
 use blanket::blanket;
 
-use crate::{CharString, WordMetadata};
+use crate::WordMetadata;
 
 #[cfg(not(feature = "concurrent"))]
 #[blanket(derive(Rc))]
@@ -10,9 +10,19 @@ pub trait Dictionary {
     /// Check if the dictionary contains a given word.
     fn contains_word_str(&self, word: &str) -> bool;
     /// Gets best fuzzy match from dictionary
-    fn fuzzy_match(&self, word: &[char], max_distance: u8) -> Vec<(CharString, WordMetadata)>;
+    fn fuzzy_match(
+        &self,
+        word: &[char],
+        max_distance: u8,
+        max_results: usize,
+    ) -> Vec<(&[char], u8, WordMetadata)>;
     /// Gets best fuzzy match from dictionary
-    fn fuzzy_match_str(&self, word: &str, max_distance: u8) -> Vec<(CharString, WordMetadata)>;
+    fn fuzzy_match_str(
+        &self,
+        word: &str,
+        max_distance: u8,
+        max_results: usize,
+    ) -> Vec<(&[char], u8, WordMetadata)>;
     /// Get the associated [`WordMetadata`] for a given word.
     /// If the word isn't in the dictionary, the resulting metadata will be
     /// empty.
@@ -31,9 +41,19 @@ pub trait Dictionary: Send + Sync {
     /// Check if the dictionary contains a given word.
     fn contains_word_str(&self, word: &str) -> bool;
     /// Gets best fuzzy match from dictionary
-    fn fuzzy_match(&self, word: &[char], max_distance: u8) -> Vec<(CharString, WordMetadata)>;
+    fn fuzzy_match(
+        &self,
+        word: &[char],
+        max_distance: u8,
+        max_results: usize,
+    ) -> Vec<(&[char], u8, WordMetadata)>;
     /// Gets best fuzzy match from dictionary
-    fn fuzzy_match_str(&self, word: &str, max_distance: u8) -> Vec<(CharString, WordMetadata)>;
+    fn fuzzy_match_str(
+        &self,
+        word: &str,
+        max_distance: u8,
+        max_results: usize,
+    ) -> Vec<(&[char], u8, WordMetadata)>;
     /// Get the associated [`WordMetadata`] for a given word.
     /// If the word isn't in the dictionary, the resulting metadata will be
     /// empty.
