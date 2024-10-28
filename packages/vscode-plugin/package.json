@@ -42,6 +42,8 @@
 		"onLanguage:javascriptreact",
 		"onLanguage:lua",
 		"onLanguage:markdown",
+		"onLanguage:nix",
+		"onLanguage:plaintext",
 		"onLanguage:python",
 		"onLanguage:ruby",
 		"onLanguage:rust",
