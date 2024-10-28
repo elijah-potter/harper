@@ -34,7 +34,7 @@ impl CommentParser {
             "csharp" => tree_sitter_c_sharp::language(),
             "toml" => tree_sitter_toml::language(),
             "lua" => tree_sitter_lua::language(),
-            "sh" => tree_sitter_bash::language(),
+            "shellscript" => tree_sitter_bash::language(),
             "java" => tree_sitter_java::language(),
             _ => return None,
         };
@@ -82,8 +82,8 @@ impl CommentParser {
             "cs" => "csharp",
             "toml" => "toml",
             "lua" => "lua",
-            "sh" => "sh",
-            "bash" => "sh",
+            "sh" => "shellscript",
+            "bash" => "shellscript",
             "java" => "java",
             _ => return None,
         })
