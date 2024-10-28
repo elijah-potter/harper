@@ -4,30 +4,17 @@ import type { Executable, LanguageClientOptions } from 'vscode-languageclient/no
 import { commands, Uri, window, workspace } from 'vscode';
 import { LanguageClient, TransportKind } from 'vscode-languageclient/node';
 
+// There's no publicly available extension manifest type except for the internal one from VSCode's
+// codebase. So, we declare our own with only the fields we need and have. See:
+// https://stackoverflow.com/a/78536803
+type ExtensionManifest = {
+	activationEvents: string[];
+	contributes: { configuration: { properties: { [key: string]: object } } };
+};
+
 let client: LanguageClient | undefined;
 const serverOptions: Executable = { command: '', transport: TransportKind.stdio };
-const clientOptions: LanguageClientOptions = {
-	documentSelector: [
-		{ language: 'html' },
-		{ language: 'markdown' },
-		{ language: 'rust' },
-		{ language: 'typescriptreact' },
-		{ language: 'typescript' },
-		{ language: 'py' },
-		{ language: 'javascript' },
-		{ language: 'javascriptreact' },
-		{ language: 'go' },
-		{ language: 'c' },
-		{ language: 'cpp' },
-		{ language: 'ruby' },
-		{ language: 'swift' },
-		{ language: 'csharp' },
-		{ language: 'toml' },
-		{ language: 'lua' },
-		{ language: 'sh' },
-		{ language: 'java' }
-	]
-};
+const clientOptions: LanguageClientOptions = {};
 
 export async function activate(context: ExtensionContext): Promise<void> {
 	serverOptions.command = Uri.joinPath(
@@ -36,26 +23,32 @@ export async function activate(context: ExtensionContext): Promise<void> {
 		`harper-ls${process.platform === 'win32' ? '.exe' : ''}`
 	).fsPath;
 
-	clientOptions.outputChannel = window.createOutputChannel('Harper');
-	context.subscriptions.push(clientOptions.outputChannel);
-
+	let manifest: ExtensionManifest;
 	try {
-		const manifest: { contributes: { configuration: { properties: { [key: string]: object } } } } =
-			JSON.parse(
-				(await workspace.fs.readFile(Uri.joinPath(context.extensionUri, 'package.json'))).toString()
-			);
-		const configs = Object.keys(manifest.contributes.configuration.properties);
-		context.subscriptions.push(
-			workspace.onDidChangeConfiguration(async (event) => {
-				if (configs.find((c) => event.affectsConfiguration(c))) {
-					clientOptions.outputChannel?.appendLine('Configuration changed, restarting server');
-					await startLanguageServer();
-				}
-			})
+		manifest = JSON.parse(
+			(await workspace.fs.readFile(Uri.joinPath(context.extensionUri, 'package.json'))).toString()
 		);
 	} catch (error) {
 		showError('Failed to read manifest file', error);
+		return;
 	}
+
+	clientOptions.documentSelector = manifest.activationEvents
+		.filter((e) => e.startsWith('onLanguage:'))
+		.map((e) => ({ language: e.split(':')[1] }));
+
+	clientOptions.outputChannel = window.createOutputChannel('Harper');
+	context.subscriptions.push(clientOptions.outputChannel);
+
+	const configs = Object.keys(manifest.contributes.configuration.properties);
+	context.subscriptions.push(
+		workspace.onDidChangeConfiguration(async (event) => {
+			if (configs.find((c) => event.affectsConfiguration(c))) {
+				clientOptions.outputChannel?.appendLine('Configuration changed, restarting server');
+				await startLanguageServer();
+			}
+		})
+	);
 
 	context.subscriptions.push(
 		commands.registerCommand('harper.languageserver.restart', startLanguageServer)
