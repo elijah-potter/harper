@@ -49,6 +49,14 @@ thread_local! {
     static DICT: Lrc<FstDictionary> = uncached_inner_new();
 }
 
+impl FstDictionary {
+    /// Create a dictionary from the curated dictionary included
+    /// in the Harper binary.
+    pub fn curated() -> Lrc<Self> {
+        DICT.with(|v| v.clone())
+    }
+}
+
 impl Dictionary for FstDictionary {
     fn contains_word(&self, word: &[char]) -> bool {
         self.word_map.contains_key(word.iter().collect::<String>())
@@ -59,8 +67,16 @@ impl Dictionary for FstDictionary {
     }
 
     fn get_word_metadata(&self, word: &[char]) -> WordMetadata {
-        let index: usize = self.word_map.get(word.iter().collect::<String>()).unwrap() as usize;
-        self.metadata[index]
+        let index: Option<usize> = self
+            .word_map
+            .get(word.iter().collect::<String>())
+            .map(|i| i as usize);
+
+        if let Some(i) = index {
+            self.metadata[i]
+        } else {
+            WordMetadata::default()
+        }
     }
 
     fn get_word_metadata_str(&self, word: &str) -> WordMetadata {
