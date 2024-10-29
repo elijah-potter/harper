@@ -2,7 +2,7 @@ use super::Pattern;
 use crate::Token;
 
 /// A naive pattern collection that naively iterates through a list of patterns,
-/// returning the first one that matches..
+/// returning the first one that matches.
 #[derive(Default)]
 pub struct NaivePatternGroup {
     patterns: Vec<Box<dyn Pattern>>,
