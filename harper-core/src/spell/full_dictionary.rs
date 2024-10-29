@@ -117,26 +117,6 @@ impl FullDictionary {
 
         word_len_starts
     }
-
-    fn words_iter(&self) -> impl Iterator<Item = &'_ [char]> {
-        self.words.iter().map(|v| v.as_slice())
-    }
-
-    /// Iterate over all the words in the dictionary of a given length
-    fn words_with_len_iter(&self, len: usize) -> Box<dyn Iterator<Item = &'_ [char]> + '_> {
-        if len == 0 || len >= self.word_len_starts.len() {
-            return Box::new(std::iter::empty());
-        }
-
-        let start = self.word_len_starts[len];
-        let end = if len + 1 == self.word_len_starts.len() {
-            self.words.len()
-        } else {
-            self.word_len_starts[len + 1]
-        };
-
-        Box::new(self.words[start..end].iter().map(|v| v.as_slice()))
-    }
 }
 
 impl Default for FullDictionary {
@@ -245,6 +225,25 @@ impl Dictionary for FullDictionary {
     ) -> Vec<(&[char], u8, WordMetadata)> {
         let word: Vec<_> = word.chars().collect();
         self.fuzzy_match(&word, max_distance, max_results)
+    }
+
+    fn words_iter(&self) -> impl Iterator<Item = &'_ [char]> {
+        self.words.iter().map(|v| v.as_slice())
+    }
+
+    fn words_with_len_iter(&self, len: usize) -> Box<dyn Iterator<Item = &'_ [char]> + '_> {
+        if len == 0 || len >= self.word_len_starts.len() {
+            return Box::new(std::iter::empty());
+        }
+
+        let start = self.word_len_starts[len];
+        let end = if len + 1 == self.word_len_starts.len() {
+            self.words.len()
+        } else {
+            self.word_len_starts[len + 1]
+        };
+
+        Box::new(self.words[start..end].iter().map(|v| v.as_slice()))
     }
 }
 
