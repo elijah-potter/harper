@@ -3,6 +3,7 @@ use itertools::{Itertools, MinMaxResult};
 use crate::CharString;
 
 pub use self::dictionary::Dictionary;
+pub use self::fst_dictionary::FstDictionary;
 pub use self::full_dictionary::FullDictionary;
 pub use self::merged_dictionary::MergedDictionary;
 
