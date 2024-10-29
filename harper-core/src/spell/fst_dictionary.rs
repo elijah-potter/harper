@@ -1,18 +1,15 @@
-use fst::Map as FstMap;
+use super::FullDictionary;
 use fst::{automaton::Levenshtein, IntoStreamer};
-use itertools::Itertools;
+use fst::{Map as FstMap, Streamer};
 
-use super::hunspell::{parse_default_attribute_list, parse_default_word_list};
-use crate::{CharString, Lrc, WordMetadata};
+use crate::{Lrc, WordMetadata};
 
 use super::Dictionary;
 
 #[derive(Debug)]
 pub struct FstDictionary {
-    /// Sorted by string in lexicographic order
-    metadata: Vec<WordMetadata>,
-    /// Sorted in lexicographic order
-    words: Vec<CharString>,
+    /// Underlying FullDictionary used for everything except fuzzy finding
+    full_dict: Lrc<FullDictionary>,
     /// Used for fuzzy-finding the index of words or metadata
     word_map: FstMap<Vec<u8>>,
 }
@@ -20,27 +17,11 @@ pub struct FstDictionary {
 /// The uncached function that is used to produce the original copy of the
 /// curated dictionary.
 fn uncached_inner_new() -> Lrc<FstDictionary> {
-    let word_list = parse_default_word_list().unwrap();
-    let attr_list = parse_default_attribute_list();
-
-    // There will be at _least_ this number of words
-    // This creates a memory map, which enables searching the map without loading
-    // all of it into memory.
+    let full_dict = FullDictionary::curated();
     let word_map = FstMap::new(include_bytes!("../../dictionary.fst").to_vec()).unwrap();
 
-    // There will be at _least_ this number of words
-    let mut wmap = hashbrown::HashMap::with_capacity(word_list.len());
-    attr_list.expand_marked_words(word_list, &mut wmap);
-
-    let (words, metadata) = wmap
-        .into_iter()
-        .sorted_by(|a, b| Ord::cmp(a.0.as_slice(), b.0.as_slice()))
-        .dedup_by(|a, b| a.0 == b.0)
-        .unzip();
-
     Lrc::new(FstDictionary {
-        metadata,
-        words,
+        full_dict,
         word_map,
     })
 }
@@ -59,29 +40,19 @@ impl FstDictionary {
 
 impl Dictionary for FstDictionary {
     fn contains_word(&self, word: &[char]) -> bool {
-        self.word_map.contains_key(word.iter().collect::<String>())
+        self.full_dict.contains_word(word)
     }
 
     fn contains_word_str(&self, word: &str) -> bool {
-        self.word_map.contains_key(word)
+        self.full_dict.contains_word_str(word)
     }
 
     fn get_word_metadata(&self, word: &[char]) -> WordMetadata {
-        let index: Option<usize> = self
-            .word_map
-            .get(word.iter().collect::<String>())
-            .map(|i| i as usize);
-
-        if let Some(i) = index {
-            self.metadata[i]
-        } else {
-            WordMetadata::default()
-        }
+        self.full_dict.get_word_metadata(word)
     }
 
     fn get_word_metadata_str(&self, word: &str) -> WordMetadata {
-        let index: usize = self.word_map.get(word).unwrap() as usize;
-        self.metadata[index]
+        self.full_dict.get_word_metadata_str(word)
     }
 
     fn fuzzy_match(
@@ -100,21 +71,36 @@ impl Dictionary for FstDictionary {
         max_results: usize,
     ) -> Vec<(&[char], u8, WordMetadata)> {
         let aut = Levenshtein::new(word, max_distance as u32).unwrap();
-        let word_indexes: Vec<u64> = self.word_map.search(aut).into_stream().into_values();
+        let mut word_indexes_stream = self.word_map.search(aut).into_stream();
+        let mut word_indexes = Vec::with_capacity(max_results);
+
+        let i = 0;
+        while i < max_results {
+            if let Some(v) = word_indexes_stream.next() {
+                word_indexes.push(v.1);
+            } else {
+                break;
+            }
+        }
         word_indexes
             .into_iter()
             .take(max_results)
-            .map(|i| (self.words.get(i as usize).unwrap(), i))
-            .map(|(word, i)| (word.as_slice(), i as u8, self.metadata[i as usize]))
+            .map(|i| (self.full_dict.get_word(i as usize), i))
+            .map(|(word, i)| {
+                (
+                    word.as_slice(),
+                    i as u8,
+                    self.full_dict.get_metadata(i as usize).to_owned(),
+                )
+            })
             .collect()
     }
 
     fn words_iter(&self) -> impl Iterator<Item = &'_ [char]> {
-        self.words.iter().map(|v| v.as_slice())
+        self.full_dict.words_iter()
     }
 
     fn words_with_len_iter(&self, len: usize) -> Box<dyn Iterator<Item = &'_ [char]> + '_> {
-        // Could be _way_ faster.
-        Box::new(self.words_iter().filter(move |w| w.len() == len))
+        self.full_dict.words_with_len_iter(len)
     }
 }

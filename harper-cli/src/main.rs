@@ -8,7 +8,7 @@ use clap::Parser;
 use harper_comments::CommentParser;
 use harper_core::linting::{LintGroup, LintGroupConfig, Linter};
 use harper_core::parsers::Markdown;
-use harper_core::{remove_overlaps, Dictionary, Document, FullDictionary};
+use harper_core::{remove_overlaps, Dictionary, Document, FstDictionary};
 
 #[derive(Debug, Parser)]
 enum Args {
@@ -37,7 +37,7 @@ fn main() -> anyhow::Result<()> {
         Args::Lint { file, count } => {
             let (doc, source) = load_file(&file)?;
 
-            let mut linter = LintGroup::new(LintGroupConfig::default(), FullDictionary::curated());
+            let mut linter = LintGroup::new(LintGroupConfig::default(), FstDictionary::curated());
             let mut lints = linter.lint(&doc);
 
             if count {
@@ -85,7 +85,7 @@ fn main() -> anyhow::Result<()> {
             Ok(())
         }
         Args::Words => {
-            let dict = FullDictionary::curated();
+            let dict = FstDictionary::curated();
 
             let mut word_str = String::new();
 
