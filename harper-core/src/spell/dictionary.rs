@@ -31,6 +31,12 @@ pub trait Dictionary {
     /// If the word isn't in the dictionary, the resulting metadata will be
     /// empty.
     fn get_word_metadata_str(&self, word: &str) -> WordMetadata;
+
+    /// Iterate over the words in the dictionary.
+    fn words_iter(&self) -> impl Iterator<Item = &'_ [char]>;
+
+    /// Iterate over all the words in the dictionary of a given length
+    fn words_with_len_iter(&self, len: usize) -> Box<dyn Iterator<Item = &'_ [char]> + '_>;
 }
 
 #[cfg(feature = "concurrent")]
@@ -62,4 +68,10 @@ pub trait Dictionary: Send + Sync {
     /// If the word isn't in the dictionary, the resulting metadata will be
     /// empty.
     fn get_word_metadata_str(&self, word: &str) -> WordMetadata;
+
+    /// Iterate over the words in the dictionary.
+    fn words_iter(&self) -> impl Iterator<Item = &'_ [char]>;
+
+    /// Iterate over all the words in the dictionary of a given length
+    fn words_with_len_iter(&self, len: usize) -> Box<dyn Iterator<Item = &'_ [char]> + '_>;
 }

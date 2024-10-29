@@ -76,6 +76,18 @@ where
         found_metadata
     }
 
+    fn words_iter(&self) -> impl Iterator<Item = &'_ [char]> {
+        self.children.iter().flat_map(|c| c.words_iter())
+    }
+
+    fn words_with_len_iter(&self, len: usize) -> Box<dyn Iterator<Item = &'_ [char]> + '_> {
+        Box::new(
+            self.children
+                .iter()
+                .flat_map(move |c| c.words_with_len_iter(len)),
+        )
+    }
+
     fn contains_word_str(&self, word: &str) -> bool {
         let chars: CharString = word.chars().collect();
         self.contains_word(&chars)

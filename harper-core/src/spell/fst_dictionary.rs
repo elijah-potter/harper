@@ -108,4 +108,13 @@ impl Dictionary for FstDictionary {
             .map(|(word, i)| (word.as_slice(), i as u8, self.metadata[i as usize]))
             .collect()
     }
+
+    fn words_iter(&self) -> impl Iterator<Item = &'_ [char]> {
+        self.words.iter().map(|v| v.as_slice())
+    }
+
+    fn words_with_len_iter(&self, len: usize) -> Box<dyn Iterator<Item = &'_ [char]> + '_> {
+        // Could be _way_ faster.
+        Box::new(self.words_iter().filter(move |w| w.len() == len))
+    }
 }
