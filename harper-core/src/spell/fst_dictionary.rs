@@ -74,13 +74,14 @@ impl Dictionary for FstDictionary {
         let mut word_indexes_stream = self.word_map.search(aut).into_stream();
         let mut word_indexes = Vec::with_capacity(max_results);
 
-        let i = 0;
+        let mut i = 0;
         while i < max_results {
             if let Some(v) = word_indexes_stream.next() {
                 word_indexes.push(v.1);
             } else {
                 break;
             }
+            i += 1;
         }
         word_indexes
             .into_iter()
