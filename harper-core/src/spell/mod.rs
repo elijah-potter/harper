@@ -1,5 +1,3 @@
-use std::borrow::Cow;
-
 use itertools::{Itertools, MinMaxResult};
 
 use crate::CharString;
@@ -27,12 +25,52 @@ pub fn suggest_correct_spelling<'a>(
         .into_iter()
         .map(|r| r.0)
         .collect();
-    matches
+
+    let mut found = Vec::with_capacity(matches.len());
+    // Often the longest and the shortest words are the most helpful, so lets push
+    // them first.
+    let minmax = matches.iter().position_minmax_by_key(|a| a.len());
+    if let MinMaxResult::MinMax(a, b) = minmax {
+        if a == b {
+            found.push(matches[a]);
+        } else {
+            found.push(matches[a]);
+            found.push(matches[b]);
+        }
+
+        // Push the rest
+        found.extend(
+            matches
+                .iter()
+                .enumerate()
+                .filter(|(i, _)| *i != a && *i != b)
+                .map(|v| v.1),
+        );
+    } else {
+        // Push the rest
+        found.extend(matches);
+    }
+
+    // Swap the lowest edit distance word with the shortest.
+    if found.len() >= 3 {
+        found.swap(0, 2);
+    }
+
+    // Let common words bubble up.
+    found.sort_by_key(|v| {
+        if dictionary.get_word_metadata(v).common {
+            0
+        } else {
+            1
+        }
+    });
+
+    found
 }
 
 /// Convenience function over [`suggest_correct_spelling`] that does conversions
 /// for you.
-pub(self) fn suggest_correct_spelling_str(
+pub fn suggest_correct_spelling_str(
     misspelled_word: impl Into<String>,
     result_limit: usize,
     max_edit_dist: u8,

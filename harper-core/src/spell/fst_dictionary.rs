@@ -1,7 +1,6 @@
-use core::str;
-
 use fst::Map as FstMap;
 use fst::{automaton::Levenshtein, IntoStreamer};
+use itertools::Itertools;
 
 use super::hunspell::{parse_default_attribute_list, parse_default_word_list};
 use crate::{CharString, Lrc, WordMetadata};
@@ -29,13 +28,15 @@ fn uncached_inner_new() -> Lrc<FstDictionary> {
     // all of it into memory.
     let word_map = FstMap::new(include_bytes!("../../dictionary.fst").to_vec()).unwrap();
 
-    let mut words: Vec<CharString> = word_list
-        .iter()
-        .map(|mw| mw.letters.as_ref().into())
-        .collect();
-    words.sort();
-    words.dedup();
-    let metadata: Vec<WordMetadata> = todo!();
+    // There will be at _least_ this number of words
+    let mut wmap = hashbrown::HashMap::with_capacity(word_list.len());
+    attr_list.expand_marked_words(word_list, &mut wmap);
+
+    let (words, metadata) = wmap
+        .into_iter()
+        .sorted_by(|a, b| Ord::cmp(a.0.as_slice(), b.0.as_slice()))
+        .dedup_by(|a, b| a.0 == b.0)
+        .unzip();
 
     Lrc::new(FstDictionary {
         metadata,
