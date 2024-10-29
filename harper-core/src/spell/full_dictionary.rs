@@ -1,5 +1,4 @@
-use std::borrow::Cow;
-
+use super::seq_to_normalized;
 use hashbrown::HashMap;
 use smallvec::{SmallVec, ToSmallVec};
 
@@ -116,6 +115,13 @@ impl FullDictionary {
         }
 
         word_len_starts
+    }
+
+    pub fn get_word(&self, index: usize) -> &CharString {
+        &self.words[index]
+    }
+    pub fn get_metadata(&self, index: usize) -> &WordMetadata {
+        self.word_map.get(self.get_word(index)).unwrap()
     }
 }
 
@@ -289,23 +295,6 @@ pub fn edit_distance_min_alloc(
 
 pub fn edit_distance(source: &[char], target: &[char]) -> u8 {
     edit_distance_min_alloc(source, target, &mut Vec::new(), &mut Vec::new())
-}
-
-/// Convert a given character sequence to the standard character set
-/// the dictionary is in.
-pub fn seq_to_normalized(seq: &[char]) -> Cow<'_, [char]> {
-    if seq.iter().any(|c| char_to_normalized(*c) != *c) {
-        Cow::Owned(seq.iter().copied().map(char_to_normalized).collect())
-    } else {
-        Cow::Borrowed(seq)
-    }
-}
-
-pub fn char_to_normalized(c: char) -> char {
-    match c {
-        '’' => '\'',
-        _ => c,
-    }
 }
 
 #[cfg(test)]

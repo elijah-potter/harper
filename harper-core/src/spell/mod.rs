@@ -1,3 +1,5 @@
+use std::borrow::Cow;
+
 use itertools::{Itertools, MinMaxResult};
 
 use crate::CharString;
@@ -82,6 +84,23 @@ pub fn suggest_correct_spelling_str(
         .into_iter()
         .map(|a| a.iter().collect::<String>())
         .collect()
+}
+
+/// Convert a given character sequence to the standard character set
+/// the dictionary is in.
+pub fn seq_to_normalized(seq: &[char]) -> Cow<'_, [char]> {
+    if seq.iter().any(|c| char_to_normalized(*c) != *c) {
+        Cow::Owned(seq.iter().copied().map(char_to_normalized).collect())
+    } else {
+        Cow::Borrowed(seq)
+    }
+}
+
+pub fn char_to_normalized(c: char) -> char {
+    match c {
+        '’' => '\'',
+        _ => c,
+    }
 }
 
 #[cfg(test)]
