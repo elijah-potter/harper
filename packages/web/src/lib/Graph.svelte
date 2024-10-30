@@ -1,6 +1,5 @@
 <script lang="ts">
 	import IntersectionObserver from 'svelte-intersection-observer';
-	import { sineInOut } from 'svelte/easing';
 	let data = new Map<string, number>();
 	data.set('Harper', 10);
 	data.set('LanguageTool', 650);
@@ -26,9 +25,7 @@
 		return {
 			duration,
 			css: (t: number) => {
-				const eased = sineInOut(t);
-
-				return `width: ${width * 100 * eased}%;`;
+				return `width: ${width * 100 * t}%;`;
 			}
 		};
 	}
@@ -43,7 +40,7 @@
 						{name} - {width * maxW} ms
 						<div
 							class="rounded transition-all mb-4 p-2 font-bold bg-gray-200"
-							in:expand={{ width, duration: 1000 }}
+							in:expand={{ width, duration: width * maxW }}
 							style={`width: ${width * 100}%;`}
 						></div>
 					</div>
