@@ -233,8 +233,8 @@ impl Dictionary for FullDictionary {
         self.fuzzy_match(&word, max_distance, max_results)
     }
 
-    fn words_iter(&self) -> impl Iterator<Item = &'_ [char]> {
-        self.words.iter().map(|v| v.as_slice())
+    fn words_iter(&self) -> Box<dyn Iterator<Item = &'_ [char]> + '_> {
+        Box::new(self.words.iter().map(|v| v.as_slice()))
     }
 
     fn words_with_len_iter(&self, len: usize) -> Box<dyn Iterator<Item = &'_ [char]> + '_> {

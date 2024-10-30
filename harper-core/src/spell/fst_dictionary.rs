@@ -1,4 +1,4 @@
-use super::FullDictionary;
+use super::{seq_to_normalized, FullDictionary};
 use fst::{automaton::Levenshtein, IntoStreamer};
 use fst::{Map as FstMap, Streamer};
 
@@ -28,6 +28,12 @@ fn uncached_inner_new() -> Lrc<FstDictionary> {
 
 thread_local! {
     static DICT: Lrc<FstDictionary> = uncached_inner_new();
+}
+
+impl PartialEq for FstDictionary {
+    fn eq(&self, other: &Self) -> bool {
+        self.full_dict == other.full_dict
+    }
 }
 
 impl FstDictionary {
@@ -70,7 +76,14 @@ impl Dictionary for FstDictionary {
         max_distance: u8,
         max_results: usize,
     ) -> Vec<(&[char], u8, WordMetadata)> {
-        let aut = Levenshtein::new(word, max_distance as u32).unwrap();
+        let chars: Vec<_> = word.chars().collect();
+        let misspelled_word = seq_to_normalized(&chars);
+        let misspelled_lower: String = misspelled_word
+            .iter()
+            .flat_map(|v| v.to_lowercase())
+            .collect();
+
+        let aut = Levenshtein::new(&misspelled_lower, max_distance as u32).unwrap();
         let mut word_indexes_stream = self.word_map.search(aut).into_stream();
         let mut word_indexes = Vec::with_capacity(max_results);
 
@@ -97,11 +110,34 @@ impl Dictionary for FstDictionary {
             .collect()
     }
 
-    fn words_iter(&self) -> impl Iterator<Item = &'_ [char]> {
+    fn words_iter(&self) -> Box<dyn Iterator<Item = &'_ [char]> + '_> {
         self.full_dict.words_iter()
     }
 
     fn words_with_len_iter(&self, len: usize) -> Box<dyn Iterator<Item = &'_ [char]> + '_> {
         self.full_dict.words_with_len_iter(len)
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use crate::{spell::seq_to_normalized, Dictionary};
+
+    use super::FstDictionary;
+
+    #[test]
+    fn fst_contains() {
+        let dict = FstDictionary::curated();
+
+        for word in dict.words_iter().step_by(5).take(20) {
+            let misspelled_word = seq_to_normalized(word);
+            let misspelled_lower: String = misspelled_word
+                .iter()
+                .flat_map(|v| v.to_lowercase())
+                .collect();
+
+            assert!(dict.contains_word(word));
+            assert!(dict.word_map.contains_key(misspelled_lower));
+        }
     }
 }
