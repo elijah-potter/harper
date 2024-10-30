@@ -5,6 +5,8 @@
 	import { Button } from 'flowbite-svelte';
 	import { lintText, applySuggestion } from '$lib/analysis';
 	import { Lint, SuggestionKind } from 'wasm';
+	import CheckMark from '$lib/CheckMark.svelte';
+	import { fly } from 'svelte/transition';
 
 	export let content = demo;
 
@@ -54,7 +56,14 @@
 	</Card>
 	<Card class="flex-none basis-[400px] max-h-full p-1 hidden lg:flex">
 		<h2 class="text-2xl font-bold m-2">Suggestions</h2>
-		<div class="flex flex-col overflow-y-scroll overflow-x-hidden m-0 p-0">
+		<div class="flex flex-col overflow-y-auto overflow-x-hidden m-0 p-0 h-full">
+			{#if lints.length == 0}
+				<div class="w-full h-full flex flex-row text-center justify-center items-center" in:fly>
+					<p class="dark:white font-bold text-lg">Looks good to me</p>
+					<CheckMark />
+				</div>
+			{/if}
+
 			{#each lints as lint, i}
 				<button
 					class="block max-w-sm p-3 bg-white dark:bg-gray-800 border border-gray-200 rounded-lg shadow m-1 hover:translate-x-1 transition-all"
