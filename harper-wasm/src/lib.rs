@@ -5,15 +5,15 @@ use std::sync::Mutex;
 use harper_core::language_detection::is_doc_likely_english;
 use harper_core::linting::{LintGroup, LintGroupConfig, Linter};
 use harper_core::parsers::{IsolateEnglish, Markdown, PlainEnglish};
-use harper_core::{remove_overlaps, Document, FullDictionary, Lrc};
+use harper_core::{remove_overlaps, Document, FstDictionary, Lrc};
 use once_cell::sync::Lazy;
 use wasm_bindgen::prelude::wasm_bindgen;
 use wasm_bindgen::JsValue;
 
-static LINTER: Lazy<Mutex<LintGroup<Lrc<FullDictionary>>>> = Lazy::new(|| {
+static LINTER: Lazy<Mutex<LintGroup<Lrc<FstDictionary>>>> = Lazy::new(|| {
     Mutex::new(LintGroup::new(
         LintGroupConfig::default(),
-        FullDictionary::curated(),
+        FstDictionary::curated(),
     ))
 });
 
@@ -32,13 +32,13 @@ pub fn setup() {
 #[wasm_bindgen]
 pub fn is_likely_english(text: String) -> bool {
     let document = Document::new_plain_english_curated(&text);
-    is_doc_likely_english(&document, &FullDictionary::curated())
+    is_doc_likely_english(&document, &FstDictionary::curated())
 }
 
 /// Helper method to remove non-English text from a plain English document.
 #[wasm_bindgen]
 pub fn isolate_english(text: String) -> String {
-    let dict = FullDictionary::curated();
+    let dict = FstDictionary::curated();
 
     let document = Document::new_curated(
         &text,
@@ -67,8 +67,7 @@ pub fn lint(text: String) -> Vec<Lint> {
     let source: Vec<_> = text.chars().collect();
     let source = Lrc::new(source);
 
-    let document =
-        Document::new_from_vec(source.clone(), &mut Markdown, &FullDictionary::curated());
+    let document = Document::new_from_vec(source.clone(), &mut Markdown, &FstDictionary::curated());
 
     let mut lints = LINTER.lock().unwrap().lint(&document);
 

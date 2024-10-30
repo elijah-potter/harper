@@ -8,6 +8,7 @@ readme = "README.md"
 repository = "https://github.com/elijah-potter/harper"
 
 [dependencies]
+harper-dictionary-parsing = { path = "../harper-dictionary-parsing", version = "0.12.0" }
 blanket = "0.4.0"
 fst = { version = "0.4.7", features = ["levenshtein"] }
 hashbrown = { version = "0.15.0", features = ["serde"] }
@@ -29,6 +30,8 @@ rand = "0.8.5"
 
 [build-dependencies]
 fst = { version = "0.4.7", features = ["levenshtein"] }
+harper-dictionary-parsing = { path = "../harper-dictionary-parsing", version = "0.12.0" }
+hashbrown = { version = "0.15.0" }
 
 [[bench]]
 name = "parse_demo"

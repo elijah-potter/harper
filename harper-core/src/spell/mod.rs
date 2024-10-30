@@ -12,7 +12,6 @@ pub use self::merged_dictionary::MergedDictionary;
 mod dictionary;
 mod fst_dictionary;
 mod full_dictionary;
-mod hunspell;
 mod merged_dictionary;
 
 /// Get the closest matches in the provided [`Dictionary`] and rank them

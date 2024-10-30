@@ -129,7 +129,7 @@ pub enum Error {
 #[cfg(test)]
 mod tests {
     use super::Matcher;
-    use crate::spell::hunspell::matcher::Operator;
+    use crate::matcher::Operator;
 
     #[test]
     fn parses_simple() {

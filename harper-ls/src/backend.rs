@@ -104,7 +104,7 @@ impl Backend {
         Ok(save_dict(&config.user_dict_path, dict).await?)
     }
 
-    async fn generate_global_dictionary(&self) -> anyhow::Result<MergedDictionary<FullDictionary>> {
+    async fn generate_global_dictionary(&self) -> anyhow::Result<MergedDictionary> {
         let mut dict = MergedDictionary::new();
         dict.add_dictionary(FullDictionary::curated());
         let user_dict = self.load_user_dictionary().await;
@@ -112,10 +112,7 @@ impl Backend {
         Ok(dict)
     }
 
-    async fn generate_file_dictionary(
-        &self,
-        url: &Url,
-    ) -> anyhow::Result<MergedDictionary<FullDictionary>> {
+    async fn generate_file_dictionary(&self, url: &Url) -> anyhow::Result<MergedDictionary> {
         let (global_dictionary, file_dictionary) = tokio::join!(
             self.generate_global_dictionary(),
             self.load_file_dictionary(url)
@@ -126,7 +123,7 @@ impl Backend {
         };
 
         let mut global_dictionary = global_dictionary?;
-        global_dictionary.add_dictionary(file_dictionary.into());
+        global_dictionary.add_dictionary(Arc::new(file_dictionary));
 
         Ok(global_dictionary)
     }

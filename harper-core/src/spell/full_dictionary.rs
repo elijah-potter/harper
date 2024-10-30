@@ -3,8 +3,8 @@ use hashbrown::HashMap;
 use smallvec::{SmallVec, ToSmallVec};
 
 use super::dictionary::Dictionary;
-use super::hunspell::{parse_default_attribute_list, parse_default_word_list};
 use crate::{CharString, Lrc, WordMetadata};
+use harper_dictionary_parsing::{parse_default_attribute_list, parse_default_word_list};
 
 /// A full, fat dictionary.
 /// All elements are stored in-memory.
