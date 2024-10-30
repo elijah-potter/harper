@@ -1,24 +1,30 @@
 mod affix_replacement;
 mod attribute_list;
+pub mod char_string;
 mod error;
 mod expansion;
 mod matcher;
-mod word_list;
+mod span;
+pub mod word_list;
+pub mod word_metadata;
 
 pub use attribute_list::AttributeList;
 use attribute_list::HumanReadableAttributeList;
+pub use char_string::CharString;
 pub use error::Error;
+pub use span::Span;
+pub use word_metadata::WordMetadata;
 
 use self::word_list::parse_word_list;
 pub use self::word_list::MarkedWord;
 
 pub fn parse_default_word_list() -> Result<Vec<MarkedWord>, Error> {
-    parse_word_list(include_str!("../../../dictionary.dict"))
+    parse_word_list(include_str!("../dictionary.dict"))
 }
 
 pub fn parse_default_attribute_list() -> AttributeList {
     let human_readable: HumanReadableAttributeList =
-        serde_json::from_str(include_str!("../../../affixes.json"))
+        serde_json::from_str(include_str!("../affixes.json"))
             .expect("The built-in affix list should always be valid.");
 
     human_readable
@@ -33,7 +39,7 @@ mod tests {
 
     use super::word_list::parse_word_list;
     use super::{parse_default_attribute_list, parse_default_word_list};
-    use crate::spell::hunspell::attribute_list::HumanReadableAttributeList;
+    use crate::attribute_list::HumanReadableAttributeList;
     use crate::{CharString, WordMetadata};
 
     pub const TEST_WORD_LIST: &str = "3\nhello\ntry/B\nwork/AB";

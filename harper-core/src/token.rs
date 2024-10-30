@@ -6,8 +6,8 @@ use serde::{Deserialize, Serialize};
 
 use crate::punctuation::Punctuation;
 use crate::span::Span;
-use crate::word_metadata::{ConjunctionData, NounData};
 use crate::{Quote, WordMetadata};
+use harper_dictionary_parsing::word_metadata::{ConjunctionData, NounData};
 
 #[derive(Debug, Clone, Copy, Serialize, Deserialize, PartialEq, Default)]
 pub struct Token {
