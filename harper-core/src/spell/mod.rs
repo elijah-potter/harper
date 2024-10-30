@@ -77,7 +77,7 @@ pub fn suggest_correct_spelling_str(
     misspelled_word: impl Into<String>,
     result_limit: usize,
     max_edit_dist: u8,
-    dictionary: &FullDictionary,
+    dictionary: &impl Dictionary,
 ) -> Vec<String> {
     let chars: CharString = misspelled_word.into().chars().collect();
     suggest_correct_spelling(&chars, result_limit, max_edit_dist, dictionary)
@@ -107,12 +107,11 @@ pub fn char_to_normalized(c: char) -> char {
 mod tests {
     use itertools::Itertools;
 
-    use crate::{spell::suggest_correct_spelling_str, FullDictionary};
+    use super::{suggest_correct_spelling_str, FstDictionary};
 
     #[test]
     fn produces_no_duplicates() {
-        let results =
-            suggest_correct_spelling_str("punctation", 100, 3, &FullDictionary::curated());
+        let results = suggest_correct_spelling_str("punctation", 100, 3, &FstDictionary::curated());
 
         dbg!(&results, results.iter().unique().collect_vec());
 
@@ -121,7 +120,7 @@ mod tests {
 
     #[test]
     fn issue_182() {
-        let results = suggest_correct_spelling_str("im", 100, 3, &FullDictionary::curated());
+        let results = suggest_correct_spelling_str("im", 100, 3, &FstDictionary::curated());
 
         dbg!(&results);
 

@@ -8,19 +8,13 @@ use crate::{CharString, WordMetadata};
 
 /// A simple wrapper over [`Dictionary`] that allows
 /// one to merge multiple dictionaries without copying.
-#[derive(Clone, PartialEq)]
-pub struct MergedDictionary<T>
-where
-    T: Dictionary + Clone,
-{
-    children: Vec<Lrc<T>>,
+#[derive(Clone)]
+pub struct MergedDictionary {
+    children: Vec<Lrc<dyn Dictionary>>,
     merged: HashMap<CharString, WordMetadata>,
 }
 
-impl<T> MergedDictionary<T>
-where
-    T: Dictionary + Clone,
-{
+impl MergedDictionary {
     pub fn new() -> Self {
         Self {
             children: Vec::new(),
@@ -28,36 +22,24 @@ where
         }
     }
 
-    pub fn add_dictionary(&mut self, dictionary: Lrc<T>) {
+    pub fn add_dictionary(&mut self, dictionary: Lrc<dyn Dictionary>) {
         self.children.push(dictionary.clone());
     }
 }
 
-impl<T> From<Lrc<T>> for MergedDictionary<T>
-where
-    T: Dictionary + Clone,
-{
-    fn from(value: Lrc<T>) -> Self {
-        Self {
-            children: vec![value],
-            ..Default::default()
-        }
+impl PartialEq for MergedDictionary {
+    fn eq(&self, other: &Self) -> bool {
+        self.merged == other.merged
     }
 }
 
-impl<T> Default for MergedDictionary<T>
-where
-    T: Dictionary + Clone,
-{
+impl Default for MergedDictionary {
     fn default() -> Self {
         Self::new()
     }
 }
 
-impl<T> Dictionary for MergedDictionary<T>
-where
-    T: Dictionary + Clone,
-{
+impl Dictionary for MergedDictionary {
     fn contains_word(&self, word: &[char]) -> bool {
         for child in &self.children {
             if child.contains_word(word) {
@@ -76,8 +58,8 @@ where
         found_metadata
     }
 
-    fn words_iter(&self) -> impl Iterator<Item = &'_ [char]> {
-        self.children.iter().flat_map(|c| c.words_iter())
+    fn words_iter(&self) -> Box<dyn Iterator<Item = &'_ [char]> + '_> {
+        Box::new(self.children.iter().flat_map(|c| c.words_iter()))
     }
 
     fn words_with_len_iter(&self, len: usize) -> Box<dyn Iterator<Item = &'_ [char]> + '_> {

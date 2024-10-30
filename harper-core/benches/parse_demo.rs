@@ -1,6 +1,6 @@
 use criterion::{black_box, criterion_group, criterion_main, Criterion};
 use harper_core::linting::{LintGroup, LintGroupConfig, Linter};
-use harper_core::{Document, FstDictionary, FullDictionary};
+use harper_core::{Document, FstDictionary};
 
 static DEMO: &str = include_str!("../../demo.md");
 
@@ -11,7 +11,7 @@ fn parse_demo(c: &mut Criterion) {
 }
 
 fn lint_demo(c: &mut Criterion) {
-    let dictionary = FullDictionary::curated();
+    let dictionary = FstDictionary::curated();
     let mut lint_set = LintGroup::new(Default::default(), dictionary);
     let document = Document::new_markdown_curated(black_box(DEMO));
 
