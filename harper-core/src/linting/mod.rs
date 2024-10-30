@@ -19,6 +19,7 @@ mod spell_check;
 mod spelled_numbers;
 mod terminating_conjunctions;
 mod unclosed_quotes;
+mod use_genitive;
 mod wrong_quotes;
 
 pub use an_a::AnA;
@@ -42,6 +43,7 @@ pub use spell_check::SpellCheck;
 pub use spelled_numbers::SpelledNumbers;
 pub use terminating_conjunctions::TerminatingConjunctions;
 pub use unclosed_quotes::UnclosedQuotes;
+pub use use_genitive::UseGenitive;
 pub use wrong_quotes::WrongQuotes;
 
 use crate::Document;

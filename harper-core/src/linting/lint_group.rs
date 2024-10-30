@@ -19,6 +19,7 @@ use super::spell_check::SpellCheck;
 use super::spelled_numbers::SpelledNumbers;
 use super::terminating_conjunctions::TerminatingConjunctions;
 use super::unclosed_quotes::UnclosedQuotes;
+use super::use_genitive::UseGenitive;
 use super::wrong_quotes::WrongQuotes;
 use super::{Lint, Linter};
 use crate::{Dictionary, Document};
@@ -127,7 +128,8 @@ create_lint_group_config!(
     TerminatingConjunctions => true,
     EllipsisLength => true,
     DotInitialisms => true,
-    BoringWords => false
+    BoringWords => false,
+    UseGenitive => true
 );
 
 impl<T: Dictionary + Default> Default for LintGroup<T> {

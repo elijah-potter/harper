@@ -4,6 +4,7 @@ use crate::{Span, Token, VecExt};
 
 mod any_pattern;
 mod consumes_remaining_pattern;
+mod either_pattern;
 mod naive_pattern_group;
 mod repeating_pattern;
 mod sequence_pattern;
@@ -12,7 +13,9 @@ mod whitespace_pattern;
 mod word_pattern_group;
 
 pub use any_pattern::AnyPattern;
+use blanket::blanket;
 pub use consumes_remaining_pattern::ConsumesRemainingPattern;
+pub use either_pattern::EitherPattern;
 pub use naive_pattern_group::NaivePatternGroup;
 pub use repeating_pattern::RepeatingPattern;
 pub use sequence_pattern::SequencePattern;
@@ -21,11 +24,13 @@ pub use whitespace_pattern::WhitespacePattern;
 pub use word_pattern_group::WordPatternGroup;
 
 #[cfg(not(feature = "concurrent"))]
+#[blanket(derive(Rc, Arc))]
 pub trait Pattern {
     fn matches(&self, tokens: &[Token], source: &[char]) -> usize;
 }
 
 #[cfg(feature = "concurrent")]
+#[blanket(derive(Arc))]
 pub trait Pattern: Send + Sync {
     fn matches(&self, tokens: &[Token], source: &[char]) -> usize;
 }

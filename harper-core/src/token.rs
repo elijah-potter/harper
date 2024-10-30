@@ -130,6 +130,26 @@ impl TokenKind {
         matches!(self, TokenKind::Punctuation(Punctuation::Ellipsis))
     }
 
+    pub fn is_adjective(&self) -> bool {
+        matches!(
+            self,
+            TokenKind::Word(WordMetadata {
+                adjective: Some(_),
+                ..
+            })
+        )
+    }
+
+    pub fn is_adverb(&self) -> bool {
+        matches!(
+            self,
+            TokenKind::Word(WordMetadata {
+                adverb: Some(_),
+                ..
+            })
+        )
+    }
+
     pub fn is_swear(&self) -> bool {
         matches!(
             self,

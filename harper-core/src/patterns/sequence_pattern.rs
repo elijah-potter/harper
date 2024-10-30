@@ -21,6 +21,12 @@ macro_rules! gen_then_from_is {
 
                 self
             }
+
+            pub fn [< then_one_or_more_$quality s >] (self) -> Self{
+                self.then_one_or_more(Box::new(|tok: &Token, _source: &[char]| {
+                    tok.kind.[< is_$quality >]()
+                }))
+            }
         }
     };
 }
@@ -35,6 +41,8 @@ impl SequencePattern {
     gen_then_from_is!(comma);
     gen_then_from_is!(period);
     gen_then_from_is!(case_separator);
+    gen_then_from_is!(adverb);
+    gen_then_from_is!(adjective);
 
     pub fn then_exact_word(mut self, word: &'static str) -> Self {
         self.token_patterns
@@ -100,6 +108,11 @@ impl SequencePattern {
     pub fn then_one_or_more(mut self, pat: Box<dyn Pattern>) -> Self {
         self.token_patterns
             .push(Box::new(RepeatingPattern::new(pat)));
+        self
+    }
+
+    pub fn then(mut self, pat: Box<dyn Pattern>) -> Self {
+        self.token_patterns.push(pat);
         self
     }
 }
