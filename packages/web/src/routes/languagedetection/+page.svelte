@@ -62,5 +62,5 @@
 
 	<p>This lower area will show the chunks of the provided text that are marked as English.</p>
 
-	<Textarea rows={8} value={strippedText} />
+	<Textarea rows={8} value={strippedText} readonly />
 </div>
