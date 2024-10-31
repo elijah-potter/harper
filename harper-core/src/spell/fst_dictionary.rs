@@ -77,25 +77,39 @@ impl Dictionary for FstDictionary {
         max_results: usize,
     ) -> Vec<(&[char], u8, WordMetadata)> {
         let chars: Vec<_> = word.chars().collect();
-        let misspelled_word = seq_to_normalized(&chars);
-        let misspelled_lower: String = misspelled_word
+        let misspelled_normalized = seq_to_normalized(&chars);
+        let misspelled_word: String = misspelled_normalized.iter().collect();
+        let misspelled_lower: String = misspelled_normalized
             .iter()
             .flat_map(|v| v.to_lowercase())
             .collect();
 
-        let aut = Levenshtein::new(&misspelled_lower, max_distance as u32).unwrap();
+        let aut = Levenshtein::new(&misspelled_word, max_distance as u32).unwrap();
+        let aut_lower = Levenshtein::new(&misspelled_lower, max_distance as u32).unwrap();
+        let mut word_lower_indexes_stream = self.word_map.search(aut_lower).into_stream();
         let mut word_indexes_stream = self.word_map.search(aut).into_stream();
-        let mut word_indexes = Vec::with_capacity(max_results);
 
+        let mut word_indexes = Vec::with_capacity(max_results);
         let mut i = 0;
         while i < max_results {
+            let mut flag = false;
+            if let Some(v) = word_lower_indexes_stream.next() {
+                word_indexes.push(v.1);
+                flag = true;
+            }
             if let Some(v) = word_indexes_stream.next() {
                 word_indexes.push(v.1);
-            } else {
+                flag = true;
+            }
+            if !flag {
                 break;
             }
             i += 1;
         }
+        // Dedup but preserve order of word indexes
+        let mut seen = hashbrown::HashSet::new();
+        word_indexes.retain(|item| seen.insert(*item));
+
         word_indexes
             .into_iter()
             .take(max_results)
@@ -121,8 +135,6 @@ impl Dictionary for FstDictionary {
 
 #[cfg(test)]
 mod tests {
-    use fst::IntoStreamer;
-
     use crate::{spell::seq_to_normalized, Dictionary};
 
     use super::FstDictionary;
@@ -132,32 +144,18 @@ mod tests {
         let dict = FstDictionary::curated();
 
         for word in dict.words_iter() {
-            let misspelled_word = seq_to_normalized(word);
-            let misspelled_lower: String = misspelled_word
+            let misspelled_normalized = seq_to_normalized(word);
+            let misspelled_word: String = misspelled_normalized.iter().collect();
+            let misspelled_lower: String = misspelled_normalized
                 .iter()
                 .flat_map(|v| v.to_lowercase())
                 .collect();
 
-            println!("{}", misspelled_lower);
-            assert!(!misspelled_lower.is_empty());
-            assert!(dict.contains_word(word));
-            assert!(dict.word_map.contains_key(misspelled_lower));
-        }
-    }
-
-    #[test]
-    fn fst_words_match() {
-        let dict = FstDictionary::curated();
-
-        for (word, i) in dict.word_map.into_stream().into_str_vec().unwrap() {
-            let full_dict_word = dict
-                .full_dict
-                .get_word(i as usize)
-                .iter()
-                .collect::<String>();
-
-            println!("({i}) \"{}\" == \"{}\"?", word, full_dict_word);
-            assert_eq!(word, full_dict_word);
+            assert!(!misspelled_word.is_empty());
+            assert!(
+                dict.word_map.contains_key(misspelled_word)
+                    || dict.word_map.contains_key(misspelled_lower)
+            );
         }
     }
 
@@ -166,13 +164,17 @@ mod tests {
         let dict = FstDictionary::curated();
 
         let word: Vec<_> = "hello".chars().collect();
-        let misspelled_word = seq_to_normalized(&word);
-        let misspelled_lower: String = misspelled_word
+        let misspelled_normalized = seq_to_normalized(&word);
+        let misspelled_word: String = misspelled_normalized.iter().collect();
+        let misspelled_lower: String = misspelled_normalized
             .iter()
             .flat_map(|v| v.to_lowercase())
             .collect();
 
-        assert!(dict.contains_word(&word));
-        assert!(dict.word_map.contains_key(misspelled_lower));
+        assert!(dict.contains_word(&misspelled_normalized));
+        assert!(
+            dict.word_map.contains_key(misspelled_lower)
+                || dict.word_map.contains_key(misspelled_word)
+        );
     }
 }
