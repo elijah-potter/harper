@@ -110,11 +110,11 @@ impl Dictionary for FstDictionary {
             .collect()
     }
 
-    fn words_iter(&self) -> Box<dyn Iterator<Item = &'_ [char]> + '_> {
+    fn words_iter(&self) -> Box<dyn Iterator<Item = &'_ [char]> + Send + '_> {
         self.full_dict.words_iter()
     }
 
-    fn words_with_len_iter(&self, len: usize) -> Box<dyn Iterator<Item = &'_ [char]> + '_> {
+    fn words_with_len_iter(&self, len: usize) -> Box<dyn Iterator<Item = &'_ [char]> + Send + '_> {
         self.full_dict.words_with_len_iter(len)
     }
 }

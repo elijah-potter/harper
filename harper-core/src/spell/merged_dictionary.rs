@@ -58,11 +58,11 @@ impl Dictionary for MergedDictionary {
         found_metadata
     }
 
-    fn words_iter(&self) -> Box<dyn Iterator<Item = &'_ [char]> + '_> {
+    fn words_iter(&self) -> Box<dyn Iterator<Item = &'_ [char]> + Send + '_> {
         Box::new(self.children.iter().flat_map(|c| c.words_iter()))
     }
 
-    fn words_with_len_iter(&self, len: usize) -> Box<dyn Iterator<Item = &'_ [char]> + '_> {
+    fn words_with_len_iter(&self, len: usize) -> Box<dyn Iterator<Item = &'_ [char]> + Send + '_> {
         Box::new(
             self.children
                 .iter()
