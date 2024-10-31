@@ -35,25 +35,28 @@ fn index_to_position(source: &[char], index: usize) -> Position {
 }
 
 fn position_to_index(source: &[char], position: Position) -> usize {
-    let newline_indices =
-        source
-            .iter()
-            .enumerate()
-            .filter_map(|(idx, c)| if *c == '\n' { Some(idx + 1) } else { None });
+    let mut newline_indices: Vec<_> = source
+        .iter()
+        .enumerate()
+        .filter_map(|(idx, c)| if *c == '\n' { Some(idx + 1) } else { None })
+        .take(position.line as usize + 1)
+        .collect();
 
-    let line_start_idx = newline_indices
-        .take(position.line as usize)
-        .last()
-        .unwrap_or(0);
+    let line_end_idx = newline_indices.pop().unwrap_or(source.len());
+    let line_start_idx = newline_indices.pop().unwrap_or(0);
 
     let mut traversed_cols = 0;
 
-    for (traversed_chars, c) in source[line_start_idx..].iter().enumerate() {
+    for (traversed_chars, c) in source[line_start_idx..line_end_idx].iter().enumerate() {
         if traversed_cols == position.character as usize {
             return line_start_idx + traversed_chars;
         }
 
         traversed_cols += c.len_utf16();
+    }
+
+    if traversed_cols > 0 {
+        return line_end_idx;
     }
 
     line_start_idx
@@ -68,9 +71,9 @@ pub fn range_to_span(source: &[char], range: Range) -> Span {
 
 #[cfg(test)]
 mod tests {
-    use tower_lsp::lsp_types::Position;
+    use tower_lsp::lsp_types::{Position, Range};
 
-    use super::{index_to_position, position_to_index};
+    use super::{index_to_position, position_to_index, range_to_span};
 
     #[test]
     fn first_line_correct() {
@@ -111,5 +114,49 @@ mod tests {
 
         assert_eq!(a, c);
         assert_eq!(b, d);
+    }
+
+    #[test]
+    fn end_of_line() {
+        let source: Vec<_> = "This is a short test\n".chars().collect();
+
+        let a = Position {
+            line: 1,
+            character: 20,
+        };
+
+        assert_eq!(position_to_index(&source, a), 20);
+    }
+
+    #[test]
+    fn end_of_file() {
+        let source: Vec<_> = "This is a short test".chars().collect();
+
+        let a = Position {
+            line: 1,
+            character: 20,
+        };
+
+        assert_eq!(position_to_index(&source, a), 20);
+    }
+
+    #[test]
+    fn issue_250() {
+        let source: Vec<_> = "Hello thur\n".chars().collect();
+
+        let range = Range {
+            start: Position {
+                line: 1,
+                character: 9,
+            },
+            end: Position {
+                line: 1,
+                character: 10,
+            },
+        };
+
+        let out = range_to_span(&source, range);
+        assert_eq!(out.start, 9);
+        assert_eq!(out.end, 10);
     }
 }
