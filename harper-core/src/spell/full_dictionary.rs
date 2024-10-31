@@ -172,8 +172,8 @@ impl Dictionary for FullDictionary {
         max_distance: u8,
         max_results: usize,
     ) -> Vec<(&[char], u8, WordMetadata)> {
-        let misspelled_word = seq_to_normalized(word);
-        let misspelled_lower: Vec<char> = misspelled_word
+        let misspelled_normalized = seq_to_normalized(word);
+        let misspelled_lower: Vec<char> = misspelled_normalized
             .iter()
             .flat_map(|v| v.to_lowercase())
             .collect();
@@ -183,19 +183,21 @@ impl Dictionary for FullDictionary {
         let mut buf_b = Vec::with_capacity(53);
 
         // The length of the shortest word to look at.
-        let shortest_word_len = if misspelled_word.len() < max_distance as usize {
+        let shortest_word_len = if misspelled_normalized.len() < max_distance as usize {
             1
         } else {
-            misspelled_word.len() - max_distance as usize
+            misspelled_normalized.len() - max_distance as usize
         };
 
         // Note how we look at the biggest words first.
-        let words_to_search = (shortest_word_len..misspelled_word.len() + max_distance as usize)
+        let words_to_search = (shortest_word_len
+            ..misspelled_normalized.len() + max_distance as usize)
             .rev()
             .flat_map(|len| self.words_with_len_iter(len));
 
         let pruned_words = words_to_search.filter_map(|word| {
-            let dist = edit_distance_min_alloc(&misspelled_word, word, &mut buf_a, &mut buf_b);
+            let dist =
+                edit_distance_min_alloc(&misspelled_normalized, word, &mut buf_a, &mut buf_b);
             let dist_lower =
                 edit_distance_min_alloc(&misspelled_lower, word, &mut buf_a, &mut buf_b);
 
@@ -362,8 +364,8 @@ mod tests {
     #[test]
     fn herself_is_pronoun() {
         let dict = FullDictionary::curated();
-        assert!(dict.get_word_metadata_str("than").is_conjunction());
-        assert!(dict.get_word_metadata_str("Than").is_conjunction());
+        assert!(dict.get_word_metadata_str("herself").is_pronoun());
+        assert!(dict.get_word_metadata_str("Herself").is_pronoun());
     }
 
     #[test]

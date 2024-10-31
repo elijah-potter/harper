@@ -26,14 +26,14 @@ fn main() {
     // Using u64 shouldn't pose any issues since I don't think the English
     // language has that many words
     words.iter().enumerate().for_each(|(i, s)| {
+        let word = s.iter().collect::<String>();
         build
-            .insert(s.iter().collect::<String>(), i as u64)
-            .unwrap()
+            .insert(word, i as u64)
+            .expect("Insertion not in lexicographical order!");
     });
 
     build.finish().expect("Unable to build map of dictionary!");
 
     println!("cargo::rerun-if-changed=build.rs");
-    println!("cargo::rerun-if-changed=dictionary.fst");
     println!("cargo::rerun-if-changed=../harper-dictionary-parsing/dictionary.dict");
 }
