@@ -1,6 +1,5 @@
 use crate::Lrc;
 
-use hashbrown::HashMap;
 use itertools::Itertools;
 
 use super::dictionary::Dictionary;
@@ -11,14 +10,12 @@ use crate::{CharString, WordMetadata};
 #[derive(Clone)]
 pub struct MergedDictionary {
     children: Vec<Lrc<dyn Dictionary>>,
-    merged: HashMap<CharString, WordMetadata>,
 }
 
 impl MergedDictionary {
     pub fn new() -> Self {
         Self {
             children: Vec::new(),
-            merged: HashMap::new(),
         }
     }
 
@@ -28,8 +25,8 @@ impl MergedDictionary {
 }
 
 impl PartialEq for MergedDictionary {
-    fn eq(&self, other: &Self) -> bool {
-        self.merged == other.merged
+    fn eq(&self, _other: &Self) -> bool {
+        false
     }
 }
 
