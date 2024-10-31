@@ -42,7 +42,7 @@ fn uncached_inner_new() -> Lrc<FullDictionary> {
 
     Lrc::new(FullDictionary {
         word_map,
-        word_len_starts: FullDictionary::create_len_starts(&mut words),
+        word_len_starts: FullDictionary::create_len_starts(&words),
         words,
     })
 }
@@ -79,7 +79,7 @@ impl FullDictionary {
             .collect();
 
         self.words.extend(pairs.iter().map(|(v, _)| v.clone()));
-        self.word_len_starts = Self::create_len_starts(&mut self.words);
+        self.word_len_starts = Self::create_len_starts(&self.words);
         self.word_map.extend(pairs);
     }
 
@@ -103,11 +103,13 @@ impl FullDictionary {
     /// list. NOTE: This function will sort the original word list by its
     /// length. If the word list's order is changed after creating the
     /// lookup, it will no longer be valid.
-    fn create_len_starts(words: &mut [CharString]) -> Vec<usize> {
-        words.sort_by_key(|a| a.len());
+    fn create_len_starts(words: &Vec<CharString>) -> Vec<usize> {
+        let mut len_words = words.clone();
+
+        len_words.sort_by_key(|a| a.len());
         let mut word_len_starts = vec![0, 0];
 
-        for (index, len) in words.iter().map(SmallVec::len).enumerate() {
+        for (index, len) in len_words.iter().map(SmallVec::len).enumerate() {
             if word_len_starts.len() <= len {
                 word_len_starts.resize(len, index);
                 word_len_starts.push(index);
