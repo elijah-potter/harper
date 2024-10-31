@@ -121,6 +121,8 @@ impl Dictionary for FstDictionary {
 
 #[cfg(test)]
 mod tests {
+    use fst::IntoStreamer;
+
     use crate::{spell::seq_to_normalized, Dictionary};
 
     use super::FstDictionary;
@@ -129,15 +131,47 @@ mod tests {
     fn fst_contains() {
         let dict = FstDictionary::curated();
 
-        for word in dict.words_iter().step_by(5).take(20) {
+        for word in dict.words_iter() {
             let misspelled_word = seq_to_normalized(word);
             let misspelled_lower: String = misspelled_word
                 .iter()
                 .flat_map(|v| v.to_lowercase())
                 .collect();
 
+            println!("{}", misspelled_lower);
+            assert!(!misspelled_lower.is_empty());
             assert!(dict.contains_word(word));
             assert!(dict.word_map.contains_key(misspelled_lower));
         }
+    }
+
+    #[test]
+    fn fst_words_match() {
+        let dict = FstDictionary::curated();
+
+        for (word, i) in dict.word_map.into_stream().into_str_vec().unwrap() {
+            let full_dict_word = dict
+                .full_dict
+                .get_word(i as usize)
+                .iter()
+                .collect::<String>();
+            println!("\"{}\" == \"{}\"?", word, full_dict_word);
+            assert_eq!(word, full_dict_word);
+        }
+    }
+
+    #[test]
+    fn fst_contains_hello() {
+        let dict = FstDictionary::curated();
+
+        let word: Vec<_> = "hello".chars().collect();
+        let misspelled_word = seq_to_normalized(&word);
+        let misspelled_lower: String = misspelled_word
+            .iter()
+            .flat_map(|v| v.to_lowercase())
+            .collect();
+
+        assert!(dict.contains_word(&word));
+        assert!(dict.word_map.contains_key(misspelled_lower));
     }
 }

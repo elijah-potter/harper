@@ -27,12 +27,13 @@ fn main() {
     // language has that many words
     words.iter().enumerate().for_each(|(i, s)| {
         build
-            .insert(s.as_slice().iter().collect::<String>(), i as u64)
+            .insert(s.iter().collect::<String>(), i as u64)
             .unwrap()
     });
 
     build.finish().expect("Unable to build map of dictionary!");
 
     println!("cargo::rerun-if-changed=build.rs");
-    println!("cargo::rerun-if-changed=dictionary.dict");
+    println!("cargo::rerun-if-changed=dictionary.fst");
+    println!("cargo::rerun-if-changed=../harper-dictionary-parsing/dictionary.dict");
 }
