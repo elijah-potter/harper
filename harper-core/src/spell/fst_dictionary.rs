@@ -155,7 +155,8 @@ mod tests {
                 .get_word(i as usize)
                 .iter()
                 .collect::<String>();
-            println!("\"{}\" == \"{}\"?", word, full_dict_word);
+
+            println!("({i}) \"{}\" == \"{}\"?", word, full_dict_word);
             assert_eq!(word, full_dict_word);
         }
     }
