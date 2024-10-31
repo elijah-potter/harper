@@ -70,8 +70,8 @@ pub trait Dictionary: Send + Sync {
     fn get_word_metadata_str(&self, word: &str) -> WordMetadata;
 
     /// Iterate over the words in the dictionary.
-    fn words_iter(&self) -> Box<dyn Iterator<Item = &'_ [char]> + '_>;
+    fn words_iter(&self) -> Box<dyn Iterator<Item = &'_ [char]> + Send + '_>;
 
     /// Iterate over all the words in the dictionary of a given length
-    fn words_with_len_iter(&self, len: usize) -> Box<dyn Iterator<Item = &'_ [char]> + '_>;
+    fn words_with_len_iter(&self, len: usize) -> Box<dyn Iterator<Item = &'_ [char]> + Send + '_>;
 }

@@ -198,7 +198,7 @@ impl Backend {
                     }
                     Some(Box::new(CollapseIdentifiers::new(
                         Box::new(ts_parser),
-                        &doc_state.dict,
+                        Box::new(doc_state.dict.clone()),
                     )))
                 } else {
                     Some(Box::new(ts_parser))

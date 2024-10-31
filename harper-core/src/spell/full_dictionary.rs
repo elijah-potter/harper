@@ -103,10 +103,10 @@ impl FullDictionary {
     /// list. NOTE: This function will sort the original word list by its
     /// length. If the word list's order is changed after creating the
     /// lookup, it will no longer be valid.
-    fn create_len_starts(words: &Vec<CharString>) -> Vec<usize> {
-        let mut len_words = words.clone();
-
+    fn create_len_starts(words: &[CharString]) -> Vec<usize> {
+        let mut len_words: Vec<_> = words.to_vec();
         len_words.sort_by_key(|a| a.len());
+
         let mut word_len_starts = vec![0, 0];
 
         for (index, len) in len_words.iter().map(SmallVec::len).enumerate() {
@@ -235,11 +235,11 @@ impl Dictionary for FullDictionary {
         self.fuzzy_match(&word, max_distance, max_results)
     }
 
-    fn words_iter(&self) -> Box<dyn Iterator<Item = &'_ [char]> + '_> {
+    fn words_iter(&self) -> Box<dyn Iterator<Item = &'_ [char]> + Send + '_> {
         Box::new(self.words.iter().map(|v| v.as_slice()))
     }
 
-    fn words_with_len_iter(&self, len: usize) -> Box<dyn Iterator<Item = &'_ [char]> + '_> {
+    fn words_with_len_iter(&self, len: usize) -> Box<dyn Iterator<Item = &'_ [char]> + Send + '_> {
         if len == 0 || len >= self.word_len_starts.len() {
             return Box::new(std::iter::empty());
         }
