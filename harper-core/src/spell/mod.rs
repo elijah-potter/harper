@@ -15,19 +15,7 @@ mod fst_dictionary;
 mod full_dictionary;
 mod merged_dictionary;
 
-/// Get the closest matches in the provided [`Dictionary`] and rank them
-/// Implementation is left up to the underlying dictionary.
-pub fn suggest_correct_spelling<'a>(
-    misspelled_word: &[char],
-    result_limit: usize,
-    max_edit_dist: u8,
-    dictionary: &'a impl Dictionary,
-) -> Vec<&'a [char]> {
-    let matches: Vec<(&[char], u8, WordMetadata)> = dictionary
-        .fuzzy_match(misspelled_word, max_edit_dist, result_limit)
-        .into_iter()
-        .collect();
-
+fn order_suggestions(matches: Vec<(&[char], u8, WordMetadata)>) -> Vec<&[char]> {
     let mut found: Vec<(&[char], u8, WordMetadata)> = Vec::with_capacity(matches.len());
     // Often the longest and the shortest words are the most helpful, so lets push
     // them first.
@@ -62,6 +50,21 @@ pub fn suggest_correct_spelling<'a>(
     // Let common words bubble up.
     found.sort_by_key(|(_, _, metadata)| if metadata.common { 0 } else { 1 });
     found.into_iter().map(|(word, _, _)| word).collect()
+}
+
+/// Get the closest matches in the provided [`Dictionary`] and rank them
+/// Implementation is left up to the underlying dictionary.
+pub fn suggest_correct_spelling<'a>(
+    misspelled_word: &[char],
+    result_limit: usize,
+    max_edit_dist: u8,
+    dictionary: &'a impl Dictionary,
+) -> Vec<&'a [char]> {
+    let matches: Vec<(&[char], u8, WordMetadata)> = dictionary
+        .fuzzy_match(misspelled_word, max_edit_dist, result_limit)
+        .into_iter()
+        .collect();
+    order_suggestions(matches)
 }
 
 /// Convenience function over [`suggest_correct_spelling`] that does conversions
@@ -144,7 +147,11 @@ fn edit_distance(source: &[char], target: &[char]) -> u8 {
 mod tests {
     use itertools::Itertools;
 
-    use super::{suggest_correct_spelling_str, FstDictionary};
+    use crate::spell::edit_distance;
+
+    use super::{
+        order_suggestions, suggest_correct_spelling_str, Dictionary, FstDictionary, FullDictionary,
+    };
 
     #[test]
     fn produces_no_duplicates() {
@@ -156,11 +163,144 @@ mod tests {
     }
 
     #[test]
+    fn zero_edit_distance() {
+        let source: Vec<_> = "hello".chars().collect();
+        let target: Vec<_> = "hello".chars().collect();
+        assert_eq!(edit_distance(&source, &target), 0);
+    }
+
+    #[test]
+    fn one_edit_distance() {
+        let source: Vec<_> = "hello".chars().collect();
+        let target: Vec<_> = "hellos".chars().collect();
+        assert_eq!(edit_distance(&source, &target), 1);
+        assert_eq!(edit_distance(&target, &source), 1);
+
+        let target: Vec<_> = "hell".chars().collect();
+        assert_eq!(edit_distance(&source, &target), 1);
+        assert_eq!(edit_distance(&target, &source), 1);
+
+        let target: Vec<_> = "hell".chars().collect();
+        assert_eq!(edit_distance(&source, &target), 1);
+        assert_eq!(edit_distance(&target, &source), 1);
+
+        let target: Vec<_> = "hvllo".chars().collect();
+        assert_eq!(edit_distance(&source, &target), 1);
+        assert_eq!(edit_distance(&target, &source), 1);
+
+        let target: Vec<_> = "Hello".chars().collect();
+        assert_eq!(edit_distance(&source, &target), 1);
+        assert_eq!(edit_distance(&target, &source), 1);
+    }
+
+    #[test]
+    fn common_words_first() {
+        let dict = FstDictionary::curated();
+        let common_words = dict
+            .words_iter()
+            .filter_map(|word| {
+                let metadata = dict.get_word_metadata(word);
+                if metadata.common {
+                    Some((word, 0, metadata))
+                } else {
+                    None
+                }
+            })
+            .take(3);
+        let uncommon_words = dict
+            .words_iter()
+            .filter_map(|word| {
+                let metadata = dict.get_word_metadata(word);
+                if metadata.common {
+                    None
+                } else {
+                    Some((word, 0, metadata))
+                }
+            })
+            .take(3);
+        let words = common_words.merge(uncommon_words).collect();
+        let suggestions = order_suggestions(words);
+
+        let common_first = suggestions
+            .into_iter()
+            .take(3)
+            .all(|word| dict.get_word_metadata(word).common);
+
+        assert!(common_first);
+    }
+
+    #[test]
+    fn identical_results_between_dicts() {
+        let fst_results = suggest_correct_spelling_str("im", 100, 3, &FstDictionary::curated());
+        let full_results = suggest_correct_spelling_str("im", 100, 3, &FullDictionary::curated());
+
+        assert_eq!(fst_results, full_results);
+
+        let fst_results = suggest_correct_spelling_str("hvllo", 100, 3, &FstDictionary::curated());
+        let full_results =
+            suggest_correct_spelling_str("hvllo", 100, 3, &FullDictionary::curated());
+
+        assert_eq!(fst_results, full_results);
+
+        let fst_results = suggest_correct_spelling_str("aboot", 100, 3, &FstDictionary::curated());
+        let full_results =
+            suggest_correct_spelling_str("aboot", 100, 3, &FullDictionary::curated());
+
+        assert_eq!(fst_results, full_results);
+    }
+
+    #[test]
     fn issue_182() {
-        let results = suggest_correct_spelling_str("im", 100, 3, &super::FullDictionary::curated());
+        let results = suggest_correct_spelling_str("im", 100, 3, &FstDictionary::curated());
 
         dbg!(&results);
 
         assert!(results.iter().take(3).contains(&"I'm".to_string()));
+    }
+
+    #[test]
+    fn spellcheck_hvllo() {
+        let results = suggest_correct_spelling_str("hvllo", 100, 3, &FstDictionary::curated());
+
+        dbg!(&results);
+
+        assert!(results.iter().take(3).contains(&"hello".to_string()));
+    }
+
+    #[test]
+    fn spellcheck_common() {
+        let results = suggest_correct_spelling_str("aboot", 100, 3, &FstDictionary::curated());
+
+        dbg!(&results);
+
+        assert!(results.iter().take(3).contains(&"about".to_string()));
+    }
+
+    #[test]
+    fn spellcheck_match() {
+        let results = suggest_correct_spelling_str("hello", 100, 3, &FstDictionary::curated());
+
+        dbg!(&results);
+
+        assert!(results.iter().take(3).contains(&"hello".to_string()));
+    }
+
+    #[test]
+    fn spellcheck_capital() {
+        let results = suggest_correct_spelling_str("Hello", 100, 3, &FstDictionary::curated());
+
+        dbg!(&results);
+
+        assert!(results.iter().take(3).contains(&"hello".to_string()));
+    }
+
+    #[test]
+    fn spellcheck_multiple_choices() {
+        let results = suggest_correct_spelling_str("mello", 100, 3, &FstDictionary::curated());
+
+        dbg!(&results);
+
+        assert!(results.iter().take(3).contains(&"hello".to_string()));
+        assert!(results.iter().take(3).contains(&"mellow".to_string()));
     }
 }
