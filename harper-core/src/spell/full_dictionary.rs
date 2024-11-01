@@ -193,21 +193,21 @@ impl Dictionary for FullDictionary {
         // 53 is the length of the longest word.
         let mut buf_a = Vec::with_capacity(53);
         let mut buf_b = Vec::with_capacity(53);
-        let pruned_words = words_to_search.filter_map(|word| {
-            let dist =
-                edit_distance_min_alloc(&misspelled_normalized, word, &mut buf_a, &mut buf_b);
-            let dist_lower =
-                edit_distance_min_alloc(&misspelled_lower, word, &mut buf_a, &mut buf_b);
-            let smallest_dist = std::cmp::min(dist, dist_lower);
+        words_to_search
+            .filter_map(|word| {
+                let dist = edit_distance_min_alloc(
+                    &misspelled_lower,
+                    &word.to_lower(),
+                    &mut buf_a,
+                    &mut buf_b,
+                );
 
-            if smallest_dist <= max_distance {
-                Some((word, smallest_dist))
-            } else {
-                None
-            }
-        });
-
-        pruned_words
+                if dist <= max_distance {
+                    Some((word, dist))
+                } else {
+                    None
+                }
+            })
             .sorted_by_key(|a| a.1)
             .take(max_results)
             .map(|(word, dist)| (word, dist, self.get_word_metadata(word)))

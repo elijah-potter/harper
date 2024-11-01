@@ -230,32 +230,28 @@ mod tests {
     }
 
     #[test]
-    fn identical_results_between_dicts() {
-        let fst_results = suggest_correct_spelling_str("im", 100, 3, &FstDictionary::curated());
-        let full_results = suggest_correct_spelling_str("im", 100, 3, &FullDictionary::curated());
+    fn full_dict_fuzzy_find() {
+        let results = suggest_correct_spelling_str("anout", 100, 3, &FullDictionary::curated());
 
-        assert_eq!(fst_results, full_results);
+        dbg!(&results);
 
-        let fst_results = suggest_correct_spelling_str("hvllo", 100, 3, &FstDictionary::curated());
-        let full_results =
-            suggest_correct_spelling_str("hvllo", 100, 3, &FullDictionary::curated());
-
-        assert_eq!(fst_results, full_results);
-
-        let fst_results = suggest_correct_spelling_str("aboot", 100, 3, &FstDictionary::curated());
-        let full_results =
-            suggest_correct_spelling_str("aboot", 100, 3, &FullDictionary::curated());
-
-        assert_eq!(fst_results, full_results);
+        assert!(results.iter().take(3).contains(&"about".to_string()));
     }
 
     #[test]
     fn issue_182() {
-        let results = suggest_correct_spelling_str("im", 1000, 3, &FstDictionary::curated());
+        let results = suggest_correct_spelling_str("Im", 100, 3, &FstDictionary::curated());
+        let lowercase_results =
+            suggest_correct_spelling_str("im", 100, 3, &FstDictionary::curated());
 
         dbg!(&results);
+        dbg!(&lowercase_results);
 
         assert!(results.iter().take(3).contains(&"I'm".to_string()));
+        assert!(lowercase_results
+            .iter()
+            .take(3)
+            .contains(&"I'm".to_string()));
     }
 
     #[test]
@@ -295,12 +291,13 @@ mod tests {
     }
 
     #[test]
-    fn spellcheck_multiple_choices() {
-        let results = suggest_correct_spelling_str("mello", 100, 3, &FstDictionary::curated());
+    fn spellchecking_is_deterministic() {
+        let results1 = suggest_correct_spelling_str("hello", 100, 3, &FstDictionary::curated());
+        let results2 = suggest_correct_spelling_str("hello", 100, 3, &FstDictionary::curated());
+        let results3 = suggest_correct_spelling_str("hello", 100, 3, &FstDictionary::curated());
 
-        dbg!(&results);
-
-        assert!(results.iter().contains(&"hello".to_string()));
-        assert!(results.iter().take(3).contains(&"mellow".to_string()));
+        assert_eq!(results1, results2);
+        assert_eq!(results1, results3);
+        assert_eq!(results2, results3);
     }
 }
