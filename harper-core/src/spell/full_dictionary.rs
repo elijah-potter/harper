@@ -1,5 +1,6 @@
 use super::{edit_distance_min_alloc, seq_to_normalized};
 use hashbrown::HashMap;
+use itertools::Itertools;
 use smallvec::{SmallVec, ToSmallVec};
 
 use super::dictionary::Dictionary;
@@ -206,20 +207,9 @@ impl Dictionary for FullDictionary {
             }
         });
 
-        // Locate the words with the lowest edit distance.
-        let mut found_dist: Vec<(&[char], u8)> = Vec::with_capacity(max_results);
-        for (word, dist) in pruned_words {
-            if found_dist.len() < max_results {
-                found_dist.push((word, dist));
-            } else if dist < found_dist[max_results - 1].1 {
-                found_dist[max_results - 1] = (word, dist);
-            }
-            found_dist.sort_by_key(|a| a.1);
-        }
-
-        // Create final, ordered list of suggestions.
-        found_dist
-            .into_iter()
+        pruned_words
+            .sorted_by_key(|a| a.1)
+            .take(max_results)
             .map(|(word, dist)| (word, dist, self.get_word_metadata(word)))
             .collect()
     }
