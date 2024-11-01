@@ -81,7 +81,7 @@ pub fn suggest_correct_spelling_str(
 
 /// Convert a given character sequence to the standard character set
 /// the dictionary is in.
-pub(self) fn seq_to_normalized(seq: &[char]) -> Cow<'_, [char]> {
+fn seq_to_normalized(seq: &[char]) -> Cow<'_, [char]> {
     if seq.iter().any(|c| char_to_normalized(*c) != *c) {
         Cow::Owned(seq.iter().copied().map(char_to_normalized).collect())
     } else {
@@ -89,7 +89,7 @@ pub(self) fn seq_to_normalized(seq: &[char]) -> Cow<'_, [char]> {
     }
 }
 
-pub(self) fn char_to_normalized(c: char) -> char {
+fn char_to_normalized(c: char) -> char {
     match c {
         '’' => '\'',
         _ => c,
@@ -101,7 +101,7 @@ pub(self) fn char_to_normalized(c: char) -> char {
 //
 // This variant avoids allocation if you already have buffers.
 #[inline]
-pub(self) fn edit_distance_min_alloc(
+fn edit_distance_min_alloc(
     source: &[char],
     target: &[char],
     previous_row: &mut Vec<u8>,
@@ -136,7 +136,7 @@ pub(self) fn edit_distance_min_alloc(
     previous_row[row_width]
 }
 
-pub(self) fn edit_distance(source: &[char], target: &[char]) -> u8 {
+fn edit_distance(source: &[char], target: &[char]) -> u8 {
     edit_distance_min_alloc(source, target, &mut Vec::new(), &mut Vec::new())
 }
 
