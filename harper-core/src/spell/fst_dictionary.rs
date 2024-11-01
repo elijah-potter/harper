@@ -82,51 +82,33 @@ impl Dictionary for FstDictionary {
         let misspelled_word_charslice = seq_to_normalized(&chars);
         let misspelled_lower_charslice = misspelled_word_charslice.to_lower();
         let misspelled_word_string = misspelled_word_charslice.to_string();
-        let misspelled_lower_string = misspelled_lower_charslice.to_string();
 
         // Actual FST search
         let automaton = Levenshtein::new(&misspelled_word_string, max_distance as u32).unwrap();
         let word_indexes_stream = self.word_map.search(automaton).into_stream().into_values();
-        let automaton_lower =
-            Levenshtein::new(&misspelled_lower_string, max_distance as u32).unwrap();
-        let word_lower_indexes_stream = self
-            .word_map
-            .search(automaton_lower)
-            .into_stream()
-            .into_values();
-
-        // HashSet used to dedup results
-        let indexes = word_indexes_stream
-            .into_iter()
-            .merge(word_lower_indexes_stream)
-            .collect::<hashbrown::HashSet<_>>();
 
         // Pre-allocated vectors for edit-distance calculation
         // 53 is the length of the longest word.
         let mut buf_a = Vec::with_capacity(53);
         let mut buf_b = Vec::with_capacity(53);
 
-        indexes
+        word_indexes_stream
             .into_iter()
+            .sorted_unstable()
+            .dedup()
             .map(|index| (self.full_dict.get_word(index as usize), index))
             // Sort by edit distance
             .map(|(word, index)| {
                 let dist = edit_distance_min_alloc(
-                    &misspelled_word_charslice,
-                    word,
-                    &mut buf_a,
-                    &mut buf_b,
-                );
-                let dist_lower = edit_distance_min_alloc(
                     &misspelled_lower_charslice,
-                    word,
+                    &word.to_lower(),
                     &mut buf_a,
                     &mut buf_b,
                 );
 
-                (word, std::cmp::min(dist, dist_lower), index)
+                (word, dist, index)
             })
-            .sorted_by_key(|a| a.1)
+            .sorted_unstable_by_key(|a| a.1)
             .take(max_results)
             .map(|(word, dist, index)| {
                 (
