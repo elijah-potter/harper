@@ -1,8 +1,9 @@
-use super::{seq_to_normalized, FullDictionary};
+use super::{edit_distance_min_alloc, seq_to_normalized, FullDictionary};
 use fst::{automaton::Levenshtein, IntoStreamer};
 use fst::{Map as FstMap, Streamer};
+use itertools::Itertools;
 
-use crate::{Lrc, WordMetadata};
+use crate::{CharStringExt, Lrc, WordMetadata};
 
 use super::Dictionary;
 
@@ -76,49 +77,74 @@ impl Dictionary for FstDictionary {
         max_distance: u8,
         max_results: usize,
     ) -> Vec<(&[char], u8, WordMetadata)> {
+        // Various transformations of the input
         let chars: Vec<_> = word.chars().collect();
-        let misspelled_normalized = seq_to_normalized(&chars);
-        let misspelled_word: String = misspelled_normalized.iter().collect();
-        let misspelled_lower: String = misspelled_normalized
-            .iter()
-            .flat_map(|v| v.to_lowercase())
-            .collect();
+        let misspelled_word_charslice = seq_to_normalized(&chars);
+        let misspelled_lower_charslice = misspelled_word_charslice.to_lower();
+        let misspelled_word_string = misspelled_word_charslice.to_string();
+        let misspelled_lower_string = misspelled_lower_charslice.to_string();
 
-        let aut = Levenshtein::new(&misspelled_word, max_distance as u32).unwrap();
-        let aut_lower = Levenshtein::new(&misspelled_lower, max_distance as u32).unwrap();
-        let mut word_lower_indexes_stream = self.word_map.search(aut_lower).into_stream();
-        let mut word_indexes_stream = self.word_map.search(aut).into_stream();
+        // Actual FST search
+        let automaton = Levenshtein::new(&misspelled_word_string, max_distance as u32).unwrap();
+        let automaton_lower =
+            Levenshtein::new(&misspelled_lower_string, max_distance as u32).unwrap();
+        let mut word_lower_indexes_stream = self.word_map.search(automaton_lower).into_stream();
+        let mut word_indexes_stream = self.word_map.search(automaton).into_stream();
 
-        let mut word_indexes = Vec::with_capacity(max_results);
-        let mut i = 0;
-        while i < max_results {
+        // Consume at most max_results values from each stream
+        // The search itself happens as you consume from the stream, so consuming a smaller number
+        // is more efficient
+        // HashSet used to dedup results
+        let mut words = hashbrown::HashSet::with_capacity(max_results * 2);
+        for _ in 0..max_results {
             let mut flag = false;
-            if let Some(v) = word_lower_indexes_stream.next() {
-                word_indexes.push(v.1);
+            if let Some((_, index)) = word_lower_indexes_stream.next() {
+                words.insert(index);
                 flag = true;
             }
-            if let Some(v) = word_indexes_stream.next() {
-                word_indexes.push(v.1);
+            if let Some((_, index)) = word_indexes_stream.next() {
+                words.insert(index);
                 flag = true;
             }
             if !flag {
                 break;
             }
-            i += 1;
         }
-        // Dedup but preserve order of word indexes
-        let mut seen = hashbrown::HashSet::new();
-        word_indexes.retain(|item| seen.insert(*item));
 
-        word_indexes
+        // Pre-allocated vectors for edit-distance calculation
+        // 53 is the length of the longest word.
+        let mut buf_a = Vec::with_capacity(53);
+        let mut buf_b = Vec::with_capacity(53);
+
+        words
             .into_iter()
+            .map(|index| (self.full_dict.get_word(index as usize), index))
+            // Sort by edit distance
+            .map(|(word, index)| {
+                let dist = edit_distance_min_alloc(
+                    &misspelled_word_charslice,
+                    word,
+                    &mut buf_a,
+                    &mut buf_b,
+                );
+                buf_a.clear();
+                buf_b.clear();
+                let dist_lower = edit_distance_min_alloc(
+                    &misspelled_lower_charslice,
+                    word,
+                    &mut buf_a,
+                    &mut buf_b,
+                );
+
+                (std::cmp::min(dist, dist_lower), word, index)
+            })
+            .sorted_unstable_by_key(|a| a.0)
             .take(max_results)
-            .map(|i| (self.full_dict.get_word(i as usize), i))
-            .map(|(word, i)| {
+            .map(|(dist, word, index)| {
                 (
                     word.as_slice(),
-                    i as u8,
-                    self.full_dict.get_metadata(i as usize).to_owned(),
+                    dist,
+                    self.full_dict.get_metadata(index as usize).to_owned(),
                 )
             })
             .collect()
@@ -135,7 +161,10 @@ impl Dictionary for FstDictionary {
 
 #[cfg(test)]
 mod tests {
-    use crate::{spell::seq_to_normalized, Dictionary};
+    use fst::IntoStreamer;
+    use itertools::Itertools;
+
+    use crate::{spell::seq_to_normalized, CharStringExt, Dictionary};
 
     use super::FstDictionary;
 
@@ -145,11 +174,8 @@ mod tests {
 
         for word in dict.words_iter() {
             let misspelled_normalized = seq_to_normalized(word);
-            let misspelled_word: String = misspelled_normalized.iter().collect();
-            let misspelled_lower: String = misspelled_normalized
-                .iter()
-                .flat_map(|v| v.to_lowercase())
-                .collect();
+            let misspelled_word: String = misspelled_normalized.to_string();
+            let misspelled_lower: String = misspelled_normalized.to_lower().to_string();
 
             assert!(!misspelled_word.is_empty());
             assert!(
@@ -165,16 +191,58 @@ mod tests {
 
         let word: Vec<_> = "hello".chars().collect();
         let misspelled_normalized = seq_to_normalized(&word);
-        let misspelled_word: String = misspelled_normalized.iter().collect();
-        let misspelled_lower: String = misspelled_normalized
-            .iter()
-            .flat_map(|v| v.to_lowercase())
-            .collect();
+        let misspelled_word: String = misspelled_normalized.to_string();
+        let misspelled_lower: String = misspelled_normalized.to_lower().to_string();
 
         assert!(dict.contains_word(&misspelled_normalized));
         assert!(
             dict.word_map.contains_key(misspelled_lower)
                 || dict.word_map.contains_key(misspelled_word)
         );
+    }
+
+    #[test]
+    fn fst_search_hello() {
+        let dict = FstDictionary::curated();
+
+        let word: Vec<_> = "hvllo".chars().collect();
+        let misspelled_normalized = seq_to_normalized(&word);
+        let misspelled_word: String = misspelled_normalized.to_string();
+        let misspelled_lower: String = misspelled_normalized.to_lower().to_string();
+
+        let aut = fst::automaton::Levenshtein::new(&misspelled_word, 2).unwrap();
+        let aut_lower = fst::automaton::Levenshtein::new(&misspelled_lower, 2).unwrap();
+        let word_indexes_stream = dict
+            .word_map
+            .search(aut)
+            .into_stream()
+            .into_str_keys()
+            .unwrap();
+        let word_lower_indexes_stream = dict
+            .word_map
+            .search(aut_lower)
+            .into_stream()
+            .into_str_keys()
+            .unwrap();
+
+        dbg!(&word_indexes_stream);
+        assert!(
+            word_indexes_stream.contains(&"hello".to_string())
+                || word_lower_indexes_stream.contains(&"hello".to_string())
+        );
+    }
+
+    #[test]
+    fn fuzzy_hello() {
+        let dict = FstDictionary::curated();
+
+        let matches: Vec<_> = dict
+            .fuzzy_match_str("hvllo", 3, 100)
+            .iter()
+            .map(|cs| cs.0.iter().collect::<String>())
+            .collect();
+        dbg!(&matches);
+
+        assert!(matches.iter().take(10).contains(&"hello".to_string()))
     }
 }
