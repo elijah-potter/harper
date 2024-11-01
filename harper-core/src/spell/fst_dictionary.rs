@@ -86,10 +86,10 @@ impl Dictionary for FstDictionary {
 
         // Actual FST search
         let automaton = Levenshtein::new(&misspelled_word_string, max_distance as u32).unwrap();
+        let mut word_indexes_stream = self.word_map.search(automaton).into_stream();
         let automaton_lower =
             Levenshtein::new(&misspelled_lower_string, max_distance as u32).unwrap();
         let mut word_lower_indexes_stream = self.word_map.search(automaton_lower).into_stream();
-        let mut word_indexes_stream = self.word_map.search(automaton).into_stream();
 
         // Consume at most max_results values from each stream
         // The search itself happens as you consume from the stream, so consuming a smaller number
@@ -98,11 +98,11 @@ impl Dictionary for FstDictionary {
         let mut words = hashbrown::HashSet::with_capacity(max_results * 2);
         for _ in 0..max_results {
             let mut flag = false;
-            if let Some((_, index)) = word_lower_indexes_stream.next() {
+            if let Some((_, index)) = word_indexes_stream.next() {
                 words.insert(index);
                 flag = true;
             }
-            if let Some((_, index)) = word_indexes_stream.next() {
+            if let Some((_, index)) = word_lower_indexes_stream.next() {
                 words.insert(index);
                 flag = true;
             }
@@ -127,8 +127,6 @@ impl Dictionary for FstDictionary {
                     &mut buf_a,
                     &mut buf_b,
                 );
-                buf_a.clear();
-                buf_b.clear();
                 let dist_lower = edit_distance_min_alloc(
                     &misspelled_lower_charslice,
                     word,
@@ -136,11 +134,11 @@ impl Dictionary for FstDictionary {
                     &mut buf_b,
                 );
 
-                (std::cmp::min(dist, dist_lower), word, index)
+                (word, std::cmp::min(dist, dist_lower), index)
             })
-            .sorted_unstable_by_key(|a| a.0)
+            .sorted_unstable_by_key(|a| a.1)
             .take(max_results)
-            .map(|(dist, word, index)| {
+            .map(|(word, dist, index)| {
                 (
                     word.as_slice(),
                     dist,
@@ -169,7 +167,7 @@ mod tests {
     use super::FstDictionary;
 
     #[test]
-    fn fst_contains() {
+    fn fst_map_contains_all_in_full_dict() {
         let dict = FstDictionary::curated();
 
         for word in dict.words_iter() {
@@ -233,16 +231,19 @@ mod tests {
     }
 
     #[test]
-    fn fuzzy_hello() {
+    fn fuzzy_result_sorted_by_edit_distance() {
         let dict = FstDictionary::curated();
 
-        let matches: Vec<_> = dict
-            .fuzzy_match_str("hvllo", 3, 100)
+        let results = dict.fuzzy_match_str("hello", 3, 100);
+        let is_sorted_by_dist = results
             .iter()
-            .map(|cs| cs.0.iter().collect::<String>())
-            .collect();
-        dbg!(&matches);
+            .map(|(_, dist, _)| dist)
+            .tuple_windows()
+            .all(|(a, b)| a <= b);
 
-        assert!(matches.iter().take(10).contains(&"hello".to_string()))
+        let expected_match: Vec<_> = "hello".chars().collect();
+        assert_eq!(results.first().unwrap().0, &expected_match);
+
+        assert!(is_sorted_by_dist)
     }
 }

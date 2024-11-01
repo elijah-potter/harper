@@ -332,4 +332,21 @@ mod tests {
         let dict = FullDictionary::curated();
         assert!(dict.get_word_metadata_str("I'm").common);
     }
+
+    #[test]
+    fn fuzzy_result_sorted_by_edit_distance() {
+        let dict = FullDictionary::curated();
+
+        let results = dict.fuzzy_match_str("hello", 3, 100);
+        let is_sorted_by_dist = results
+            .iter()
+            .map(|(_, dist, _)| dist)
+            .tuple_windows()
+            .all(|(a, b)| a <= b);
+
+        let expected_match: Vec<_> = "hello".chars().collect();
+        assert_eq!(results.first().unwrap().0, &expected_match);
+
+        assert!(is_sorted_by_dist)
+    }
 }
