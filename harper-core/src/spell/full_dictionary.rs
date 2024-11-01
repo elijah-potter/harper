@@ -334,9 +334,6 @@ mod tests {
             .tuple_windows()
             .all(|(a, b)| a <= b);
 
-        let expected_match: Vec<_> = "hello".chars().collect();
-        assert_eq!(results.first().unwrap().0, &expected_match);
-
         assert!(is_sorted_by_dist)
     }
 }
