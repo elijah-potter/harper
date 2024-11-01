@@ -1,9 +1,9 @@
-use super::seq_to_normalized;
+use super::{edit_distance_min_alloc, seq_to_normalized};
 use hashbrown::HashMap;
 use smallvec::{SmallVec, ToSmallVec};
 
 use super::dictionary::Dictionary;
-use crate::{CharString, Lrc, WordMetadata};
+use crate::{CharString, CharStringExt, Lrc, WordMetadata};
 use harper_dictionary_parsing::{parse_default_attribute_list, parse_default_word_list};
 
 /// A full, fat dictionary.
@@ -136,7 +136,7 @@ impl Default for FullDictionary {
 impl Dictionary for FullDictionary {
     fn get_word_metadata(&self, word: &[char]) -> WordMetadata {
         let normalized = seq_to_normalized(word);
-        let lowercase: CharString = normalized.iter().flat_map(|c| c.to_lowercase()).collect();
+        let lowercase: CharString = normalized.to_lower();
 
         self.word_map
             .get(normalized.as_ref())
@@ -147,7 +147,7 @@ impl Dictionary for FullDictionary {
 
     fn contains_word(&self, word: &[char]) -> bool {
         let normalized = seq_to_normalized(word);
-        let lowercase: CharString = normalized.iter().flat_map(|c| c.to_lowercase()).collect();
+        let lowercase: CharString = normalized.to_lower();
 
         self.word_map.contains_key(normalized.as_ref()) || self.word_map.contains_key(&lowercase)
     }
@@ -173,14 +173,7 @@ impl Dictionary for FullDictionary {
         max_results: usize,
     ) -> Vec<(&[char], u8, WordMetadata)> {
         let misspelled_normalized = seq_to_normalized(word);
-        let misspelled_lower: Vec<char> = misspelled_normalized
-            .iter()
-            .flat_map(|v| v.to_lowercase())
-            .collect();
-
-        // 53 is the length of the longest word.
-        let mut buf_a = Vec::with_capacity(53);
-        let mut buf_b = Vec::with_capacity(53);
+        let misspelled_lower: Vec<char> = misspelled_normalized.to_lower().to_vec();
 
         // The length of the shortest word to look at.
         let shortest_word_len = if misspelled_normalized.len() < max_distance as usize {
@@ -195,14 +188,19 @@ impl Dictionary for FullDictionary {
             .rev()
             .flat_map(|len| self.words_with_len_iter(len));
 
+        // Pre-allocated vectors for the edit-distance calculation
+        // 53 is the length of the longest word.
+        let mut buf_a = Vec::with_capacity(53);
+        let mut buf_b = Vec::with_capacity(53);
         let pruned_words = words_to_search.filter_map(|word| {
             let dist =
                 edit_distance_min_alloc(&misspelled_normalized, word, &mut buf_a, &mut buf_b);
             let dist_lower =
                 edit_distance_min_alloc(&misspelled_lower, word, &mut buf_a, &mut buf_b);
+            let smallest_dist = std::cmp::min(dist, dist_lower);
 
-            if dist.min(dist_lower) <= max_distance {
-                Some((word, dist))
+            if smallest_dist <= max_distance {
+                Some((word, smallest_dist))
             } else {
                 None
             }
@@ -210,7 +208,6 @@ impl Dictionary for FullDictionary {
 
         // Locate the words with the lowest edit distance.
         let mut found_dist: Vec<(&[char], u8)> = Vec::with_capacity(max_results);
-
         for (word, dist) in pruned_words {
             if found_dist.len() < max_results {
                 found_dist.push((word, dist));
@@ -223,7 +220,7 @@ impl Dictionary for FullDictionary {
         // Create final, ordered list of suggestions.
         found_dist
             .into_iter()
-            .map(|v| (v.0, v.1, self.get_word_metadata(v.0)))
+            .map(|(word, dist)| (word, dist, self.get_word_metadata(word)))
             .collect()
     }
 
@@ -257,55 +254,11 @@ impl Dictionary for FullDictionary {
     }
 }
 
-// Computes the Levenstein edit distance between two patterns.
-// This is accomplished via a memory-optimized Wagner-Fischer algorithm
-//
-// This variant avoids allocation if you already have buffers.
-#[inline]
-pub fn edit_distance_min_alloc(
-    source: &[char],
-    target: &[char],
-    previous_row: &mut Vec<u8>,
-    current_row: &mut Vec<u8>,
-) -> u8 {
-    if cfg!(debug_assertions) {
-        assert!(source.len() <= 255 && target.len() <= 255);
-    }
-
-    let row_width = source.len();
-    let col_height = target.len();
-
-    previous_row.clear();
-    previous_row.extend(0u8..=row_width as u8);
-    // Alright if not zeroed, since we overwrite it anyway.
-    current_row.resize(row_width + 1, 0);
-
-    for j in 1..=col_height {
-        current_row[0] = j as u8;
-
-        for i in 1..=row_width {
-            let cost = if source[i - 1] == target[j - 1] { 0 } else { 1 };
-
-            current_row[i] = (previous_row[i] + 1)
-                .min(current_row[i - 1] + 1)
-                .min(previous_row[i - 1] + cost);
-        }
-
-        std::mem::swap(previous_row, current_row);
-    }
-
-    previous_row[row_width]
-}
-
-pub fn edit_distance(source: &[char], target: &[char]) -> u8 {
-    edit_distance_min_alloc(source, target, &mut Vec::new(), &mut Vec::new())
-}
-
 #[cfg(test)]
 mod tests {
-    use super::{edit_distance, seq_to_normalized};
     use itertools::Itertools;
 
+    use super::super::{edit_distance, seq_to_normalized};
     use crate::{Dictionary, FullDictionary};
 
     fn assert_edit_dist(source: &str, target: &str, expected: u8) {
