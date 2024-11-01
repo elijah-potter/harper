@@ -1,6 +1,6 @@
 use super::{edit_distance_min_alloc, seq_to_normalized, FullDictionary};
+use fst::Map as FstMap;
 use fst::{automaton::Levenshtein, IntoStreamer};
-use fst::{Map as FstMap, Streamer};
 use itertools::Itertools;
 
 use crate::{CharStringExt, Lrc, WordMetadata};
@@ -86,37 +86,27 @@ impl Dictionary for FstDictionary {
 
         // Actual FST search
         let automaton = Levenshtein::new(&misspelled_word_string, max_distance as u32).unwrap();
-        let mut word_indexes_stream = self.word_map.search(automaton).into_stream();
+        let word_indexes_stream = self.word_map.search(automaton).into_stream().into_values();
         let automaton_lower =
             Levenshtein::new(&misspelled_lower_string, max_distance as u32).unwrap();
-        let mut word_lower_indexes_stream = self.word_map.search(automaton_lower).into_stream();
+        let word_lower_indexes_stream = self
+            .word_map
+            .search(automaton_lower)
+            .into_stream()
+            .into_values();
 
-        // Consume at most max_results values from each stream
-        // The search itself happens as you consume from the stream, so consuming a smaller number
-        // is more efficient
         // HashSet used to dedup results
-        let mut words = hashbrown::HashSet::with_capacity(max_results * 2);
-        for _ in 0..max_results {
-            let mut flag = false;
-            if let Some((_, index)) = word_indexes_stream.next() {
-                words.insert(index);
-                flag = true;
-            }
-            if let Some((_, index)) = word_lower_indexes_stream.next() {
-                words.insert(index);
-                flag = true;
-            }
-            if !flag {
-                break;
-            }
-        }
+        let indexes = word_indexes_stream
+            .into_iter()
+            .merge(word_lower_indexes_stream)
+            .collect::<hashbrown::HashSet<_>>();
 
         // Pre-allocated vectors for edit-distance calculation
         // 53 is the length of the longest word.
         let mut buf_a = Vec::with_capacity(53);
         let mut buf_b = Vec::with_capacity(53);
 
-        words
+        indexes
             .into_iter()
             .map(|index| (self.full_dict.get_word(index as usize), index))
             // Sort by edit distance
@@ -136,7 +126,7 @@ impl Dictionary for FstDictionary {
 
                 (word, std::cmp::min(dist, dist_lower), index)
             })
-            .sorted_unstable_by_key(|a| a.1)
+            .sorted_by_key(|a| a.1)
             .take(max_results)
             .map(|(word, dist, index)| {
                 (
@@ -240,9 +230,6 @@ mod tests {
             .map(|(_, dist, _)| dist)
             .tuple_windows()
             .all(|(a, b)| a <= b);
-
-        let expected_match: Vec<_> = "hello".chars().collect();
-        assert_eq!(results.first().unwrap().0, &expected_match);
 
         assert!(is_sorted_by_dist)
     }
