@@ -1,6 +1,8 @@
 use super::{edit_distance_min_alloc, seq_to_normalized, FullDictionary};
 use fst::Map as FstMap;
 use fst::{automaton::Levenshtein, IntoStreamer};
+use harper_dictionary_parsing::CharString;
+use hashbrown::HashMap;
 use itertools::Itertools;
 use std::sync::Arc;
 
@@ -43,6 +45,38 @@ impl FstDictionary {
     /// in the Harper binary.
     pub fn curated() -> Arc<Self> {
         DICT.with(|v| v.clone())
+    }
+
+    pub fn new(new_words: HashMap<CharString, WordMetadata>) -> Self {
+        let words = new_words
+            .into_iter()
+            .sorted_by_key(|p| p.0.to_owned())
+            .dedup_by(|p1, p2| p1.0 == p2.0)
+            .sorted_by_key(|p| p.0.len());
+
+        let mut builder = fst::MapBuilder::memory();
+        words
+            .clone()
+            .enumerate()
+            .map(|(i, (w, _))| (i, w))
+            .sorted_by_key(|w| w.1.to_owned())
+            .for_each(|(i, w)| {
+                let word = w.iter().collect::<String>();
+                builder
+                    .insert(word, i as u64)
+                    .expect("Insertion not in lexicographical order!");
+            });
+
+        let mut full_dict = FullDictionary::new();
+        full_dict.extend_words(words);
+
+        let fst_bytes = builder.into_inner().unwrap();
+        let word_map = FstMap::new(fst_bytes).expect("Unable to build FST map.");
+
+        FstDictionary {
+            full_dict: Arc::new(full_dict),
+            word_map,
+        }
     }
 }
 
