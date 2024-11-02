@@ -2,7 +2,6 @@
 #![allow(dead_code)]
 
 mod char_ext;
-mod char_string;
 mod document;
 pub mod language_detection;
 mod lexing;
@@ -11,7 +10,6 @@ mod mask;
 pub mod parsers;
 pub mod patterns;
 mod punctuation;
-mod span;
 mod spell;
 mod sync;
 mod token;
@@ -19,13 +17,13 @@ mod vec_ext;
 
 use std::collections::VecDeque;
 
-pub use char_string::{CharString, CharStringExt};
 pub use document::Document;
+pub use harper_dictionary_parsing::char_string::{CharString, CharStringExt};
+pub use harper_dictionary_parsing::span::Span;
 pub use harper_dictionary_parsing::{word_metadata::Tense, WordMetadata};
 use linting::Lint;
 pub use mask::{Mask, Masker};
 pub use punctuation::{Punctuation, Quote};
-pub use span::Span;
 pub use spell::{Dictionary, FstDictionary, FullDictionary, MergedDictionary};
 pub use sync::Lrc;
 pub use token::{FatToken, Token, TokenKind, TokenStringExt};

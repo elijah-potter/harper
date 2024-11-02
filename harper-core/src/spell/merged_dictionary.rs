@@ -1,9 +1,8 @@
-use harper_dictionary_parsing::CharString;
 use itertools::Itertools;
 use std::sync::Arc;
 
 use super::dictionary::Dictionary;
-use crate::WordMetadata;
+use crate::{CharString, WordMetadata};
 
 /// A simple wrapper over [`Dictionary`] that allows
 /// one to merge multiple dictionaries without copying.

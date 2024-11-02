@@ -1,9 +1,8 @@
 use std::borrow::Cow;
 
-use harper_dictionary_parsing::WordMetadata;
 use itertools::{Itertools, MinMaxResult};
 
-use crate::{CharString, CharStringExt};
+use crate::{CharString, CharStringExt, WordMetadata};
 
 pub use self::dictionary::Dictionary;
 pub use self::fst_dictionary::FstDictionary;

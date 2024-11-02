@@ -4,13 +4,13 @@ pub mod char_string;
 mod error;
 mod expansion;
 mod matcher;
-mod span;
+pub mod span;
 pub mod word_list;
 pub mod word_metadata;
 
 pub use attribute_list::AttributeList;
 use attribute_list::HumanReadableAttributeList;
-pub use char_string::CharString;
+pub use char_string::{CharString, CharStringExt};
 pub use error::Error;
 pub use span::Span;
 pub use word_metadata::WordMetadata;
