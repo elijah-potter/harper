@@ -1,8 +1,8 @@
-use super::{edit_distance_min_alloc, seq_to_normalized, FullDictionary};
-use fst::Map as FstMap;
-use fst::{automaton::Levenshtein, IntoStreamer};
+use super::{seq_to_normalized, FullDictionary};
+use fst::{map::StreamWithState, IntoStreamer, Map as FstMap, Streamer};
 use hashbrown::HashMap;
 use itertools::Itertools;
+use levenshtein_automata::{LevenshteinAutomatonBuilder, DFA};
 use std::sync::Arc;
 
 use crate::{CharString, CharStringExt, WordMetadata};
@@ -79,6 +79,15 @@ impl FstDictionary {
     }
 }
 
+fn stream_distances_vec(stream: &mut StreamWithState<&DFA>, dfa: &DFA) -> Vec<(u64, u8)> {
+    let mut word_indexes = Vec::new();
+    while let Some((_, v, s)) = stream.next() {
+        word_indexes.push((v, dfa.distance(s).to_u8()));
+    }
+
+    word_indexes
+}
+
 impl Dictionary for FstDictionary {
     fn contains_word(&self, word: &[char]) -> bool {
         self.full_dict.contains_word(word)
@@ -114,39 +123,23 @@ impl Dictionary for FstDictionary {
         // Various transformations of the input
         let chars: Vec<_> = word.chars().collect();
         let misspelled_word_charslice = seq_to_normalized(&chars);
-        let misspelled_lower_charslice = misspelled_word_charslice.to_lower();
         let misspelled_word_string = misspelled_word_charslice.to_string();
 
         // Actual FST search
-        let automaton = Levenshtein::new(&misspelled_word_string, max_distance as u32).unwrap();
-        let word_indexes = self.word_map.search(automaton).into_stream().into_values();
+        let automaton_builder = LevenshteinAutomatonBuilder::new(max_distance, true);
+        let dfa = automaton_builder.build_dfa(&misspelled_word_string);
+        let mut word_indexes_stream = self.word_map.search_with_state(&dfa).into_stream();
 
-        // Pre-allocated vectors for edit-distance calculation
-        // 53 is the length of the longest word.
-        let mut buf_a = Vec::with_capacity(53);
-        let mut buf_b = Vec::with_capacity(53);
-
-        word_indexes
+        stream_distances_vec(&mut word_indexes_stream, &dfa)
             .into_iter()
             .sorted_unstable()
-            .dedup()
-            .map(|index| (self.full_dict.get_word(index as usize), index))
+            .dedup_by(|a, b| a.0 == b.0)
             // Sort by edit distance
-            .map(|(word, index)| {
-                let dist = edit_distance_min_alloc(
-                    &misspelled_lower_charslice,
-                    &word.to_lower(),
-                    &mut buf_a,
-                    &mut buf_b,
-                );
-
-                (word, dist, index)
-            })
             .sorted_unstable_by_key(|a| a.1)
             .take(max_results)
-            .map(|(word, dist, index)| {
+            .map(|(index, dist)| {
                 (
-                    word.as_slice(),
+                    self.full_dict.get_word(index as usize).as_slice(),
                     dist,
                     self.full_dict.get_metadata(index as usize).to_owned(),
                 )

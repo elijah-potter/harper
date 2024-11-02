@@ -178,12 +178,11 @@ impl Dictionary for FullDictionary {
         max_distance: u8,
         max_results: usize,
     ) -> Vec<(&[char], u8, WordMetadata)> {
-        let misspelled_normalized = seq_to_normalized(word);
-        let misspelled_lower_charslice = misspelled_normalized.to_lower();
+        let misspelled_charslice = seq_to_normalized(word);
 
         let shortest_word_len =
-            std::cmp::max(1, misspelled_normalized.len() - max_distance as usize);
-        let longest_word_len = misspelled_normalized.len() + max_distance as usize;
+            std::cmp::max(1, misspelled_charslice.len() - max_distance as usize);
+        let longest_word_len = misspelled_charslice.len() + max_distance as usize;
 
         // Get canidate words
         let words_to_search = (shortest_word_len..=longest_word_len)
@@ -198,12 +197,8 @@ impl Dictionary for FullDictionary {
         // Sort by edit-distance
         words_to_search
             .filter_map(|word| {
-                let dist = edit_distance_min_alloc(
-                    &misspelled_lower_charslice,
-                    &word.to_lower(),
-                    &mut buf_a,
-                    &mut buf_b,
-                );
+                let dist =
+                    edit_distance_min_alloc(&misspelled_charslice, &word, &mut buf_a, &mut buf_b);
 
                 if dist <= max_distance {
                     Some((word, dist))
