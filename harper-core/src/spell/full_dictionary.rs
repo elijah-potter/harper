@@ -2,9 +2,10 @@ use super::{edit_distance_min_alloc, seq_to_normalized};
 use hashbrown::HashMap;
 use itertools::Itertools;
 use smallvec::{SmallVec, ToSmallVec};
+use std::sync::Arc;
 
 use super::dictionary::Dictionary;
-use crate::{CharString, CharStringExt, Lrc, WordMetadata};
+use crate::{CharString, CharStringExt, WordMetadata};
 use harper_dictionary_parsing::{parse_default_attribute_list, parse_default_word_list};
 
 /// A full, fat dictionary.
@@ -28,7 +29,7 @@ pub struct FullDictionary {
 
 /// The uncached function that is used to produce the original copy of the
 /// curated dictionary.
-fn uncached_inner_new() -> Lrc<FullDictionary> {
+fn uncached_inner_new() -> Arc<FullDictionary> {
     let word_list = parse_default_word_list().unwrap();
     let attr_list = parse_default_attribute_list();
 
@@ -41,7 +42,7 @@ fn uncached_inner_new() -> Lrc<FullDictionary> {
     words.sort();
     words.dedup();
 
-    Lrc::new(FullDictionary {
+    Arc::new(FullDictionary {
         word_map,
         word_len_starts: FullDictionary::create_len_starts(&words),
         words,
@@ -49,7 +50,7 @@ fn uncached_inner_new() -> Lrc<FullDictionary> {
 }
 
 thread_local! {
-    static DICT: Lrc<FullDictionary> = uncached_inner_new();
+    static DICT: Arc<FullDictionary> = uncached_inner_new();
 }
 
 impl FullDictionary {
@@ -63,7 +64,7 @@ impl FullDictionary {
 
     /// Create a dictionary from the curated dictionary included
     /// in the Harper binary.
-    pub fn curated() -> Lrc<Self> {
+    pub fn curated() -> Arc<Self> {
         DICT.with(|v| v.clone())
     }
 

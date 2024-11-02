@@ -1,21 +1,21 @@
-use crate::Lrc;
 use std::collections::VecDeque;
+use std::sync::Arc;
 
 use itertools::Itertools;
 
 use super::{Parser, TokenKind};
 use crate::patterns::{PatternExt, SequencePattern};
-use crate::{Dictionary, Span, Token, VecExt};
+use crate::{Dictionary, Lrc, Span, Token, VecExt};
 
 /// A parser that wraps any other parser to collapse token strings that match
 /// the pattern `word_word` or `word-word`.
 pub struct CollapseIdentifiers {
     inner: Box<dyn Parser>,
-    dict: Lrc<dyn Dictionary>,
+    dict: Arc<dyn Dictionary>,
 }
 
 impl CollapseIdentifiers {
-    pub fn new(inner: Box<dyn Parser>, dict: Box<Lrc<dyn Dictionary>>) -> Self {
+    pub fn new(inner: Box<dyn Parser>, dict: Box<Arc<dyn Dictionary>>) -> Self {
         Self {
             inner,
             dict: *dict.clone(),
@@ -104,10 +104,10 @@ mod tests {
 
         let mut merged_dict = MergedDictionary::new();
         merged_dict.add_dictionary(curated_dictionary);
-        merged_dict.add_dictionary(Lrc::new(dict));
+        merged_dict.add_dictionary(Arc::new(dict));
 
         let tokens =
-            CollapseIdentifiers::new(Box::new(PlainEnglish), Box::new(Lrc::new(merged_dict)))
+            CollapseIdentifiers::new(Box::new(PlainEnglish), Box::new(Arc::new(merged_dict)))
                 .parse_str(source);
         assert_eq!(tokens.len(), 11);
     }
@@ -128,10 +128,10 @@ mod tests {
 
         let mut merged_dict = MergedDictionary::new();
         merged_dict.add_dictionary(curated_dictionary);
-        merged_dict.add_dictionary(Lrc::new(dict));
+        merged_dict.add_dictionary(Arc::new(dict));
 
         let tokens =
-            CollapseIdentifiers::new(Box::new(PlainEnglish), Box::new(Lrc::new(merged_dict)))
+            CollapseIdentifiers::new(Box::new(PlainEnglish), Box::new(Arc::new(merged_dict)))
                 .parse_str(source);
 
         assert_eq!(tokens.len(), 11);
@@ -152,10 +152,10 @@ mod tests {
 
         let mut merged_dict = MergedDictionary::new();
         merged_dict.add_dictionary(curated_dictionary);
-        merged_dict.add_dictionary(Lrc::new(dict));
+        merged_dict.add_dictionary(Arc::new(dict));
 
         let tokens =
-            CollapseIdentifiers::new(Box::new(PlainEnglish), Box::new(Lrc::new(merged_dict)))
+            CollapseIdentifiers::new(Box::new(PlainEnglish), Box::new(Arc::new(merged_dict)))
                 .parse_str(source);
         assert_eq!(tokens.len(), 11);
     }
@@ -175,10 +175,10 @@ mod tests {
 
         let mut merged_dict = MergedDictionary::new();
         merged_dict.add_dictionary(curated_dictionary);
-        merged_dict.add_dictionary(Lrc::new(dict));
+        merged_dict.add_dictionary(Arc::new(dict));
 
         let tokens =
-            CollapseIdentifiers::new(Box::new(PlainEnglish), Box::new(Lrc::new(merged_dict)))
+            CollapseIdentifiers::new(Box::new(PlainEnglish), Box::new(Arc::new(merged_dict)))
                 .parse_str(source);
         assert_eq!(tokens.len(), 13);
     }
@@ -199,10 +199,10 @@ mod tests {
 
         let mut merged_dict = MergedDictionary::new();
         merged_dict.add_dictionary(curated_dictionary);
-        merged_dict.add_dictionary(Lrc::new(dict));
+        merged_dict.add_dictionary(Arc::new(dict));
 
         let tokens =
-            CollapseIdentifiers::new(Box::new(PlainEnglish), Box::new(Lrc::new(merged_dict)))
+            CollapseIdentifiers::new(Box::new(PlainEnglish), Box::new(Arc::new(merged_dict)))
                 .parse_str(source);
         assert_eq!(tokens.len(), 15);
     }
@@ -223,10 +223,10 @@ mod tests {
 
         let mut merged_dict = MergedDictionary::new();
         merged_dict.add_dictionary(curated_dictionary);
-        merged_dict.add_dictionary(Lrc::new(dict));
+        merged_dict.add_dictionary(Arc::new(dict));
 
         let tokens =
-            CollapseIdentifiers::new(Box::new(PlainEnglish), Box::new(Lrc::new(merged_dict)))
+            CollapseIdentifiers::new(Box::new(PlainEnglish), Box::new(Arc::new(merged_dict)))
                 .parse_str(source);
         assert_eq!(tokens.len(), 11);
     }
