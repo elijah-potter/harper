@@ -67,7 +67,7 @@ impl FullDictionary {
 
     /// Create a dictionary from the curated dictionary included
     /// in the Harper binary.
-    pub fn curated() -> Arc<Self> {
+    pub(super) fn curated() -> Arc<Self> {
         DICT.with(|v| v.clone())
     }
 
