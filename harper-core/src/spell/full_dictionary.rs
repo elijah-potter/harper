@@ -249,34 +249,7 @@ impl Dictionary for FullDictionary {
 mod tests {
     use itertools::Itertools;
 
-    use super::super::{edit_distance, seq_to_normalized};
     use crate::{Dictionary, FullDictionary};
-
-    fn assert_edit_dist(source: &str, target: &str, expected: u8) {
-        let source: Vec<_> = source.chars().collect();
-        let target: Vec<_> = target.chars().collect();
-
-        let dist = edit_distance(&source, &target);
-        assert_eq!(dist, expected)
-    }
-
-    #[test]
-    fn normalizes_weve() {
-        let word = vec!['w', 'e', '’', 'v', 'e'];
-        let norm = seq_to_normalized(&word);
-
-        assert_eq!(norm.clone(), vec!['w', 'e', '\'', 'v', 'e'])
-    }
-
-    #[test]
-    fn simple1() {
-        assert_edit_dist("kitten", "sitting", 3)
-    }
-
-    #[test]
-    fn simple2() {
-        assert_edit_dist("saturday", "sunday", 3)
-    }
 
     #[test]
     fn curated_contains_no_duplicates() {

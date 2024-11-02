@@ -95,6 +95,8 @@ fn seq_to_normalized(seq: &[char]) -> Cow<'_, [char]> {
 fn char_to_normalized(c: char) -> char {
     match c {
         '’' => '\'',
+        '‘' => '\'',
+        '＇' => '\'',
         _ => c,
     }
 }
@@ -147,11 +149,36 @@ fn edit_distance(source: &[char], target: &[char]) -> u8 {
 mod tests {
     use itertools::Itertools;
 
-    use crate::spell::edit_distance;
-
     use super::{
-        order_suggestions, suggest_correct_spelling_str, Dictionary, FstDictionary, FullDictionary,
+        edit_distance, order_suggestions, seq_to_normalized, suggest_correct_spelling_str,
+        Dictionary, FstDictionary, FullDictionary,
     };
+
+    fn assert_edit_dist(source: &str, target: &str, expected: u8) {
+        let source: Vec<_> = source.chars().collect();
+        let target: Vec<_> = target.chars().collect();
+
+        let dist = edit_distance(&source, &target);
+        assert_eq!(dist, expected)
+    }
+
+    #[test]
+    fn normalizes_weve() {
+        let word = vec!['w', 'e', '’', 'v', 'e'];
+        let norm = seq_to_normalized(&word);
+
+        assert_eq!(norm.clone(), vec!['w', 'e', '\'', 'v', 'e'])
+    }
+
+    #[test]
+    fn simple_edit_distance_1() {
+        assert_edit_dist("kitten", "sitting", 3)
+    }
+
+    #[test]
+    fn simple_edit_distance_2() {
+        assert_edit_dist("saturday", "sunday", 3)
+    }
 
     #[test]
     fn produces_no_duplicates() {
