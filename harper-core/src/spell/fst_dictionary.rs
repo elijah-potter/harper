@@ -86,14 +86,14 @@ impl Dictionary for FstDictionary {
 
         // Actual FST search
         let automaton = Levenshtein::new(&misspelled_word_string, max_distance as u32).unwrap();
-        let word_indexes_stream = self.word_map.search(automaton).into_stream().into_values();
+        let word_indexes = self.word_map.search(automaton).into_stream().into_values();
 
         // Pre-allocated vectors for edit-distance calculation
         // 53 is the length of the longest word.
         let mut buf_a = Vec::with_capacity(53);
         let mut buf_b = Vec::with_capacity(53);
 
-        word_indexes_stream
+        word_indexes
             .into_iter()
             .sorted_unstable()
             .dedup()

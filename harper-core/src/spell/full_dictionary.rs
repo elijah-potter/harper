@@ -175,18 +175,14 @@ impl Dictionary for FullDictionary {
         max_results: usize,
     ) -> Vec<(&[char], u8, WordMetadata)> {
         let misspelled_normalized = seq_to_normalized(word);
-        let misspelled_lower: Vec<char> = misspelled_normalized.to_lower().to_vec();
+        let misspelled_lower_charslice = misspelled_normalized.to_lower();
 
-        // The length of the shortest word to look at.
-        let shortest_word_len = if misspelled_normalized.len() < max_distance as usize {
-            1
-        } else {
-            misspelled_normalized.len() - max_distance as usize
-        };
+        let shortest_word_len =
+            std::cmp::max(1, misspelled_normalized.len() - max_distance as usize);
+        let longest_word_len = misspelled_normalized.len() + max_distance as usize;
 
-        // Note how we look at the biggest words first.
-        let words_to_search = (shortest_word_len
-            ..misspelled_normalized.len() + max_distance as usize)
+        // Get canidate words
+        let words_to_search = (shortest_word_len..=longest_word_len)
             .rev()
             .flat_map(|len| self.words_with_len_iter(len));
 
@@ -194,10 +190,12 @@ impl Dictionary for FullDictionary {
         // 53 is the length of the longest word.
         let mut buf_a = Vec::with_capacity(53);
         let mut buf_b = Vec::with_capacity(53);
+
+        // Sort by edit-distance
         words_to_search
             .filter_map(|word| {
                 let dist = edit_distance_min_alloc(
-                    &misspelled_lower,
+                    &misspelled_lower_charslice,
                     &word.to_lower(),
                     &mut buf_a,
                     &mut buf_b,
@@ -209,7 +207,7 @@ impl Dictionary for FullDictionary {
                     None
                 }
             })
-            .sorted_by_key(|a| a.1)
+            .sorted_unstable_by_key(|a| a.1)
             .take(max_results)
             .map(|(word, dist)| (word, dist, self.get_word_metadata(word)))
             .collect()
