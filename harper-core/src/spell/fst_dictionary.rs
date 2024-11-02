@@ -1,12 +1,11 @@
 use super::{edit_distance_min_alloc, seq_to_normalized, FullDictionary};
 use fst::Map as FstMap;
 use fst::{automaton::Levenshtein, IntoStreamer};
-use harper_dictionary_parsing::CharString;
 use hashbrown::HashMap;
 use itertools::Itertools;
 use std::sync::Arc;
 
-use crate::{CharStringExt, WordMetadata};
+use crate::{CharString, CharStringExt, WordMetadata};
 
 use super::Dictionary;
 

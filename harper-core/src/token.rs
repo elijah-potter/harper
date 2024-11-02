@@ -5,7 +5,7 @@ use paste::paste;
 use serde::{Deserialize, Serialize};
 
 use crate::punctuation::Punctuation;
-use crate::span::Span;
+use crate::Span;
 use crate::{Quote, WordMetadata};
 use harper_dictionary_parsing::word_metadata::{ConjunctionData, NounData};
 
