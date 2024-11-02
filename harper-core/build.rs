@@ -6,6 +6,7 @@ use harper_dictionary_parsing::{
     parse_default_attribute_list, parse_default_word_list, CharString,
 };
 use hashbrown::HashMap;
+use itertools::Itertools;
 
 fn main() {
     let wtr = io::BufWriter::new(File::create("dictionary.fst").unwrap());
@@ -19,18 +20,25 @@ fn main() {
 
     attr_list.expand_marked_words(word_list, &mut word_map);
 
-    let mut words: Vec<CharString> = word_map.iter().map(|(v, _)| v.clone()).collect();
-    words.sort();
+    let mut words: Vec<CharString> = word_map.iter().map(|(w, _)| w.clone()).collect();
+    // This may seem weird, but it ensures that the indexes from enumerate below match with those
+    // of the words array in FullDictionary.
+    words.sort_unstable();
     words.dedup();
+    words.sort_by_key(|w| w.len()); // DO NOT MAKE THIS UNSTABLE.
 
     // Using u64 shouldn't pose any issues since I don't think the English
     // language has that many words
-    words.iter().enumerate().for_each(|(i, s)| {
-        let word = s.iter().collect::<String>();
-        build
-            .insert(word, i as u64)
-            .expect("Insertion not in lexicographical order!");
-    });
+    words
+        .iter()
+        .enumerate()
+        .sorted_by_key(|w| w.1)
+        .for_each(|(i, s)| {
+            let word = s.iter().collect::<String>();
+            build
+                .insert(word, i as u64)
+                .expect("Insertion not in lexicographical order!");
+        });
 
     build.finish().expect("Unable to build map of dictionary!");
 

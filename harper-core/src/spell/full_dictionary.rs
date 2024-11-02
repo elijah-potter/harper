@@ -39,8 +39,11 @@ fn uncached_inner_new() -> Arc<FullDictionary> {
     attr_list.expand_marked_words(word_list, &mut word_map);
 
     let mut words: Vec<CharString> = word_map.iter().map(|(v, _)| v.clone()).collect();
-    words.sort();
+    // This may seem weird, but it ensures that the indexes in the Words vector match up with those
+    // stored in the computed FST Map.
+    words.sort_unstable();
     words.dedup();
+    words.sort_by_key(|w| w.len()); // DO NOT MAKE THIS UNSTABLE.
 
     Arc::new(FullDictionary {
         word_map,
@@ -245,9 +248,19 @@ impl Dictionary for FullDictionary {
 
 #[cfg(test)]
 mod tests {
+    use harper_dictionary_parsing::CharString;
     use itertools::Itertools;
 
     use crate::{Dictionary, FullDictionary};
+
+    #[test]
+    fn words_with_len_contains_self() {
+        let dict = FullDictionary::curated();
+
+        let word: CharString = "hello".chars().collect();
+        let words_with_same_len = dict.words_with_len_iter(word.len()).collect_vec();
+        assert!(words_with_same_len.contains(&&word[..]));
+    }
 
     #[test]
     fn curated_contains_no_duplicates() {
