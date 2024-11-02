@@ -84,6 +84,7 @@ impl FullDictionary {
             .collect();
 
         self.words.extend(pairs.iter().map(|(v, _)| v.clone()));
+        self.words.sort_by_key(|w| w.len());
         self.word_len_starts = Self::create_len_starts(&self.words);
         self.word_map.extend(pairs);
     }
