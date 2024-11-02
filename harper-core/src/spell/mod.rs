@@ -230,12 +230,30 @@ mod tests {
     }
 
     #[test]
-    fn full_dict_fuzzy_find() {
+    fn full_dict_fuzzy_find_anout() {
         let results = suggest_correct_spelling_str("anout", 100, 3, &FullDictionary::curated());
 
         dbg!(&results);
 
         assert!(results.iter().take(3).contains(&"about".to_string()));
+    }
+
+    #[test]
+    fn full_dict_fuzzy_find_ello() {
+        let results = suggest_correct_spelling_str("ello", 100, 3, &FullDictionary::curated());
+
+        dbg!(&results);
+
+        assert!(results.iter().take(3).contains(&"hello".to_string()));
+    }
+
+    #[test]
+    fn full_dict_fuzzy_find_hello_capital() {
+        let results = suggest_correct_spelling_str("Hello", 100, 3, &FullDictionary::curated());
+
+        dbg!(&results);
+
+        assert!(results.iter().take(3).contains(&"hello".to_string()));
     }
 
     #[test]

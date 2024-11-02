@@ -2,33 +2,34 @@ use super::{edit_distance_min_alloc, seq_to_normalized, FullDictionary};
 use fst::Map as FstMap;
 use fst::{automaton::Levenshtein, IntoStreamer};
 use itertools::Itertools;
+use std::sync::Arc;
 
-use crate::{CharStringExt, Lrc, WordMetadata};
+use crate::{CharStringExt, WordMetadata};
 
 use super::Dictionary;
 
 #[derive(Debug)]
 pub struct FstDictionary {
     /// Underlying FullDictionary used for everything except fuzzy finding
-    full_dict: Lrc<FullDictionary>,
+    full_dict: Arc<FullDictionary>,
     /// Used for fuzzy-finding the index of words or metadata
     word_map: FstMap<Vec<u8>>,
 }
 
 /// The uncached function that is used to produce the original copy of the
 /// curated dictionary.
-fn uncached_inner_new() -> Lrc<FstDictionary> {
+fn uncached_inner_new() -> Arc<FstDictionary> {
     let full_dict = FullDictionary::curated();
     let word_map = FstMap::new(include_bytes!("../../dictionary.fst").to_vec()).unwrap();
 
-    Lrc::new(FstDictionary {
+    Arc::new(FstDictionary {
         full_dict,
         word_map,
     })
 }
 
 thread_local! {
-    static DICT: Lrc<FstDictionary> = uncached_inner_new();
+    static DICT: Arc<FstDictionary> = uncached_inner_new();
 }
 
 impl PartialEq for FstDictionary {
@@ -40,7 +41,7 @@ impl PartialEq for FstDictionary {
 impl FstDictionary {
     /// Create a dictionary from the curated dictionary included
     /// in the Harper binary.
-    pub fn curated() -> Lrc<Self> {
+    pub fn curated() -> Arc<Self> {
         DICT.with(|v| v.clone())
     }
 }

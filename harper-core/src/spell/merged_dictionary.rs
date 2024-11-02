@@ -1,15 +1,15 @@
-use crate::Lrc;
-
+use harper_dictionary_parsing::CharString;
 use itertools::Itertools;
+use std::sync::Arc;
 
 use super::dictionary::Dictionary;
-use crate::{CharString, WordMetadata};
+use crate::WordMetadata;
 
 /// A simple wrapper over [`Dictionary`] that allows
 /// one to merge multiple dictionaries without copying.
 #[derive(Clone)]
 pub struct MergedDictionary {
-    children: Vec<Lrc<dyn Dictionary>>,
+    children: Vec<Arc<dyn Dictionary>>,
 }
 
 impl MergedDictionary {
@@ -19,8 +19,8 @@ impl MergedDictionary {
         }
     }
 
-    pub fn add_dictionary(&mut self, dictionary: Lrc<dyn Dictionary>) {
-        self.children.push(dictionary.clone());
+    pub fn add_dictionary(&mut self, dictionary: Arc<dyn Dictionary>) {
+        self.children.push(dictionary);
     }
 }
 
