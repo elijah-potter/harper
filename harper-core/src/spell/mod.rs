@@ -48,7 +48,7 @@ fn order_suggestions(matches: Vec<(&[char], u8, WordMetadata)>) -> Vec<&[char]> 
     }
 
     // Let common words bubble up.
-    found.sort_by_key(|(_, _, metadata)| if metadata.common { 0 } else { 1 });
+    found.sort_by_key(|(_, dist, metadata)| dist + if metadata.common { 0 } else { 1 });
     found.into_iter().map(|(word, _, _)| word).collect()
 }
 
@@ -154,6 +154,9 @@ mod tests {
         Dictionary, FstDictionary, FullDictionary,
     };
 
+    const RESULT_LIMIT: usize = 100;
+    const MAX_EDIT_DIST: u8 = 3;
+
     fn assert_edit_dist(source: &str, target: &str, expected: u8) {
         let source: Vec<_> = source.chars().collect();
         let target: Vec<_> = target.chars().collect();
@@ -172,17 +175,22 @@ mod tests {
 
     #[test]
     fn simple_edit_distance_1() {
-        assert_edit_dist("kitten", "sitting", 3)
+        assert_edit_dist("kitten", "sitting", MAX_EDIT_DIST)
     }
 
     #[test]
     fn simple_edit_distance_2() {
-        assert_edit_dist("saturday", "sunday", 3)
+        assert_edit_dist("saturday", "sunday", MAX_EDIT_DIST)
     }
 
     #[test]
     fn produces_no_duplicates() {
-        let results = suggest_correct_spelling_str("punctation", 100, 3, &FstDictionary::curated());
+        let results = suggest_correct_spelling_str(
+            "punctation",
+            RESULT_LIMIT,
+            MAX_EDIT_DIST,
+            &FstDictionary::curated(),
+        );
 
         dbg!(&results, results.iter().unique().collect_vec());
 
@@ -257,37 +265,19 @@ mod tests {
     }
 
     #[test]
-    fn full_dict_fuzzy_find_anout() {
-        let results = suggest_correct_spelling_str("anout", 100, 3, &FullDictionary::curated());
-
-        dbg!(&results);
-
-        assert!(results.iter().take(3).contains(&"about".to_string()));
-    }
-
-    #[test]
-    fn full_dict_fuzzy_find_ello() {
-        let results = suggest_correct_spelling_str("ello", 100, 3, &FullDictionary::curated());
-
-        dbg!(&results);
-
-        assert!(results.iter().take(3).contains(&"hello".to_string()));
-    }
-
-    #[test]
-    fn full_dict_fuzzy_find_hello_capital() {
-        let results = suggest_correct_spelling_str("Hello", 100, 3, &FullDictionary::curated());
-
-        dbg!(&results);
-
-        assert!(results.iter().take(3).contains(&"hello".to_string()));
-    }
-
-    #[test]
     fn issue_182() {
-        let results = suggest_correct_spelling_str("Im", 100, 3, &FstDictionary::curated());
-        let lowercase_results =
-            suggest_correct_spelling_str("im", 100, 3, &FstDictionary::curated());
+        let results = suggest_correct_spelling_str(
+            "Im",
+            RESULT_LIMIT,
+            MAX_EDIT_DIST,
+            &FstDictionary::curated(),
+        );
+        let lowercase_results = suggest_correct_spelling_str(
+            "im",
+            RESULT_LIMIT,
+            MAX_EDIT_DIST,
+            &FstDictionary::curated(),
+        );
 
         dbg!(&results);
         dbg!(&lowercase_results);
@@ -300,8 +290,13 @@ mod tests {
     }
 
     #[test]
-    fn spellcheck_hvllo() {
-        let results = suggest_correct_spelling_str("hvllo", 100, 3, &FstDictionary::curated());
+    fn fst_spellcheck_hvllo() {
+        let results = suggest_correct_spelling_str(
+            "hvllo",
+            RESULT_LIMIT,
+            MAX_EDIT_DIST,
+            &FstDictionary::curated(),
+        );
 
         dbg!(&results);
 
@@ -309,8 +304,27 @@ mod tests {
     }
 
     #[test]
-    fn spellcheck_common() {
-        let results = suggest_correct_spelling_str("aboot", 100, 3, &FstDictionary::curated());
+    fn full_spellcheck_hvllo() {
+        let results = suggest_correct_spelling_str(
+            "hvllo",
+            RESULT_LIMIT,
+            MAX_EDIT_DIST,
+            &FullDictionary::curated(),
+        );
+
+        dbg!(&results);
+
+        assert!(results.iter().take(3).contains(&"hello".to_string()));
+    }
+
+    #[test]
+    fn fst_spellcheck_common() {
+        let results = suggest_correct_spelling_str(
+            "aboot",
+            RESULT_LIMIT,
+            MAX_EDIT_DIST,
+            &FstDictionary::curated(),
+        );
 
         dbg!(&results);
 
@@ -318,8 +332,27 @@ mod tests {
     }
 
     #[test]
-    fn spellcheck_match() {
-        let results = suggest_correct_spelling_str("hello", 100, 3, &FstDictionary::curated());
+    fn full_spellcheck_common() {
+        let results = suggest_correct_spelling_str(
+            "aboot",
+            RESULT_LIMIT,
+            MAX_EDIT_DIST,
+            &FullDictionary::curated(),
+        );
+
+        dbg!(&results);
+
+        assert!(results.iter().take(3).contains(&"about".to_string()));
+    }
+
+    #[test]
+    fn fst_spellcheck_match() {
+        let results = suggest_correct_spelling_str(
+            "hello",
+            RESULT_LIMIT,
+            MAX_EDIT_DIST,
+            &FstDictionary::curated(),
+        );
 
         dbg!(&results);
 
@@ -327,8 +360,41 @@ mod tests {
     }
 
     #[test]
-    fn spellcheck_capital() {
-        let results = suggest_correct_spelling_str("Hello", 100, 3, &FstDictionary::curated());
+    fn full_spellcheck_match() {
+        let results = suggest_correct_spelling_str(
+            "hello",
+            RESULT_LIMIT,
+            MAX_EDIT_DIST,
+            &FullDictionary::curated(),
+        );
+
+        dbg!(&results);
+
+        assert!(results.iter().take(3).contains(&"hello".to_string()));
+    }
+
+    #[test]
+    fn fst_spellcheck_capital() {
+        let results = suggest_correct_spelling_str(
+            "Hello",
+            RESULT_LIMIT,
+            MAX_EDIT_DIST,
+            &FstDictionary::curated(),
+        );
+
+        dbg!(&results);
+
+        assert!(results.iter().take(3).contains(&"hello".to_string()));
+    }
+
+    #[test]
+    fn full_spellcheck_capital() {
+        let results = suggest_correct_spelling_str(
+            "Hello",
+            RESULT_LIMIT,
+            MAX_EDIT_DIST,
+            &FullDictionary::curated(),
+        );
 
         dbg!(&results);
 
@@ -337,9 +403,24 @@ mod tests {
 
     #[test]
     fn spellchecking_is_deterministic() {
-        let results1 = suggest_correct_spelling_str("hello", 100, 3, &FstDictionary::curated());
-        let results2 = suggest_correct_spelling_str("hello", 100, 3, &FstDictionary::curated());
-        let results3 = suggest_correct_spelling_str("hello", 100, 3, &FstDictionary::curated());
+        let results1 = suggest_correct_spelling_str(
+            "hello",
+            RESULT_LIMIT,
+            MAX_EDIT_DIST,
+            &FstDictionary::curated(),
+        );
+        let results2 = suggest_correct_spelling_str(
+            "hello",
+            RESULT_LIMIT,
+            MAX_EDIT_DIST,
+            &FstDictionary::curated(),
+        );
+        let results3 = suggest_correct_spelling_str(
+            "hello",
+            RESULT_LIMIT,
+            MAX_EDIT_DIST,
+            &FstDictionary::curated(),
+        );
 
         assert_eq!(results1, results2);
         assert_eq!(results1, results3);
