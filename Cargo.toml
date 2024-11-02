@@ -2,3 +2,6 @@
 members = [ "harper-cli", "harper-core", "harper-dictionary-parsing", "harper-ls", "harper-comments", "harper-wasm", "harper-tree-sitter", "harper-html"]
 resolver = "2"
 
+[profile.release]
+opt-level = 3
+strip = true
