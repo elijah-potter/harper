@@ -92,7 +92,7 @@ impl FstDictionary {
 fn build_dfa(max_distance: u8, query: &str) -> DFA {
     // Insert if does not exist
     AUTOMATON_BUILDERS.with_borrow_mut(|v| {
-        if v.iter().find(|t| t.0 == max_distance).is_none() {
+        if !v.iter().any(|t| t.0 == max_distance) {
             v.push((
                 max_distance,
                 LevenshteinAutomatonBuilder::new(max_distance, TRANSPOSITION_COST_ONE),
