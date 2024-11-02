@@ -7,7 +7,8 @@ use harper_comments::CommentParser;
 use harper_core::linting::{LintGroup, Linter};
 use harper_core::parsers::{CollapseIdentifiers, IsolateEnglish, Markdown, Parser, PlainEnglish};
 use harper_core::{
-    Dictionary, Document, FullDictionary, MergedDictionary, Token, TokenKind, WordMetadata,
+    Dictionary, Document, FstDictionary, FullDictionary, MergedDictionary, Token, TokenKind,
+    WordMetadata,
 };
 use harper_html::HtmlParser;
 use serde_json::Value;
@@ -106,7 +107,7 @@ impl Backend {
 
     async fn generate_global_dictionary(&self) -> anyhow::Result<MergedDictionary> {
         let mut dict = MergedDictionary::new();
-        dict.add_dictionary(FullDictionary::curated());
+        dict.add_dictionary(FstDictionary::curated());
         let user_dict = self.load_user_dictionary().await;
         dict.add_dictionary(Arc::new(user_dict));
         Ok(dict)
