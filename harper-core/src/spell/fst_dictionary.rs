@@ -3,13 +3,12 @@ use fst::{map::StreamWithState, IntoStreamer, Map as FstMap, Streamer};
 use hashbrown::HashMap;
 use itertools::Itertools;
 use levenshtein_automata::{LevenshteinAutomatonBuilder, DFA};
-use std::sync::Arc;
+use std::{cell::RefCell, sync::Arc};
 
 use crate::{CharString, CharStringExt, WordMetadata};
 
 use super::Dictionary;
 
-#[derive(Debug)]
 pub struct FstDictionary {
     /// Underlying FullDictionary used for everything except fuzzy finding
     full_dict: Arc<FullDictionary>,
@@ -29,8 +28,19 @@ fn uncached_inner_new() -> Arc<FstDictionary> {
     })
 }
 
+const EXPECTED_DISTANCE: u8 = 3;
+const TRANSPOSITION_COST_ONE: bool = false;
 thread_local! {
     static DICT: Arc<FstDictionary> = uncached_inner_new();
+
+    // Builders are computationally expensive and do not depend on the word, so we store a
+    // collection of builders and the associated edit distance here.
+    // Currently, the edit distance we use is 3, but a value that does not exist in this
+    // collection will create a new builder of that distance and push it to the collection.
+    static AUTOMATON_BUILDERS: RefCell<Vec<(u8, LevenshteinAutomatonBuilder)>> = RefCell::new(vec![(
+        EXPECTED_DISTANCE,
+        LevenshteinAutomatonBuilder::new(EXPECTED_DISTANCE, TRANSPOSITION_COST_ONE),
+    )]);
 }
 
 impl PartialEq for FstDictionary {
@@ -77,6 +87,26 @@ impl FstDictionary {
             word_map,
         }
     }
+}
+
+fn build_dfa(max_distance: u8, query: &str) -> DFA {
+    // Insert if does not exist
+    AUTOMATON_BUILDERS.with_borrow_mut(|v| {
+        if v.iter().find(|t| t.0 == max_distance).is_none() {
+            v.push((
+                max_distance,
+                LevenshteinAutomatonBuilder::new(max_distance, TRANSPOSITION_COST_ONE),
+            ));
+        }
+    });
+
+    AUTOMATON_BUILDERS.with_borrow(|v| {
+        v.iter()
+            .find(|a| a.0 == max_distance)
+            .unwrap()
+            .1
+            .build_dfa(query)
+    })
 }
 
 fn stream_distances_vec(stream: &mut StreamWithState<&DFA>, dfa: &DFA) -> Vec<(u64, u8)> {
@@ -126,14 +156,11 @@ impl Dictionary for FstDictionary {
         let misspelled_word_string = misspelled_word_charslice.to_string();
 
         // Actual FST search
-        let automaton_builder = LevenshteinAutomatonBuilder::new(max_distance, true);
-        let dfa = automaton_builder.build_dfa(&misspelled_word_string);
+        let dfa = build_dfa(max_distance, &misspelled_word_string);
         let mut word_indexes_stream = self.word_map.search_with_state(&dfa).into_stream();
 
         stream_distances_vec(&mut word_indexes_stream, &dfa)
             .into_iter()
-            .sorted_unstable()
-            .dedup_by(|a, b| a.0 == b.0)
             // Sort by edit distance
             .sorted_unstable_by_key(|a| a.1)
             .take(max_results)
