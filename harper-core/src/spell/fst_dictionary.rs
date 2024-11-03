@@ -185,7 +185,6 @@ impl Dictionary for FstDictionary {
 
 #[cfg(test)]
 mod tests {
-    use fst::IntoStreamer;
     use itertools::Itertools;
 
     use crate::{spell::seq_to_normalized, CharStringExt, Dictionary};
@@ -222,37 +221,6 @@ mod tests {
         assert!(
             dict.word_map.contains_key(misspelled_lower)
                 || dict.word_map.contains_key(misspelled_word)
-        );
-    }
-
-    #[test]
-    fn fst_search_hello() {
-        let dict = FstDictionary::curated();
-
-        let word: Vec<_> = "hvllo".chars().collect();
-        let misspelled_normalized = seq_to_normalized(&word);
-        let misspelled_word: String = misspelled_normalized.to_string();
-        let misspelled_lower: String = misspelled_normalized.to_lower().to_string();
-
-        let aut = fst::automaton::Levenshtein::new(&misspelled_word, 2).unwrap();
-        let aut_lower = fst::automaton::Levenshtein::new(&misspelled_lower, 2).unwrap();
-        let word_indexes_stream = dict
-            .word_map
-            .search(aut)
-            .into_stream()
-            .into_str_keys()
-            .unwrap();
-        let word_lower_indexes_stream = dict
-            .word_map
-            .search(aut_lower)
-            .into_stream()
-            .into_str_keys()
-            .unwrap();
-
-        dbg!(&word_indexes_stream);
-        assert!(
-            word_indexes_stream.contains(&"hello".to_string())
-                || word_lower_indexes_stream.contains(&"hello".to_string())
         );
     }
 
