@@ -14,7 +14,7 @@ path = "build.rs"
 [dependencies]
 harper-dictionary-parsing = { path = "../harper-dictionary-parsing", version = "0.12.0" }
 blanket = "0.4.0"
-fst = { version = "0.4.7", features = ["levenshtein"] }
+fst = "0.4.7"
 hashbrown = { version = "0.15.0", features = ["serde"] }
 is-macro = "0.3.6"
 itertools = "0.13.0"
@@ -34,7 +34,7 @@ criterion = { version = "0.5.1", features = ["plotters", "cargo_bench_support"],
 rand = "0.8.5"
 
 [build-dependencies]
-fst = { version = "0.4.7", features = ["levenshtein"] }
+fst = "0.4.7"
 harper-dictionary-parsing = { path = "../harper-dictionary-parsing", version = "0.12.0" }
 hashbrown = { version = "0.15.0" }
 itertools = "0.13.0"
