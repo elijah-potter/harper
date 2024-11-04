@@ -67,7 +67,8 @@ impl FullDictionary {
 
     /// Create a dictionary from the curated dictionary included
     /// in the Harper binary.
-    pub(super) fn curated() -> Arc<Self> {
+    /// Consider using [`FstDictionary::curated()`] instead, as it is more performant for spellchecking.
+    pub fn curated() -> Arc<Self> {
         DICT.with(|v| v.clone())
     }
 
@@ -180,8 +181,11 @@ impl Dictionary for FullDictionary {
     ) -> Vec<(&[char], u8, WordMetadata)> {
         let misspelled_charslice = seq_to_normalized(word);
 
-        let shortest_word_len =
-            std::cmp::max(1, misspelled_charslice.len() - max_distance as usize);
+        let shortest_word_len = if misspelled_charslice.len() <= max_distance as usize {
+            1
+        } else {
+            misspelled_charslice.len() - max_distance as usize
+        };
         let longest_word_len = misspelled_charslice.len() + max_distance as usize;
 
         // Get canidate words

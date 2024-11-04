@@ -27,8 +27,6 @@ fn main() {
     words.dedup();
     words.sort_by_key(|w| w.len()); // DO NOT MAKE THIS UNSTABLE.
 
-    // Using u64 shouldn't pose any issues since I don't think the English
-    // language has that many words
     words
         .iter()
         .enumerate()
