@@ -1,5 +1,10 @@
 # Changelog
 
+## Unreleased
+
+- Linting Python, Shellscript/Bash, and Git Commit files now work properly.
+- Add support for Nix and Plaintext files.
+
 ## 0.12.0
 
 - `harper-ls` is now bundled with this extension, it no longer needs to be in your `PATH`.
