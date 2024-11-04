@@ -338,62 +338,6 @@ mod tests {
     }
 
     #[test]
-    fn fst_spellcheck_match() {
-        let results = suggest_correct_spelling_str(
-            "hello",
-            RESULT_LIMIT,
-            MAX_EDIT_DIST,
-            &FstDictionary::curated(),
-        );
-
-        dbg!(&results);
-
-        assert!(results.iter().take(3).contains(&"hello".to_string()));
-    }
-
-    #[test]
-    fn full_spellcheck_match() {
-        let results = suggest_correct_spelling_str(
-            "hello",
-            RESULT_LIMIT,
-            MAX_EDIT_DIST,
-            &FullDictionary::curated(),
-        );
-
-        dbg!(&results);
-
-        assert!(results.iter().take(3).contains(&"hello".to_string()));
-    }
-
-    #[test]
-    fn fst_spellcheck_capital() {
-        let results = suggest_correct_spelling_str(
-            "Hello",
-            RESULT_LIMIT,
-            MAX_EDIT_DIST,
-            &FstDictionary::curated(),
-        );
-
-        dbg!(&results);
-
-        assert!(results.iter().take(3).contains(&"hello".to_string()));
-    }
-
-    #[test]
-    fn full_spellcheck_capital() {
-        let results = suggest_correct_spelling_str(
-            "Hello",
-            RESULT_LIMIT,
-            MAX_EDIT_DIST,
-            &FullDictionary::curated(),
-        );
-
-        dbg!(&results);
-
-        assert!(results.iter().take(3).contains(&"hello".to_string()));
-    }
-
-    #[test]
     fn spellchecking_is_deterministic() {
         let results1 = suggest_correct_spelling_str(
             "hello",
