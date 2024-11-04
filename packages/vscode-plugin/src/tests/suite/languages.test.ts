@@ -51,7 +51,7 @@ describe('Languages >', () => {
 			const uri = await openFile('languages', testCase.file);
 
 			// Wait for `harper-ls` to send diagnostics
-			await sleep(50);
+			await sleep(75);
 
 			compareActualVsExpectedDiagnostics(
 				getActualDiagnostics(uri),
