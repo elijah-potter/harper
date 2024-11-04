@@ -23,7 +23,7 @@ unicode-blocks = "0.1.9"
 unicode-width = "0.2.0"
 
 [dev-dependencies]
-criterion = "0.5.1"
+criterion = { version = "0.5.1", default-features = false }
 rand = "0.8.5"
 
 [[bench]]
