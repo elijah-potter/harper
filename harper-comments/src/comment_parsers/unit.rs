@@ -1,5 +1,6 @@
 use harper_core::parsers::{Markdown, Parser};
-use harper_core::{Span, Token};
+use harper_core::Token;
+use harper_lib::Span;
 
 use super::without_initiators;
 

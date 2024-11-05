@@ -6,6 +6,7 @@ use harper_core::language_detection::is_doc_likely_english;
 use harper_core::linting::{LintGroup, LintGroupConfig, Linter};
 use harper_core::parsers::{IsolateEnglish, Markdown, PlainEnglish};
 use harper_core::{remove_overlaps, Document, FstDictionary, Lrc};
+use harper_lib::Span as HarperSpan;
 use once_cell::sync::Lazy;
 use wasm_bindgen::prelude::wasm_bindgen;
 use wasm_bindgen::JsValue;
@@ -86,7 +87,7 @@ pub fn apply_suggestion(
     suggestion: &Suggestion,
 ) -> Result<String, String> {
     let mut source: Vec<_> = text.chars().collect();
-    let span: harper_core::Span = span.into();
+    let span: HarperSpan = span.into();
 
     suggestion.inner.apply(span, &mut source);
 
@@ -184,14 +185,14 @@ impl Span {
     }
 }
 
-impl From<Span> for harper_core::Span {
-    fn from(value: Span) -> Self {
-        harper_core::Span::new(value.start, value.end)
+impl From<HarperSpan> for Span {
+    fn from(value: HarperSpan) -> Self {
+        Span::new(value.start, value.end)
     }
 }
 
-impl From<harper_core::Span> for Span {
-    fn from(value: harper_core::Span) -> Self {
-        Span::new(value.start, value.end)
+impl From<Span> for HarperSpan {
+    fn from(value: Span) -> Self {
+        HarperSpan::new(value.start, value.end)
     }
 }

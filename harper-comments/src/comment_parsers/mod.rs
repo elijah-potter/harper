@@ -4,7 +4,7 @@ mod jsdoc;
 mod unit;
 
 pub use go::Go;
-use harper_core::Span;
+use harper_lib::Span;
 pub use javadoc::JavaDoc;
 pub use jsdoc::JsDoc;
 pub use unit::Unit;
