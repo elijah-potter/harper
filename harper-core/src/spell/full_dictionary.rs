@@ -1,5 +1,5 @@
 use super::{edit_distance_min_alloc, seq_to_normalized};
-use harper_lib::CharStringExt;
+use harper_data::CharStringExt;
 use hashbrown::HashMap;
 use itertools::Itertools;
 use smallvec::{SmallVec, ToSmallVec};
@@ -249,7 +249,7 @@ impl Dictionary for FullDictionary {
 
 #[cfg(test)]
 mod tests {
-    use harper_lib::CharString;
+    use harper_data::CharString;
     use itertools::Itertools;
 
     use crate::{Dictionary, FullDictionary};

@@ -2,8 +2,8 @@ use std::fs::File;
 use std::io;
 
 use fst::MapBuilder;
+use harper_data::CharString;
 use harper_dictionary_parsing::{parse_default_attribute_list, parse_default_word_list};
-use harper_lib::CharString;
 use hashbrown::HashMap;
 use itertools::Itertools;
 

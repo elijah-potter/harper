@@ -6,7 +6,7 @@ use harper_core::language_detection::is_doc_likely_english;
 use harper_core::linting::{LintGroup, LintGroupConfig, Linter};
 use harper_core::parsers::{IsolateEnglish, Markdown, PlainEnglish};
 use harper_core::{remove_overlaps, Document, FstDictionary, Lrc};
-use harper_lib::Span as HarperSpan;
+use harper_data::Span as HarperSpan;
 use once_cell::sync::Lazy;
 use wasm_bindgen::prelude::wasm_bindgen;
 use wasm_bindgen::JsValue;

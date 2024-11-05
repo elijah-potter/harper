@@ -1,7 +1,7 @@
 use std::path::Path;
 
 use harper_core::{Dictionary, FullDictionary};
-use harper_lib::WordMetadata;
+use harper_data::WordMetadata;
 use tokio::fs::{self, File};
 use tokio::io::{self, AsyncRead, AsyncReadExt, AsyncWrite, AsyncWriteExt, BufReader, BufWriter};
 

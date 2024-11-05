@@ -1,6 +1,6 @@
 use super::{seq_to_normalized, FullDictionary};
 use fst::{map::StreamWithState, IntoStreamer, Map as FstMap, Streamer};
-use harper_lib::CharStringExt;
+use harper_data::CharStringExt;
 use hashbrown::HashMap;
 use itertools::Itertools;
 use levenshtein_automata::{LevenshteinAutomatonBuilder, DFA};
@@ -186,7 +186,7 @@ impl Dictionary for FstDictionary {
 
 #[cfg(test)]
 mod tests {
-    use harper_lib::CharStringExt;
+    use harper_data::CharStringExt;
     use itertools::Itertools;
 
     use crate::{spell::seq_to_normalized, Dictionary};

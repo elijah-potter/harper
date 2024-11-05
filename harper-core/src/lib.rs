@@ -26,9 +26,9 @@ pub use sync::Lrc;
 pub use token::{FatToken, Token, TokenKind, TokenStringExt};
 pub use vec_ext::VecExt;
 
-use harper_lib::Span;
-use harper_lib::WordMetadata;
-use harper_lib::{CharString, CharStringExt};
+use harper_data::Span;
+use harper_data::WordMetadata;
+use harper_data::{CharString, CharStringExt};
 
 /// A utility function that removes overlapping lints in a vector,
 /// keeping the more important ones.

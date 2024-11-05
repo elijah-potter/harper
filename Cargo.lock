@@ -558,8 +558,8 @@ name = "harper-comments"
 version = "0.12.0"
 dependencies = [
  "harper-core",
+ "harper-data",
  "harper-html",
- "harper-lib",
  "harper-tree-sitter",
  "itertools 0.13.0",
  "paste",
@@ -588,8 +588,8 @@ dependencies = [
  "blanket",
  "criterion",
  "fst",
+ "harper-data",
  "harper-dictionary-parsing",
- "harper-lib",
  "hashbrown 0.15.0",
  "is-macro",
  "itertools 0.13.0",
@@ -607,10 +607,19 @@ dependencies = [
 ]
 
 [[package]]
+name = "harper-data"
+version = "0.12.0"
+dependencies = [
+ "is-macro",
+ "serde",
+ "smallvec",
+]
+
+[[package]]
 name = "harper-dictionary-parsing"
 version = "0.12.0"
 dependencies = [
- "harper-lib",
+ "harper-data",
  "hashbrown 0.15.0",
  "serde",
  "serde_json",
@@ -630,15 +639,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "harper-lib"
-version = "0.12.0"
-dependencies = [
- "is-macro",
- "serde",
- "smallvec",
-]
-
-[[package]]
 name = "harper-ls"
 version = "0.12.0"
 dependencies = [
@@ -648,8 +648,8 @@ dependencies = [
  "futures",
  "harper-comments",
  "harper-core",
+ "harper-data",
  "harper-html",
- "harper-lib",
  "itertools 0.13.0",
  "once_cell",
  "open",
@@ -667,7 +667,7 @@ name = "harper-tree-sitter"
 version = "0.12.0"
 dependencies = [
  "harper-core",
- "harper-lib",
+ "harper-data",
  "tree-sitter",
 ]
 
@@ -677,7 +677,7 @@ version = "0.1.0"
 dependencies = [
  "console_error_panic_hook",
  "harper-core",
- "harper-lib",
+ "harper-data",
  "once_cell",
  "serde-wasm-bindgen",
  "tracing",
