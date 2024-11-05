@@ -1,6 +1,9 @@
 [package]
 name = "harper-lib"
-version = "0.1.0"
+version = "0.12.0"
 edition = "2021"
 
 [dependencies]
+is-macro = "0.3.6"
+serde = { version = "1.0.209", features = ["derive"] }
+smallvec = { version = "1.13.2", features = ["serde"] }

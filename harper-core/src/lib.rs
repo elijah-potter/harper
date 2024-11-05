@@ -18,9 +18,6 @@ mod vec_ext;
 use std::collections::VecDeque;
 
 pub use document::Document;
-pub use harper_dictionary_parsing::char_string::{CharString, CharStringExt};
-pub use harper_dictionary_parsing::span::Span;
-pub use harper_dictionary_parsing::{word_metadata::Tense, WordMetadata};
 use linting::Lint;
 pub use mask::{Mask, Masker};
 pub use punctuation::{Punctuation, Quote};
@@ -28,6 +25,10 @@ pub use spell::{Dictionary, FstDictionary, FullDictionary, MergedDictionary};
 pub use sync::Lrc;
 pub use token::{FatToken, Token, TokenKind, TokenStringExt};
 pub use vec_ext::VecExt;
+
+use harper_lib::Span;
+use harper_lib::WordMetadata;
+use harper_lib::{CharString, CharStringExt};
 
 /// A utility function that removes overlapping lints in a vector,
 /// keeping the more important ones.

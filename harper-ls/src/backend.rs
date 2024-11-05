@@ -8,9 +8,9 @@ use harper_core::linting::{LintGroup, Linter};
 use harper_core::parsers::{CollapseIdentifiers, IsolateEnglish, Markdown, Parser, PlainEnglish};
 use harper_core::{
     Dictionary, Document, FstDictionary, FullDictionary, MergedDictionary, Token, TokenKind,
-    WordMetadata,
 };
 use harper_html::HtmlParser;
+use harper_lib::WordMetadata;
 use serde_json::Value;
 use tokio::sync::{Mutex, RwLock};
 use tower_lsp::jsonrpc::Result;
