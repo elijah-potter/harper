@@ -189,7 +189,7 @@ impl Dictionary for FullDictionary {
         };
         let longest_word_len = misspelled_charslice.len() + max_distance as usize;
 
-        // Get canidate words
+        // Get candidate words
         let words_to_search = (shortest_word_len..=longest_word_len)
             .rev()
             .flat_map(|len| self.words_with_len_iter(len));
