@@ -1,11 +1,12 @@
 use super::{seq_to_normalized, FullDictionary};
 use fst::{map::StreamWithState, IntoStreamer, Map as FstMap, Streamer};
+use harper_lib::CharStringExt;
 use hashbrown::HashMap;
 use itertools::Itertools;
 use levenshtein_automata::{LevenshteinAutomatonBuilder, DFA};
 use std::{cell::RefCell, sync::Arc};
 
-use crate::{CharString, CharStringExt, WordMetadata};
+use crate::{CharString, WordMetadata};
 
 use super::Dictionary;
 
@@ -185,9 +186,10 @@ impl Dictionary for FstDictionary {
 
 #[cfg(test)]
 mod tests {
+    use harper_lib::CharStringExt;
     use itertools::Itertools;
 
-    use crate::{spell::seq_to_normalized, CharStringExt, Dictionary};
+    use crate::{spell::seq_to_normalized, Dictionary};
 
     use super::FstDictionary;
 

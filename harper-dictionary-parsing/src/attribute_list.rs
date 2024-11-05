@@ -6,7 +6,7 @@ use super::affix_replacement::AffixReplacement;
 use super::expansion::{Expansion, HumanReadableExpansion};
 use super::word_list::MarkedWord;
 use super::Error;
-use crate::{CharString, Span, WordMetadata};
+use harper_lib::{CharString, Span, WordMetadata};
 
 #[derive(Debug, Clone)]
 pub struct AttributeList {
