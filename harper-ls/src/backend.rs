@@ -6,10 +6,8 @@ use anyhow::anyhow;
 use harper_comments::CommentParser;
 use harper_core::linting::{LintGroup, Linter};
 use harper_core::parsers::{CollapseIdentifiers, IsolateEnglish, Markdown, Parser, PlainEnglish};
-use harper_core::{
-    Dictionary, Document, FstDictionary, FullDictionary, MergedDictionary, Token, TokenKind,
-};
-use harper_data::WordMetadata;
+use harper_core::{Dictionary, Document, FstDictionary, FullDictionary, MergedDictionary};
+use harper_data::{Token, TokenKind, WordMetadata};
 use harper_html::HtmlParser;
 use serde_json::Value;
 use tokio::sync::{Mutex, RwLock};

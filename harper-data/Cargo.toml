@@ -2,8 +2,20 @@
 name = "harper-data"
 version = "0.12.0"
 edition = "2021"
+description = "The language checker for developers."
+license = "Apache-2.0"
+repository = "https://github.com/elijah-potter/harper"
 
 [dependencies]
 is-macro = "0.3.6"
 serde = { version = "1.0.209", features = ["derive"] }
 smallvec = { version = "1.13.2", features = ["serde"] }
+itertools = "0.13.0"
+ordered-float = { version = "4.4.0", features = ["serde"] }
+paste = "1.0.14"
+unicode-blocks = "0.1.9"
+unicode-width = "0.2.0"
+
+[features]
+default = []
+concurrent = []

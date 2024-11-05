@@ -1,5 +1,7 @@
+use harper_data::{Punctuation, Span, Token, TokenKind, WordMetadata};
+
 use crate::linting::{Lint, LintKind, Linter, Suggestion};
-use crate::{CharString, Document, Punctuation, Span, Token, TokenKind, WordMetadata};
+use crate::{CharString, Document};
 
 #[derive(Debug, PartialEq, PartialOrd, Clone)]
 struct PatternToken {

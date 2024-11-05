@@ -2,12 +2,10 @@ mod email_address;
 mod hostname;
 mod url;
 
+use harper_data::{CharExt, Punctuation, Quote, TokenKind};
 use url::lex_url;
 
 use self::email_address::lex_email_address;
-use crate::char_ext::CharExt;
-use crate::punctuation::{Punctuation, Quote};
-use crate::token::TokenKind;
 use crate::WordMetadata;
 
 #[derive(Debug)]

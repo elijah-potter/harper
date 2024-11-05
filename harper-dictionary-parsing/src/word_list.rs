@@ -1,5 +1,6 @@
-use super::Error;
 use harper_data::CharString;
+
+use super::Error;
 
 #[derive(Debug, Clone)]
 pub struct MarkedWord {

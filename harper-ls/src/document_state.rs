@@ -1,5 +1,6 @@
 use harper_core::linting::LintGroup;
-use harper_core::{Document, FullDictionary, Lrc, MergedDictionary};
+use harper_core::{Document, FullDictionary, MergedDictionary};
+use harper_data::Lrc;
 
 #[derive(Default)]
 pub struct DocumentState {

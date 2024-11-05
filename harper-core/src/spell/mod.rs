@@ -2,12 +2,11 @@ use std::borrow::Cow;
 
 use itertools::{Itertools, MinMaxResult};
 
-use crate::{CharString, CharStringExt, WordMetadata};
-
 pub use self::dictionary::Dictionary;
 pub use self::fst_dictionary::FstDictionary;
 pub use self::full_dictionary::FullDictionary;
 pub use self::merged_dictionary::MergedDictionary;
+use crate::{CharString, CharStringExt, WordMetadata};
 
 mod dictionary;
 mod fst_dictionary;
@@ -20,7 +19,7 @@ fn order_suggestions(matches: Vec<(&[char], u8, WordMetadata)>) -> Vec<&[char]> 
     // them first.
     let minmax = matches
         .iter()
-        .position_minmax_by_key(|(word, _, _)| word.len());
+        .position_minmax_by_key(|(word, ..)| word.len());
     if let MinMaxResult::MinMax(a, b) = minmax {
         if a == b {
             found.push(matches[a]);
@@ -49,7 +48,7 @@ fn order_suggestions(matches: Vec<(&[char], u8, WordMetadata)>) -> Vec<&[char]> 
     // Let common words bubble up, but do not prioritize them over all else.
     found.sort_by_key(|(_, dist, metadata)| dist + if metadata.common { 0 } else { 1 });
 
-    found.into_iter().map(|(word, _, _)| word).collect()
+    found.into_iter().map(|(word, ..)| word).collect()
 }
 
 /// Get the closest matches in the provided [`Dictionary`] and rank them
@@ -264,8 +263,8 @@ mod tests {
         assert!(common_first);
     }
 
-    // I'm ignoring this one because the sorting algorithm prioritizes shorter words at the same
-    // edit distance that are also common.
+    // I'm ignoring this one because the sorting algorithm prioritizes shorter words
+    // at the same edit distance that are also common.
     #[ignore]
     #[test]
     fn issue_182() {

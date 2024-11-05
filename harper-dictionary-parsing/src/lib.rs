@@ -26,13 +26,13 @@ pub fn parse_default_attribute_list() -> AttributeList {
 
 #[cfg(test)]
 mod tests {
+    use harper_data::{CharString, WordMetadata};
     use hashbrown::{HashMap, HashSet};
     use serde_json::json;
 
     use super::word_list::parse_word_list;
     use super::{parse_default_attribute_list, parse_default_word_list};
     use crate::attribute_list::HumanReadableAttributeList;
-    use harper_data::{CharString, WordMetadata};
 
     pub const TEST_WORD_LIST: &str = "3\nhello\ntry/B\nwork/AB";
 

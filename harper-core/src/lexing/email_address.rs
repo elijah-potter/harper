@@ -1,8 +1,8 @@
+use harper_data::TokenKind;
 use itertools::Itertools;
 
 use super::hostname::lex_hostname;
 use super::FoundToken;
-use crate::TokenKind;
 
 pub fn lex_email_address(source: &[char]) -> Option<FoundToken> {
     // Location of the @ sign

@@ -1,6 +1,7 @@
+use harper_data::{Lrc, Token};
+
 use super::{Lint, LintKind, PatternLinter};
 use crate::patterns::{ConsumesRemainingPattern, Pattern, SequencePattern};
-use crate::Lrc;
 
 pub struct TerminatingConjunctions {
     pattern: Box<dyn Pattern>,
@@ -53,7 +54,7 @@ impl PatternLinter for TerminatingConjunctions {
         self.pattern.as_ref()
     }
 
-    fn match_to_lint(&self, matched_tokens: &[crate::Token], source: &[char]) -> Lint {
+    fn match_to_lint(&self, matched_tokens: &[Token], source: &[char]) -> Lint {
         let word_span = matched_tokens[0].span;
         let word = word_span.get_content_string(source);
 

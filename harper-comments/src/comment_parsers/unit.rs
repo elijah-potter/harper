@@ -1,6 +1,5 @@
 use harper_core::parsers::{Markdown, Parser};
-use harper_core::Token;
-use harper_data::Span;
+use harper_data::{Span, Token, TokenKind};
 
 use super::without_initiators;
 
@@ -34,7 +33,7 @@ impl Parser for Unit {
             if chars_traversed + line.len() < source.len() {
                 new_tokens.push(Token::new(
                     Span::new_with_len(line.len(), 1),
-                    harper_core::TokenKind::Newline(1),
+                    TokenKind::Newline(1),
                 ));
             }
 

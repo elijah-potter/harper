@@ -1,3 +1,4 @@
+use harper_data::Token;
 use hashbrown::HashMap;
 
 use super::naive_pattern_group::NaivePatternGroup;
@@ -27,7 +28,8 @@ impl WordPatternGroup<NaivePatternGroup> {
         }
     }
 
-    /// Add a pattern that matches just a word on its own, without anything else required to match.
+    /// Add a pattern that matches just a word on its own, without anything else
+    /// required to match.
     pub fn add_word(&mut self, word: &'static str) {
         self.add(
             word,
@@ -40,7 +42,7 @@ impl<P> Pattern for WordPatternGroup<P>
 where
     P: Pattern,
 {
-    fn matches(&self, tokens: &[crate::Token], source: &[char]) -> usize {
+    fn matches(&self, tokens: &[Token], source: &[char]) -> usize {
         let Some(first) = tokens.first() else {
             return 0;
         };

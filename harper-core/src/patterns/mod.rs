@@ -1,6 +1,6 @@
 use std::collections::VecDeque;
 
-use crate::{Span, Token, VecExt};
+use harper_data::{Span, Token, VecExt};
 
 mod any_pattern;
 mod consumes_remaining_pattern;

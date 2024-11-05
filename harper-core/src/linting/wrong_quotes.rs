@@ -1,6 +1,7 @@
+use harper_data::{Token, TokenStringExt};
+
 use super::{Lint, Linter, Suggestion};
 use crate::document::Document;
-use crate::{Token, TokenStringExt};
 
 #[derive(Debug, Clone, Copy, Default)]
 pub struct WrongQuotes;

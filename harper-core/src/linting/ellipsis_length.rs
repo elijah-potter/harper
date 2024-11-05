@@ -1,7 +1,7 @@
+use harper_data::TokenStringExt;
 use itertools::Itertools;
 
 use super::{Lint, LintKind, Linter, Suggestion};
-use crate::TokenStringExt;
 
 /// A linter that checks that an ellipsis doesn't contain too many periods (or
 /// too few).

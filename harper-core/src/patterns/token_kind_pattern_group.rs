@@ -1,7 +1,7 @@
+use harper_data::{Token, TokenKind};
 use hashbrown::HashMap;
 
 use super::Pattern;
-use crate::{Token, TokenKind};
 
 pub struct TokenKindPatternGroup {
     /// These are patterns whose first token's kind must be strictly equal.

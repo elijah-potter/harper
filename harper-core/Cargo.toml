@@ -26,8 +26,6 @@ serde = { version = "1.0.209", features = ["derive"] }
 serde_json = "1.0.132"
 smallvec = { version = "1.13.2", features = ["serde"] }
 thiserror = "1.0.65"
-unicode-blocks = "0.1.9"
-unicode-width = "0.2.0"
 levenshtein_automata = { version = "0.2.1", features = ["fst_automaton"] }
 
 [dev-dependencies]
@@ -51,4 +49,4 @@ harness = false
 
 [features]
 default = []
-concurrent = []
+concurrent = ["harper-data/concurrent"]

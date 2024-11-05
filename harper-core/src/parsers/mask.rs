@@ -1,6 +1,7 @@
+use harper_data::{Span, Token, TokenKind};
+
 use super::Parser;
 use crate::mask::Masker;
-use crate::{Span, Token, TokenKind};
 
 /// Composes a Masker and a Parser to parse only masked chunks of text.
 pub struct Mask<M, P>

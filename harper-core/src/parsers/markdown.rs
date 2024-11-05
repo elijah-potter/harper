@@ -1,7 +1,8 @@
 use std::collections::VecDeque;
 
+use harper_data::{Span, Token, TokenKind, TokenStringExt, VecExt};
+
 use super::{Parser, PlainEnglish};
-use crate::{Span, Token, TokenKind, TokenStringExt, VecExt};
 
 /// A parser that wraps the [`PlainEnglish`] parser that allows one to parse
 /// CommonMark files.
@@ -249,9 +250,10 @@ impl Parser for Markdown {
 
 #[cfg(test)]
 mod tests {
+    use harper_data::{Punctuation, TokenKind};
+
     use super::super::StrParser;
     use super::Markdown;
-    use crate::{Punctuation, TokenKind};
 
     #[test]
     fn survives_emojis() {

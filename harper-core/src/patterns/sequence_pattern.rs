@@ -1,9 +1,9 @@
+use harper_data::{Lrc, Token, TokenKind};
 use hashbrown::HashSet;
 use paste::paste;
 
 use super::whitespace_pattern::WhitespacePattern;
 use super::{Pattern, RepeatingPattern};
-use crate::{Lrc, Token, TokenKind};
 
 /// A pattern that checks that a sequence of others patterns match.
 #[derive(Default)]
@@ -137,11 +137,12 @@ impl Pattern for SequencePattern {
 
 #[cfg(test)]
 mod tests {
+    use harper_data::Lrc;
     use hashbrown::HashSet;
 
     use super::SequencePattern;
     use crate::patterns::Pattern;
-    use crate::{Document, Lrc};
+    use crate::Document;
 
     #[test]
     fn matches_n_whitespace_tokens() {

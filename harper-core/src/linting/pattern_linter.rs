@@ -1,6 +1,7 @@
+use harper_data::{Token, TokenStringExt};
+
 use super::{Lint, Linter};
 use crate::patterns::Pattern;
-use crate::{Token, TokenStringExt};
 
 #[cfg(not(feature = "concurrent"))]
 pub trait PatternLinter {

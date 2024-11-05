@@ -1,5 +1,7 @@
+use harper_data::TokenStringExt;
+
 use crate::linting::{LintKind, Linter, Suggestion};
-use crate::{Document, Lint, TokenStringExt};
+use crate::{Document, Lint};
 
 /// Linter that checks to make sure small integers (< one hundred) are spelled
 /// out.

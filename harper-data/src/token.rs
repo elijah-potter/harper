@@ -5,9 +5,7 @@ use paste::paste;
 use serde::{Deserialize, Serialize};
 
 use crate::punctuation::Punctuation;
-use crate::Span;
-use crate::{Quote, WordMetadata};
-use harper_data::word_metadata::{ConjunctionData, NounData};
+use crate::{ConjunctionData, NounData, Quote, Span, WordMetadata};
 
 #[derive(Debug, Clone, Copy, Serialize, Deserialize, PartialEq, Default)]
 pub struct Token {
@@ -513,36 +511,5 @@ impl TokenStringExt for [Token] {
         };
 
         first_sentence.into_iter().chain(rest).chain(last_sentence)
-    }
-}
-
-#[cfg(test)]
-mod tests {
-    use crate::{
-        parsers::{Parser, PlainEnglish},
-        TokenStringExt,
-    };
-
-    #[test]
-    fn parses_sentences_correctly() {
-        let text = "There were three little pigs. They built three little homes.";
-        let chars: Vec<char> = text.chars().collect();
-        let toks = PlainEnglish.parse(&chars);
-
-        let mut sentence_strs = vec![];
-
-        for sentence in toks.iter_sentences() {
-            if let Some(span) = sentence.span() {
-                sentence_strs.push(span.get_content_string(&chars));
-            }
-        }
-
-        assert_eq!(
-            sentence_strs,
-            vec![
-                "There were three little pigs.",
-                " They built three little homes."
-            ]
-        )
     }
 }

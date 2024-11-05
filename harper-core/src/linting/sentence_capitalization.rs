@@ -1,9 +1,9 @@
+use harper_data::TokenStringExt;
 use itertools::Itertools;
 
 use super::lint::Suggestion;
 use super::{Lint, LintKind, Linter};
 use crate::document::Document;
-use crate::TokenStringExt;
 
 #[derive(Debug, Clone, Copy, Default)]
 pub struct SentenceCapitalization;

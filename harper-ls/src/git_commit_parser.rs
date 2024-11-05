@@ -1,4 +1,5 @@
 use harper_core::parsers::{Markdown, Parser};
+use harper_data::Token;
 
 /// A Harper parser for Git commit files
 pub struct GitCommitParser;
@@ -6,7 +7,7 @@ pub struct GitCommitParser;
 impl Parser for GitCommitParser {
     /// Admittedly a somewhat naive implementation.
     /// We're going to get _something_ to work, before we polish it off.
-    fn parse(&mut self, source: &[char]) -> Vec<harper_core::Token> {
+    fn parse(&mut self, source: &[char]) -> Vec<Token> {
         // Locate the first `#`
         let end = source
             .iter()

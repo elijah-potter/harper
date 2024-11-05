@@ -1,11 +1,12 @@
 use std::collections::VecDeque;
 use std::sync::Arc;
 
+use harper_data::{Lrc, Span, Token, VecExt};
 use itertools::Itertools;
 
 use super::{Parser, TokenKind};
 use crate::patterns::{PatternExt, SequencePattern};
-use crate::{Dictionary, Lrc, Span, Token, VecExt};
+use crate::Dictionary;
 
 /// A parser that wraps any other parser to collapse token strings that match
 /// the pattern `word_word` or `word-word`.
@@ -59,12 +60,9 @@ impl Parser for CollapseIdentifiers {
 
 #[cfg(test)]
 mod tests {
-    use crate::{
-        parsers::{PlainEnglish, StrParser},
-        FstDictionary, FullDictionary, MergedDictionary, WordMetadata,
-    };
-
     use super::*;
+    use crate::parsers::{PlainEnglish, StrParser};
+    use crate::{FstDictionary, FullDictionary, MergedDictionary, WordMetadata};
 
     #[test]
     fn matches_kebab() {

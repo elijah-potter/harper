@@ -1,4 +1,4 @@
-use crate::Token;
+use harper_data::Token;
 
 use super::Pattern;
 

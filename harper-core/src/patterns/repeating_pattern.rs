@@ -1,5 +1,6 @@
+use harper_data::Token;
+
 use super::Pattern;
-use crate::Token;
 
 /// A pattern that will match one or more repetitions of the same pattern.
 ///

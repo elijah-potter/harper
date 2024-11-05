@@ -1,9 +1,7 @@
-use crate::{
-    patterns::{Pattern, WordPatternGroup},
-    Token, TokenStringExt,
-};
+use harper_data::{Token, TokenStringExt};
 
 use super::{Lint, LintKind, PatternLinter};
+use crate::patterns::{Pattern, WordPatternGroup};
 
 pub struct BoringWords {
     pattern: Box<dyn Pattern>,

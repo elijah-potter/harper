@@ -1,5 +1,6 @@
+use harper_data::Token;
+
 use super::Pattern;
-use crate::Token;
 
 /// A pattern that wraps another pattern.
 /// If the wrapped pattern matches the remainder of the input, it returns the

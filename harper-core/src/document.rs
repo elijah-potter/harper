@@ -2,15 +2,14 @@ use std::cmp::Ordering;
 use std::collections::VecDeque;
 use std::fmt::Display;
 
+use harper_data::{
+    FatToken, Lrc, NumberSuffix, Punctuation, Token, TokenKind, TokenStringExt, VecExt,
+};
 use paste::paste;
 
 use crate::parsers::{Markdown, Parser, PlainEnglish};
 use crate::patterns::{PatternExt, RepeatingPattern, SequencePattern};
-use crate::punctuation::Punctuation;
-use crate::token::NumberSuffix;
-use crate::vec_ext::VecExt;
-use crate::Span;
-use crate::{Dictionary, FatToken, FstDictionary, Lrc, Token, TokenKind, TokenStringExt};
+use crate::{Dictionary, FstDictionary, Span};
 
 /// A document containing some amount of lexed and parsed English text.
 #[derive(Debug, Clone)]

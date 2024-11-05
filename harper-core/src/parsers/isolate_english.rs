@@ -1,9 +1,11 @@
-use crate::{language_detection::is_likely_english, Dictionary};
+use harper_data::TokenStringExt;
 
-use super::{Parser, Token, TokenStringExt};
+use super::{Parser, Token};
+use crate::language_detection::is_likely_english;
+use crate::Dictionary;
 
-/// A parser that wraps another, using heuristics to quickly redact paragraphs of a document that aren't
-/// intended to be English text.
+/// A parser that wraps another, using heuristics to quickly redact paragraphs
+/// of a document that aren't intended to be English text.
 pub struct IsolateEnglish<D: Dictionary> {
     inner: Box<dyn Parser>,
     dict: D,
@@ -36,9 +38,11 @@ impl<D: Dictionary> Parser for IsolateEnglish<D> {
 
 #[cfg(test)]
 mod tests {
-    use crate::{parsers::PlainEnglish, Document, FstDictionary, TokenStringExt};
+    use harper_data::TokenStringExt;
 
     use super::IsolateEnglish;
+    use crate::parsers::PlainEnglish;
+    use crate::{Document, FstDictionary};
 
     /// Assert that the provided text contains _no_ chunks of valid English
     fn assert_no_english(text: &str) {
@@ -54,8 +58,8 @@ mod tests {
         assert_eq!(document.iter_punctuations().count(), 0);
     }
 
-    /// Assert that, once stripped of non-English chunks, the resulting document looks like another
-    /// piece of text.
+    /// Assert that, once stripped of non-English chunks, the resulting document
+    /// looks like another piece of text.
     fn assert_stripped_english(source: &str, target: &str) {
         let dict = FstDictionary::curated();
 
@@ -78,7 +82,8 @@ mod tests {
     #[test]
     fn mixed_spanish_english_politics() {
         assert_no_english(
-            "No estoy of acuerdo con the politics de Los estados unidos ahora; pienso que we need mas diversidad in el gobierno.",
+            "No estoy of acuerdo con the politics de Los estados unidos ahora; pienso que we need \
+             mas diversidad in el gobierno.",
         );
     }
 

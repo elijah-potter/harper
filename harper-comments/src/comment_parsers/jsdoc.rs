@@ -1,6 +1,5 @@
 use harper_core::parsers::{Markdown, Parser};
-use harper_core::{Punctuation, Token, TokenKind};
-use harper_data::Span;
+use harper_data::{Punctuation, Span, Token, TokenKind};
 use itertools::Itertools;
 
 use super::without_initiators;
@@ -19,7 +18,7 @@ impl Parser for JsDoc {
             if chars_traversed + line.len() < source.len() {
                 new_tokens.push(Token::new(
                     Span::new_with_len(line.len(), 1),
-                    harper_core::TokenKind::Newline(1),
+                    TokenKind::Newline(1),
                 ));
             }
 
@@ -149,7 +148,8 @@ fn parse_inline_tag(tokens: &[Token]) -> Option<usize> {
 
 #[cfg(test)]
 mod tests {
-    use harper_core::{Document, Punctuation, TokenKind};
+    use harper_core::Document;
+    use harper_data::{Punctuation, TokenKind};
 
     use crate::CommentParser;
 

@@ -1,6 +1,7 @@
+use harper_data::{Span, TokenStringExt};
+
 use super::{Lint, LintKind, Linter};
-use crate::token::TokenStringExt;
-use crate::{Document, Span};
+use crate::Document;
 
 /// Detect and warn that the sentence is too long.
 #[derive(Debug, Clone, Copy, Default)]

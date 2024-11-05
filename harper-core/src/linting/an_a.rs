@@ -1,9 +1,10 @@
 use std::borrow::Cow;
 
+use harper_data::TokenStringExt;
 use itertools::Itertools;
 
 use crate::linting::{Lint, LintKind, Linter, Suggestion};
-use crate::{Document, TokenStringExt};
+use crate::Document;
 
 #[derive(Debug, Default)]
 pub struct AnA;

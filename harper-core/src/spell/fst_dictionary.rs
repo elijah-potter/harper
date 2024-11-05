@@ -1,14 +1,15 @@
-use super::{seq_to_normalized, FullDictionary};
-use fst::{map::StreamWithState, IntoStreamer, Map as FstMap, Streamer};
+use std::cell::RefCell;
+use std::sync::Arc;
+
+use fst::map::StreamWithState;
+use fst::{IntoStreamer, Map as FstMap, Streamer};
 use harper_data::CharStringExt;
 use hashbrown::HashMap;
 use itertools::Itertools;
 use levenshtein_automata::{LevenshteinAutomatonBuilder, DFA};
-use std::{cell::RefCell, sync::Arc};
 
+use super::{seq_to_normalized, Dictionary, FullDictionary};
 use crate::{CharString, WordMetadata};
-
-use super::Dictionary;
 
 pub struct FstDictionary {
     /// Underlying FullDictionary used for everything except fuzzy finding
@@ -189,9 +190,9 @@ mod tests {
     use harper_data::CharStringExt;
     use itertools::Itertools;
 
-    use crate::{spell::seq_to_normalized, Dictionary};
-
     use super::FstDictionary;
+    use crate::spell::seq_to_normalized;
+    use crate::Dictionary;
 
     #[test]
     fn fst_map_contains_all_in_full_dict() {

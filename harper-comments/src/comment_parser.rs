@@ -2,7 +2,8 @@ use std::path::Path;
 
 use comment_parsers::{Go, JavaDoc, JsDoc, Unit};
 use harper_core::parsers::{self, Parser};
-use harper_core::{FullDictionary, Token};
+use harper_core::FullDictionary;
+use harper_data::Token;
 use harper_tree_sitter::TreeSitterMasker;
 use tree_sitter::Node;
 

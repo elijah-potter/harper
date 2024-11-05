@@ -1,9 +1,8 @@
 use std::fmt::Display;
 
+use harper_data::Span;
 use is_macro::Is;
 use serde::{Deserialize, Serialize};
-
-use crate::Span;
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Lint {

@@ -1,5 +1,5 @@
 use harper_core::parsers::{self, Parser, PlainEnglish};
-use harper_core::Token;
+use harper_data::Token;
 use harper_tree_sitter::TreeSitterMasker;
 use tree_sitter::Node;
 

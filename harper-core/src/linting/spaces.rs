@@ -1,6 +1,7 @@
+use harper_data::{Token, TokenKind, TokenStringExt};
+
 use super::{Lint, LintKind, Linter, Suggestion};
-use crate::token::TokenStringExt;
-use crate::{Document, Token, TokenKind};
+use crate::Document;
 
 #[derive(Debug, Default)]
 pub struct Spaces;

@@ -1,3 +1,4 @@
+use harper_data::{CharString, TokenStringExt};
 use hashbrown::HashMap;
 use smallvec::ToSmallVec;
 
@@ -5,7 +6,7 @@ use super::lint::Suggestion;
 use super::{Lint, LintKind, Linter};
 use crate::document::Document;
 use crate::spell::suggest_correct_spelling;
-use crate::{CharString, Dictionary, TokenStringExt};
+use crate::Dictionary;
 
 pub struct SpellCheck<T>
 where

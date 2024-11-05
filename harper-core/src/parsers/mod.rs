@@ -6,12 +6,11 @@ mod plain_english;
 
 use blanket::blanket;
 pub use collapse_identifiers::CollapseIdentifiers;
+pub use harper_data::{Token, TokenKind, TokenStringExt};
 pub use isolate_english::IsolateEnglish;
 pub use markdown::Markdown;
 pub use mask::Mask;
 pub use plain_english::PlainEnglish;
-
-pub use crate::token::{Token, TokenKind, TokenStringExt};
 
 #[cfg(not(feature = "concurrent"))]
 #[blanket(derive(Box))]
@@ -41,9 +40,10 @@ where
 
 #[cfg(test)]
 mod tests {
+    use harper_data::Punctuation;
+    use harper_data::TokenKind::{self, *};
+
     use super::{Markdown, Parser, PlainEnglish};
-    use crate::Punctuation;
-    use crate::TokenKind::{self, *};
 
     fn assert_tokens_eq(
         test_str: impl AsRef<str>,

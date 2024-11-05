@@ -1,13 +1,14 @@
-use super::{edit_distance_min_alloc, seq_to_normalized};
+use std::sync::Arc;
+
 use harper_data::CharStringExt;
+use harper_dictionary_parsing::{parse_default_attribute_list, parse_default_word_list};
 use hashbrown::HashMap;
 use itertools::Itertools;
 use smallvec::{SmallVec, ToSmallVec};
-use std::sync::Arc;
 
 use super::dictionary::Dictionary;
+use super::{edit_distance_min_alloc, seq_to_normalized};
 use crate::{CharString, WordMetadata};
-use harper_dictionary_parsing::{parse_default_attribute_list, parse_default_word_list};
 
 /// A full, fat dictionary.
 /// All elements are stored in-memory.
@@ -40,8 +41,8 @@ fn uncached_inner_new() -> Arc<FullDictionary> {
     attr_list.expand_marked_words(word_list, &mut word_map);
 
     let mut words: Vec<CharString> = word_map.iter().map(|(v, _)| v.clone()).collect();
-    // This may seem weird, but it ensures that the indexes in the Words vector match up with those
-    // stored in the computed FST Map.
+    // This may seem weird, but it ensures that the indexes in the Words vector
+    // match up with those stored in the computed FST Map.
     words.sort_unstable();
     words.dedup();
     words.sort_by_key(|w| w.len()); // DO NOT MAKE THIS UNSTABLE.
@@ -68,7 +69,8 @@ impl FullDictionary {
 
     /// Create a dictionary from the curated dictionary included
     /// in the Harper binary.
-    /// Consider using [`super::FstDictionary::curated()`] instead, as it is more performant for spellchecking.
+    /// Consider using [`super::FstDictionary::curated()`] instead, as it is
+    /// more performant for spellchecking.
     pub fn curated() -> Arc<Self> {
         DICT.with(|v| v.clone())
     }

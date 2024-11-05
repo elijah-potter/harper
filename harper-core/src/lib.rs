@@ -1,7 +1,6 @@
 #![doc = include_str!("../README.md")]
 #![allow(dead_code)]
 
-mod char_ext;
 mod document;
 pub mod language_detection;
 mod lexing;
@@ -9,26 +8,15 @@ pub mod linting;
 mod mask;
 pub mod parsers;
 pub mod patterns;
-mod punctuation;
 mod spell;
-mod sync;
-mod token;
-mod vec_ext;
 
 use std::collections::VecDeque;
 
 pub use document::Document;
+use harper_data::{CharString, CharStringExt, Span, VecExt, WordMetadata};
 use linting::Lint;
 pub use mask::{Mask, Masker};
-pub use punctuation::{Punctuation, Quote};
 pub use spell::{Dictionary, FstDictionary, FullDictionary, MergedDictionary};
-pub use sync::Lrc;
-pub use token::{FatToken, Token, TokenKind, TokenStringExt};
-pub use vec_ext::VecExt;
-
-use harper_data::Span;
-use harper_data::WordMetadata;
-use harper_data::{CharString, CharStringExt};
 
 /// A utility function that removes overlapping lints in a vector,
 /// keeping the more important ones.
@@ -62,10 +50,8 @@ pub fn remove_overlaps(lints: &mut Vec<Lint>) {
 
 #[cfg(test)]
 mod tests {
-    use crate::{
-        linting::{LintGroup, LintGroupConfig, Linter},
-        remove_overlaps, Document, FstDictionary,
-    };
+    use crate::linting::{LintGroup, LintGroupConfig, Linter};
+    use crate::{remove_overlaps, Document, FstDictionary};
 
     #[test]
     fn keeps_space_lint() {

@@ -1,6 +1,8 @@
+use harper_data::{Lrc, Token};
+
 use crate::linting::{LintKind, PatternLinter, Suggestion};
 use crate::patterns::{EitherPattern, Pattern, SequencePattern, WordPatternGroup};
-use crate::{Lint, Lrc, Token};
+use crate::Lint;
 
 // Looks for places where the genitive case _isn't_ being used, and should be.
 pub struct UseGenitive {
@@ -67,9 +69,8 @@ impl Default for UseGenitive {
 
 #[cfg(test)]
 mod tests {
-    use crate::linting::tests::{assert_lint_count, assert_suggestion_result};
-
     use super::UseGenitive;
+    use crate::linting::tests::{assert_lint_count, assert_suggestion_result};
 
     #[test]
     fn catches_adjective_noun() {

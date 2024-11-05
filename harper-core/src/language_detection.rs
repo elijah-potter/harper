@@ -1,4 +1,6 @@
-use crate::{Dictionary, Document, Token, TokenKind};
+use harper_data::{Token, TokenKind};
+
+use crate::{Dictionary, Document};
 
 /// Check if the contents of the document are likely intended to represent
 /// English.

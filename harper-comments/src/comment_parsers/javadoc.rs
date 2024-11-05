@@ -1,7 +1,7 @@
 use std::collections::VecDeque;
 
 use harper_core::parsers::Parser;
-use harper_core::{Punctuation, Token, TokenKind, VecExt};
+use harper_data::{Punctuation, Token, TokenKind, VecExt};
 use harper_html::HtmlParser;
 
 use super::without_initiators;
