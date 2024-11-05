@@ -68,7 +68,7 @@ impl FullDictionary {
 
     /// Create a dictionary from the curated dictionary included
     /// in the Harper binary.
-    /// Consider using [`FstDictionary::curated()`] instead, as it is more performant for spellchecking.
+    /// Consider using [`super::FstDictionary::curated()`] instead, as it is more performant for spellchecking.
     pub fn curated() -> Arc<Self> {
         DICT.with(|v| v.clone())
     }
@@ -171,8 +171,8 @@ impl Dictionary for FullDictionary {
     }
 
     /// Suggest a correct spelling for a given misspelled word.
-    /// [`word`] is assumed to be quite small (n < 100).
-    /// [`max_distance`] relates to an optimization that allows the search
+    /// `Self::word` is assumed to be quite small (n < 100).
+    /// `max_distance` relates to an optimization that allows the search
     /// algorithm to prune large portions of the search.
     fn fuzzy_match(
         &self,
