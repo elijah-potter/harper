@@ -45,6 +45,10 @@ itertools = "0.13.0"
 name = "parse_demo"
 harness = false
 
+[[bench]]
+name = "build_curated_fst"
+harness = false
+
 [features]
 default = []
 concurrent = []
