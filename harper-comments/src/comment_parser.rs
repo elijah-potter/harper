@@ -1,16 +1,16 @@
 use std::path::Path;
 
 use comment_parsers::{Go, JavaDoc, JsDoc, Unit};
-use harper_core::parsers::{self, Parser};
-use harper_core::FullDictionary;
 use harper_data::Token;
+use harper_parsing::{MaskParser, Parser};
+use harper_spell::FullDictionary;
 use harper_tree_sitter::TreeSitterMasker;
 use tree_sitter::Node;
 
 use crate::comment_parsers;
 
 pub struct CommentParser {
-    inner: parsers::Mask<TreeSitterMasker, Box<dyn Parser>>,
+    inner: MaskParser<TreeSitterMasker, Box<dyn Parser>>,
 }
 
 impl CommentParser {
@@ -48,7 +48,7 @@ impl CommentParser {
         };
 
         Some(Self {
-            inner: parsers::Mask::new(
+            inner: MaskParser::new(
                 TreeSitterMasker::new(language, Self::node_condition),
                 comment_parser,
             ),

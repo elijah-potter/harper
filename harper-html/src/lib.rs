@@ -1,10 +1,10 @@
-use harper_core::parsers::{self, Parser, PlainEnglish};
 use harper_data::Token;
+use harper_parsing::{MaskParser, Parser, PlainEnglish};
 use harper_tree_sitter::TreeSitterMasker;
 use tree_sitter::Node;
 
 pub struct HtmlParser {
-    inner: parsers::Mask<TreeSitterMasker, PlainEnglish>,
+    inner: MaskParser<TreeSitterMasker, PlainEnglish>,
 }
 
 impl HtmlParser {
@@ -16,7 +16,7 @@ impl HtmlParser {
 impl Default for HtmlParser {
     fn default() -> Self {
         Self {
-            inner: parsers::Mask::new(
+            inner: MaskParser::new(
                 TreeSitterMasker::new(tree_sitter_html::language(), Self::node_condition),
                 PlainEnglish,
             ),

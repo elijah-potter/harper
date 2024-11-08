@@ -6,9 +6,10 @@ use anyhow::format_err;
 use ariadne::{Color, Label, Report, ReportKind, Source};
 use clap::Parser;
 use harper_comments::CommentParser;
-use harper_core::linting::{LintGroup, LintGroupConfig, Linter};
-use harper_core::parsers::Markdown;
-use harper_core::{remove_overlaps, Dictionary, Document, FstDictionary};
+use harper_core::Document;
+use harper_linting::{remove_overlaps, LintGroup, LintGroupConfig, Linter};
+use harper_parsing::Markdown;
+use harper_spell::{Dictionary, FstDictionary};
 
 #[derive(Debug, Parser)]
 enum Args {
@@ -104,7 +105,7 @@ fn main() -> anyhow::Result<()> {
 fn load_file(file: &Path) -> anyhow::Result<(Document, String)> {
     let source = std::fs::read_to_string(file)?;
 
-    let mut parser: Box<dyn harper_core::parsers::Parser> =
+    let mut parser: Box<dyn harper_parsing::Parser> =
         if let Some("md") = file.extension().map(|v| v.to_str().unwrap()) {
             Box::new(Markdown)
         } else {

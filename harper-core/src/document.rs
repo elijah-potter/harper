@@ -7,9 +7,10 @@ use harper_data::{
 };
 use paste::paste;
 
-use crate::parsers::{Markdown, Parser, PlainEnglish};
-use crate::patterns::{PatternExt, RepeatingPattern, SequencePattern};
-use crate::{Dictionary, FstDictionary, Span};
+use harper_data::Span;
+use harper_parsing::{Markdown, Parser, PlainEnglish};
+use harper_patterns::{PatternExt, RepeatingPattern, SequencePattern};
+use harper_spell::{Dictionary, FstDictionary};
 
 /// A document containing some amount of lexed and parsed English text.
 #[derive(Debug, Clone)]
@@ -546,7 +547,7 @@ mod tests {
     use itertools::Itertools;
 
     use super::Document;
-    use crate::Span;
+    use harper_data::Span;
 
     fn assert_condensed_contractions(text: &str, final_tok_count: usize) {
         let document = Document::new_plain_english_curated(text);

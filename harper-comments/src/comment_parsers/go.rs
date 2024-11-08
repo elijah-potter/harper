@@ -1,5 +1,5 @@
-use harper_core::parsers::{Markdown, Parser};
 use harper_data::Token;
+use harper_parsing::{Markdown, Parser};
 
 use super::without_initiators;
 

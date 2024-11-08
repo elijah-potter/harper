@@ -1,5 +1,5 @@
-use harper_core::parsers::{Markdown, Parser};
 use harper_data::{Punctuation, Span, Token, TokenKind};
+use harper_parsing::{Markdown, Parser};
 use itertools::Itertools;
 
 use super::without_initiators;

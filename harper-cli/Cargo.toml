@@ -12,4 +12,10 @@ ariadne = "0.4.1"
 clap = { version = "4.5.20", features = ["derive"] }
 harper-core = { path = "../harper-core", version = "0.12.0" }
 harper-comments = { path = "../harper-comments", version = "0.12.0" }
+harper-spell = { path = "../harper-spell", version = "0.12.0" }
+harper-linting = { path = "../harper-linting", version = "0.12.0" }
+harper-parsing = { path = "../harper-parsing", version = "0.12.0" }
 serde_json = "1.0.132"
+
+[dev-dependencies]
+paste = "1.0.15"

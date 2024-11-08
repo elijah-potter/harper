@@ -7,13 +7,11 @@ license = "Apache-2.0"
 readme = "README.md"
 repository = "https://github.com/elijah-potter/harper"
 
-[[bin]]
-name = "force-build"
-path = "build.rs"
-
 [dependencies]
 harper-data = { path = "../harper-data", version = "0.12.0" }
-harper-dictionary-parsing = { path = "../harper-dictionary-parsing", version = "0.12.0" }
+harper-parsing = { path = "../harper-parsing", version = "0.12.0" }
+harper-patterns = { path = "../harper-patterns", version = "0.12.0" }
+harper-spell = { path = "../harper-spell", version = "0.12.0" }
 blanket = "0.4.0"
 fst = "0.4.7"
 hashbrown = { version = "0.15.0", features = ["serde"] }
@@ -31,21 +29,6 @@ levenshtein_automata = { version = "0.2.1", features = ["fst_automaton"] }
 [dev-dependencies]
 criterion = { version = "0.5.1", features = ["plotters", "cargo_bench_support"], default-features = false}
 rand = "0.8.5"
-
-[build-dependencies]
-fst = "0.4.7"
-harper-data = { path = "../harper-data", version = "0.12.0" }
-harper-dictionary-parsing = { path = "../harper-dictionary-parsing", version = "0.12.0" }
-hashbrown = { version = "0.15.0" }
-itertools = "0.13.0"
-
-[[bench]]
-name = "parse_demo"
-harness = false
-
-[[bench]]
-name = "build_curated_fst"
-harness = false
 
 [features]
 default = []

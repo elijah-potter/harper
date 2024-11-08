@@ -1,0 +1,29 @@
+[package]
+name = "harper-spell"
+version = "0.12.0"
+edition = "2021"
+description = "The language checker for developers."
+license = "Apache-2.0"
+readme = "README.md"
+repository = "https://github.com/elijah-potter/harper"
+
+[dependencies]
+fst = "0.4.7"
+levenshtein_automata = { version = "0.2.1", features = ["fst_automaton"] }
+smallvec = "1.13.2"
+blanket = "0.4.0"
+harper-data = { path = "../harper-data", version = "0.12.0" }
+itertools = "0.13.0"
+harper-dictionary-parsing = { path = "../harper-dictionary-parsing", version = "0.12.0" }
+hashbrown = "0.15.1"
+
+[build-dependencies]
+fst = "0.4.7"
+harper-data = { path = "../harper-data", version = "0.12.0" }
+harper-dictionary-parsing = { path = "../harper-dictionary-parsing", version = "0.12.0" }
+hashbrown = { version = "0.15.0" }
+itertools = "0.13.0"
+
+[features]
+default = []
+concurrent = ["harper-data/concurrent"]

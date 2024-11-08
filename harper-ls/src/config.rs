@@ -1,7 +1,7 @@
 use std::path::PathBuf;
 
 use dirs::{config_dir, data_local_dir};
-use harper_core::linting::LintGroupConfig;
+use harper_linting::LintGroupConfig;
 use resolve_path::PathResolveExt;
 use serde::{Deserialize, Serialize};
 use serde_json::Value;

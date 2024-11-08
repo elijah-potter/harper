@@ -1,0 +1,23 @@
+[package]
+name = "harper-linting"
+version = "0.12.0"
+edition = "2021"
+description = "The language checker for developers."
+license = "Apache-2.0"
+repository = "https://github.com/elijah-potter/harper"
+
+[dependencies]
+is-macro = "0.3.6"
+harper-data = { path = "../harper-data", version = "0.12.0" }
+harper-core = { path = "../harper-core", version = "0.12.0" }
+harper-spell = { path = "../harper-spell", version = "0.12.0" }
+harper-patterns = { path = "../harper-patterns", version = "0.12.0" }
+hashbrown = "0.15.1"
+itertools = "0.13.0"
+paste = "1.0.15"
+serde = { version = "1.0.209", features = ["derive"] }
+smallvec = "1.13.2"
+
+[features]
+default = []
+concurrent = ["harper-data/concurrent", "harper-patterns/concurrent"]

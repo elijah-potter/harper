@@ -89,9 +89,9 @@ dependencies = [
 
 [[package]]
 name = "anyhow"
-version = "1.0.92"
+version = "1.0.93"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "74f37166d7d48a0284b99dd824694c26119c700b53bf0d1540cdb147dbdaaf13"
+checksum = "4c95c10ba0b00a02636238b814946408b1322d5ac4760326e6fb8ec956d85775"
 
 [[package]]
 name = "ariadne"
@@ -561,6 +561,10 @@ dependencies = [
  "clap",
  "harper-comments",
  "harper-core",
+ "harper-linting",
+ "harper-parsing",
+ "harper-spell",
+ "paste",
  "serde_json",
 ]
 
@@ -571,6 +575,9 @@ dependencies = [
  "harper-core",
  "harper-data",
  "harper-html",
+ "harper-linting",
+ "harper-parsing",
+ "harper-spell",
  "harper-tree-sitter",
  "itertools 0.13.0",
  "paste",
@@ -600,7 +607,9 @@ dependencies = [
  "criterion",
  "fst",
  "harper-data",
- "harper-dictionary-parsing",
+ "harper-parsing",
+ "harper-patterns",
+ "harper-spell",
  "hashbrown 0.15.1",
  "is-macro",
  "itertools 0.13.0",
@@ -642,15 +651,61 @@ dependencies = [
 ]
 
 [[package]]
+name = "harper-gestalt"
+version = "0.12.0"
+dependencies = [
+ "harper-comments",
+ "harper-core",
+ "harper-data",
+ "harper-html",
+ "harper-language-detection",
+ "harper-linting",
+ "harper-parsing",
+ "harper-patterns",
+ "harper-spell",
+ "itertools 0.13.0",
+ "paste",
+]
+
+[[package]]
 name = "harper-html"
 version = "0.12.0"
 dependencies = [
  "harper-core",
  "harper-data",
+ "harper-linting",
+ "harper-parsing",
+ "harper-spell",
  "harper-tree-sitter",
  "paste",
  "tree-sitter",
  "tree-sitter-html",
+]
+
+[[package]]
+name = "harper-language-detection"
+version = "0.12.0"
+dependencies = [
+ "harper-core",
+ "harper-data",
+ "harper-parsing",
+ "harper-spell",
+]
+
+[[package]]
+name = "harper-linting"
+version = "0.12.0"
+dependencies = [
+ "harper-core",
+ "harper-data",
+ "harper-patterns",
+ "harper-spell",
+ "hashbrown 0.15.1",
+ "is-macro",
+ "itertools 0.13.0",
+ "paste",
+ "serde",
+ "smallvec",
 ]
 
 [[package]]
@@ -664,7 +719,12 @@ dependencies = [
  "harper-comments",
  "harper-core",
  "harper-data",
+ "harper-gestalt",
  "harper-html",
+ "harper-language-detection",
+ "harper-linting",
+ "harper-parsing",
+ "harper-spell",
  "itertools 0.13.0",
  "once_cell",
  "open",
@@ -678,11 +738,50 @@ dependencies = [
 ]
 
 [[package]]
+name = "harper-parsing"
+version = "0.12.0"
+dependencies = [
+ "blanket",
+ "harper-data",
+ "harper-patterns",
+ "itertools 0.13.0",
+ "pulldown-cmark",
+ "rand",
+]
+
+[[package]]
+name = "harper-patterns"
+version = "0.12.0"
+dependencies = [
+ "blanket",
+ "harper-data",
+ "harper-parsing",
+ "hashbrown 0.15.1",
+ "paste",
+]
+
+[[package]]
+name = "harper-spell"
+version = "0.12.0"
+dependencies = [
+ "blanket",
+ "fst",
+ "harper-data",
+ "harper-dictionary-parsing",
+ "hashbrown 0.15.1",
+ "itertools 0.13.0",
+ "levenshtein_automata",
+ "smallvec",
+]
+
+[[package]]
 name = "harper-tree-sitter"
 version = "0.12.0"
 dependencies = [
  "harper-core",
  "harper-data",
+ "harper-parsing",
+ "harper-spell",
  "tree-sitter",
 ]
 
@@ -693,6 +792,10 @@ dependencies = [
  "console_error_panic_hook",
  "harper-core",
  "harper-data",
+ "harper-language-detection",
+ "harper-linting",
+ "harper-parsing",
+ "harper-spell",
  "once_cell",
  "serde-wasm-bindgen",
  "tracing",

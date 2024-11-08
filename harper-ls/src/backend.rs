@@ -3,12 +3,11 @@ use std::path::{Component, PathBuf};
 use std::sync::Arc;
 
 use anyhow::anyhow;
-use harper_comments::CommentParser;
-use harper_core::linting::{LintGroup, Linter};
-use harper_core::parsers::{CollapseIdentifiers, IsolateEnglish, Markdown, Parser, PlainEnglish};
-use harper_core::{Dictionary, Document, FstDictionary, FullDictionary, MergedDictionary};
+use harper_core::Document;
 use harper_data::{Token, TokenKind, WordMetadata};
-use harper_html::HtmlParser;
+use harper_gestalt::GestaltParser;
+use harper_linting::{LintGroup, Linter};
+use harper_spell::{Dictionary, FstDictionary, FullDictionary, MergedDictionary};
 use serde_json::Value;
 use tokio::sync::{Mutex, RwLock};
 use tower_lsp::jsonrpc::Result;
@@ -29,7 +28,6 @@ use crate::config::Config;
 use crate::diagnostics::{lint_to_code_actions, lints_to_diagnostics};
 use crate::dictionary_io::{load_dict, save_dict};
 use crate::document_state::DocumentState;
-use crate::git_commit_parser::GitCommitParser;
 use crate::pos_conv::range_to_span;
 
 pub struct Backend {
@@ -178,51 +176,13 @@ impl Backend {
             return Ok(());
         };
 
-        let parser: Option<Box<dyn Parser>> =
-            if let Some(ts_parser) = CommentParser::new_from_language_id(language_id) {
-                let source: Vec<char> = text.chars().collect();
-                let source = Arc::new(source);
-
-                if let Some(new_dict) = ts_parser.create_ident_dict(source.as_slice()) {
-                    let new_dict = Arc::new(new_dict);
-
-                    if doc_state.ident_dict != new_dict {
-                        doc_state.ident_dict = new_dict.clone();
-                        let mut merged = self.generate_file_dictionary(url).await?;
-                        merged.add_dictionary(new_dict);
-                        let merged = Arc::new(merged);
-
-                        doc_state.linter = LintGroup::new(config_lock.lint_config, merged.clone());
-                        doc_state.dict = merged.clone();
-                    }
-                    Some(Box::new(CollapseIdentifiers::new(
-                        Box::new(ts_parser),
-                        Box::new(doc_state.dict.clone()),
-                    )))
-                } else {
-                    Some(Box::new(ts_parser))
-                }
-            } else if language_id == "markdown" {
-                Some(Box::new(Markdown))
-            } else if language_id == "gitcommit" {
-                Some(Box::new(GitCommitParser))
-            } else if language_id == "html" {
-                Some(Box::new(HtmlParser::default()))
-            } else if language_id == "mail" {
-                Some(Box::new(PlainEnglish))
-            } else {
-                None
-            };
+        let parser = GestaltParser::new_from_language_id(language_id);
 
         match parser {
             None => {
                 doc_lock.remove(url);
             }
             Some(mut parser) => {
-                if self.config.read().await.isolate_english {
-                    parser = Box::new(IsolateEnglish::new(parser, doc_state.dict.clone()));
-                }
-
                 doc_state.document = Document::new(text, &mut parser, &doc_state.dict);
             }
         }
