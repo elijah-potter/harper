@@ -1,12 +1,11 @@
-use harper_data::Token;
-use harper_data::TokenStringExt;
+use harper_data::{Token, TokenStringExt};
 use harper_parsing::Parser;
 
-use crate::is_likely_english;
-use crate::Dictionary;
+use crate::{is_likely_english, Dictionary};
 
-/// A [`Parser`](harper_parsing::Parser) that wraps another, using heuristics to quickly redact paragraphs
-/// of a document that aren't intended to be English text.
+/// A [`Parser`](harper_parsing::Parser) that wraps another, using heuristics to
+/// quickly redact paragraphs of a document that aren't intended to be English
+/// text.
 pub struct IsolateEnglish<D: Dictionary> {
     inner: Box<dyn Parser>,
     dict: D,
@@ -40,11 +39,11 @@ impl<D: Dictionary> Parser for IsolateEnglish<D> {
 #[cfg(test)]
 mod tests {
     use harper_data::TokenStringExt;
+    use harper_parsing::PlainEnglish;
     use harper_spell::FstDictionary;
 
     use super::IsolateEnglish;
     use crate::Document;
-    use harper_parsing::PlainEnglish;
 
     /// Assert that the provided text contains _no_ chunks of valid English
     fn assert_no_english(text: &str) {

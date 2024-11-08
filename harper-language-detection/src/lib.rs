@@ -1,8 +1,7 @@
 mod isolate_english;
 
-use harper_data::{Token, TokenKind};
-
 use harper_core::Document;
+use harper_data::{Token, TokenKind};
 use harper_spell::Dictionary;
 pub use isolate_english::IsolateEnglish;
 
@@ -56,9 +55,10 @@ pub fn is_likely_english(toks: &[Token], source: &[char], dict: &impl Dictionary
 
 #[cfg(test)]
 mod tests {
-    use super::is_doc_likely_english;
     use harper_core::Document;
     use harper_spell::FstDictionary;
+
+    use super::is_doc_likely_english;
 
     fn assert_not_english(source: &'static str) {
         let dict = FstDictionary::curated();

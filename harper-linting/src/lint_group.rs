@@ -1,3 +1,5 @@
+use harper_core::Document;
+use harper_spell::Dictionary;
 use paste::paste;
 use serde::{Deserialize, Serialize};
 
@@ -22,8 +24,6 @@ use super::unclosed_quotes::UnclosedQuotes;
 use super::use_genitive::UseGenitive;
 use super::wrong_quotes::WrongQuotes;
 use super::{Lint, Linter};
-use harper_core::Document;
-use harper_spell::Dictionary;
 
 macro_rules! create_lint_group_config {
     ($($linter:ident => $default:expr),*) => {

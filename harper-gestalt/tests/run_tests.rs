@@ -1,8 +1,9 @@
+use std::path::Path;
+
 use harper_core::Document;
 use harper_gestalt::GestaltParser;
 use harper_linting::{LintGroup, LintGroupConfig, Linter};
 use harper_spell::FstDictionary;
-use std::path::Path;
 
 /// Creates a unit test checking that the linting of a source file in
 /// `tests_sources` produces the expected number of lints.

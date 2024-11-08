@@ -39,9 +39,8 @@ impl Linter for EllipsisLength {
 
 #[cfg(test)]
 mod tests {
-    use crate::tests::{assert_lint_count, assert_suggestion_result};
-
     use super::EllipsisLength;
+    use crate::tests::{assert_lint_count, assert_suggestion_result};
 
     #[test]
     fn allows_correct_ellipsis() {

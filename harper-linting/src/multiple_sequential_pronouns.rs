@@ -1,11 +1,10 @@
 use harper_data::{Lrc, Token, TokenStringExt};
+use harper_patterns::{Pattern, SequencePattern};
 use hashbrown::HashSet;
 
 use super::pattern_linter::PatternLinter;
 use super::Suggestion;
-use crate::Lint;
-use crate::LintKind;
-use harper_patterns::{Pattern, SequencePattern};
+use crate::{Lint, LintKind};
 
 /// Linter that checks if multiple pronouns are being used right after each
 /// other. This is a common mistake to make during the revision process.

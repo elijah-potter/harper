@@ -1,12 +1,12 @@
 use std::borrow::Cow;
 
+use harper_data::{CharString, CharStringExt, WordMetadata};
 use itertools::{Itertools, MinMaxResult};
 
 pub use self::dictionary::Dictionary;
 pub use self::fst_dictionary::FstDictionary;
 pub use self::full_dictionary::FullDictionary;
 pub use self::merged_dictionary::MergedDictionary;
-use harper_data::{CharString, CharStringExt, WordMetadata};
 
 mod dictionary;
 mod fst_dictionary;
@@ -144,12 +144,11 @@ fn edit_distance_min_alloc(
 mod tests {
     use itertools::Itertools;
 
-    use crate::edit_distance_min_alloc;
-
     use super::{
         order_suggestions, seq_to_normalized, suggest_correct_spelling_str, Dictionary,
         FstDictionary, FullDictionary,
     };
+    use crate::edit_distance_min_alloc;
 
     // A convenience method for these tests.
     fn edit_distance(source: &[char], target: &[char]) -> u8 {

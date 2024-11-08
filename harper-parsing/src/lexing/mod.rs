@@ -2,11 +2,10 @@ mod email_address;
 mod hostname;
 mod url;
 
-use harper_data::{CharExt, Punctuation, Quote, TokenKind};
+use harper_data::{CharExt, Punctuation, Quote, TokenKind, WordMetadata};
 use url::lex_url;
 
 use self::email_address::lex_email_address;
-use harper_data::WordMetadata;
 
 #[derive(Debug)]
 pub struct FoundToken {

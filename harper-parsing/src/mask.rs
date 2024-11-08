@@ -73,8 +73,9 @@ impl Mask {
 
 #[cfg(test)]
 mod tests {
-    use crate::Mask;
     use harper_data::Span;
+
+    use crate::Mask;
 
     #[test]
     fn bumps_existing() {

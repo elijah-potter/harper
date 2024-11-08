@@ -1,7 +1,7 @@
 use harper_data::{Token, TokenStringExt};
+use harper_patterns::{Pattern, WordPatternGroup};
 
 use super::{Lint, LintKind, PatternLinter};
-use harper_patterns::{Pattern, WordPatternGroup};
 
 pub struct BoringWords {
     pattern: Box<dyn Pattern>,

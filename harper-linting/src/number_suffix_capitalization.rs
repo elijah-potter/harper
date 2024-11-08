@@ -1,7 +1,7 @@
+use harper_core::Document;
 use harper_data::{Span, TokenKind, TokenStringExt};
 
 use super::{Lint, LintKind, Linter, Suggestion};
-use harper_core::Document;
 
 /// Detect and warn that the sentence is too long.
 #[derive(Debug, Clone, Copy, Default)]

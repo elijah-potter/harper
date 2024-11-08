@@ -1,7 +1,7 @@
+use harper_core::Document;
 use harper_data::TokenStringExt;
 
 use crate::{Lint, LintKind, Linter};
-use harper_core::Document;
 
 #[derive(Debug, Default)]
 pub struct AvoidCurses;

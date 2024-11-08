@@ -1,10 +1,10 @@
 use std::collections::VecDeque;
 
 use harper_data::{Lrc, Span, Token, TokenKind, VecExt};
+use harper_patterns::{PatternExt, SequencePattern};
 use itertools::Itertools;
 
 use super::Parser;
-use harper_patterns::{PatternExt, SequencePattern};
 
 /// A parser that wraps any other parser to collapse token strings that match
 /// the pattern `word_word` or `word-word`.
@@ -52,8 +52,9 @@ impl Parser for CollapseIdentifiers {
 
 #[cfg(test)]
 mod tests {
-    use super::*;
     use harper_parsing::{PlainEnglish, StrParser};
+
+    use super::*;
 
     #[test]
     fn matches_kebab() {

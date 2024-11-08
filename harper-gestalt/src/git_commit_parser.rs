@@ -3,9 +3,9 @@ use harper_parsing::{Markdown, Parser};
 
 /// A Harper parser for Git commit files.
 ///
-/// In this crate since the only place it's needed at the moment is the Gestalt parser.
-/// If it needs to be used _without_ the rest of the Gestalt parser, feel free to move it to it's
-/// own crate.
+/// In this crate since the only place it's needed at the moment is the Gestalt
+/// parser. If it needs to be used _without_ the rest of the Gestalt parser,
+/// feel free to move it to it's own crate.
 pub struct GitCommitParser;
 
 impl Parser for GitCommitParser {

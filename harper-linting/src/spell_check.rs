@@ -1,11 +1,11 @@
+use harper_core::Document;
 use harper_data::{CharString, TokenStringExt};
+use harper_spell::{suggest_correct_spelling, Dictionary};
 use hashbrown::HashMap;
 use smallvec::ToSmallVec;
 
 use super::lint::Suggestion;
 use super::{Lint, LintKind, Linter};
-use harper_core::Document;
-use harper_spell::{suggest_correct_spelling, Dictionary};
 
 pub struct SpellCheck<T>
 where

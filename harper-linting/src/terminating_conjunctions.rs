@@ -1,7 +1,7 @@
 use harper_data::{Lrc, Token};
+use harper_patterns::{ConsumesRemainingPattern, Pattern, SequencePattern};
 
 use super::{Lint, LintKind, PatternLinter};
-use harper_patterns::{ConsumesRemainingPattern, Pattern, SequencePattern};
 
 pub struct TerminatingConjunctions {
     pattern: Box<dyn Pattern>,

@@ -30,6 +30,7 @@ pub use boring_words::BoringWords;
 pub use correct_number_suffix::CorrectNumberSuffix;
 pub use dot_initialisms::DotInitialisms;
 pub use ellipsis_length::EllipsisLength;
+use harper_core::Document;
 use harper_data::VecExt;
 pub use linking_verbs::LinkingVerbs;
 pub use lint::{Lint, LintKind, Suggestion};
@@ -48,8 +49,6 @@ pub use terminating_conjunctions::TerminatingConjunctions;
 pub use unclosed_quotes::UnclosedQuotes;
 pub use use_genitive::UseGenitive;
 pub use wrong_quotes::WrongQuotes;
-
-use harper_core::Document;
 
 #[cfg(not(feature = "concurrent"))]
 pub trait Linter {
@@ -93,12 +92,11 @@ pub fn remove_overlaps(lints: &mut Vec<Lint>) {
 
 #[cfg(test)]
 mod tests {
-    use super::Linter;
-
-    use crate::remove_overlaps;
-    use crate::{LintGroup, LintGroupConfig};
     use harper_core::Document;
     use harper_spell::FstDictionary;
+
+    use super::Linter;
+    use crate::{remove_overlaps, LintGroup, LintGroupConfig};
 
     #[test]
     fn keeps_space_lint() {

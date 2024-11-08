@@ -1,7 +1,7 @@
+use harper_core::Document;
 use harper_data::{Token, TokenKind, TokenStringExt};
 
 use super::{Lint, LintKind, Linter, Suggestion};
-use harper_core::Document;
 
 #[derive(Debug, Default)]
 pub struct Spaces;

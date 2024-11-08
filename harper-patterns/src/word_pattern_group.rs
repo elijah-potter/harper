@@ -1,9 +1,8 @@
-use harper_data::Token;
+use harper_data::{CharString, Token};
 use hashbrown::HashMap;
 
 use super::naive_pattern_group::NaivePatternGroup;
 use super::{Pattern, SequencePattern};
-use harper_data::CharString;
 
 /// A pattern collection to look for patterns that start with a specific
 /// word.

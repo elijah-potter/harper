@@ -33,9 +33,10 @@ impl Pattern for RepeatingPattern {
 
 #[cfg(test)]
 mod tests {
+    use harper_parsing::{Parser, PlainEnglish};
+
     use super::RepeatingPattern;
     use crate::{AnyPattern, Pattern};
-    use harper_parsing::{Parser, PlainEnglish};
 
     #[test]
     fn matches_anything() {

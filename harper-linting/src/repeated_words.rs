@@ -1,7 +1,7 @@
 use harper_data::{Token, TokenStringExt};
+use harper_patterns::{Pattern, SequencePattern, WordPatternGroup};
 
 use super::{Lint, LintKind, PatternLinter, Suggestion};
-use harper_patterns::{Pattern, SequencePattern, WordPatternGroup};
 
 pub struct RepeatedWords {
     pattern: Box<dyn Pattern>,

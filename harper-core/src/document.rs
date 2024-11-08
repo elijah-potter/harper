@@ -3,14 +3,12 @@ use std::collections::VecDeque;
 use std::fmt::Display;
 
 use harper_data::{
-    FatToken, Lrc, NumberSuffix, Punctuation, Token, TokenKind, TokenStringExt, VecExt,
+    FatToken, Lrc, NumberSuffix, Punctuation, Span, Token, TokenKind, TokenStringExt, VecExt,
 };
-use paste::paste;
-
-use harper_data::Span;
 use harper_parsing::{Markdown, Parser, PlainEnglish};
 use harper_patterns::{PatternExt, RepeatingPattern, SequencePattern};
 use harper_spell::{Dictionary, FstDictionary};
+use paste::paste;
 
 /// A document containing some amount of lexed and parsed English text.
 #[derive(Debug, Clone)]
@@ -544,10 +542,10 @@ impl Display for Document {
 
 #[cfg(test)]
 mod tests {
+    use harper_data::Span;
     use itertools::Itertools;
 
     use super::Document;
-    use harper_data::Span;
 
     fn assert_condensed_contractions(text: &str, final_tok_count: usize) {
         let document = Document::new_plain_english_curated(text);

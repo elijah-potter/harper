@@ -1,8 +1,7 @@
 use harper_data::{Lrc, Token};
-
-use crate::Lint;
-use crate::{LintKind, PatternLinter, Suggestion};
 use harper_patterns::{EitherPattern, Pattern, SequencePattern, WordPatternGroup};
+
+use crate::{Lint, LintKind, PatternLinter, Suggestion};
 
 // Looks for places where the genitive case _isn't_ being used, and should be.
 pub struct UseGenitive {

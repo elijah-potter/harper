@@ -191,8 +191,7 @@ mod tests {
     use itertools::Itertools;
 
     use super::FstDictionary;
-    use crate::seq_to_normalized;
-    use crate::Dictionary;
+    use crate::{seq_to_normalized, Dictionary};
 
     #[test]
     fn fst_map_contains_all_in_full_dict() {

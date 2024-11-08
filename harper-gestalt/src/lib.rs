@@ -10,11 +10,13 @@ use harper_data::Token;
 use harper_html::HtmlParser;
 use harper_parsing::{Markdown, Parser, PlainEnglish};
 
-/// A [`Parser`](harper_parsing::Parser) that combines a variety of parsers to singlehandedly
-/// support a significant variety of programming languages and file formats.
+/// A [`Parser`](harper_parsing::Parser) that combines a variety of parsers to
+/// singlehandedly support a significant variety of programming languages and
+/// file formats.
 ///
 /// For now, it just allows us to provide a filetype and get a parser.
-/// Eventually, we plan to support nesting (like linting the comments inside Markdown code blocks).
+/// Eventually, we plan to support nesting (like linting the comments inside
+/// Markdown code blocks).
 pub struct GestaltParser {
     inner: Box<dyn Parser>,
 }
@@ -55,7 +57,8 @@ impl GestaltParser {
     /// Note to contributors: try to keep this in sync with
     /// [`Self::new_from_language_id`].
     ///
-    /// This operates in _addition_ to the similarly named function in the [`CommentParser`].
+    /// This operates in _addition_ to the similarly named function in the
+    /// [`CommentParser`].
     fn filename_to_filetype(path: &Path) -> Option<&'static str> {
         Some(match path.extension()?.to_str()? {
             "md" => "markdown",

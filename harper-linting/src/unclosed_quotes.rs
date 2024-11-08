@@ -1,7 +1,7 @@
+use harper_core::Document;
 use harper_data::{Punctuation, Quote, TokenKind};
 
 use super::{Lint, LintKind, Linter};
-use harper_core::Document;
 
 #[derive(Debug, Clone, Copy, Default)]
 pub struct UnclosedQuotes;

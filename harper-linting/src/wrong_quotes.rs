@@ -1,7 +1,7 @@
+use harper_core::Document;
 use harper_data::{Token, TokenStringExt};
 
 use super::{Lint, Linter, Suggestion};
-use harper_core::Document;
 
 #[derive(Debug, Clone, Copy, Default)]
 pub struct WrongQuotes;

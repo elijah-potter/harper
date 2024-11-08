@@ -1,8 +1,8 @@
 use harper_data::{Token, TokenStringExt};
+use harper_patterns::{Pattern, SequencePattern, WordPatternGroup};
 use hashbrown::HashMap;
 
 use super::{Lint, LintKind, PatternLinter, Suggestion};
-use harper_patterns::{Pattern, SequencePattern, WordPatternGroup};
 
 pub struct DotInitialisms {
     pattern: Box<dyn Pattern>,

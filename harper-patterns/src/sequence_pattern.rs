@@ -138,11 +138,11 @@ impl Pattern for SequencePattern {
 #[cfg(test)]
 mod tests {
     use harper_data::Lrc;
+    use harper_parsing::{Parser, PlainEnglish};
     use hashbrown::HashSet;
 
     use super::SequencePattern;
     use crate::Pattern;
-    use harper_parsing::{Parser, PlainEnglish};
 
     #[test]
     fn matches_n_whitespace_tokens() {
