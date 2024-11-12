@@ -66,3 +66,32 @@ impl PatternLinter for ThatWhich {
         }
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::super::tests::assert_lint_count;
+    use super::ThatWhich;
+
+    #[test]
+    fn catches_lowercase() {
+        assert_lint_count(
+            "To reiterate, that that is cool is not uncool.",
+            ThatWhich::default(),
+            1,
+        );
+    }
+
+    #[test]
+    fn catches_different_cases() {
+        assert_lint_count("That that is cool is not uncool.", ThatWhich::default(), 1);
+    }
+
+    #[test]
+    fn likes_correction() {
+        assert_lint_count(
+            "To reiterate, that which is cool is not uncool.",
+            ThatWhich::default(),
+            0,
+        );
+    }
+}
