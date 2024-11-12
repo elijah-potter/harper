@@ -3,7 +3,7 @@ use paste::paste;
 
 use super::whitespace_pattern::WhitespacePattern;
 use super::{Pattern, RepeatingPattern};
-use crate::{Lrc, Token, TokenKind};
+use crate::{CharStringExt, Lrc, Token, TokenKind};
 
 /// A pattern that checks that a sequence of others patterns match.
 #[derive(Default)]
@@ -55,6 +55,29 @@ impl SequencePattern {
 
                 let mut w_char_count = 0;
                 for (i, w_char) in word.chars().enumerate() {
+                    w_char_count += 1;
+
+                    if tok_chars.get(i).cloned() != Some(w_char) {
+                        return false;
+                    }
+                }
+
+                w_char_count == tok_chars.len()
+            }));
+        self
+    }
+
+    pub fn then_exact_word_or_lowercase(mut self, word: &'static str) -> Self {
+        self.token_patterns
+            .push(Box::new(|tok: &Token, source: &[char]| {
+                if !tok.kind.is_word() {
+                    return false;
+                }
+
+                let tok_chars = tok.span.get_content(source).to_lower();
+
+                let mut w_char_count = 0;
+                for (i, w_char) in word.to_lowercase().chars().enumerate() {
                     w_char_count += 1;
 
                     if tok_chars.get(i).cloned() != Some(w_char) {
