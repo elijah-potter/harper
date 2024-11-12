@@ -16,7 +16,7 @@ impl Linter for RepeatedWords {
                 let word_a = document.get_span_content(tok_a.span);
                 let word_b = document.get_span_content(tok_b.span);
 
-                if word_a.to_lower() == word_b.to_lower() {
+                if !tok_a.kind.is_homophone() && word_a.to_lower() == word_b.to_lower() {
                     let intervening_tokens = &chunk[idx_a + 1..*idx_b];
 
                     if intervening_tokens.iter().any(|t| !t.kind.is_whitespace()) {
@@ -48,5 +48,11 @@ mod tests {
     #[test]
     fn catches_basic() {
         assert_lint_count("I wanted the the banana.", RepeatedWords::default(), 1)
+    }
+
+    #[test]
+    fn does_not_lint_homophones() {
+        assert_lint_count("To address address problems.", RepeatedWords::default(), 0);
+        assert_lint_count("To record record profits.", RepeatedWords::default(), 0);
     }
 }

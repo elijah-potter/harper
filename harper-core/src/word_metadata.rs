@@ -113,6 +113,41 @@ impl WordMetadata {
         )
     }
 
+    /// Checks if the word is a homophone
+    /// This is based off of metadata, so it is not guaranteed to be correct
+    pub fn is_homophone(&self) -> bool {
+        [
+            matches!(
+                self.noun,
+                Some(NounData {
+                    is_proper: None,
+                    is_plural: None,
+                    is_possessive: None,
+                    is_pronoun: None
+                })
+            ),
+            matches!(
+                self.verb,
+                Some(VerbData {
+                    is_linking: None,
+                    tense: None
+                })
+            ),
+            self.is_conjunction(),
+            self.is_adjective(),
+            self.is_adverb(),
+            self.is_possessive_noun(),
+            self.is_plural_noun(),
+            self.is_proper_noun(),
+            self.is_pronoun(),
+            self.is_linking_verb(),
+        ]
+        .iter()
+        .map(|b| *b as u8)
+        .sum::<u8>()
+            > 1
+    }
+
     /// Checks whether a word is _definitely_ a swear.
     pub fn is_swear(&self) -> bool {
         matches!(self.swear, Some(true))
