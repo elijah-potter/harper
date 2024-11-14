@@ -2,7 +2,7 @@ use serde::{Deserialize, Serialize};
 
 use super::affix_replacement::{AffixReplacement, HumanReadableAffixReplacement};
 use super::Error;
-use harper_lib::WordMetadata;
+use crate::WordMetadata;
 
 #[derive(Debug, Clone)]
 pub struct Expansion {

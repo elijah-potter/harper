@@ -1,4 +1,4 @@
-use harper_lib::Span;
+use harper_core::Span;
 use tower_lsp::lsp_types::{Position, Range};
 
 /// This module includes various conversions from the index-based [`Span`]s that

@@ -1,6 +1,5 @@
-use std::sync::Arc;
-
 use itertools::Itertools;
+use std::sync::Arc;
 
 use super::dictionary::Dictionary;
 use crate::{CharString, WordMetadata};

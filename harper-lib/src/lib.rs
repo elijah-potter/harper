@@ -1,7 +1,14 @@
-mod char_string;
-mod span;
-pub mod word_metadata;
+pub fn add(left: u64, right: u64) -> u64 {
+    left + right
+}
 
-pub use char_string::{CharString, CharStringExt};
-pub use span::Span;
-pub use word_metadata::WordMetadata;
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn it_works() {
+        let result = add(2, 2);
+        assert_eq!(result, 4);
+    }
+}
