@@ -1,4 +1,7 @@
-use super::{seq_to_normalized, FullDictionary};
+use super::{
+    hunspell::{parse_default_attribute_list, parse_default_word_list},
+    seq_to_normalized, FullDictionary,
+};
 use fst::{map::StreamWithState, IntoStreamer, Map as FstMap, Streamer};
 use hashbrown::HashMap;
 use itertools::Itertools;
@@ -19,13 +22,14 @@ pub struct FstDictionary {
 /// The uncached function that is used to produce the original copy of the
 /// curated dictionary.
 fn uncached_inner_new() -> Arc<FstDictionary> {
-    let full_dict = FullDictionary::curated();
-    let word_map = FstMap::new(include_bytes!("../../dictionary.fst").to_vec()).unwrap();
+    let word_list = parse_default_word_list().unwrap();
+    let attr_list = parse_default_attribute_list();
 
-    Arc::new(FstDictionary {
-        full_dict,
-        word_map,
-    })
+    // There will be at _least_ this number of words
+    let mut word_map = HashMap::with_capacity(word_list.len());
+    attr_list.expand_marked_words(word_list, &mut word_map);
+
+    Arc::new(FstDictionary::new(word_map))
 }
 
 const EXPECTED_DISTANCE: u8 = 3;
@@ -187,7 +191,8 @@ impl Dictionary for FstDictionary {
 mod tests {
     use itertools::Itertools;
 
-    use crate::{spell::seq_to_normalized, CharStringExt, Dictionary};
+    use crate::CharStringExt;
+    use crate::{spell::seq_to_normalized, Dictionary};
 
     use super::FstDictionary;
 
@@ -197,8 +202,10 @@ mod tests {
 
         for word in dict.words_iter() {
             let misspelled_normalized = seq_to_normalized(word);
-            let misspelled_word: String = misspelled_normalized.to_string();
-            let misspelled_lower: String = misspelled_normalized.to_lower().to_string();
+            let misspelled_word = misspelled_normalized.to_string();
+            let misspelled_lower = misspelled_normalized.to_lower().to_string();
+
+            dbg!(&misspelled_lower);
 
             assert!(!misspelled_word.is_empty());
             assert!(

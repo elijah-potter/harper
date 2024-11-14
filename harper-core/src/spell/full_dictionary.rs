@@ -1,4 +1,8 @@
-use super::{edit_distance_min_alloc, seq_to_normalized};
+use super::{
+    edit_distance_min_alloc,
+    hunspell::{parse_default_attribute_list, parse_default_word_list},
+    seq_to_normalized,
+};
 use hashbrown::HashMap;
 use itertools::Itertools;
 use smallvec::{SmallVec, ToSmallVec};
@@ -6,7 +10,6 @@ use std::sync::Arc;
 
 use super::dictionary::Dictionary;
 use crate::{CharString, CharStringExt, WordMetadata};
-use harper_dictionary_parsing::{parse_default_attribute_list, parse_default_word_list};
 
 /// A full, fat dictionary.
 /// All elements are stored in-memory.
@@ -248,7 +251,7 @@ impl Dictionary for FullDictionary {
 
 #[cfg(test)]
 mod tests {
-    use harper_dictionary_parsing::CharString;
+    use crate::CharString;
     use itertools::Itertools;
 
     use crate::{Dictionary, FullDictionary};

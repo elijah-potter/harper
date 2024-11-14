@@ -11,7 +11,9 @@ pub struct Span {
 
 impl Span {
     pub fn new(start: usize, end: usize) -> Self {
-        assert!(start <= end);
+        if start > end {
+            panic!("{} > {}", start, end);
+        }
         Self { start, end }
     }
 

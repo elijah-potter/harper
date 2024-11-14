@@ -598,7 +598,6 @@ dependencies = [
  "blanket",
  "criterion",
  "fst",
- "harper-dictionary-parsing",
  "hashbrown 0.15.0",
  "is-macro",
  "itertools 0.13.0",
@@ -613,18 +612,6 @@ dependencies = [
  "thiserror",
  "unicode-blocks",
  "unicode-width 0.2.0",
-]
-
-[[package]]
-name = "harper-dictionary-parsing"
-version = "0.12.0"
-dependencies = [
- "hashbrown 0.15.0",
- "is-macro",
- "serde",
- "serde_json",
- "smallvec",
- "thiserror",
 ]
 
 [[package]]
