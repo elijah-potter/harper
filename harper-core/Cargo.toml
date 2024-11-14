@@ -32,10 +32,6 @@ rand = "0.8.5"
 name = "parse_demo"
 harness = false
 
-[[bench]]
-name = "build_curated_fst"
-harness = false
-
 [features]
 default = []
 concurrent = []
