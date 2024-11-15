@@ -11,6 +11,7 @@ use std::{cell::RefCell, sync::Arc};
 use crate::{CharString, CharStringExt, WordMetadata};
 
 use super::Dictionary;
+use super::FuzzyMatchResult;
 
 pub struct FstDictionary {
     /// Underlying FullDictionary used for everything except fuzzy finding
@@ -144,7 +145,7 @@ impl Dictionary for FstDictionary {
         word: &[char],
         max_distance: u8,
         max_results: usize,
-    ) -> Vec<(&[char], u8, WordMetadata)> {
+    ) -> Vec<FuzzyMatchResult> {
         self.fuzzy_match_str(&word.iter().collect::<String>(), max_distance, max_results)
     }
 
@@ -153,7 +154,7 @@ impl Dictionary for FstDictionary {
         word: &str,
         max_distance: u8,
         max_results: usize,
-    ) -> Vec<(&[char], u8, WordMetadata)> {
+    ) -> Vec<FuzzyMatchResult> {
         // Various transformations of the input
         let chars: Vec<_> = word.chars().collect();
         let misspelled_word_charslice = seq_to_normalized(&chars);
@@ -168,12 +169,10 @@ impl Dictionary for FstDictionary {
             // Sort by edit distance
             .sorted_unstable_by_key(|a| a.1)
             .take(max_results)
-            .map(|(index, dist)| {
-                (
-                    self.full_dict.get_word(index as usize).as_slice(),
-                    dist,
-                    self.full_dict.get_metadata(index as usize).to_owned(),
-                )
+            .map(|(index, edit_distance)| FuzzyMatchResult {
+                word: self.full_dict.get_word(index as usize).as_slice(),
+                edit_distance,
+                metadata: self.full_dict.get_metadata(index as usize).to_owned(),
             })
             .collect()
     }
@@ -238,7 +237,7 @@ mod tests {
         let results = dict.fuzzy_match_str("hello", 3, 100);
         let is_sorted_by_dist = results
             .iter()
-            .map(|(_, dist, _)| dist)
+            .map(|fm| fm.edit_distance)
             .tuple_windows()
             .all(|(a, b)| a <= b);
 

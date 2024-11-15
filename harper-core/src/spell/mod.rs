@@ -12,21 +12,33 @@ pub use self::merged_dictionary::MergedDictionary;
 mod dictionary;
 mod fst_dictionary;
 mod full_dictionary;
+mod hunspell;
 mod merged_dictionary;
 
-fn order_suggestions(matches: Vec<(&[char], u8, WordMetadata)>) -> Vec<&[char]> {
-    let mut found: Vec<(&[char], u8, WordMetadata)> = Vec::with_capacity(matches.len());
+#[derive(PartialEq)]
+pub struct FuzzyMatchResult<'a> {
+    word: &'a [char],
+    edit_distance: u8,
+    metadata: WordMetadata,
+}
+
+impl<'a> PartialOrd for FuzzyMatchResult<'a> {
+    fn partial_cmp(&self, other: &Self) -> Option<std::cmp::Ordering> {
+        self.edit_distance.partial_cmp(&other.edit_distance)
+    }
+}
+
+fn order_suggestions(matches: Vec<FuzzyMatchResult>) -> Vec<&[char]> {
+    let mut found: Vec<&FuzzyMatchResult> = Vec::with_capacity(matches.len());
     // Often the longest and the shortest words are the most helpful, so lets push
     // them first.
-    let minmax = matches
-        .iter()
-        .position_minmax_by_key(|(word, _, _)| word.len());
+    let minmax = matches.iter().position_minmax_by_key(|fmr| fmr.word.len());
     if let MinMaxResult::MinMax(a, b) = minmax {
         if a == b {
-            found.push(matches[a]);
+            found.push(&matches[a]);
         } else {
-            found.push(matches[a]);
-            found.push(matches[b]);
+            found.push(&matches[a]);
+            found.push(&matches[b]);
         }
 
         // Push the rest
@@ -38,7 +50,7 @@ fn order_suggestions(matches: Vec<(&[char], u8, WordMetadata)>) -> Vec<&[char]> 
                 .map(|v| v.1),
         );
     } else {
-        found.extend(matches);
+        found.extend(&matches);
     }
 
     // Swap the lowest edit distance word with the shortest.
@@ -47,9 +59,9 @@ fn order_suggestions(matches: Vec<(&[char], u8, WordMetadata)>) -> Vec<&[char]> 
     }
 
     // Let common words bubble up, but do not prioritize them over all else.
-    found.sort_by_key(|(_, dist, metadata)| dist + if metadata.common { 0 } else { 1 });
+    found.sort_by_key(|fmr| fmr.edit_distance + if fmr.metadata.common { 0 } else { 1 });
 
-    found.into_iter().map(|(word, _, _)| word).collect()
+    found.into_iter().map(|fmr| fmr.word).collect()
 }
 
 /// Get the closest matches in the provided [`Dictionary`] and rank them
@@ -60,7 +72,7 @@ pub fn suggest_correct_spelling<'a>(
     max_edit_dist: u8,
     dictionary: &'a impl Dictionary,
 ) -> Vec<&'a [char]> {
-    let matches: Vec<(&[char], u8, WordMetadata)> = dictionary
+    let matches: Vec<FuzzyMatchResult> = dictionary
         .fuzzy_match(misspelled_word, max_edit_dist, result_limit)
         .into_iter()
         .collect();
@@ -149,6 +161,8 @@ fn edit_distance(source: &[char], target: &[char]) -> u8 {
 mod tests {
     use itertools::Itertools;
 
+    use crate::spell::FuzzyMatchResult;
+
     use super::{
         edit_distance, order_suggestions, seq_to_normalized, suggest_correct_spelling_str,
         Dictionary, FstDictionary, FullDictionary,
@@ -236,7 +250,11 @@ mod tests {
             .filter_map(|word| {
                 let metadata = dict.get_word_metadata(word);
                 if metadata.common {
-                    Some((word, 0, metadata))
+                    Some(FuzzyMatchResult {
+                        word,
+                        edit_distance: 0,
+                        metadata,
+                    })
                 } else {
                     None
                 }
@@ -249,7 +267,11 @@ mod tests {
                 if metadata.common {
                     None
                 } else {
-                    Some((word, 0, metadata))
+                    Some(FuzzyMatchResult {
+                        word,
+                        edit_distance: 0,
+                        metadata,
+                    })
                 }
             })
             .take(3);

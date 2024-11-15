@@ -8,8 +8,10 @@ use itertools::Itertools;
 use smallvec::{SmallVec, ToSmallVec};
 use std::sync::Arc;
 
-use super::dictionary::Dictionary;
 use crate::{CharString, CharStringExt, WordMetadata};
+
+use super::dictionary::Dictionary;
+use super::FuzzyMatchResult;
 
 /// A full, fat dictionary.
 /// All elements are stored in-memory.
@@ -181,7 +183,7 @@ impl Dictionary for FullDictionary {
         word: &[char],
         max_distance: u8,
         max_results: usize,
-    ) -> Vec<(&[char], u8, WordMetadata)> {
+    ) -> Vec<FuzzyMatchResult> {
         let misspelled_charslice = seq_to_normalized(word);
 
         let shortest_word_len = if misspelled_charslice.len() <= max_distance as usize {
@@ -215,7 +217,11 @@ impl Dictionary for FullDictionary {
             })
             .sorted_unstable_by_key(|a| a.1)
             .take(max_results)
-            .map(|(word, dist)| (word, dist, self.get_word_metadata(word)))
+            .map(|(word, edit_distance)| FuzzyMatchResult {
+                word,
+                edit_distance,
+                metadata: self.get_word_metadata(word),
+            })
             .collect()
     }
 
@@ -224,7 +230,7 @@ impl Dictionary for FullDictionary {
         word: &str,
         max_distance: u8,
         max_results: usize,
-    ) -> Vec<(&[char], u8, WordMetadata)> {
+    ) -> Vec<FuzzyMatchResult> {
         let word: Vec<_> = word.chars().collect();
         self.fuzzy_match(&word, max_distance, max_results)
     }
@@ -318,7 +324,7 @@ mod tests {
         let results = dict.fuzzy_match_str("hello", 3, 100);
         let is_sorted_by_dist = results
             .iter()
-            .map(|(_, dist, _)| dist)
+            .map(|fm| fm.edit_distance)
             .tuple_windows()
             .all(|(a, b)| a <= b);
 

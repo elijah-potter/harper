@@ -1,5 +1,6 @@
 use blanket::blanket;
 
+use super::FuzzyMatchResult;
 use crate::WordMetadata;
 
 #[blanket(derive(Arc))]
@@ -9,19 +10,9 @@ pub trait Dictionary: Send + Sync {
     /// Check if the dictionary contains a given word.
     fn contains_word_str(&self, word: &str) -> bool;
     /// Gets best fuzzy match from dictionary
-    fn fuzzy_match(
-        &self,
-        word: &[char],
-        max_distance: u8,
-        max_results: usize,
-    ) -> Vec<(&[char], u8, WordMetadata)>;
+    fn fuzzy_match(&self, word: &[char], max_distance: u8, max_results: usize) -> Vec<FuzzyMatchResult>;
     /// Gets best fuzzy match from dictionary
-    fn fuzzy_match_str(
-        &self,
-        word: &str,
-        max_distance: u8,
-        max_results: usize,
-    ) -> Vec<(&[char], u8, WordMetadata)>;
+    fn fuzzy_match_str(&self, word: &str, max_distance: u8, max_results: usize) -> Vec<FuzzyMatchResult>;
     /// Get the associated [`WordMetadata`] for a given word.
     /// If the word isn't in the dictionary, the resulting metadata will be
     /// empty.

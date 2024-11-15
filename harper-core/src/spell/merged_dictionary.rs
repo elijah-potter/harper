@@ -2,7 +2,7 @@ use std::sync::Arc;
 
 use itertools::Itertools;
 
-use super::dictionary::Dictionary;
+use super::{dictionary::Dictionary, FuzzyMatchResult};
 use crate::{CharString, WordMetadata};
 
 /// A simple wrapper over [`Dictionary`] that allows
@@ -82,11 +82,11 @@ impl Dictionary for MergedDictionary {
         word: &[char],
         max_distance: u8,
         max_results: usize,
-    ) -> Vec<(&[char], u8, WordMetadata)> {
+    ) -> Vec<FuzzyMatchResult> {
         self.children
             .iter()
             .flat_map(|d| d.fuzzy_match(word, max_distance, max_results))
-            .sorted_by_key(|r| r.1)
+            .sorted_by_key(|r| r.edit_distance)
             .take(max_results)
             .collect()
     }
@@ -96,11 +96,11 @@ impl Dictionary for MergedDictionary {
         word: &str,
         max_distance: u8,
         max_results: usize,
-    ) -> Vec<(&[char], u8, WordMetadata)> {
+    ) -> Vec<FuzzyMatchResult> {
         self.children
             .iter()
             .flat_map(|d| d.fuzzy_match_str(word, max_distance, max_results))
-            .sorted_by_key(|r| r.1)
+            .sorted_by_key(|r| r.edit_distance)
             .take(max_results)
             .collect()
     }
