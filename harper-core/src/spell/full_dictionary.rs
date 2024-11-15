@@ -131,10 +131,10 @@ impl FullDictionary {
         word_len_starts
     }
 
-    pub fn get_word(&self, index: usize) -> &CharString {
+    pub(super) fn get_word(&self, index: usize) -> &CharString {
         &self.words[index]
     }
-    pub fn get_metadata(&self, index: usize) -> &WordMetadata {
+    pub(super) fn get_metadata(&self, index: usize) -> &WordMetadata {
         self.word_map.get(self.get_word(index)).unwrap()
     }
 }
