@@ -1,5 +1,4 @@
-use std::sync::Arc;
-
+use crate::Lrc;
 use itertools::Itertools;
 
 use super::{dictionary::Dictionary, FuzzyMatchResult};
@@ -9,7 +8,7 @@ use crate::{CharString, WordMetadata};
 /// one to merge multiple dictionaries without copying.
 #[derive(Clone)]
 pub struct MergedDictionary {
-    children: Vec<Arc<dyn Dictionary>>,
+    children: Vec<Lrc<dyn Dictionary>>,
 }
 
 impl MergedDictionary {
@@ -19,7 +18,7 @@ impl MergedDictionary {
         }
     }
 
-    pub fn add_dictionary(&mut self, dictionary: Arc<dyn Dictionary>) {
+    pub fn add_dictionary(&mut self, dictionary: Lrc<dyn Dictionary>) {
         self.children.push(dictionary);
     }
 }
