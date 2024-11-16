@@ -18,6 +18,8 @@ pub struct FstDictionary {
     full_dict: Arc<FullDictionary>,
     /// Used for fuzzy-finding the index of words or metadata
     word_map: FstMap<Vec<u8>>,
+    /// Used for fuzzy-finding the index of words or metadata
+    words: Vec<(CharString, WordMetadata)>,
 }
 
 /// The uncached function that is used to produce the original copy of the
@@ -62,27 +64,19 @@ impl FstDictionary {
     }
 
     pub fn new(new_words: HashMap<CharString, WordMetadata>) -> Self {
-        let words = new_words
-            .into_iter()
-            .sorted_by_key(|p| p.0.to_owned())
-            .dedup_by(|p1, p2| p1.0 == p2.0)
-            .sorted_by_key(|p| p.0.len());
+        let mut words: Vec<(CharString, WordMetadata)> = new_words.into_iter().collect();
+        words.sort_unstable_by(|(a, _), (b, _)| a.cmp(b));
 
         let mut builder = fst::MapBuilder::memory();
-        words
-            .clone()
-            .enumerate()
-            .map(|(i, (w, _))| (i, w))
-            .sorted_by_key(|w| w.1.to_owned())
-            .for_each(|(i, w)| {
-                let word = w.iter().collect::<String>();
-                builder
-                    .insert(word, i as u64)
-                    .expect("Insertion not in lexicographical order!");
-            });
+        for (index, (word, _)) in words.iter().enumerate() {
+            let word = word.iter().collect::<String>();
+            builder
+                .insert(word, index as u64)
+                .expect("Insertion not in lexicographical order!");
+        }
 
         let mut full_dict = FullDictionary::new();
-        full_dict.extend_words(words);
+        full_dict.extend_words(words.iter().cloned());
 
         let fst_bytes = builder.into_inner().unwrap();
         let word_map = FstMap::new(fst_bytes).expect("Unable to build FST map.");
@@ -90,6 +84,7 @@ impl FstDictionary {
         FstDictionary {
             full_dict: Arc::new(full_dict),
             word_map,
+            words,
         }
     }
 }
@@ -169,10 +164,14 @@ impl Dictionary for FstDictionary {
             // Sort by edit distance
             .sorted_unstable_by_key(|a| a.1)
             .take(max_results)
-            .map(|(index, edit_distance)| FuzzyMatchResult {
-                word: self.full_dict.get_word(index as usize).as_slice(),
-                edit_distance,
-                metadata: self.full_dict.get_metadata(index as usize).to_owned(),
+            .map(|(index, edit_distance)| {
+                let (word, metadata) = &self.words[index as usize];
+
+                FuzzyMatchResult {
+                    word,
+                    edit_distance,
+                    metadata: *metadata,
+                }
             })
             .collect()
     }
