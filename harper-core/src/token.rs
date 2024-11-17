@@ -323,12 +323,12 @@ impl TokenKind {
         metadata.is_noun()
     }
 
-    pub fn is_homophone(&self) -> bool {
+    pub fn is_likely_homograph(&self) -> bool {
         let TokenKind::Word(metadata) = self else {
             return false;
         };
 
-        metadata.is_homophone()
+        metadata.is_likely_homograph()
     }
 
     pub fn is_comma(&self) -> bool {
@@ -405,7 +405,7 @@ pub trait TokenStringExt {
     create_decl_for!(sentence_terminator);
     create_decl_for!(chunk_terminator);
     create_decl_for!(punctuation);
-    create_decl_for!(homophone);
+    create_decl_for!(likely_homograph);
 
     fn iter_linking_verb_indices(&self) -> impl Iterator<Item = usize> + '_;
     fn iter_linking_verbs(&self) -> impl Iterator<Item = Token> + '_;
@@ -438,7 +438,7 @@ impl TokenStringExt for [Token] {
     create_fns_for!(unlintable);
     create_fns_for!(sentence_terminator);
     create_fns_for!(chunk_terminator);
-    create_fns_for!(homophone);
+    create_fns_for!(likely_homograph);
 
     fn first_non_whitespace(&self) -> Option<Token> {
         self.iter().find(|t| !t.kind.is_whitespace()).copied()

@@ -113,9 +113,9 @@ impl WordMetadata {
         )
     }
 
-    /// Checks if the word is a homophone
+    /// Checks if the word is a homograph
     /// This is based off of metadata, so it is not guaranteed to be correct
-    pub fn is_homophone(&self) -> bool {
+    pub fn is_likely_homograph(&self) -> bool {
         [
             matches!(
                 self.noun,
