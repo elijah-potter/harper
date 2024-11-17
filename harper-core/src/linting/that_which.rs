@@ -15,24 +15,15 @@ impl Default for ThatWhich {
     fn default() -> Self {
         let mut pattern = WordPatternGroup::default();
 
-        pattern.add(
-            "that",
-            Box::new(
-                SequencePattern::default()
-                    .then_exact_word_or_lowercase("That")
-                    .then_whitespace()
-                    .then_exact_word("that"),
-            ),
+        let matching_pattern = crate::Lrc::new(
+            SequencePattern::default()
+                .then_exact_word_or_lowercase("That")
+                .then_whitespace()
+                .then_exact_word("that"),
         );
-        pattern.add(
-            "That",
-            Box::new(
-                SequencePattern::default()
-                    .then_exact_word_or_lowercase("That")
-                    .then_whitespace()
-                    .then_exact_word("that"),
-            ),
-        );
+
+        pattern.add("that", Box::new(matching_pattern.clone()));
+        pattern.add("That", Box::new(matching_pattern));
 
         Self {
             pattern: Box::new(pattern),
