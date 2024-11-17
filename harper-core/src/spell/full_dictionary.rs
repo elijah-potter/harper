@@ -44,11 +44,10 @@ fn uncached_inner_new() -> Arc<FullDictionary> {
     attr_list.expand_marked_words(word_list, &mut word_map);
 
     let mut words: Vec<CharString> = word_map.iter().map(|(v, _)| v.clone()).collect();
-    // This may seem weird, but it ensures that the indexes in the Words vector match up with those
-    // stored in the computed FST Map.
+
     words.sort_unstable();
     words.dedup();
-    words.sort_by_key(|w| w.len()); // DO NOT MAKE THIS UNSTABLE.
+    words.sort_unstable_by_key(|w| w.len());
 
     Arc::new(FullDictionary {
         word_map,
@@ -112,9 +111,7 @@ impl FullDictionary {
     }
 
     /// Create a lookup table for finding words of a specific length in a word
-    /// list. NOTE: This function will sort the original word list by its
-    /// length. If the word list's order is changed after creating the
-    /// lookup, it will no longer be valid.
+    /// list.
     fn create_len_starts(words: &[CharString]) -> Vec<usize> {
         let mut len_words: Vec<_> = words.to_vec();
         len_words.sort_by_key(|a| a.len());
