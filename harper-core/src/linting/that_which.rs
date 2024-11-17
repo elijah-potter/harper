@@ -2,7 +2,7 @@ use itertools::Itertools;
 
 use crate::{
     patterns::{Pattern, SequencePattern, WordPatternGroup},
-    Token, TokenStringExt,
+    Lrc, Token, TokenStringExt,
 };
 
 use super::{Lint, LintKind, PatternLinter, Suggestion};
@@ -15,7 +15,7 @@ impl Default for ThatWhich {
     fn default() -> Self {
         let mut pattern = WordPatternGroup::default();
 
-        let matching_pattern = crate::Lrc::new(
+        let matching_pattern = Lrc::new(
             SequencePattern::default()
                 .then_exact_word_or_lowercase("That")
                 .then_whitespace()
