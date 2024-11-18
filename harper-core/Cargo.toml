@@ -13,6 +13,7 @@ fst = "0.4.7"
 hashbrown = { version = "0.15.0", features = ["serde"] }
 is-macro = "0.3.6"
 itertools = "0.13.0"
+lazy_static = "1.5.0"
 ordered-float = { version = "4.5.0", features = ["serde"] }
 paste = "1.0.14"
 pulldown-cmark = "0.12.2"

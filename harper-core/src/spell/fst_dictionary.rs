@@ -5,6 +5,7 @@ use super::{
 use fst::{map::StreamWithState, IntoStreamer, Map as FstMap, Streamer};
 use hashbrown::HashMap;
 use itertools::Itertools;
+use lazy_static::lazy_static;
 use levenshtein_automata::{LevenshteinAutomatonBuilder, DFA};
 use std::{cell::RefCell, sync::Arc};
 
@@ -37,9 +38,12 @@ fn uncached_inner_new() -> Arc<FstDictionary> {
 
 const EXPECTED_DISTANCE: u8 = 3;
 const TRANSPOSITION_COST_ONE: bool = false;
-thread_local! {
-    static DICT: Arc<FstDictionary> = uncached_inner_new();
 
+lazy_static! {
+    static ref DICT: Arc<FstDictionary> = uncached_inner_new();
+}
+
+thread_local! {
     // Builders are computationally expensive and do not depend on the word, so we store a
     // collection of builders and the associated edit distance here.
     // Currently, the edit distance we use is 3, but a value that does not exist in this
@@ -60,7 +64,7 @@ impl FstDictionary {
     /// Create a dictionary from the curated dictionary included
     /// in the Harper binary.
     pub fn curated() -> Arc<Self> {
-        DICT.with(|v| v.clone())
+        (*DICT).clone()
     }
 
     pub fn new(new_words: HashMap<CharString, WordMetadata>) -> Self {

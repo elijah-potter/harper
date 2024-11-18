@@ -5,6 +5,7 @@ use super::{
 };
 use hashbrown::HashMap;
 use itertools::Itertools;
+use lazy_static::lazy_static;
 use smallvec::{SmallVec, ToSmallVec};
 use std::sync::Arc;
 
@@ -56,8 +57,8 @@ fn uncached_inner_new() -> Arc<FullDictionary> {
     })
 }
 
-thread_local! {
-    static DICT: Arc<FullDictionary> = uncached_inner_new();
+lazy_static! {
+    static ref DICT: Arc<FullDictionary> = uncached_inner_new();
 }
 
 impl FullDictionary {
@@ -73,7 +74,7 @@ impl FullDictionary {
     /// in the Harper binary.
     /// Consider using [`super::FstDictionary::curated()`] instead, as it is more performant for spellchecking.
     pub fn curated() -> Arc<Self> {
-        DICT.with(|v| v.clone())
+        (*DICT).clone()
     }
 
     /// Appends words to the dictionary.
