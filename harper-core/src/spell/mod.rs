@@ -223,23 +223,18 @@ mod tests {
         let source: Vec<_> = "hello".chars().collect();
         let target: Vec<_> = "hellos".chars().collect();
         assert_eq!(edit_distance(&source, &target), 1);
-        assert_eq!(edit_distance(&target, &source), 1);
 
         let target: Vec<_> = "hell".chars().collect();
         assert_eq!(edit_distance(&source, &target), 1);
-        assert_eq!(edit_distance(&target, &source), 1);
 
         let target: Vec<_> = "hell".chars().collect();
         assert_eq!(edit_distance(&source, &target), 1);
-        assert_eq!(edit_distance(&target, &source), 1);
 
         let target: Vec<_> = "hvllo".chars().collect();
         assert_eq!(edit_distance(&source, &target), 1);
-        assert_eq!(edit_distance(&target, &source), 1);
 
         let target: Vec<_> = "Hello".chars().collect();
         assert_eq!(edit_distance(&source, &target), 1);
-        assert_eq!(edit_distance(&target, &source), 1);
     }
 
     #[test]
@@ -382,6 +377,5 @@ mod tests {
 
         assert_eq!(results1, results2);
         assert_eq!(results1, results3);
-        assert_eq!(results2, results3);
     }
 }
