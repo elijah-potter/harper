@@ -2,7 +2,6 @@ use super::{
     hunspell::{parse_default_attribute_list, parse_default_word_list},
     seq_to_normalized, FullDictionary,
 };
-use core::slice::SlicePattern;
 use fst::{map::StreamWithState, IntoStreamer, Map as FstMap, Streamer};
 use hashbrown::HashMap;
 use itertools::Itertools;
@@ -146,7 +145,7 @@ impl Dictionary for FstDictionary {
         max_distance: u8,
         max_results: usize,
     ) -> Vec<FuzzyMatchResult> {
-        let misspelled_word_charslice = seq_to_normalized(&word);
+        let misspelled_word_charslice = seq_to_normalized(word);
         let misspelled_word_string = misspelled_word_charslice.to_string();
 
         // Actual FST search
