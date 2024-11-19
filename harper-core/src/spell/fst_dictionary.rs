@@ -150,11 +150,22 @@ impl Dictionary for FstDictionary {
 
         // Actual FST search
         let dfa = build_dfa(max_distance, &misspelled_word_string);
+        let dfa_lowercase = build_dfa(max_distance, &misspelled_word_string.to_lowercase());
         let mut word_indexes_stream = self.word_map.search_with_state(&dfa).into_stream();
+        let mut word_indexes_lowercase_stream = self
+            .word_map
+            .search_with_state(&dfa_lowercase)
+            .into_stream();
 
         stream_distances_vec(&mut word_indexes_stream, &dfa)
             .into_iter()
+            .merge(
+                stream_distances_vec(&mut word_indexes_lowercase_stream, &dfa_lowercase)
+                    .into_iter(),
+            )
             // Sort by edit distance
+            .sorted_unstable_by_key(|a| a.0)
+            .dedup_by(|a, b| a.0 == b.0)
             .sorted_unstable_by_key(|a| a.1)
             .take(max_results)
             .map(|(index, edit_distance)| {

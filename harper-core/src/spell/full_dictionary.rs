@@ -199,9 +199,16 @@ impl Dictionary for FullDictionary {
             .filter_map(|word| {
                 let dist =
                     edit_distance_min_alloc(&misspelled_charslice, word, &mut buf_a, &mut buf_b);
+                let lowercase_dist = edit_distance_min_alloc(
+                    &misspelled_charslice.to_lower(),
+                    word,
+                    &mut buf_a,
+                    &mut buf_b,
+                );
 
-                if dist <= max_distance {
-                    Some((word, dist))
+                let smaller_dist = dist.min(lowercase_dist);
+                if smaller_dist <= max_distance {
+                    Some((word, smaller_dist))
                 } else {
                     None
                 }

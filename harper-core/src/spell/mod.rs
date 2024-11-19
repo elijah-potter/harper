@@ -287,6 +287,20 @@ mod tests {
         assert!(common_first);
     }
 
+    #[test]
+    fn this_correction() {
+        let results = suggest_correct_spelling_str(
+            "Ths",
+            RESULT_LIMIT,
+            MAX_EDIT_DIST,
+            &FstDictionary::curated(),
+        );
+
+        dbg!(&results);
+
+        assert!(results.iter().take(3).contains(&"this".to_string()));
+    }
+
     // I'm ignoring this one because the sorting algorithm prioritizes shorter words at the same
     // edit distance that are also common.
     #[ignore]
