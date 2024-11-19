@@ -26,7 +26,7 @@ unicode-width = "0.2.0"
 levenshtein_automata = { version = "0.2.1", features = ["fst_automaton"] }
 
 [dev-dependencies]
-criterion = { version = "0.5.1", features = ["plotters", "cargo_bench_support"], default-features = false}
+criterion = { version = "0.5.1", default-features = false }
 rand = "0.8.5"
 
 [[bench]]
