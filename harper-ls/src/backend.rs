@@ -206,11 +206,11 @@ impl Backend {
                 }
             } else if language_id == "markdown" {
                 Some(Box::new(Markdown))
-            } else if language_id == "gitcommit" {
+            } else if language_id == "git-commit" {
                 Some(Box::new(GitCommitParser))
             } else if language_id == "html" {
                 Some(Box::new(HtmlParser::default()))
-            } else if language_id == "mail" {
+            } else if language_id == "mail" || language_id == "plaintext" {
                 Some(Box::new(PlainEnglish))
             } else {
                 None

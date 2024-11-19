@@ -18,6 +18,7 @@ use super::spaces::Spaces;
 use super::spell_check::SpellCheck;
 use super::spelled_numbers::SpelledNumbers;
 use super::terminating_conjunctions::TerminatingConjunctions;
+use super::that_which::ThatWhich;
 use super::unclosed_quotes::UnclosedQuotes;
 use super::use_genitive::UseGenitive;
 use super::wrong_quotes::WrongQuotes;
@@ -129,7 +130,8 @@ create_lint_group_config!(
     EllipsisLength => true,
     DotInitialisms => true,
     BoringWords => false,
-    UseGenitive => true
+    UseGenitive => true,
+    ThatWhich => true
 );
 
 impl<T: Dictionary + Default> Default for LintGroup<T> {
