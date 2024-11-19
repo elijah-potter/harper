@@ -159,10 +159,10 @@ impl Dictionary for FstDictionary {
 
         stream_distances_vec(&mut word_indexes_stream, &dfa)
             .into_iter()
-            .merge(
-                stream_distances_vec(&mut word_indexes_lowercase_stream, &dfa_lowercase)
-                    .into_iter(),
-            )
+            .merge(stream_distances_vec(
+                &mut word_indexes_lowercase_stream,
+                &dfa_lowercase,
+            ))
             // Sort by edit distance
             .sorted_unstable_by_key(|a| a.0)
             .dedup_by(|a, b| a.0 == b.0)
