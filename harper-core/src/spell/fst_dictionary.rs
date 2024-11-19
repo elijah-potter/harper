@@ -2,6 +2,7 @@ use super::{
     hunspell::{parse_default_attribute_list, parse_default_word_list},
     seq_to_normalized, FullDictionary,
 };
+use core::slice::SlicePattern;
 use fst::{map::StreamWithState, IntoStreamer, Map as FstMap, Streamer};
 use hashbrown::HashMap;
 use itertools::Itertools;
@@ -145,18 +146,7 @@ impl Dictionary for FstDictionary {
         max_distance: u8,
         max_results: usize,
     ) -> Vec<FuzzyMatchResult> {
-        self.fuzzy_match_str(&word.iter().collect::<String>(), max_distance, max_results)
-    }
-
-    fn fuzzy_match_str(
-        &self,
-        word: &str,
-        max_distance: u8,
-        max_results: usize,
-    ) -> Vec<FuzzyMatchResult> {
-        // Various transformations of the input
-        let chars: Vec<_> = word.chars().collect();
-        let misspelled_word_charslice = seq_to_normalized(&chars);
+        let misspelled_word_charslice = seq_to_normalized(&word);
         let misspelled_word_string = misspelled_word_charslice.to_string();
 
         // Actual FST search
@@ -178,6 +168,19 @@ impl Dictionary for FstDictionary {
                 }
             })
             .collect()
+    }
+
+    fn fuzzy_match_str(
+        &self,
+        word: &str,
+        max_distance: u8,
+        max_results: usize,
+    ) -> Vec<FuzzyMatchResult> {
+        self.fuzzy_match(
+            word.chars().collect::<Vec<_>>().as_slice(),
+            max_distance,
+            max_results,
+        )
     }
 
     fn words_iter(&self) -> Box<dyn Iterator<Item = &'_ [char]> + Send + '_> {
