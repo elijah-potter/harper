@@ -237,9 +237,11 @@ mod tests {
         assert_eq!(edit_distance(&source, &target), 1);
     }
 
+    /// Ensures that the suggestions are ordered taking into account commonality
     #[test]
     fn common_words_first() {
         let dict = FstDictionary::curated();
+        // Select three common words
         let common_words = dict
             .words_iter()
             .filter_map(|word| {
@@ -255,6 +257,7 @@ mod tests {
                 }
             })
             .take(3);
+        // Select three uncommon words
         let uncommon_words = dict
             .words_iter()
             .filter_map(|word| {
@@ -270,9 +273,12 @@ mod tests {
                 }
             })
             .take(3);
-        let words = common_words.merge(uncommon_words).collect();
+        // Feed the common and uncommon words into the ordering function, starting with uncommon
+        // words
+        let words = uncommon_words.merge(common_words).collect();
         let suggestions = order_suggestions(words);
 
+        // Asserts that the ordering prioritizes common words
         let common_first = suggestions
             .into_iter()
             .take(3)
