@@ -165,8 +165,8 @@ impl Dictionary for FstDictionary {
             ))
             // Sort by edit distance
             .sorted_unstable_by_key(|a| a.0)
-            .dedup_by(|a, b| a.0 == b.0)
-            .sorted_unstable_by_key(|a| a.1)
+            .sorted_by_key(|a| a.1)
+            .dedup_by(|a, b| a.0 == b.0) // remove the one with the larger distance
             .take(max_results)
             .map(|(index, edit_distance)| {
                 let (word, metadata) = &self.words[index as usize];
