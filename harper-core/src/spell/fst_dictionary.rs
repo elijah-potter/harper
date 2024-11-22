@@ -163,9 +163,10 @@ impl Dictionary for FstDictionary {
                 &mut word_indexes_lowercase_stream,
                 &dfa_lowercase,
             ))
-            // Sort by edit distance
+            // Remove duplicates caused by checking exact and lowercase
             .sorted_unstable_by_key(|a| a.0)
             .dedup_by(|a, b| a.0 == b.0)
+            // Sort by edit distance
             .sorted_unstable_by_key(|a| a.1)
             .take(max_results)
             .map(|(index, edit_distance)| {
