@@ -28,6 +28,7 @@ impl<'a> PartialOrd for FuzzyMatchResult<'a> {
     }
 }
 
+/// Order the suggestions to be shown to the user.
 fn order_suggestions(matches: Vec<FuzzyMatchResult>) -> Vec<&[char]> {
     let mut found: Vec<&FuzzyMatchResult> = Vec::with_capacity(matches.len());
     // Often the longest and the shortest words are the most helpful, so lets push
@@ -58,8 +59,8 @@ fn order_suggestions(matches: Vec<FuzzyMatchResult>) -> Vec<&[char]> {
         found.swap(0, 2);
     }
 
-    // Let common words bubble up, but do not prioritize them over all else.
-    found.sort_by_key(|fmr| fmr.edit_distance + if fmr.metadata.common { 0 } else { 1 });
+    // Make commonality relevant
+    found.sort_by_key(|fmr| if fmr.metadata.common { 0 } else { 1 });
 
     found.into_iter().map(|fmr| fmr.word).collect()
 }
@@ -168,7 +169,7 @@ mod tests {
         Dictionary, FstDictionary, FullDictionary,
     };
 
-    const RESULT_LIMIT: usize = 100;
+    const RESULT_LIMIT: usize = 60;
     const MAX_EDIT_DIST: u8 = 3;
 
     fn assert_edit_dist(source: &str, target: &str, expected: u8) {
@@ -301,16 +302,55 @@ mod tests {
         assert!(results.iter().take(3).contains(&"this".to_string()));
     }
 
-    // I'm ignoring this one because the sorting algorithm prioritizes shorter words at the same
-    // edit distance that are also common.
-    #[ignore]
     #[test]
-    fn issue_182() {
+    fn need_correction_full() {
         let results = suggest_correct_spelling_str(
-            "im",
+            "ned",
+            RESULT_LIMIT,
+            MAX_EDIT_DIST,
+            &FullDictionary::curated(),
+        );
+
+        dbg!(&results);
+
+        assert!(results.iter().take(3).contains(&"need".to_string()));
+    }
+
+    #[test]
+    fn need_correction_fst() {
+        let results = suggest_correct_spelling_str(
+            "ned",
             RESULT_LIMIT,
             MAX_EDIT_DIST,
             &FstDictionary::curated(),
+        );
+
+        dbg!(&results);
+
+        assert!(results.iter().take(3).contains(&"need".to_string()));
+    }
+
+    #[test]
+    fn issue_182_fst() {
+        let results = suggest_correct_spelling_str(
+            "Im",
+            RESULT_LIMIT,
+            MAX_EDIT_DIST,
+            &FstDictionary::curated(),
+        );
+
+        dbg!(&results);
+
+        assert!(results.iter().take(3).contains(&"I'm".to_string()));
+    }
+
+    #[test]
+    fn issue_182_full() {
+        let results = suggest_correct_spelling_str(
+            "Im",
+            RESULT_LIMIT,
+            MAX_EDIT_DIST,
+            &FullDictionary::curated(),
         );
 
         dbg!(&results);

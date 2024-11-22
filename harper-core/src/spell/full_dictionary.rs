@@ -176,6 +176,7 @@ impl Dictionary for FullDictionary {
         max_results: usize,
     ) -> Vec<FuzzyMatchResult> {
         let misspelled_charslice = seq_to_normalized(word);
+        let misspelled_charslice_lower = misspelled_charslice.to_lower();
 
         let shortest_word_len = if misspelled_charslice.len() <= max_distance as usize {
             1
@@ -200,7 +201,7 @@ impl Dictionary for FullDictionary {
                 let dist =
                     edit_distance_min_alloc(&misspelled_charslice, word, &mut buf_a, &mut buf_b);
                 let lowercase_dist = edit_distance_min_alloc(
-                    &misspelled_charslice.to_lower(),
+                    &misspelled_charslice_lower,
                     word,
                     &mut buf_a,
                     &mut buf_b,

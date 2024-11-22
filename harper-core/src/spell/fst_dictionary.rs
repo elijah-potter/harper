@@ -4,7 +4,6 @@ use super::{
 };
 use fst::{map::StreamWithState, IntoStreamer, Map as FstMap, Streamer};
 use hashbrown::HashMap;
-use itertools::Itertools;
 use lazy_static::lazy_static;
 use levenshtein_automata::{LevenshteinAutomatonBuilder, DFA};
 use std::{cell::RefCell, sync::Arc};
@@ -70,6 +69,7 @@ impl FstDictionary {
     pub fn new(new_words: HashMap<CharString, WordMetadata>) -> Self {
         let mut words: Vec<(CharString, WordMetadata)> = new_words.into_iter().collect();
         words.sort_unstable_by(|(a, _), (b, _)| a.cmp(b));
+        words.dedup_by(|(a, _), (b, _)| a == b);
 
         let mut builder = fst::MapBuilder::memory();
         for (index, (word, _)) in words.iter().enumerate() {
@@ -113,13 +113,14 @@ fn build_dfa(max_distance: u8, query: &str) -> DFA {
     })
 }
 
+/// Consumes a DFA stream and emits the index-edit distance pairs it produces.
 fn stream_distances_vec(stream: &mut StreamWithState<&DFA>, dfa: &DFA) -> Vec<(u64, u8)> {
-    let mut word_indexes = Vec::new();
+    let mut word_index_pairs = Vec::new();
     while let Some((_, v, s)) = stream.next() {
-        word_indexes.push((v, dfa.distance(s).to_u8()));
+        word_index_pairs.push((v, dfa.distance(s).to_u8()));
     }
 
-    word_indexes
+    word_index_pairs
 }
 
 impl Dictionary for FstDictionary {
@@ -157,28 +158,33 @@ impl Dictionary for FstDictionary {
             .search_with_state(&dfa_lowercase)
             .into_stream();
 
-        stream_distances_vec(&mut word_indexes_stream, &dfa)
-            .into_iter()
-            .merge(stream_distances_vec(
-                &mut word_indexes_lowercase_stream,
-                &dfa_lowercase,
-            ))
-            // Remove duplicates caused by checking exact and lowercase
-            .sorted_unstable_by_key(|a| a.0)
-            .dedup_by(|a, b| a.0 == b.0)
-            // Sort by edit distance
-            .sorted_unstable_by_key(|a| a.1)
-            .take(max_results)
-            .map(|(index, edit_distance)| {
-                let (word, metadata) = &self.words[index as usize];
+        let upper_dists = stream_distances_vec(&mut word_indexes_stream, &dfa);
+        let lower_dists = stream_distances_vec(&mut word_indexes_lowercase_stream, &dfa_lowercase);
 
-                FuzzyMatchResult {
-                    word,
-                    edit_distance,
-                    metadata: *metadata,
-                }
+        let mut merged = Vec::with_capacity(upper_dists.len());
+
+        // Merge the two results
+        for ((i_u, dist_u), (i_l, dist_l)) in upper_dists.into_iter().zip(lower_dists.into_iter()) {
+            let (chosen_index, edit_distance) = if dist_u <= dist_l {
+                (i_u, dist_u)
+            } else {
+                (i_l, dist_l)
+            };
+
+            let (word, metadata) = &self.words[chosen_index as usize];
+
+            merged.push(FuzzyMatchResult {
+                word,
+                edit_distance,
+                metadata: *metadata,
             })
-            .collect()
+        }
+
+        merged.sort_unstable_by_key(|v| v.word);
+        merged.sort_unstable_by_key(|v| v.edit_distance);
+        merged.truncate(max_results);
+
+        merged
     }
 
     fn fuzzy_match_str(
