@@ -7,7 +7,8 @@ use harper_comments::CommentParser;
 use harper_core::linting::{LintGroup, Linter};
 use harper_core::parsers::{CollapseIdentifiers, IsolateEnglish, Markdown, Parser, PlainEnglish};
 use harper_core::{
-    Dictionary, Document, FullDictionary, MergedDictionary, Token, TokenKind, WordMetadata,
+    Dictionary, Document, FstDictionary, FullDictionary, MergedDictionary, Token, TokenKind,
+    WordMetadata,
 };
 use harper_html::HtmlParser;
 use serde_json::Value;
@@ -104,18 +105,15 @@ impl Backend {
         Ok(save_dict(&config.user_dict_path, dict).await?)
     }
 
-    async fn generate_global_dictionary(&self) -> anyhow::Result<MergedDictionary<FullDictionary>> {
+    async fn generate_global_dictionary(&self) -> anyhow::Result<MergedDictionary> {
         let mut dict = MergedDictionary::new();
-        dict.add_dictionary(FullDictionary::curated());
+        dict.add_dictionary(FstDictionary::curated());
         let user_dict = self.load_user_dictionary().await;
         dict.add_dictionary(Arc::new(user_dict));
         Ok(dict)
     }
 
-    async fn generate_file_dictionary(
-        &self,
-        url: &Url,
-    ) -> anyhow::Result<MergedDictionary<FullDictionary>> {
+    async fn generate_file_dictionary(&self, url: &Url) -> anyhow::Result<MergedDictionary> {
         let (global_dictionary, file_dictionary) = tokio::join!(
             self.generate_global_dictionary(),
             self.load_file_dictionary(url)
@@ -126,7 +124,7 @@ impl Backend {
         };
 
         let mut global_dictionary = global_dictionary?;
-        global_dictionary.add_dictionary(file_dictionary.into());
+        global_dictionary.add_dictionary(Arc::new(file_dictionary));
 
         Ok(global_dictionary)
     }
@@ -201,7 +199,7 @@ impl Backend {
                     }
                     Some(Box::new(CollapseIdentifiers::new(
                         Box::new(ts_parser),
-                        &doc_state.dict,
+                        Box::new(doc_state.dict.clone()),
                     )))
                 } else {
                     Some(Box::new(ts_parser))

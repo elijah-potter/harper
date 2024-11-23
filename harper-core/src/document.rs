@@ -7,10 +7,10 @@ use paste::paste;
 use crate::parsers::{Markdown, Parser, PlainEnglish};
 use crate::patterns::{PatternExt, RepeatingPattern, SequencePattern};
 use crate::punctuation::Punctuation;
-use crate::span::Span;
 use crate::token::NumberSuffix;
 use crate::vec_ext::VecExt;
-use crate::{Dictionary, FatToken, FullDictionary, Lrc, Token, TokenKind, TokenStringExt};
+use crate::Span;
+use crate::{Dictionary, FatToken, FstDictionary, Lrc, Token, TokenKind, TokenStringExt};
 
 /// A document containing some amount of lexed and parsed English text.
 #[derive(Debug, Clone)]
@@ -21,7 +21,7 @@ pub struct Document {
 
 impl Default for Document {
     fn default() -> Self {
-        Self::new("", &mut PlainEnglish, &FullDictionary::curated())
+        Self::new("", &mut PlainEnglish, &FstDictionary::curated())
     }
 }
 
@@ -39,7 +39,7 @@ impl Document {
     pub fn new_curated(text: &str, parser: &mut impl Parser) -> Self {
         let source: Vec<_> = text.chars().collect();
 
-        Self::new_from_vec(Lrc::new(source), parser, &FullDictionary::curated())
+        Self::new_from_vec(Lrc::new(source), parser, &FstDictionary::curated())
     }
 
     /// Lexes and parses text to produce a document using a provided language
@@ -60,7 +60,7 @@ impl Document {
     /// Parse text to produce a document using the built-in [`PlainEnglish`]
     /// parser and curated dictionary.
     pub fn new_plain_english_curated(text: &str) -> Self {
-        Self::new(text, &mut PlainEnglish, &FullDictionary::curated())
+        Self::new(text, &mut PlainEnglish, &FstDictionary::curated())
     }
 
     /// Parse text to produce a document using the built-in [`PlainEnglish`]
@@ -72,7 +72,7 @@ impl Document {
     /// Parse text to produce a document using the built-in [`Markdown`] parser
     /// and curated dictionary.
     pub fn new_markdown_curated(text: &str) -> Self {
-        Self::new(text, &mut Markdown, &FullDictionary::curated())
+        Self::new(text, &mut Markdown, &FstDictionary::curated())
     }
 
     /// Parse text to produce a document using the built-in [`PlainEnglish`]

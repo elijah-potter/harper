@@ -32,7 +32,7 @@ impl Mask {
     pub fn iter_allowed<'a>(
         &'a self,
         source: &'a [char],
-    ) -> impl Iterator<Item = (Span, &'a [char])> + '_ {
+    ) -> impl Iterator<Item = (Span, &'a [char])> {
         self.allowed.iter().map(|s| (*s, s.get_content(source)))
     }
 

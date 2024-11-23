@@ -6,6 +6,7 @@ pub type CharString = SmallVec<[char; 12]>;
 
 pub trait CharStringExt {
     fn to_lower(&self) -> CharString;
+    fn to_string(&self) -> String;
 }
 
 impl CharStringExt for [char] {
@@ -15,5 +16,8 @@ impl CharStringExt for [char] {
         out.extend(self.iter().flat_map(|v| v.to_lowercase()));
 
         out
+    }
+    fn to_string(&self) -> String {
+        self.iter().collect()
     }
 }
