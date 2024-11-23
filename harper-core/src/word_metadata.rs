@@ -1,4 +1,5 @@
 use is_macro::Is;
+use paste::paste;
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Default, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, PartialOrd, Hash)]
@@ -14,8 +15,57 @@ pub struct WordMetadata {
     pub common: bool,
 }
 
+/// Needed for `serde`
 fn default_common() -> bool {
     false
+}
+
+macro_rules! generate_metadata_queries {
+    ($($category:ident has $($sub:ident),*).*) => {
+        paste! {
+            pub fn is_likely_homograph(&self) -> bool {
+                if [$($(self.[< is_ $sub _ $category >](),)*)*].iter().map(|b| *b as u8).sum::<u8>() > 1 {
+                    return true;
+                }
+
+                [$(
+                    self.[< is_ $category >](),
+                )*].iter().map(|b| *b as u8).sum::<u8>() > 1
+            }
+
+            $(
+                #[doc = concat!("Checks if the word is definitely a ", stringify!($category), ".")]
+                pub fn [< is_ $category >](&self) -> bool {
+                    self.$category.is_some()
+                }
+
+                $(
+                    #[doc = concat!("Checks if the word is definitely a ", stringify!($category), " and more specifically is labeled as (a) ", stringify!($sub), ".")]
+                    pub fn [< is_ $sub _ $category >](&self) -> bool {
+                        matches!(
+                            self.$category,
+                            Some([< $category:camel Data >]{
+                                [< is_ $sub >]: Some(true),
+                                ..
+                            })
+                        )
+                    }
+
+
+                    #[doc = concat!("Checks if the word is definitely a ", stringify!($category), " and more specifically is labeled as __not__ (a) ", stringify!($sub), ".")]
+                    pub fn [< is_not_ $sub _ $category >](&self) -> bool {
+                        matches!(
+                            self.$category,
+                            Some([< $category:camel Data >]{
+                                [< is_ $sub >]: Some(false),
+                                ..
+                            })
+                        )
+                    }
+                )*
+            )*
+        }
+    };
 }
 
 impl WordMetadata {
@@ -43,110 +93,13 @@ impl WordMetadata {
         }
     }
 
-    pub fn is_noun(&self) -> bool {
-        self.noun.is_some()
-    }
-
-    pub fn is_conjunction(&self) -> bool {
-        self.conjunction.is_some()
-    }
-
-    pub fn is_verb(&self) -> bool {
-        self.verb.is_some()
-    }
-
-    pub fn is_adjective(&self) -> bool {
-        self.adjective.is_some()
-    }
-
-    pub fn is_adverb(&self) -> bool {
-        self.adverb.is_some()
-    }
-
-    pub fn is_possessive_noun(&self) -> bool {
-        matches!(
-            self.noun,
-            Some(NounData {
-                is_possessive: Some(true),
-                ..
-            })
-        )
-    }
-
-    pub fn is_plural_noun(&self) -> bool {
-        matches!(
-            self.noun,
-            Some(NounData {
-                is_plural: Some(true),
-                ..
-            })
-        )
-    }
-
-    pub fn is_proper_noun(&self) -> bool {
-        matches!(
-            self.noun,
-            Some(NounData {
-                is_proper: Some(true),
-                ..
-            })
-        )
-    }
-
-    pub fn is_pronoun(&self) -> bool {
-        matches!(
-            self.noun,
-            Some(NounData {
-                is_pronoun: Some(true),
-                ..
-            })
-        )
-    }
-
-    pub fn is_linking_verb(&self) -> bool {
-        matches!(
-            self.verb,
-            Some(VerbData {
-                is_linking: Some(true),
-                ..
-            })
-        )
-    }
-
-    /// Checks if the word is a homograph
-    /// This is based off of metadata, so it is not guaranteed to be correct
-    pub fn is_likely_homograph(&self) -> bool {
-        [
-            matches!(
-                self.noun,
-                Some(NounData {
-                    is_proper: None,
-                    is_plural: None,
-                    is_possessive: None,
-                    is_pronoun: None
-                })
-            ),
-            matches!(
-                self.verb,
-                Some(VerbData {
-                    is_linking: None,
-                    tense: None
-                })
-            ),
-            self.is_conjunction(),
-            self.is_adjective(),
-            self.is_adverb(),
-            self.is_possessive_noun(),
-            self.is_plural_noun(),
-            self.is_proper_noun(),
-            self.is_pronoun(),
-            self.is_linking_verb(),
-        ]
-        .iter()
-        .map(|b| *b as u8)
-        .sum::<u8>()
-            > 1
-    }
+    generate_metadata_queries!(
+        noun has proper, plural, possessive, pronoun.
+        verb has linking.
+        conjunction has.
+        adjective has.
+        adverb has
+    );
 
     /// Checks whether a word is _definitely_ a swear.
     pub fn is_swear(&self) -> bool {
