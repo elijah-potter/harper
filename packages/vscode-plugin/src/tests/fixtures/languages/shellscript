@@ -1,0 +1,4 @@
+#!/usr/bin/env bash
+
+# Errorz
+echo "Hello World!"

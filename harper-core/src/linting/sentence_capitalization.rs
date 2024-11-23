@@ -102,4 +102,13 @@ mod tests {
             1,
         )
     }
+
+    #[test]
+    fn unphased_comma() {
+        assert_lint_count(
+            "the linter should not be affected by, that comma.",
+            SentenceCapitalization,
+            1,
+        )
+    }
 }

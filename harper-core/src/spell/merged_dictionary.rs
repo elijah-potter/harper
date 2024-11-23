@@ -1,62 +1,42 @@
-use crate::Lrc;
+use std::sync::Arc;
 
-use hashbrown::HashMap;
+use itertools::Itertools;
 
-use super::dictionary::Dictionary;
+use super::{dictionary::Dictionary, FuzzyMatchResult};
 use crate::{CharString, WordMetadata};
 
 /// A simple wrapper over [`Dictionary`] that allows
 /// one to merge multiple dictionaries without copying.
-#[derive(Clone, PartialEq)]
-pub struct MergedDictionary<T>
-where
-    T: Dictionary + Clone,
-{
-    children: Vec<Lrc<T>>,
-    merged: HashMap<CharString, WordMetadata>,
+#[derive(Clone)]
+pub struct MergedDictionary {
+    children: Vec<Arc<dyn Dictionary>>,
 }
 
-impl<T> MergedDictionary<T>
-where
-    T: Dictionary + Clone,
-{
+impl MergedDictionary {
     pub fn new() -> Self {
         Self {
             children: Vec::new(),
-            merged: HashMap::new(),
         }
     }
 
-    pub fn add_dictionary(&mut self, dictionary: Lrc<T>) {
-        self.children.push(dictionary.clone());
+    pub fn add_dictionary(&mut self, dictionary: Arc<dyn Dictionary>) {
+        self.children.push(dictionary);
     }
 }
 
-impl<T> From<Lrc<T>> for MergedDictionary<T>
-where
-    T: Dictionary + Clone,
-{
-    fn from(value: Lrc<T>) -> Self {
-        Self {
-            children: vec![value],
-            ..Default::default()
-        }
+impl PartialEq for MergedDictionary {
+    fn eq(&self, _other: &Self) -> bool {
+        false
     }
 }
 
-impl<T> Default for MergedDictionary<T>
-where
-    T: Dictionary + Clone,
-{
+impl Default for MergedDictionary {
     fn default() -> Self {
         Self::new()
     }
 }
 
-impl<T> Dictionary for MergedDictionary<T>
-where
-    T: Dictionary + Clone,
-{
+impl Dictionary for MergedDictionary {
     fn contains_word(&self, word: &[char]) -> bool {
         for child in &self.children {
             if child.contains_word(word) {
@@ -75,11 +55,11 @@ where
         found_metadata
     }
 
-    fn words_iter(&self) -> impl Iterator<Item = &'_ [char]> {
-        self.children.iter().flat_map(|c| c.words_iter())
+    fn words_iter(&self) -> Box<dyn Iterator<Item = &'_ [char]> + Send + '_> {
+        Box::new(self.children.iter().flat_map(|c| c.words_iter()))
     }
 
-    fn words_with_len_iter(&self, len: usize) -> Box<dyn Iterator<Item = &'_ [char]> + '_> {
+    fn words_with_len_iter(&self, len: usize) -> Box<dyn Iterator<Item = &'_ [char]> + Send + '_> {
         Box::new(
             self.children
                 .iter()
@@ -95,5 +75,33 @@ where
     fn get_word_metadata_str(&self, word: &str) -> WordMetadata {
         let chars: CharString = word.chars().collect();
         self.get_word_metadata(&chars)
+    }
+
+    fn fuzzy_match(
+        &self,
+        word: &[char],
+        max_distance: u8,
+        max_results: usize,
+    ) -> Vec<FuzzyMatchResult> {
+        self.children
+            .iter()
+            .flat_map(|d| d.fuzzy_match(word, max_distance, max_results))
+            .sorted_by_key(|r| r.edit_distance)
+            .take(max_results)
+            .collect()
+    }
+
+    fn fuzzy_match_str(
+        &self,
+        word: &str,
+        max_distance: u8,
+        max_results: usize,
+    ) -> Vec<FuzzyMatchResult> {
+        self.children
+            .iter()
+            .flat_map(|d| d.fuzzy_match_str(word, max_distance, max_results))
+            .sorted_by_key(|r| r.edit_distance)
+            .take(max_results)
+            .collect()
     }
 }

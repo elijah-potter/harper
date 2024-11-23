@@ -5,8 +5,8 @@ use paste::paste;
 use serde::{Deserialize, Serialize};
 
 use crate::punctuation::Punctuation;
-use crate::span::Span;
-use crate::word_metadata::{ConjunctionData, NounData};
+use crate::Span;
+use crate::{ConjunctionData, NounData};
 use crate::{Quote, WordMetadata};
 
 #[derive(Debug, Clone, Copy, Serialize, Deserialize, PartialEq, Default)]

@@ -1,10 +1,18 @@
+use super::{
+    edit_distance_min_alloc,
+    hunspell::{parse_default_attribute_list, parse_default_word_list},
+    seq_to_normalized,
+};
 use hashbrown::HashMap;
+use itertools::Itertools;
+use lazy_static::lazy_static;
 use smallvec::{SmallVec, ToSmallVec};
+use std::sync::Arc;
+
+use crate::{CharString, CharStringExt, WordMetadata};
 
 use super::dictionary::Dictionary;
-use super::hunspell::{parse_default_attribute_list, parse_default_word_list};
-use super::seq_to_normalized;
-use crate::{CharString, Lrc, WordMetadata};
+use super::FuzzyMatchResult;
 
 /// A full, fat dictionary.
 /// All elements are stored in-memory.
@@ -27,7 +35,7 @@ pub struct FullDictionary {
 
 /// The uncached function that is used to produce the original copy of the
 /// curated dictionary.
-fn uncached_inner_new() -> Lrc<FullDictionary> {
+fn uncached_inner_new() -> Arc<FullDictionary> {
     let word_list = parse_default_word_list().unwrap();
     let attr_list = parse_default_attribute_list();
 
@@ -37,18 +45,20 @@ fn uncached_inner_new() -> Lrc<FullDictionary> {
     attr_list.expand_marked_words(word_list, &mut word_map);
 
     let mut words: Vec<CharString> = word_map.iter().map(|(v, _)| v.clone()).collect();
-    words.sort();
-    words.dedup();
 
-    Lrc::new(FullDictionary {
+    words.sort_unstable();
+    words.dedup();
+    words.sort_unstable_by_key(|w| w.len());
+
+    Arc::new(FullDictionary {
         word_map,
-        word_len_starts: FullDictionary::create_len_starts(&mut words),
+        word_len_starts: FullDictionary::create_len_starts(&words),
         words,
     })
 }
 
-thread_local! {
-    static DICT: Lrc<FullDictionary> = uncached_inner_new();
+lazy_static! {
+    static ref DICT: Arc<FullDictionary> = uncached_inner_new();
 }
 
 impl FullDictionary {
@@ -62,8 +72,9 @@ impl FullDictionary {
 
     /// Create a dictionary from the curated dictionary included
     /// in the Harper binary.
-    pub fn curated() -> Lrc<Self> {
-        DICT.with(|v| v.clone())
+    /// Consider using [`super::FstDictionary::curated()`] instead, as it is more performant for spellchecking.
+    pub fn curated() -> Arc<Self> {
+        (*DICT).clone()
     }
 
     /// Appends words to the dictionary.
@@ -79,7 +90,8 @@ impl FullDictionary {
             .collect();
 
         self.words.extend(pairs.iter().map(|(v, _)| v.clone()));
-        self.word_len_starts = Self::create_len_starts(&mut self.words);
+        self.words.sort_by_key(|w| w.len());
+        self.word_len_starts = Self::create_len_starts(&self.words);
         self.word_map.extend(pairs);
     }
 
@@ -100,14 +112,14 @@ impl FullDictionary {
     }
 
     /// Create a lookup table for finding words of a specific length in a word
-    /// list. NOTE: This function will sort the original word list by its
-    /// length. If the word list's order is changed after creating the
-    /// lookup, it will no longer be valid.
-    fn create_len_starts(words: &mut [CharString]) -> Vec<usize> {
-        words.sort_by_key(|a| a.len());
+    /// list.
+    fn create_len_starts(words: &[CharString]) -> Vec<usize> {
+        let mut len_words: Vec<_> = words.to_vec();
+        len_words.sort_by_key(|a| a.len());
+
         let mut word_len_starts = vec![0, 0];
 
-        for (index, len) in words.iter().map(SmallVec::len).enumerate() {
+        for (index, len) in len_words.iter().map(SmallVec::len).enumerate() {
             if word_len_starts.len() <= len {
                 word_len_starts.resize(len, index);
                 word_len_starts.push(index);
@@ -125,29 +137,9 @@ impl Default for FullDictionary {
 }
 
 impl Dictionary for FullDictionary {
-    fn words_iter(&self) -> impl Iterator<Item = &'_ [char]> {
-        self.words.iter().map(|v| v.as_slice())
-    }
-
-    /// Iterate over all the words in the dictionary of a given length
-    fn words_with_len_iter(&self, len: usize) -> Box<dyn Iterator<Item = &'_ [char]> + '_> {
-        if len == 0 || len >= self.word_len_starts.len() {
-            return Box::new(std::iter::empty());
-        }
-
-        let start = self.word_len_starts[len];
-        let end = if len + 1 == self.word_len_starts.len() {
-            self.words.len()
-        } else {
-            self.word_len_starts[len + 1]
-        };
-
-        Box::new(self.words[start..end].iter().map(|v| v.as_slice()))
-    }
-
     fn get_word_metadata(&self, word: &[char]) -> WordMetadata {
         let normalized = seq_to_normalized(word);
-        let lowercase: CharString = normalized.iter().flat_map(|c| c.to_lowercase()).collect();
+        let lowercase: CharString = normalized.to_lower();
 
         self.word_map
             .get(normalized.as_ref())
@@ -158,7 +150,7 @@ impl Dictionary for FullDictionary {
 
     fn contains_word(&self, word: &[char]) -> bool {
         let normalized = seq_to_normalized(word);
-        let lowercase: CharString = normalized.iter().flat_map(|c| c.to_lowercase()).collect();
+        let lowercase: CharString = normalized.to_lower();
 
         self.word_map.contains_key(normalized.as_ref()) || self.word_map.contains_key(&lowercase)
     }
@@ -172,18 +164,116 @@ impl Dictionary for FullDictionary {
         let chars: CharString = word.chars().collect();
         self.get_word_metadata(&chars)
     }
+
+    /// Suggest a correct spelling for a given misspelled word.
+    /// `Self::word` is assumed to be quite small (n < 100).
+    /// `max_distance` relates to an optimization that allows the search
+    /// algorithm to prune large portions of the search.
+    fn fuzzy_match(
+        &self,
+        word: &[char],
+        max_distance: u8,
+        max_results: usize,
+    ) -> Vec<FuzzyMatchResult> {
+        let misspelled_charslice = seq_to_normalized(word);
+        let misspelled_charslice_lower = misspelled_charslice.to_lower();
+
+        let shortest_word_len = if misspelled_charslice.len() <= max_distance as usize {
+            1
+        } else {
+            misspelled_charslice.len() - max_distance as usize
+        };
+        let longest_word_len = misspelled_charslice.len() + max_distance as usize;
+
+        // Get candidate words
+        let words_to_search = (shortest_word_len..=longest_word_len)
+            .rev()
+            .flat_map(|len| self.words_with_len_iter(len));
+
+        // Pre-allocated vectors for the edit-distance calculation
+        // 53 is the length of the longest word.
+        let mut buf_a = Vec::with_capacity(53);
+        let mut buf_b = Vec::with_capacity(53);
+
+        // Sort by edit-distance
+        words_to_search
+            .filter_map(|word| {
+                let dist =
+                    edit_distance_min_alloc(&misspelled_charslice, word, &mut buf_a, &mut buf_b);
+                let lowercase_dist = edit_distance_min_alloc(
+                    &misspelled_charslice_lower,
+                    word,
+                    &mut buf_a,
+                    &mut buf_b,
+                );
+
+                let smaller_dist = dist.min(lowercase_dist);
+                if smaller_dist <= max_distance {
+                    Some((word, smaller_dist))
+                } else {
+                    None
+                }
+            })
+            .sorted_unstable_by_key(|a| a.1)
+            .take(max_results)
+            .map(|(word, edit_distance)| FuzzyMatchResult {
+                word,
+                edit_distance,
+                metadata: self.get_word_metadata(word),
+            })
+            .collect()
+    }
+
+    fn fuzzy_match_str(
+        &self,
+        word: &str,
+        max_distance: u8,
+        max_results: usize,
+    ) -> Vec<FuzzyMatchResult> {
+        let word: Vec<_> = word.chars().collect();
+        self.fuzzy_match(&word, max_distance, max_results)
+    }
+
+    fn words_iter(&self) -> Box<dyn Iterator<Item = &'_ [char]> + Send + '_> {
+        Box::new(self.words.iter().map(|v| v.as_slice()))
+    }
+
+    fn words_with_len_iter(&self, len: usize) -> Box<dyn Iterator<Item = &'_ [char]> + Send + '_> {
+        if len == 0 || len >= self.word_len_starts.len() {
+            return Box::new(std::iter::empty());
+        }
+
+        let start = self.word_len_starts[len];
+        let end = if len + 1 == self.word_len_starts.len() {
+            self.words.len()
+        } else {
+            self.word_len_starts[len + 1]
+        };
+
+        Box::new(self.words[start..end].iter().map(|v| v.as_slice()))
+    }
 }
 
 #[cfg(test)]
 mod tests {
+    use crate::CharString;
     use itertools::Itertools;
 
     use crate::{Dictionary, FullDictionary};
 
     #[test]
+    fn words_with_len_contains_self() {
+        let dict = FullDictionary::curated();
+
+        let word: CharString = "hello".chars().collect();
+        let words_with_same_len = dict.words_with_len_iter(word.len()).collect_vec();
+        assert!(words_with_same_len.contains(&&word[..]));
+    }
+
+    #[test]
     fn curated_contains_no_duplicates() {
         let dict = FullDictionary::curated();
-        assert!(dict.words_iter().all_unique());
+        assert!(dict.words.iter().all_unique());
     }
 
     #[test]
@@ -210,8 +300,8 @@ mod tests {
     #[test]
     fn herself_is_pronoun() {
         let dict = FullDictionary::curated();
-        assert!(dict.get_word_metadata_str("than").is_conjunction());
-        assert!(dict.get_word_metadata_str("Than").is_conjunction());
+        assert!(dict.get_word_metadata_str("herself").is_pronoun());
+        assert!(dict.get_word_metadata_str("Herself").is_pronoun());
     }
 
     #[test]
@@ -224,5 +314,19 @@ mod tests {
     fn im_is_common() {
         let dict = FullDictionary::curated();
         assert!(dict.get_word_metadata_str("I'm").common);
+    }
+
+    #[test]
+    fn fuzzy_result_sorted_by_edit_distance() {
+        let dict = FullDictionary::curated();
+
+        let results = dict.fuzzy_match_str("hello", 3, 100);
+        let is_sorted_by_dist = results
+            .iter()
+            .map(|fm| fm.edit_distance)
+            .tuple_windows()
+            .all(|(a, b)| a <= b);
+
+        assert!(is_sorted_by_dist)
     }
 }

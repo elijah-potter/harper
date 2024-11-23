@@ -5,7 +5,7 @@ use harper_core::{Document, FullDictionary, Lrc, MergedDictionary};
 pub struct DocumentState {
     pub document: Document,
     pub ident_dict: Lrc<FullDictionary>,
-    pub dict: Lrc<MergedDictionary<FullDictionary>>,
-    pub linter: LintGroup<Lrc<MergedDictionary<FullDictionary>>>,
+    pub dict: Lrc<MergedDictionary>,
+    pub linter: LintGroup<Lrc<MergedDictionary>>,
     pub language_id: Option<String>,
 }

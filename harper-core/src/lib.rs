@@ -26,11 +26,11 @@ use linting::Lint;
 pub use mask::{Mask, Masker};
 pub use punctuation::{Punctuation, Quote};
 pub use span::Span;
-pub use spell::{Dictionary, FullDictionary, MergedDictionary};
+pub use spell::{Dictionary, FstDictionary, FullDictionary, MergedDictionary};
 pub use sync::Lrc;
 pub use token::{FatToken, Token, TokenKind, TokenStringExt};
 pub use vec_ext::VecExt;
-pub use word_metadata::{Tense, WordMetadata};
+pub use word_metadata::{AdverbData, ConjunctionData, NounData, Tense, VerbData, WordMetadata};
 
 /// A utility function that removes overlapping lints in a vector,
 /// keeping the more important ones.
@@ -66,7 +66,7 @@ pub fn remove_overlaps(lints: &mut Vec<Lint>) {
 mod tests {
     use crate::{
         linting::{LintGroup, LintGroupConfig, Linter},
-        remove_overlaps, Document, FullDictionary,
+        remove_overlaps, Document, FstDictionary,
     };
 
     #[test]
@@ -78,7 +78,7 @@ mod tests {
             spaces: Some(true),
             ..LintGroupConfig::none()
         };
-        let mut linter = LintGroup::new(lint_config, FullDictionary::curated());
+        let mut linter = LintGroup::new(lint_config, FstDictionary::curated());
 
         let mut lints = linter.lint(&doc);
 
