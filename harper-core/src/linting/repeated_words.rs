@@ -47,16 +47,16 @@ mod tests {
 
     #[test]
     fn catches_basic() {
-        assert_lint_count("I wanted the the banana.", RepeatedWords::default(), 1)
+        assert_lint_count("I wanted the the banana.", RepeatedWords, 1)
     }
 
     #[test]
     fn does_not_lint_homographs_address() {
-        assert_lint_count("To address address problems.", RepeatedWords::default(), 0);
+        assert_lint_count("To address address problems.", RepeatedWords, 0);
     }
 
     #[test]
     fn does_not_lint_homographs_record() {
-        assert_lint_count("To record record profits.", RepeatedWords::default(), 0);
+        assert_lint_count("To record record profits.", RepeatedWords, 0);
     }
 }
