@@ -300,8 +300,8 @@ mod tests {
     #[test]
     fn herself_is_pronoun() {
         let dict = FullDictionary::curated();
-        assert!(dict.get_word_metadata_str("herself").is_pronoun());
-        assert!(dict.get_word_metadata_str("Herself").is_pronoun());
+        assert!(dict.get_word_metadata_str("herself").is_pronoun_noun());
+        assert!(dict.get_word_metadata_str("Herself").is_pronoun_noun());
     }
 
     #[test]
