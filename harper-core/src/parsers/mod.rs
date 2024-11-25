@@ -3,6 +3,7 @@ mod isolate_english;
 mod markdown;
 mod mask;
 mod plain_english;
+mod typst;
 
 use blanket::blanket;
 pub use collapse_identifiers::CollapseIdentifiers;
