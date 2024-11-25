@@ -1,6 +1,6 @@
 use itertools::Itertools;
 
-use typst_syntax::ast::{AstNode, Expr};
+use typst_syntax::ast::{AstNode, Expr, Markup};
 
 use super::{Parser, PlainEnglish};
 use crate::{parsers::StrParser, Token, TokenKind, WordMetadata};
@@ -19,17 +19,19 @@ macro_rules! constant_token {
         }])
     }};
 }
-macro_rules! recursive_env {
-    ($offset:ident, $expr:ident, $doc:ident, $parser:ident) => {
-        Some(
-            $expr
-                .body()
-                .exprs()
-                .filter_map(|e| map_token(e, $doc, $parser, $offset))
-                .flatten()
-                .collect_vec(),
-        )
-    };
+
+fn recursive_env(
+    exprs: &mut dyn Iterator<Item = typst_syntax::ast::Expr>,
+    doc: &typst_syntax::Source,
+    parser: &mut PlainEnglish,
+    offset: &mut usize,
+) -> Option<Vec<Token>> {
+    Some(
+        exprs
+            .filter_map(|e| map_token(e, doc, parser, offset))
+            .flatten()
+            .collect_vec(),
+    )
 }
 
 fn map_token(
@@ -55,8 +57,8 @@ fn map_token(
         Expr::Escape(_) => None,
         Expr::Shorthand(_) => None,
         Expr::SmartQuote(_) => None,
-        Expr::Strong(strong) => recursive_env!(offset, strong, doc, parser),
-        Expr::Emph(emph) => recursive_env!(offset, emph, doc, parser),
+        Expr::Strong(strong) => recursive_env(&mut strong.body().exprs(), doc, parser, offset),
+        Expr::Emph(emph) => recursive_env(&mut emph.body().exprs(), doc, parser, offset),
         Expr::Raw(_) => None,
         Expr::Link(a) => constant_token!(offset, doc, a, TokenKind::Url),
         Expr::Label(label) => Some(
@@ -72,17 +74,17 @@ fn map_token(
         Expr::Ref(a) => {
             constant_token!(offset, doc, a, TokenKind::Word(WordMetadata::default()))
         }
-        Expr::Heading(heading) => recursive_env!(offset, heading, doc, parser),
-        Expr::List(list_item) => recursive_env!(offset, list_item, doc, parser),
-        Expr::Enum(enum_item) => recursive_env!(offset, enum_item, doc, parser),
-        Expr::Term(term_item) => Some(
-            term_item
+        Expr::Heading(heading) => recursive_env(&mut heading.body().exprs(), doc, parser, offset),
+        Expr::List(list_item) => recursive_env(&mut list_item.body().exprs(), doc, parser, offset),
+        Expr::Enum(enum_item) => recursive_env(&mut enum_item.body().exprs(), doc, parser, offset),
+        Expr::Term(term_item) => recursive_env(
+            &mut term_item
                 .term()
                 .exprs()
-                .chain(term_item.description().exprs())
-                .filter_map(|e| map_token(e, doc, parser, offset))
-                .flatten()
-                .collect_vec(),
+                .chain(term_item.description().exprs()),
+            doc,
+            parser,
+            offset,
         ),
         Expr::Equation(a) => constant_token!(offset, doc, a, TokenKind::Unlintable),
         Expr::Math(_) => None,
@@ -112,7 +114,9 @@ fn map_token(
                 .collect_vec(),
         ),
         Expr::Code(a) => constant_token!(offset, doc, a, TokenKind::Unlintable),
-        Expr::Content(content_block) => recursive_env!(offset, content_block, doc, parser),
+        Expr::Content(content_block) => {
+            recursive_env(&mut content_block.body().exprs(), doc, parser, offset)
+        }
         Expr::Parenthesized(parenthesized) => map_token(parenthesized.expr(), doc, parser, offset),
         Expr::Array(array) => Some(
             array
@@ -155,7 +159,7 @@ impl Parser for Typst {
 
         let source_str: String = source.iter().collect();
         let typst_document = typst_syntax::Source::detached(source_str);
-        let typst_tree = typst_syntax::ast::Markup::from_untyped(typst_document.root())
+        let typst_tree = Markup::from_untyped(typst_document.root())
             .expect("Unable to create typst document from parsed tree!");
         let mut offset = 0;
 
