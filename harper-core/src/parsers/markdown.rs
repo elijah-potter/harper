@@ -225,6 +225,15 @@ impl Parser for Markdown {
 
                     tokens.append(&mut new_tokens);
                 }
+                // TODO: Support via `harper-html`
+                pulldown_cmark::Event::Html(_content)
+                | pulldown_cmark::Event::InlineHtml(_content) => {
+                    let size = _content.chars().count();
+                    tokens.push(Token {
+                        span: Span::new_with_len(traversed_chars, size),
+                        kind: TokenKind::Unlintable,
+                    });
+                }
                 _ => (),
             }
         }
@@ -251,7 +260,7 @@ impl Parser for Markdown {
 mod tests {
     use super::super::StrParser;
     use super::Markdown;
-    use crate::{Punctuation, TokenKind};
+    use crate::{Punctuation, TokenKind, TokenStringExt};
 
     #[test]
     fn survives_emojis() {
@@ -352,5 +361,12 @@ mod tests {
         dbg!(&token_kinds);
 
         assert!(matches!(token_kinds.as_slice(), &[TokenKind::Word(_)]))
+    }
+
+    #[test]
+    fn html_is_unlintable() {
+        let source = r#"The range of inputs from <ctrl-g> to ctrl-z"#;
+        let tokens = Markdown.parse_str(source);
+        assert_eq!(tokens.iter_unlintables().count(), 1);
     }
 }
