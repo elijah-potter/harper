@@ -3,14 +3,14 @@ use itertools::Itertools;
 use typst_syntax::ast::{AstNode, Expr, Markup};
 
 use super::{Parser, PlainEnglish};
-use crate::{parsers::StrParser, Token, TokenKind, WordMetadata};
+use crate::{parsers::StrParser, Punctuation, Token, TokenKind, WordMetadata};
 
 /// A parser that wraps the [`PlainEnglish`] parser that allows one to parse
 /// Typst files.
 pub struct Typst;
 
 macro_rules! constant_token {
-    ($offset:ident, $doc:ident, $a:ident, $to:expr) => {{
+    ($offset:ident, $doc:ident, $a:expr, $to:expr) => {{
         let range = $doc.range($a.span()).unwrap();
         *$offset += range.len();
         Some(vec![Token {
@@ -18,6 +18,18 @@ macro_rules! constant_token {
             kind: $to,
         }])
     }};
+}
+
+macro_rules! merge_expr {
+    ($($inner:expr),*) => {
+        Some(
+            [$($inner),*]
+                .into_iter()
+                .flatten()
+                .flatten()
+                .collect_vec(),
+        )
+    };
 }
 
 fn recursive_env(
@@ -28,10 +40,31 @@ fn recursive_env(
 ) -> Option<Vec<Token>> {
     Some(
         exprs
-            .filter_map(|e| map_token(e, doc, parser, offset))
+            .filter_map(|e| {
+                let range = doc.range(e.span()).unwrap();
+                *offset += range.len();
+                map_token(e, doc, parser, offset)
+            })
             .flatten()
             .collect_vec(),
     )
+}
+
+fn parse_english(
+    str: impl Into<String>,
+    parser: &mut PlainEnglish,
+    offset: &mut usize,
+) -> Option<Vec<Token>> {
+    let res = parser
+        .parse_str(str.into())
+        .into_iter()
+        .map(|mut t| {
+            t.span.push_by(*offset);
+            t
+        })
+        .collect_vec();
+    *offset = res.last()?.span.end - 1;
+    Some(res)
 }
 
 fn map_token(
@@ -41,36 +74,34 @@ fn map_token(
     offset: &mut usize,
 ) -> Option<Vec<Token>> {
     match ex {
-        Expr::Text(text) => Some(
-            parser
-                .parse_str(text.get())
-                .into_iter()
-                .map(|mut t| {
-                    t.span.push_by(*offset);
-                    t
-                })
-                .collect_vec(),
-        ),
+        Expr::Text(text) => parse_english(text.get(), parser, offset),
         Expr::Space(a) => constant_token!(offset, doc, a, TokenKind::Space(1)),
         Expr::Linebreak(a) => constant_token!(offset, doc, a, TokenKind::Newline(1)),
         Expr::Parbreak(a) => constant_token!(offset, doc, a, TokenKind::Newline(2)),
-        Expr::Escape(_) => None,
-        Expr::Shorthand(_) => None,
-        Expr::SmartQuote(_) => None,
+        Expr::Escape(a) => constant_token!(offset, doc, a, TokenKind::Unlintable),
+        Expr::Shorthand(a) => constant_token!(offset, doc, a, TokenKind::Unlintable),
+        Expr::SmartQuote(quote) => {
+            if quote.double() {
+                constant_token!(
+                    offset,
+                    doc,
+                    quote,
+                    TokenKind::Punctuation(Punctuation::Quote(crate::Quote { twin_loc: None }))
+                )
+            } else {
+                constant_token!(
+                    offset,
+                    doc,
+                    quote,
+                    TokenKind::Punctuation(Punctuation::Apostrophe)
+                )
+            }
+        }
         Expr::Strong(strong) => recursive_env(&mut strong.body().exprs(), doc, parser, offset),
         Expr::Emph(emph) => recursive_env(&mut emph.body().exprs(), doc, parser, offset),
-        Expr::Raw(_) => None,
+        Expr::Raw(a) => constant_token!(offset, doc, a, TokenKind::Unlintable),
         Expr::Link(a) => constant_token!(offset, doc, a, TokenKind::Url),
-        Expr::Label(label) => Some(
-            parser
-                .parse_str(label.get())
-                .into_iter()
-                .map(|mut t| {
-                    t.span.push_by(*offset);
-                    t
-                })
-                .collect_vec(),
-        ),
+        Expr::Label(label) => parse_english(label.get(), parser, offset),
         Expr::Ref(a) => {
             constant_token!(offset, doc, a, TokenKind::Word(WordMetadata::default()))
         }
@@ -87,15 +118,15 @@ fn map_token(
             offset,
         ),
         Expr::Equation(a) => constant_token!(offset, doc, a, TokenKind::Unlintable),
-        Expr::Math(_) => None,
-        Expr::MathIdent(_) => None,
-        Expr::MathShorthand(_) => None,
-        Expr::MathAlignPoint(_) => None,
-        Expr::MathDelimited(_) => None,
-        Expr::MathAttach(_) => None,
-        Expr::MathPrimes(_) => None,
-        Expr::MathFrac(_) => None,
-        Expr::MathRoot(_) => None,
+        Expr::Math(_) => panic!("Unexpected math outside equation environment."),
+        Expr::MathIdent(_) => panic!("Unexpected math outside equation environment."),
+        Expr::MathShorthand(_) => panic!("Unexpected math outside equation environment."),
+        Expr::MathAlignPoint(_) => panic!("Unexpected math outside equation environment."),
+        Expr::MathDelimited(_) => panic!("Unexpected math outside equation environment."),
+        Expr::MathAttach(_) => panic!("Unexpected math outside equation environment."),
+        Expr::MathPrimes(_) => panic!("Unexpected math outside equation environment."),
+        Expr::MathFrac(_) => panic!("Unexpected math outside equation environment."),
+        Expr::MathRoot(_) => panic!("Unexpected math outside equation environment."),
         Expr::Ident(a) => constant_token!(offset, doc, a, TokenKind::Word(WordMetadata::default())),
         Expr::None(a) => constant_token!(offset, doc, a, TokenKind::Word(WordMetadata::default())),
         Expr::Auto(a) => constant_token!(offset, doc, a, TokenKind::Word(WordMetadata::default())),
@@ -103,16 +134,7 @@ fn map_token(
         Expr::Int(int) => todo!(),
         Expr::Float(float) => todo!(),
         Expr::Numeric(a) => constant_token!(offset, doc, a, TokenKind::Unlintable),
-        Expr::Str(text) => Some(
-            parser
-                .parse_str(text.get())
-                .into_iter()
-                .map(|mut t| {
-                    t.span.push_by(*offset);
-                    t
-                })
-                .collect_vec(),
-        ),
+        Expr::Str(text) => parse_english(text.get(), parser, offset),
         Expr::Code(a) => constant_token!(offset, doc, a, TokenKind::Unlintable),
         Expr::Content(content_block) => {
             recursive_env(&mut content_block.body().exprs(), doc, parser, offset)
@@ -131,25 +153,64 @@ fn map_token(
                 .flatten()
                 .collect_vec(),
         ),
-        Expr::Dict(dict) => todo!(),
-        Expr::Unary(unary) => todo!(),
-        Expr::Binary(binary) => todo!(),
-        Expr::FieldAccess(field_access) => todo!(),
-        Expr::FuncCall(func_call) => todo!(),
-        Expr::Closure(closure) => todo!(),
-        Expr::Let(let_binding) => todo!(),
-        Expr::DestructAssign(destruct_assignment) => todo!(),
-        Expr::Set(set_rule) => todo!(),
-        Expr::Show(show_rule) => todo!(),
-        Expr::Contextual(contextual) => todo!(),
-        Expr::Conditional(conditional) => todo!(),
-        Expr::While(while_loop) => todo!(),
-        Expr::For(for_loop) => todo!(),
-        Expr::Import(module_import) => todo!(),
-        Expr::Include(module_include) => todo!(),
-        Expr::Break(loop_break) => todo!(),
-        Expr::Continue(loop_continue) => todo!(),
-        Expr::Return(func_return) => todo!(),
+        // TODO: actually parse dictionaries
+        Expr::Dict(a) => constant_token!(offset, doc, a, TokenKind::Unlintable),
+        Expr::Unary(a) => constant_token!(offset, doc, a, TokenKind::Unlintable),
+        Expr::Binary(a) => constant_token!(offset, doc, a, TokenKind::Unlintable),
+        Expr::FieldAccess(field_access) => merge_expr!(
+            map_token(field_access.target(), doc, parser, offset),
+            constant_token!(
+                offset,
+                doc,
+                field_access.field(),
+                TokenKind::Word(WordMetadata::default())
+            )
+        ),
+        Expr::FuncCall(a) => constant_token!(offset, doc, a, TokenKind::Unlintable),
+        Expr::Closure(a) => constant_token!(offset, doc, a, TokenKind::Unlintable),
+        Expr::Let(let_binding) => let_binding
+            .init()
+            .and_then(|e| map_token(e, doc, parser, offset)),
+        Expr::DestructAssign(destruct_assignment) => {
+            map_token(destruct_assignment.value(), doc, parser, offset)
+        }
+        Expr::Set(set_rule) => merge_expr!(
+            map_token(set_rule.target(), doc, parser, offset),
+            map_token(set_rule.condition()?, doc, parser, offset)
+        ),
+        Expr::Show(show_rule) => merge_expr!(
+            map_token(show_rule.transform(), doc, parser, offset),
+            map_token(show_rule.selector()?, doc, parser, offset)
+        ),
+        Expr::Contextual(contextual) => map_token(contextual.body(), doc, parser, offset),
+        Expr::Conditional(conditional) => merge_expr!(
+            map_token(conditional.condition(), doc, parser, offset),
+            map_token(conditional.if_body(), doc, parser, offset),
+            map_token(conditional.else_body()?, doc, parser, offset)
+        ),
+        Expr::While(while_loop) => merge_expr!(
+            map_token(while_loop.condition(), doc, parser, offset),
+            map_token(while_loop.body(), doc, parser, offset)
+        ),
+        Expr::For(for_loop) => merge_expr!(
+            map_token(for_loop.iterable(), doc, parser, offset),
+            map_token(for_loop.body(), doc, parser, offset)
+        ),
+        Expr::Import(module_import) => {
+            merge_expr!(
+                map_token(module_import.source(), doc, parser, offset),
+                constant_token!(
+                    offset,
+                    doc,
+                    module_import.new_name()?,
+                    TokenKind::Word(WordMetadata::default())
+                )
+            )
+        }
+        Expr::Include(module_include) => map_token(module_include.source(), doc, parser, offset),
+        Expr::Break(a) => constant_token!(offset, doc, a, TokenKind::Unlintable),
+        Expr::Continue(a) => constant_token!(offset, doc, a, TokenKind::Unlintable),
+        Expr::Return(a) => constant_token!(offset, doc, a, TokenKind::Unlintable),
     }
 }
 
@@ -170,5 +231,74 @@ impl Parser for Typst {
             .filter_map(|ex| map_token(ex, &typst_document, &mut english_parser, &mut offset))
             .flatten()
             .collect_vec()
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::Typst;
+    use crate::{parsers::StrParser, Punctuation, TokenKind};
+
+    #[test]
+    fn conjunction() {
+        let source = r"doesn't";
+
+        let tokens = Typst.parse_str(source);
+
+        let token_kinds = tokens.iter().map(|t| t.kind).collect::<Vec<_>>();
+
+        dbg!(&token_kinds);
+
+        assert!(matches!(token_kinds.as_slice(), &[TokenKind::Word(_),]))
+    }
+
+    #[test]
+    fn sentence() {
+        let source = r"This is a sentence, it does not have any particularly interesting elements of the typst syntax.";
+
+        let tokens = Typst.parse_str(source);
+
+        let token_kinds = tokens.iter().map(|t| t.kind).collect::<Vec<_>>();
+
+        dbg!(&token_kinds);
+
+        assert!(matches!(
+            token_kinds.as_slice(),
+            &[
+                TokenKind::Word(_),
+                TokenKind::Space(1),
+                TokenKind::Word(_),
+                TokenKind::Space(1),
+                TokenKind::Word(_),
+                TokenKind::Space(1),
+                TokenKind::Word(_),
+                TokenKind::Punctuation(Punctuation::Comma),
+                TokenKind::Space(1),
+                TokenKind::Word(_),
+                TokenKind::Space(1),
+                TokenKind::Word(_),
+                TokenKind::Space(1),
+                TokenKind::Word(_),
+                TokenKind::Space(1),
+                TokenKind::Word(_),
+                TokenKind::Space(1),
+                TokenKind::Word(_),
+                TokenKind::Space(1),
+                TokenKind::Word(_),
+                TokenKind::Space(1),
+                TokenKind::Word(_),
+                TokenKind::Space(1),
+                TokenKind::Word(_),
+                TokenKind::Space(1),
+                TokenKind::Word(_),
+                TokenKind::Space(1),
+                TokenKind::Word(_),
+                TokenKind::Space(1),
+                TokenKind::Word(_),
+                TokenKind::Space(1),
+                TokenKind::Word(_),
+                TokenKind::Punctuation(Punctuation::Period),
+            ]
+        ))
     }
 }
