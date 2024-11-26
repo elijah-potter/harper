@@ -77,7 +77,7 @@ fn map_token(
         Expr::Text(text) => parse_english(text.get(), parser, offset),
         Expr::Space(a) => constant_token!(offset, doc, a, TokenKind::Space(1)),
         Expr::Linebreak(a) => constant_token!(offset, doc, a, TokenKind::Newline(1)),
-        Expr::Parbreak(a) => constant_token!(offset, doc, a, TokenKind::Newline(2)),
+        Expr::Parbreak(a) => constant_token!(offset, doc, a, TokenKind::ParagraphBreak),
         Expr::Escape(a) => constant_token!(offset, doc, a, TokenKind::Unlintable),
         Expr::Shorthand(a) => constant_token!(offset, doc, a, TokenKind::Unlintable),
         Expr::SmartQuote(quote) => {
