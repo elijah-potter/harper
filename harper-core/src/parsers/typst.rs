@@ -63,7 +63,7 @@ fn parse_english(
             t
         })
         .collect_vec();
-    *offset = res.last()?.span.end - 1;
+    *offset = res.last()?.span.end;
     Some(res)
 }
 
