@@ -11,6 +11,7 @@ pub use isolate_english::IsolateEnglish;
 pub use markdown::Markdown;
 pub use mask::Mask;
 pub use plain_english::PlainEnglish;
+pub use typst::Typst;
 
 pub use crate::token::{Token, TokenKind, TokenStringExt};
 
