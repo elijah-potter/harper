@@ -7,7 +7,7 @@ use ariadne::{Color, Label, Report, ReportKind, Source};
 use clap::Parser;
 use harper_comments::CommentParser;
 use harper_core::linting::{LintGroup, LintGroupConfig, Linter};
-use harper_core::parsers::Markdown;
+use harper_core::parsers::{Markdown, Typst};
 use harper_core::{remove_overlaps, Dictionary, Document, FstDictionary};
 
 #[derive(Debug, Parser)]
@@ -107,6 +107,8 @@ fn load_file(file: &Path) -> anyhow::Result<(Document, String)> {
     let mut parser: Box<dyn harper_core::parsers::Parser> =
         if let Some("md") = file.extension().map(|v| v.to_str().unwrap()) {
             Box::new(Markdown)
+        } else if let Some("typ") = file.extension().map(|v| v.to_str().unwrap()) {
+            Box::new(Typst)
         } else {
             Box::new(
                 CommentParser::new_from_filename(file)
