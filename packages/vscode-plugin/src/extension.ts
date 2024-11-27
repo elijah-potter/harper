@@ -44,8 +44,9 @@ export async function activate(context: ExtensionContext): Promise<void> {
 	context.subscriptions.push(
 		workspace.onDidChangeConfiguration(async (event) => {
 			if (configs.find((c) => event.affectsConfiguration(c))) {
-				clientOptions.outputChannel?.appendLine('Configuration changed, restarting server');
-				await startLanguageServer();
+				await client?.sendNotification('workspace/didChangeConfiguration', {
+					settings: { 'harper-ls': workspace.getConfiguration('harper-ls') }
+				});
 			}
 		})
 	);
