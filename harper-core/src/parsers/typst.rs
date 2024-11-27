@@ -1,9 +1,13 @@
 use itertools::Itertools;
-
+use std::collections::VecDeque;
 use typst_syntax::ast::{AstNode, Expr, Markup};
 
 use super::{Parser, PlainEnglish};
-use crate::{parsers::StrParser, Punctuation, Token, TokenKind, WordMetadata};
+use crate::{
+    parsers::StrParser,
+    patterns::{PatternExt, SequencePattern},
+    ConjunctionData, Lrc, Punctuation, Span, Token, TokenKind, VecExt, WordMetadata,
+};
 
 /// A parser that wraps the [`PlainEnglish`] parser that allows one to parse
 /// Typst files.
@@ -199,6 +203,13 @@ fn map_token(
     }
 }
 
+thread_local! {
+    static WORD_APOSTROPHE_WORD: Lrc<SequencePattern> = Lrc::new(SequencePattern::default()
+                .then_any_word()
+                .then_apostrophe()
+                .then_any_word());
+}
+
 impl Parser for Typst {
     fn parse(&mut self, source: &[char]) -> Vec<Token> {
         let mut english_parser = PlainEnglish;
@@ -210,11 +221,43 @@ impl Parser for Typst {
 
         // NOTE: the range spits out __byte__ indices, not char indices.
         // This is why we keep track above.
-        typst_tree
+        let mut tokens = typst_tree
             .exprs()
             .filter_map(|ex| map_token(ex, &typst_document, &mut english_parser))
             .flatten()
-            .collect_vec()
+            .collect_vec();
+
+        // Consolidate conjunctions
+        let mut to_remove = VecDeque::default();
+        for tok_span in WORD_APOSTROPHE_WORD
+            .with(|v| v.clone())
+            .find_all_matches(&tokens, source)
+        {
+            let start_tok = &tokens[tok_span.start];
+            let end_tok = &tokens[tok_span.end - 1];
+            let char_span = Span::new(start_tok.span.start, end_tok.span.end);
+
+            if let TokenKind::Word(metadata) = start_tok.kind {
+                if end_tok.span.get_content(source) == &['s'] {
+                    if let Some(mut noun) = metadata.noun {
+                        noun.is_possessive = Some(true);
+                    }
+                } else {
+                    tokens[tok_span.start].kind = TokenKind::Word(WordMetadata {
+                        conjunction: Some(ConjunctionData {}),
+                        ..metadata
+                    });
+                };
+
+                tokens[tok_span.start].span = char_span;
+                to_remove.extend(tok_span.start + 1..tok_span.end);
+            } else {
+                panic!("Apostrophe consolidation does not start with Word Token!")
+            }
+        }
+        tokens.remove_indices(to_remove.into_iter().sorted().unique().collect());
+
+        tokens
     }
 }
 
