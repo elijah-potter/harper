@@ -238,7 +238,7 @@ impl Parser for Typst {
             let char_span = Span::new(start_tok.span.start, end_tok.span.end);
 
             if let TokenKind::Word(metadata) = start_tok.kind {
-                if end_tok.span.get_content(source) == &['s'] {
+                if end_tok.span.get_content(source) == ['s'] {
                     if let Some(mut noun) = metadata.noun {
                         noun.is_possessive = Some(true);
                     }
