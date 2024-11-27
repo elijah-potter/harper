@@ -6,7 +6,7 @@ use super::{Parser, PlainEnglish};
 use crate::{
     parsers::StrParser,
     patterns::{PatternExt, SequencePattern},
-    ConjunctionData, Lrc, Punctuation, Span, Token, TokenKind, VecExt, WordMetadata,
+    ConjunctionData, Lrc, NounData, Punctuation, Span, Token, TokenKind, VecExt, WordMetadata,
 };
 
 /// A parser that wraps the [`PlainEnglish`] parser that allows one to parse
@@ -238,16 +238,26 @@ impl Parser for Typst {
             let char_span = Span::new(start_tok.span.start, end_tok.span.end);
 
             if let TokenKind::Word(metadata) = start_tok.kind {
-                if end_tok.span.get_content(source) == ['s'] {
-                    if let Some(mut noun) = metadata.noun {
-                        noun.is_possessive = Some(true);
-                    }
-                } else {
-                    tokens[tok_span.start].kind = TokenKind::Word(WordMetadata {
-                        conjunction: Some(ConjunctionData {}),
-                        ..metadata
+                tokens[tok_span.start].kind =
+                    TokenKind::Word(if end_tok.span.get_content(source) == ['s'] {
+                        WordMetadata {
+                            noun: Some(NounData {
+                                is_possessive: Some(true),
+                                ..metadata.noun.unwrap_or_default()
+                            }),
+                            conjunction: None,
+                            ..metadata
+                        }
+                    } else {
+                        WordMetadata {
+                            noun: metadata.noun.map(|noun| NounData {
+                                is_possessive: Some(false),
+                                ..noun
+                            }),
+                            conjunction: Some(ConjunctionData {}),
+                            ..metadata
+                        }
                     });
-                };
 
                 tokens[tok_span.start].span = char_span;
                 to_remove.extend(tok_span.start + 1..tok_span.end);
@@ -266,7 +276,7 @@ mod tests {
     use ordered_float::OrderedFloat;
 
     use super::Typst;
-    use crate::{parsers::StrParser, Punctuation, TokenKind};
+    use crate::{parsers::StrParser, NounData, Punctuation, TokenKind, WordMetadata};
 
     #[test]
     fn conjunction() {
@@ -278,12 +288,38 @@ mod tests {
 
         dbg!(&token_kinds);
 
-        assert!(matches!(token_kinds.as_slice(), &[TokenKind::Word(_),]))
+        assert_eq!(token_kinds.len(), 1);
+        assert!(token_kinds.into_iter().all(|t| t.is_conjunction()))
+    }
+
+    #[test]
+    fn possessive() {
+        let source = r"person's";
+
+        let tokens = Typst.parse_str(source);
+
+        let token_kinds = tokens.iter().map(|t| t.kind).collect::<Vec<_>>();
+
+        dbg!(&token_kinds);
+
+        assert_eq!(token_kinds.len(), 1);
+        assert!(token_kinds.into_iter().all(|t| {
+            matches!(
+                t,
+                TokenKind::Word(WordMetadata {
+                    noun: Some(NounData {
+                        is_possessive: Some(true),
+                        ..
+                    }),
+                    ..
+                })
+            )
+        }))
     }
 
     #[test]
     fn number() {
-        let source = r"The number 12 is larger than 11, but is much less than 11!";
+        let source = r"12 is larger than 11, but much less than 11!";
 
         let tokens = Typst.parse_str(source);
 
@@ -294,10 +330,6 @@ mod tests {
         assert!(matches!(
             token_kinds.as_slice(),
             &[
-                TokenKind::Word(_),
-                TokenKind::Space(1),
-                TokenKind::Word(_),
-                TokenKind::Space(1),
                 TokenKind::Number(OrderedFloat(12.0), None),
                 TokenKind::Space(1),
                 TokenKind::Word(_),
@@ -317,10 +349,29 @@ mod tests {
                 TokenKind::Space(1),
                 TokenKind::Word(_),
                 TokenKind::Space(1),
-                TokenKind::Word(_),
-                TokenKind::Space(1),
                 TokenKind::Number(OrderedFloat(11.0), None),
                 TokenKind::Punctuation(Punctuation::Bang),
+            ]
+        ))
+    }
+
+    #[test]
+    fn math_unlintable() {
+        let source = r"$12 > 11$, $12 << 11!$";
+
+        let tokens = Typst.parse_str(source);
+
+        let token_kinds = tokens.iter().map(|t| t.kind).collect::<Vec<_>>();
+
+        dbg!(&token_kinds);
+
+        assert!(matches!(
+            token_kinds.as_slice(),
+            &[
+                TokenKind::Unlintable,
+                TokenKind::Punctuation(Punctuation::Comma),
+                TokenKind::Space(1),
+                TokenKind::Unlintable,
             ]
         ))
     }
