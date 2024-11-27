@@ -116,8 +116,12 @@ fn map_token(
         Expr::None(a) => constant_token!(doc, a, TokenKind::Word(WordMetadata::default())),
         Expr::Auto(a) => constant_token!(doc, a, TokenKind::Word(WordMetadata::default())),
         Expr::Bool(a) => constant_token!(doc, a, TokenKind::Word(WordMetadata::default())),
-        Expr::Int(int) => todo!(),
-        Expr::Float(float) => todo!(),
+        Expr::Int(int) => {
+            constant_token!(doc, int, TokenKind::Number((int.get() as f64).into(), None))
+        }
+        Expr::Float(float) => {
+            constant_token!(doc, float, TokenKind::Number(float.get().into(), None))
+        }
         Expr::Numeric(a) => constant_token!(doc, a, TokenKind::Unlintable),
         Expr::Str(text) => parse_english(text.get(), doc, parser, &text.span()),
         Expr::Code(a) => constant_token!(doc, a, TokenKind::Unlintable),
@@ -216,6 +220,8 @@ impl Parser for Typst {
 
 #[cfg(test)]
 mod tests {
+    use ordered_float::OrderedFloat;
+
     use super::Typst;
     use crate::{parsers::StrParser, Punctuation, TokenKind};
 
@@ -230,6 +236,50 @@ mod tests {
         dbg!(&token_kinds);
 
         assert!(matches!(token_kinds.as_slice(), &[TokenKind::Word(_),]))
+    }
+
+    #[test]
+    fn number() {
+        let source = r"The number 12 is larger than 11, but is much less than 11!";
+
+        let tokens = Typst.parse_str(source);
+
+        let token_kinds = tokens.iter().map(|t| t.kind).collect::<Vec<_>>();
+
+        dbg!(&token_kinds);
+
+        assert!(matches!(
+            token_kinds.as_slice(),
+            &[
+                TokenKind::Word(_),
+                TokenKind::Space(1),
+                TokenKind::Word(_),
+                TokenKind::Space(1),
+                TokenKind::Number(OrderedFloat(12.0), None),
+                TokenKind::Space(1),
+                TokenKind::Word(_),
+                TokenKind::Space(1),
+                TokenKind::Word(_),
+                TokenKind::Space(1),
+                TokenKind::Word(_),
+                TokenKind::Space(1),
+                TokenKind::Number(OrderedFloat(11.0), None),
+                TokenKind::Punctuation(Punctuation::Comma),
+                TokenKind::Space(1),
+                TokenKind::Word(_),
+                TokenKind::Space(1),
+                TokenKind::Word(_),
+                TokenKind::Space(1),
+                TokenKind::Word(_),
+                TokenKind::Space(1),
+                TokenKind::Word(_),
+                TokenKind::Space(1),
+                TokenKind::Word(_),
+                TokenKind::Space(1),
+                TokenKind::Number(OrderedFloat(11.0), None),
+                TokenKind::Punctuation(Punctuation::Bang),
+            ]
+        ))
     }
 
     #[test]
