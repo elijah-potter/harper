@@ -26,6 +26,11 @@ enum Args {
         /// The file you wish to parse.
         file: PathBuf,
     },
+    /// Parse a provided document and show the spans of the detected tokens.
+    Spans {
+        /// The file you wish to display the spans.
+        file: PathBuf,
+    },
     /// Emit decompressed, line-separated list of words in Harper's dictionary.
     Words,
 }
@@ -83,6 +88,29 @@ fn main() -> anyhow::Result<()> {
             }
 
             Ok(())
+        }
+        Args::Spans { file } => {
+            let (doc, source) = load_file(&file)?;
+
+            let primary_color = Color::Blue;
+            let filename = file
+                .file_name()
+                .map(|s| s.to_string_lossy().into())
+                .unwrap_or("<file>".to_string());
+
+            let mut report_builder = Report::build(ReportKind::Advice, &filename, 0);
+            for token in doc.tokens() {
+                report_builder = report_builder.with_label(
+                    Label::new((&filename, token.span.into()))
+                        .with_message(format!("[{}, {})", token.span.start, token.span.end))
+                        .with_color(primary_color),
+                );
+            }
+
+            let report = report_builder.finish();
+            report.print((&filename, Source::from(source)))?;
+
+            std::process::exit(1);
         }
         Args::Words => {
             let dict = FstDictionary::curated();
