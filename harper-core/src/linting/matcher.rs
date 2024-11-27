@@ -121,6 +121,7 @@ impl Matcher {
             "united nations" => "United Nations",
             "mins" => "minutes",
             "min" => "minute",
+            "min" => "minimum",
             "secs" => "seconds",
             "sec" => "second",
             "hrs" => "hours",
