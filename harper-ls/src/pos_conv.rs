@@ -1,8 +1,9 @@
+//! This module includes various conversions from the index-based [`Span`]s that
+//! Harper uses, and the Ranges that the LSP uses.
+
 use harper_core::Span;
 use tower_lsp::lsp_types::{Position, Range};
 
-/// This module includes various conversions from the index-based [`Span`]s that
-/// Harper uses, and the Ranges that the LSP uses.
 pub fn span_to_range(source: &[char], span: Span) -> Range {
     let start = index_to_position(source, span.start);
     let end = index_to_position(source, span.end);
