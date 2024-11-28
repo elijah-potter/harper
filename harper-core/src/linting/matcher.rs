@@ -274,7 +274,8 @@ impl Matcher {
             "not", "longer" => "no longer",
             "to", "towards" => "towards",
             "though", "process" => "thought process",
-            "the", "this" => "that this"
+            "the", "this" => "that this",
+            "take", "a", "decision" => "make a decision"
         };
 
         // TODO: Improve the description for this lint specifically.

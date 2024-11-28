@@ -481,6 +481,22 @@ impl LanguageServer for Backend {
 
     async fn did_change_configuration(&self, params: DidChangeConfigurationParams) {
         self.update_config_from_obj(params.settings).await;
+
+        let urls: Vec<Url> = {
+            let mut doc_lock = self.doc_state.lock().await;
+            let config_lock = self.config.read().await;
+
+            for doc in doc_lock.values_mut() {
+                doc.linter = LintGroup::new(config_lock.lint_config, doc.dict.clone());
+            }
+
+            doc_lock.keys().cloned().collect()
+        };
+
+        for url in urls {
+            let _ = self.update_document_from_file(&url, None).await;
+            self.publish_diagnostics(&url).await;
+        }
     }
 
     async fn code_action(&self, params: CodeActionParams) -> Result<Option<CodeActionResponse>> {

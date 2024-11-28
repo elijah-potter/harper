@@ -22,7 +22,7 @@ pub struct FuzzyMatchResult<'a> {
     metadata: WordMetadata,
 }
 
-impl<'a> PartialOrd for FuzzyMatchResult<'a> {
+impl PartialOrd for FuzzyMatchResult<'_> {
     fn partial_cmp(&self, other: &Self) -> Option<std::cmp::Ordering> {
         self.edit_distance.partial_cmp(&other.edit_distance)
     }
