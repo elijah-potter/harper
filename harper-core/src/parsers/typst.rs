@@ -64,6 +64,88 @@ fn parse_english(
     Some(res)
 }
 
+fn parse_dict(
+    dict: &mut dyn Iterator<Item = typst_syntax::ast::DictItem>,
+    doc: &typst_syntax::Source,
+    parser: &mut PlainEnglish,
+) -> Option<Vec<Token>> {
+    Some(
+        dict.filter_map(|di| match di {
+            typst_syntax::ast::DictItem::Named(named) => merge_expr!(
+                constant_token!(doc, named.name(), TokenKind::Word(WordMetadata::default())),
+                map_token(named.expr(), doc, parser),
+                parse_pattern(named.pattern(), doc, parser)
+            ),
+            typst_syntax::ast::DictItem::Keyed(keyed) => merge_expr!(
+                map_token(keyed.key(), doc, parser),
+                map_token(keyed.expr(), doc, parser)
+            ),
+            typst_syntax::ast::DictItem::Spread(spread) => spread.sink_ident().map_or_else(
+                || {
+                    spread
+                        .sink_expr()
+                        .and_then(|expr| map_token(expr, doc, parser))
+                },
+                |ident| constant_token!(doc, ident, TokenKind::Word(WordMetadata::default())),
+            ),
+        })
+        .flatten()
+        .collect(),
+    )
+}
+
+fn parse_pattern(
+    pat: typst_syntax::ast::Pattern,
+    doc: &typst_syntax::Source,
+    parser: &mut PlainEnglish,
+) -> Option<Vec<Token>> {
+    match pat {
+        typst_syntax::ast::Pattern::Normal(expr) => map_token(expr, doc, parser),
+        typst_syntax::ast::Pattern::Placeholder(underscore) => {
+            constant_token!(doc, underscore, TokenKind::Unlintable)
+        }
+        typst_syntax::ast::Pattern::Parenthesized(parenthesized) => merge_expr!(
+            map_token(parenthesized.expr(), doc, parser),
+            parse_pattern(parenthesized.pattern(), doc, parser)
+        ),
+        typst_syntax::ast::Pattern::Destructuring(destructuring) => Some(
+            destructuring
+                .items()
+                .filter_map(|item| match item {
+                    typst_syntax::ast::DestructuringItem::Pattern(pattern) => {
+                        parse_pattern(pattern, doc, parser)
+                    }
+                    typst_syntax::ast::DestructuringItem::Named(named) => merge_expr!(
+                        constant_token!(
+                            doc,
+                            named.name(),
+                            TokenKind::Word(WordMetadata::default())
+                        ),
+                        parse_pattern(named.pattern(), doc, parser)
+                    ),
+                    typst_syntax::ast::DestructuringItem::Spread(spread) => {
+                        spread.sink_ident().map_or_else(
+                            || {
+                                spread
+                                    .sink_expr()
+                                    .and_then(|expr| map_token(expr, doc, parser))
+                            },
+                            |ident| {
+                                constant_token!(
+                                    doc,
+                                    ident,
+                                    TokenKind::Word(WordMetadata::default())
+                                )
+                            },
+                        )
+                    }
+                })
+                .flatten()
+                .collect(),
+        ),
+    }
+}
+
 fn map_token(
     ex: typst_syntax::ast::Expr,
     doc: &typst_syntax::Source,
@@ -146,8 +228,7 @@ fn map_token(
                 .flatten()
                 .collect_vec(),
         ),
-        // TODO: actually parse dictionaries
-        Expr::Dict(a) => constant_token!(doc, a, TokenKind::Unlintable),
+        Expr::Dict(a) => parse_dict(&mut a.items(), doc, parser),
         Expr::Unary(a) => constant_token!(doc, a, TokenKind::Unlintable),
         Expr::Binary(a) => constant_token!(doc, a, TokenKind::Unlintable),
         Expr::FieldAccess(field_access) => merge_expr!(
