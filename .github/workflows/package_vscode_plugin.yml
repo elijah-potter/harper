@@ -9,6 +9,7 @@ on:
 jobs:
   package:
     name: Package - ${{ matrix.platform.code_target }}
+    if: github.event.pull_request.draft == false
     strategy:
       matrix:
         platform:
