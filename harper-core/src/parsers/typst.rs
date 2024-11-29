@@ -53,15 +53,17 @@ fn parse_english(
     parser: &mut PlainEnglish,
     span: &typst_syntax::Span,
 ) -> Option<Vec<Token>> {
-    let res = parser
-        .parse_str(str.into())
-        .into_iter()
-        .map(|mut t| {
-            t.span.push_by(doc.range(*span).unwrap().start);
-            t
-        })
-        .collect_vec();
-    Some(res)
+    let offset = doc.range(*span).unwrap().start;
+    Some(
+        parser
+            .parse_str(str.into())
+            .into_iter()
+            .map(|mut t| {
+                t.span.push_by(offset);
+                t
+            })
+            .collect_vec(),
+    )
 }
 
 fn parse_dict(
@@ -73,8 +75,7 @@ fn parse_dict(
         dict.filter_map(|di| match di {
             typst_syntax::ast::DictItem::Named(named) => merge_expr!(
                 constant_token!(doc, named.name(), TokenKind::Word(WordMetadata::default())),
-                map_token(named.expr(), doc, parser),
-                parse_pattern(named.pattern(), doc, parser)
+                map_token(named.expr(), doc, parser)
             ),
             typst_syntax::ast::DictItem::Keyed(keyed) => merge_expr!(
                 map_token(keyed.key(), doc, parser),
@@ -241,7 +242,15 @@ fn map_token(
         ),
         Expr::FuncCall(a) => constant_token!(doc, a, TokenKind::Unlintable),
         Expr::Closure(a) => constant_token!(doc, a, TokenKind::Unlintable),
-        Expr::Let(let_binding) => let_binding.init().and_then(|e| map_token(e, doc, parser)),
+        Expr::Let(let_binding) => merge_expr!(
+            match let_binding.kind() {
+                typst_syntax::ast::LetBindingKind::Normal(pattern) =>
+                    parse_pattern(pattern, doc, parser),
+                typst_syntax::ast::LetBindingKind::Closure(ident) =>
+                    constant_token!(doc, ident, TokenKind::Word(WordMetadata::default())),
+            },
+            let_binding.init().and_then(|e| map_token(e, doc, parser))
+        ),
         Expr::DestructAssign(destruct_assignment) => {
             map_token(destruct_assignment.value(), doc, parser)
         }
@@ -354,6 +363,7 @@ impl Parser for Typst {
 
 #[cfg(test)]
 mod tests {
+    use itertools::Itertools;
     use ordered_float::OrderedFloat;
 
     use super::Typst;
@@ -361,12 +371,10 @@ mod tests {
 
     #[test]
     fn conjunction() {
-        let source = r"doesn't";
+        let source = "doesn't";
 
         let tokens = Typst.parse_str(source);
-
         let token_kinds = tokens.iter().map(|t| t.kind).collect::<Vec<_>>();
-
         dbg!(&token_kinds);
 
         assert_eq!(token_kinds.len(), 1);
@@ -375,12 +383,10 @@ mod tests {
 
     #[test]
     fn possessive() {
-        let source = r"person's";
+        let source = "person's";
 
         let tokens = Typst.parse_str(source);
-
         let token_kinds = tokens.iter().map(|t| t.kind).collect::<Vec<_>>();
-
         dbg!(&token_kinds);
 
         assert_eq!(token_kinds.len(), 1);
@@ -400,12 +406,10 @@ mod tests {
 
     #[test]
     fn number() {
-        let source = r"12 is larger than 11, but much less than 11!";
+        let source = "12 is larger than 11, but much less than 11!";
 
         let tokens = Typst.parse_str(source);
-
         let token_kinds = tokens.iter().map(|t| t.kind).collect::<Vec<_>>();
-
         dbg!(&token_kinds);
 
         assert!(matches!(
@@ -438,12 +442,10 @@ mod tests {
 
     #[test]
     fn math_unlintable() {
-        let source = r"$12 > 11$, $12 << 11!$";
+        let source = "$12 > 11$, $12 << 11!$";
 
         let tokens = Typst.parse_str(source);
-
         let token_kinds = tokens.iter().map(|t| t.kind).collect::<Vec<_>>();
-
         dbg!(&token_kinds);
 
         assert!(matches!(
@@ -458,13 +460,45 @@ mod tests {
     }
 
     #[test]
-    fn sentence() {
-        let source = r"This is a sentence, it does not have any particularly interesting elements of the typst syntax.";
+    fn dict_parsing() {
+        let source = r#"#let dict = (
+                        name: "Typst",
+                        born: 2019,
+                      )"#;
 
         let tokens = Typst.parse_str(source);
-
         let token_kinds = tokens.iter().map(|t| t.kind).collect::<Vec<_>>();
+        dbg!(&token_kinds);
 
+        let typst_document = typst_syntax::Source::detached(source);
+        let typst_tree = <typst_syntax::ast::Markup as typst_syntax::ast::AstNode>::from_untyped(
+            typst_document.root(),
+        )
+        .expect("Unable to create typst document from parsed tree!");
+        dbg!(typst_tree.exprs().collect_vec());
+
+        let charslice = source.chars().collect_vec();
+        assert_eq!(tokens[2].span.get_content_string(&charslice), "Typst");
+        assert!(matches!(
+            token_kinds.as_slice(),
+            &[
+                TokenKind::Word(_),
+                TokenKind::Word(_),
+                TokenKind::Punctuation(Punctuation::Quote { .. }),
+                TokenKind::Word(_),
+                TokenKind::Punctuation(Punctuation::Quote { .. }),
+                TokenKind::Word(_),
+                TokenKind::Number(OrderedFloat(2019.0), None),
+            ]
+        ))
+    }
+
+    #[test]
+    fn sentence() {
+        let source = "This is a sentence, it does not have any particularly interesting elements of the typst syntax.";
+
+        let tokens = Typst.parse_str(source);
+        let token_kinds = tokens.iter().map(|t| t.kind).collect::<Vec<_>>();
         dbg!(&token_kinds);
 
         assert!(matches!(
