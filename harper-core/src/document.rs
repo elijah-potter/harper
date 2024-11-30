@@ -500,6 +500,7 @@ impl TokenStringExt for Document {
     create_fns_on_doc!(ellipsis);
     create_fns_on_doc!(unlintable);
     create_fns_on_doc!(sentence_terminator);
+    create_fns_on_doc!(paragraph_break);
     create_fns_on_doc!(chunk_terminator);
     create_fns_on_doc!(punctuation);
     create_fns_on_doc!(likely_homograph);
@@ -526,6 +527,10 @@ impl TokenStringExt for Document {
 
     fn iter_chunks(&self) -> impl Iterator<Item = &'_ [Token]> + '_ {
         self.tokens.iter_chunks()
+    }
+
+    fn iter_paragraphs(&self) -> impl Iterator<Item = &'_ [Token]> + '_ {
+        self.tokens.iter_paragraphs()
     }
 
     fn iter_sentences(&self) -> impl Iterator<Item = &'_ [Token]> + '_ {

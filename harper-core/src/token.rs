@@ -403,6 +403,7 @@ pub trait TokenStringExt {
     create_decl_for!(ellipsis);
     create_decl_for!(unlintable);
     create_decl_for!(sentence_terminator);
+    create_decl_for!(paragraph_break);
     create_decl_for!(chunk_terminator);
     create_decl_for!(punctuation);
     create_decl_for!(likely_homograph);
@@ -421,6 +422,10 @@ pub trait TokenStringExt {
     fn iter_chunks(&self) -> impl Iterator<Item = &'_ [Token]> + '_;
 
     /// Get an iterator over token slices that represent the individual
+    /// paragraphs in a document.
+    fn iter_paragraphs(&self) -> impl Iterator<Item = &'_ [Token]> + '_;
+
+    /// Get an iterator over token slices that represent the individual
     /// sentences in a document.
     fn iter_sentences(&self) -> impl Iterator<Item = &'_ [Token]> + '_;
 }
@@ -437,6 +442,7 @@ impl TokenStringExt for [Token] {
     create_fns_for!(ellipsis);
     create_fns_for!(unlintable);
     create_fns_for!(sentence_terminator);
+    create_fns_for!(paragraph_break);
     create_fns_for!(chunk_terminator);
     create_fns_for!(likely_homograph);
 
@@ -499,6 +505,30 @@ impl TokenStringExt for [Token] {
         };
 
         first_chunk.into_iter().chain(rest).chain(last)
+    }
+
+    fn iter_paragraphs(&self) -> impl Iterator<Item = &'_ [Token]> + '_ {
+        let first_pg = self
+            .iter_paragraph_break_indices()
+            .next()
+            .map(|first_term| &self[0..=first_term]);
+
+        let rest = self
+            .iter_paragraph_break_indices()
+            .tuple_windows()
+            .map(move |(a, b)| &self[a + 1..=b]);
+
+        let last_pg = if let Some(last_i) = self.last_paragraph_break_index() {
+            if last_i + 1 < self.len() {
+                Some(&self[last_i + 1..])
+            } else {
+                None
+            }
+        } else {
+            Some(self)
+        };
+
+        first_pg.into_iter().chain(rest).chain(last_pg)
     }
 
     fn iter_sentences(&self) -> impl Iterator<Item = &'_ [Token]> + '_ {
