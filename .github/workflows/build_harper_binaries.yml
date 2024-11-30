@@ -9,6 +9,7 @@ on:
 jobs:
   release:
     name: Release ${{ matrix.platform.project }} - ${{ matrix.platform.release_for }}
+    if: github.event.pull_request.draft == false
     strategy:
       matrix:
         platform:
