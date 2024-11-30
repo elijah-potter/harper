@@ -8,7 +8,7 @@ on:
 
 jobs:
   release:
-    name: Release - ${{ matrix.platform.release_for }}
+    name: Release ${{ matrix.platform.project }} - ${{ matrix.platform.release_for }}
     strategy:
       matrix:
         platform:
