@@ -3,7 +3,7 @@
     <h1>Harper</h1>
 </div>
 
-[![Harper LS](https://github.com/elijah-potter/harper/actions/workflows/build_harper_ls.yml/badge.svg)](https://github.com/elijah-potter/harper/actions/workflows/build_harper_ls.yml)
+[![Harper Binaries](https://github.com/elijah-potter/harper/actions/workflows/build_harper_binaries.yml/badge.svg)](https://github.com/elijah-potter/harper/actions/workflows/build_harper_binaries.yml)
 [![Web](https://github.com/elijah-potter/harper/actions/workflows/build_web.yml/badge.svg)](https://github.com/elijah-potter/harper/actions/workflows/build_web.yml)
 [![Precommit](https://github.com/elijah-potter/harper/actions/workflows/precommit.yml/badge.svg)](https://github.com/elijah-potter/harper/actions/workflows/precommit.yml)
 [![Crates.io](https://img.shields.io/crates/v/harper-ls)](https://crates.io/crates/harper-ls)
