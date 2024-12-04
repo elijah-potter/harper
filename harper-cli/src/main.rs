@@ -99,7 +99,8 @@ fn main() -> anyhow::Result<()> {
                 .map(|s| s.to_string_lossy().into())
                 .unwrap_or("<file>".to_string());
 
-            let mut report_builder = Report::build(ReportKind::Advice, &filename, 0);
+            let mut report_builder =
+                Report::build(ReportKind::Custom("Spans", primary_color), &filename, 0);
             let mut color = primary_color;
             for token in doc.tokens() {
                 report_builder = report_builder.with_label(
