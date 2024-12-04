@@ -211,7 +211,8 @@ fn map_token(
         }
         Expr::Numeric(a) => constant_token!(doc, a, TokenKind::Unlintable),
         Expr::Str(text) => {
-            // Using `text.get()` doesn't work here, because it escapes quotes
+            // Using `text.get()` doesn't work here, because it escapes quotes which throws off
+            // the span
             parse_english(doc.get(doc.range(text.span())?)?, doc, parser, &text.span())
         }
         Expr::Code(a) => constant_token!(doc, a, TokenKind::Unlintable),
