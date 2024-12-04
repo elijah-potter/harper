@@ -93,18 +93,27 @@ fn main() -> anyhow::Result<()> {
             let (doc, source) = load_file(&file)?;
 
             let primary_color = Color::Blue;
+            let secondary_color = Color::Magenta;
             let filename = file
                 .file_name()
                 .map(|s| s.to_string_lossy().into())
                 .unwrap_or("<file>".to_string());
 
             let mut report_builder = Report::build(ReportKind::Advice, &filename, 0);
+            let mut color = primary_color;
             for token in doc.tokens() {
                 report_builder = report_builder.with_label(
                     Label::new((&filename, token.span.into()))
                         .with_message(format!("[{}, {})", token.span.start, token.span.end))
-                        .with_color(primary_color),
+                        .with_color(color),
                 );
+
+                // Alternate colors so spans are clear
+                color = if color == primary_color {
+                    secondary_color
+                } else {
+                    primary_color
+                };
             }
 
             let report = report_builder.finish();
