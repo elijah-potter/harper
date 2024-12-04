@@ -473,13 +473,6 @@ mod tests {
         let token_kinds = tokens.iter().map(|t| t.kind).collect::<Vec<_>>();
         dbg!(&token_kinds);
 
-        let typst_document = typst_syntax::Source::detached(source);
-        let typst_tree = <typst_syntax::ast::Markup as typst_syntax::ast::AstNode>::from_untyped(
-            typst_document.root(),
-        )
-        .expect("Unable to create typst document from parsed tree!");
-        dbg!(typst_tree.exprs().collect_vec());
-
         let charslice = source.chars().collect_vec();
         assert_eq!(tokens[3].span.get_content_string(&charslice), "Typst");
         assert!(matches!(
