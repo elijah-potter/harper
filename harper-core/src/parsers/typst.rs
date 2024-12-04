@@ -210,7 +210,10 @@ fn map_token(
             constant_token!(doc, float, TokenKind::Number(float.get().into(), None))
         }
         Expr::Numeric(a) => constant_token!(doc, a, TokenKind::Unlintable),
-        Expr::Str(text) => parse_english(text.get(), doc, parser, &text.span()),
+        Expr::Str(text) => {
+            // Using `text.get()` doesn't work here, because it escapes quotes
+            parse_english(doc.get(doc.range(text.span())?)?, doc, parser, &text.span())
+        }
         Expr::Code(a) => constant_token!(doc, a, TokenKind::Unlintable),
         Expr::Content(content_block) => {
             recursive_env(&mut content_block.body().exprs(), doc, parser)
@@ -478,7 +481,7 @@ mod tests {
         dbg!(typst_tree.exprs().collect_vec());
 
         let charslice = source.chars().collect_vec();
-        assert_eq!(tokens[2].span.get_content_string(&charslice), "Typst");
+        assert_eq!(tokens[3].span.get_content_string(&charslice), "Typst");
         assert!(matches!(
             token_kinds.as_slice(),
             &[
