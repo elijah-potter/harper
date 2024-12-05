@@ -1,6 +1,6 @@
 import type { Extension } from 'vscode';
 
-import { ConfigurationTarget, Uri, workspace } from 'vscode';
+import { commands, ConfigurationTarget, Uri, workspace } from 'vscode';
 
 import {
 	activateHarper,
@@ -60,5 +60,24 @@ describe('Integration >', () => {
 
 		// Set config back to default value
 		await config.update('repeated_words', true, ConfigurationTarget.Workspace);
+	});
+
+	it('updates diagnostics when files are deleted', async () => {
+		const markdownContent = await workspace.fs.readFile(markdownUri);
+		// `harper-ls` can only be notified if the deletion happens within VSCode, so use these
+		// commands instead of `workspace.fs.delete`.
+		await commands.executeCommand('workbench.files.action.showActiveFileInExplorer');
+		await commands.executeCommand('deleteFile');
+		// Wait for `harper-ls` to update diagnostics
+		await sleep(75);
+
+		compareActualVsExpectedDiagnostics(
+			getActualDiagnostics(markdownUri),
+			createExpectedDiagnostics()
+		);
+
+		// Re-create deleted file and open it again
+		await workspace.fs.writeFile(markdownUri, markdownContent);
+		await openFile('integration.md');
 	});
 });
