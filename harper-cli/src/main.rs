@@ -7,7 +7,7 @@ use ariadne::{Color, Label, Report, ReportKind, Source};
 use clap::Parser;
 use harper_comments::CommentParser;
 use harper_core::linting::{LintGroup, LintGroupConfig, Linter};
-use harper_core::parsers::Markdown;
+use harper_core::parsers::{Markdown, MarkdownOptions};
 use harper_core::{remove_overlaps, Dictionary, Document, FstDictionary};
 
 #[derive(Debug, Parser)]
@@ -32,12 +32,14 @@ enum Args {
 
 fn main() -> anyhow::Result<()> {
     let args = Args::parse();
+    let markdown_options = MarkdownOptions::default();
+    let linting_options = LintGroupConfig::default();
 
     match args {
         Args::Lint { file, count } => {
-            let (doc, source) = load_file(&file)?;
+            let (doc, source) = load_file(&file, markdown_options)?;
 
-            let mut linter = LintGroup::new(LintGroupConfig::default(), FstDictionary::curated());
+            let mut linter = LintGroup::new(linting_options, FstDictionary::curated());
             let mut lints = linter.lint(&doc);
 
             if count {
@@ -75,7 +77,7 @@ fn main() -> anyhow::Result<()> {
             std::process::exit(1);
         }
         Args::Parse { file } => {
-            let (doc, _) = load_file(&file)?;
+            let (doc, _) = load_file(&file, markdown_options)?;
 
             for token in doc.tokens() {
                 let json = serde_json::to_string(&token)?;
@@ -101,15 +103,15 @@ fn main() -> anyhow::Result<()> {
     }
 }
 
-fn load_file(file: &Path) -> anyhow::Result<(Document, String)> {
+fn load_file(file: &Path, markdown_options: MarkdownOptions) -> anyhow::Result<(Document, String)> {
     let source = std::fs::read_to_string(file)?;
 
     let mut parser: Box<dyn harper_core::parsers::Parser> =
         if let Some("md") = file.extension().map(|v| v.to_str().unwrap()) {
-            Box::new(Markdown)
+            Box::new(Markdown::new(markdown_options))
         } else {
             Box::new(
-                CommentParser::new_from_filename(file)
+                CommentParser::new_from_filename(file, Markdown::new(markdown_options))
                     .map(Box::new)
                     .ok_or(format_err!("Could not detect language ID."))?,
             )

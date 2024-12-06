@@ -9,7 +9,16 @@ use super::without_initiators;
 ///
 /// It assumes it is being provided a single line of comment at a time,
 /// including the comment initiation characters.
-pub struct Unit;
+#[derive(Clone)]
+pub struct Unit {
+    markdown_parser: Markdown,
+}
+
+impl Unit {
+    pub fn new(markdown_parser: Markdown) -> Self {
+        Self { markdown_parser }
+    }
+}
 
 impl Parser for Unit {
     fn parse(&mut self, source: &[char]) -> Vec<Token> {
@@ -28,7 +37,7 @@ impl Parser for Unit {
                 continue;
             }
 
-            let mut new_tokens = parse_line(line);
+            let mut new_tokens = parse_line(line, &mut self.markdown_parser);
 
             if chars_traversed + line.len() < source.len() {
                 new_tokens.push(Token::new(
@@ -49,7 +58,7 @@ impl Parser for Unit {
     }
 }
 
-fn parse_line(source: &[char]) -> Vec<Token> {
+fn parse_line(source: &[char], markdown_parser: &mut Markdown) -> Vec<Token> {
     let actual = without_initiators(source);
 
     if actual.is_empty() {
@@ -57,8 +66,6 @@ fn parse_line(source: &[char]) -> Vec<Token> {
     }
 
     let source = actual.get_content(source);
-
-    let mut markdown_parser = Markdown;
 
     let mut new_tokens = markdown_parser.parse(source);
 

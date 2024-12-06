@@ -4,7 +4,7 @@ use std::fmt::Display;
 
 use paste::paste;
 
-use crate::parsers::{Markdown, Parser, PlainEnglish};
+use crate::parsers::{Markdown, MarkdownOptions, Parser, PlainEnglish};
 use crate::patterns::{PatternExt, RepeatingPattern, SequencePattern};
 use crate::punctuation::Punctuation;
 use crate::token::NumberSuffix;
@@ -71,14 +71,22 @@ impl Document {
 
     /// Parse text to produce a document using the built-in [`Markdown`] parser
     /// and curated dictionary.
-    pub fn new_markdown_curated(text: &str) -> Self {
-        Self::new(text, &mut Markdown, &FstDictionary::curated())
+    pub fn new_markdown_curated(text: &str, markdown_options: MarkdownOptions) -> Self {
+        Self::new(
+            text,
+            &mut Markdown::new(markdown_options),
+            &FstDictionary::curated(),
+        )
     }
 
     /// Parse text to produce a document using the built-in [`PlainEnglish`]
     /// parser and the curated dictionary.
-    pub fn new_markdown(text: &str, dictionary: &impl Dictionary) -> Self {
-        Self::new(text, &mut Markdown, dictionary)
+    pub fn new_markdown(
+        text: &str,
+        markdown_options: MarkdownOptions,
+        dictionary: &impl Dictionary,
+    ) -> Self {
+        Self::new(text, &mut Markdown::new(markdown_options), dictionary)
     }
 
     /// Re-parse important language constructs.
@@ -553,14 +561,14 @@ mod tests {
     use itertools::Itertools;
 
     use super::Document;
-    use crate::Span;
+    use crate::{parsers::MarkdownOptions, Span};
 
     fn assert_condensed_contractions(text: &str, final_tok_count: usize) {
         let document = Document::new_plain_english_curated(text);
 
         assert_eq!(document.tokens.len(), final_tok_count);
 
-        let document = Document::new_markdown_curated(text);
+        let document = Document::new_markdown_curated(text, MarkdownOptions::default());
 
         assert_eq!(document.tokens.len(), final_tok_count);
     }

@@ -3,8 +3,16 @@ use harper_core::Token;
 
 use super::without_initiators;
 
-#[derive(Debug, Clone, Copy)]
-pub struct Go;
+#[derive(Clone)]
+pub struct Go {
+    markdown_parser: Markdown,
+}
+
+impl Go {
+    pub fn new(markdown_parser: Markdown) -> Self {
+        Self { markdown_parser }
+    }
+}
 
 impl Parser for Go {
     fn parse(&mut self, source: &[char]) -> Vec<Token> {
@@ -25,9 +33,7 @@ impl Parser for Go {
             actual_source = new_source
         }
 
-        let mut markdown_parser = Markdown;
-
-        let mut new_tokens = markdown_parser.parse(actual_source);
+        let mut new_tokens = self.markdown_parser.parse(actual_source);
 
         new_tokens
             .iter_mut()
