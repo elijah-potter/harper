@@ -12,9 +12,19 @@ use crate::{Span, Token, TokenKind, TokenStringExt, VecExt};
 #[derive(Default, Clone, Debug)]
 pub struct Markdown(MarkdownOptions);
 
-#[derive(Default, Copy, Clone, Debug, Serialize, Deserialize)]
+#[derive(Copy, Clone, Debug, Serialize, Deserialize)]
 pub struct MarkdownOptions {
     pub ignore_link_title: bool,
+}
+
+// Clippy rule excepted because this can easily be expanded later
+#[allow(clippy::derivable_impls)]
+impl Default for MarkdownOptions {
+    fn default() -> Self {
+        Self {
+            ignore_link_title: false,
+        }
+    }
 }
 
 impl Markdown {
@@ -222,6 +232,7 @@ impl Parser for Markdown {
                             continue;
                         }
                         if !(matches!(tag, Tag::Paragraph)
+                            || matches!(tag, Tag::Link { .. }) && !self.0.ignore_link_title
                             || matches!(tag, Tag::Heading { .. })
                             || matches!(tag, Tag::Item)
                             || matches!(tag, Tag::TableCell)
@@ -427,6 +438,17 @@ mod tests {
             .map(|t| t.kind)
             .collect::<Vec<_>>();
 
-        assert!(!matches!(token_kinds.as_slice(), &[TokenKind::Unlintable]));
+        dbg!(&token_kinds);
+
+        assert!(matches!(
+            token_kinds.as_slice(),
+            &[
+                TokenKind::Word(_),
+                TokenKind::Punctuation(Punctuation::Hyphen),
+                TokenKind::Word(_),
+                TokenKind::Punctuation(Punctuation::ForwardSlash),
+                TokenKind::Word(_)
+            ]
+        ));
     }
 }
