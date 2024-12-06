@@ -7,7 +7,13 @@ use crate::{Span, Token, TokenKind, TokenStringExt, VecExt};
 /// CommonMark files.
 ///
 /// Will ignore code blocks and tables.
-pub struct Markdown;
+#[derive(Default)]
+pub struct Markdown(pub MarkdownOptions);
+
+#[derive(Default, Copy, Clone)]
+pub struct MarkdownOptions {
+    ignore_link_title: bool,
+}
 
 impl Markdown {
     /// Remove hidden Wikilink target text.
@@ -202,7 +208,7 @@ impl Parser for Markdown {
                             });
                             continue;
                         }
-                        if matches!(tag, Tag::Link { .. }) {
+                        if self.0.ignore_link_title && matches!(tag, Tag::Link { .. }) {
                             tokens.push(Token {
                                 span: Span::new_with_len(traversed_chars, text.chars().count()),
                                 kind: TokenKind::Unlintable,
@@ -265,13 +271,13 @@ impl Parser for Markdown {
 mod tests {
     use super::super::StrParser;
     use super::Markdown;
-    use crate::{Punctuation, TokenKind, TokenStringExt};
+    use crate::{parsers::markdown::MarkdownOptions, Punctuation, TokenKind, TokenStringExt};
 
     #[test]
     fn survives_emojis() {
         let source = r#"🤷."#;
 
-        Markdown.parse_str(source);
+        Markdown::default().parse_str(source);
     }
 
     /// Check whether the Markdown parser will emit a breaking newline
@@ -282,7 +288,7 @@ mod tests {
     fn ends_with_newline() {
         let source = "This is a test.";
 
-        let tokens = Markdown.parse_str(source);
+        let tokens = Markdown::default().parse_str(source);
         assert_ne!(tokens.len(), 0);
         assert!(!tokens.last().unwrap().kind.is_newline());
     }
@@ -291,7 +297,7 @@ mod tests {
     fn math_becomes_unlintable() {
         let source = r#"$\Katex$ $\text{is}$ $\text{great}$."#;
 
-        let tokens = Markdown.parse_str(source);
+        let tokens = Markdown::default().parse_str(source);
         assert_eq!(
             tokens.iter().map(|t| t.kind).collect::<Vec<_>>(),
             vec![
@@ -309,7 +315,7 @@ mod tests {
     fn hidden_wikilink_text() {
         let source = r#"[[this is hidden|this is not]]"#;
 
-        let tokens = Markdown.parse_str(source);
+        let tokens = Markdown::default().parse_str(source);
 
         let token_kinds = tokens.iter().map(|t| t.kind).collect::<Vec<_>>();
 
@@ -329,7 +335,7 @@ mod tests {
     fn improper_wikilink_text() {
         let source = r#"this is shown|this is also shown]]"#;
 
-        let tokens = Markdown.parse_str(source);
+        let tokens = Markdown::default().parse_str(source);
 
         let token_kinds = tokens.iter().map(|t| t.kind).collect::<Vec<_>>();
 
@@ -360,7 +366,7 @@ mod tests {
     #[test]
     fn normal_wikilink() {
         let source = r#"[[Wikilink]]"#;
-        let tokens = Markdown.parse_str(source);
+        let tokens = Markdown::default().parse_str(source);
         let token_kinds = tokens.iter().map(|t| t.kind).collect::<Vec<_>>();
 
         dbg!(&token_kinds);
@@ -371,18 +377,50 @@ mod tests {
     #[test]
     fn html_is_unlintable() {
         let source = r#"The range of inputs from <ctrl-g> to ctrl-z"#;
-        let tokens = Markdown.parse_str(source);
+        let tokens = Markdown::default().parse_str(source);
         assert_eq!(tokens.iter_unlintables().count(), 1);
     }
 
     #[test]
     fn link_title_unlintable() {
+        let mut parser = Markdown(MarkdownOptions {
+            ignore_link_title: true,
+            ..MarkdownOptions::default()
+        });
         let source = r#"[elijah-potter/harper](https://github.com/elijah-potter/harper)"#;
-        let tokens = Markdown.parse_str(source);
+        let tokens = parser.parse_str(source);
         let token_kinds = tokens.iter().map(|t| t.kind).collect::<Vec<_>>();
 
         dbg!(&token_kinds);
 
         assert!(matches!(token_kinds.as_slice(), &[TokenKind::Unlintable]))
+    }
+
+    #[test]
+    fn respects_config() {
+        let source = r#"[elijah-potter/harper](https://github.com/elijah-potter/harper)"#;
+        let mut parser = Markdown(MarkdownOptions {
+            ignore_link_title: true,
+            ..MarkdownOptions::default()
+        });
+        let token_kinds = parser
+            .parse_str(source)
+            .iter()
+            .map(|t| t.kind)
+            .collect::<Vec<_>>();
+
+        assert!(matches!(token_kinds.as_slice(), &[TokenKind::Unlintable]));
+
+        let mut parser = Markdown(MarkdownOptions {
+            ignore_link_title: false,
+            ..MarkdownOptions::default()
+        });
+        let token_kinds = parser
+            .parse_str(source)
+            .iter()
+            .map(|t| t.kind)
+            .collect::<Vec<_>>();
+
+        assert!(!matches!(token_kinds.as_slice(), &[TokenKind::Unlintable]));
     }
 }

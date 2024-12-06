@@ -7,7 +7,7 @@ mod plain_english;
 use blanket::blanket;
 pub use collapse_identifiers::CollapseIdentifiers;
 pub use isolate_english::IsolateEnglish;
-pub use markdown::Markdown;
+pub use markdown::{Markdown, MarkdownOptions};
 pub use mask::Mask;
 pub use plain_english::PlainEnglish;
 
