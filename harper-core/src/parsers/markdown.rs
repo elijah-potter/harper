@@ -224,7 +224,7 @@ impl Parser for Markdown {
                             });
                             continue;
                         }
-                        if self.0.ignore_link_title && matches!(tag, Tag::Link { .. }) {
+                        if matches!(tag, Tag::Link { .. }) && self.0.ignore_link_title {
                             tokens.push(Token {
                                 span: Span::new_with_len(traversed_chars, text.chars().count()),
                                 kind: TokenKind::Unlintable,
