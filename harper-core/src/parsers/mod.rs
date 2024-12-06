@@ -63,7 +63,7 @@ mod tests {
     }
 
     fn assert_tokens_eq_md(test_str: impl AsRef<str>, expected: &[TokenKind]) {
-        let mut parser = Markdown;
+        let mut parser = Markdown::default();
 
         assert_tokens_eq(test_str, expected, &mut parser)
     }

@@ -1,5 +1,7 @@
 use std::collections::VecDeque;
 
+use serde::{Deserialize, Serialize};
+
 use super::{Parser, PlainEnglish};
 use crate::{Span, Token, TokenKind, TokenStringExt, VecExt};
 
@@ -7,15 +9,19 @@ use crate::{Span, Token, TokenKind, TokenStringExt, VecExt};
 /// CommonMark files.
 ///
 /// Will ignore code blocks and tables.
-#[derive(Default)]
-pub struct Markdown(pub MarkdownOptions);
+#[derive(Default, Clone, Debug)]
+pub struct Markdown(MarkdownOptions);
 
-#[derive(Default, Copy, Clone)]
+#[derive(Default, Copy, Clone, Debug, Serialize, Deserialize)]
 pub struct MarkdownOptions {
-    ignore_link_title: bool,
+    pub ignore_link_title: bool,
 }
 
 impl Markdown {
+    pub fn new(options: MarkdownOptions) -> Self {
+        Self(options)
+    }
+
     /// Remove hidden Wikilink target text.
     ///
     /// As in, the stuff to the left of the pipe operator:

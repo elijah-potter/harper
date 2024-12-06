@@ -4,7 +4,16 @@ use itertools::Itertools;
 
 use super::without_initiators;
 
-pub struct JsDoc;
+#[derive(Clone)]
+pub struct JsDoc {
+    markdown_parser: Markdown,
+}
+
+impl JsDoc {
+    pub fn new(markdown_parser: Markdown) -> Self {
+        Self { markdown_parser }
+    }
+}
 
 impl Parser for JsDoc {
     fn parse(&mut self, source: &[char]) -> Vec<Token> {
@@ -13,7 +22,7 @@ impl Parser for JsDoc {
         let mut chars_traversed = 0;
 
         for line in source.split(|c| *c == '\n') {
-            let mut new_tokens = parse_line(line);
+            let mut new_tokens = parse_line(line, &mut self.markdown_parser);
 
             if chars_traversed + line.len() < source.len() {
                 new_tokens.push(Token::new(
@@ -34,7 +43,7 @@ impl Parser for JsDoc {
     }
 }
 
-fn parse_line(source: &[char]) -> Vec<Token> {
+fn parse_line(source: &[char], markdown_parser: &mut Markdown) -> Vec<Token> {
     let actual_line = without_initiators(source);
 
     if actual_line.is_empty() {
@@ -43,7 +52,7 @@ fn parse_line(source: &[char]) -> Vec<Token> {
 
     let source_line = actual_line.get_content(source);
 
-    let mut new_tokens = Markdown.parse(source_line);
+    let mut new_tokens = markdown_parser.parse(source_line);
 
     // Handle inline tags
     mark_inline_tags(&mut new_tokens);
@@ -148,21 +157,23 @@ fn parse_inline_tag(tokens: &[Token]) -> Option<usize> {
 
 #[cfg(test)]
 mod tests {
-    use harper_core::{Document, Punctuation, TokenKind};
+    use harper_core::{parsers::Markdown, Document, Punctuation, TokenKind};
 
     use crate::CommentParser;
 
     #[test]
     fn escapes_loop() {
         let source = "/** This should _not_cause an infinite loop: {@ */";
-        let mut parser = CommentParser::new_from_language_id("javascript").unwrap();
+        let mut parser =
+            CommentParser::new_from_language_id("javascript", Markdown::default()).unwrap();
         Document::new_curated(source, &mut parser);
     }
 
     #[test]
     fn handles_inline_link() {
         let source = "/** See {@link MyClass} and [MyClass's foo property]{@link MyClass#foo}. */";
-        let mut parser = CommentParser::new_from_language_id("javascript").unwrap();
+        let mut parser =
+            CommentParser::new_from_language_id("javascript", Markdown::default()).unwrap();
         let document = Document::new_curated(source, &mut parser);
 
         assert!(matches!(
@@ -206,7 +217,8 @@ mod tests {
     #[test]
     fn handles_class() {
         let source = "/** @class Circle representing a circle. */";
-        let mut parser = CommentParser::new_from_language_id("javascript").unwrap();
+        let mut parser =
+            CommentParser::new_from_language_id("javascript", Markdown::default()).unwrap();
         let document = Document::new_curated(source, &mut parser);
 
         assert!(document

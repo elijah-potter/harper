@@ -67,8 +67,12 @@ pub fn lint(text: String) -> Vec<Lint> {
     let source: Vec<_> = text.chars().collect();
     let source = Lrc::new(source);
 
-    let document =
-        Document::new_from_vec(source.clone(), &mut Markdown, &FullDictionary::curated());
+    // TODO: Have a way to configure the markdown parser
+    let document = Document::new_from_vec(
+        source.clone(),
+        &mut Markdown::default(),
+        &FullDictionary::curated(),
+    );
 
     let mut lints = LINTER.lock().unwrap().lint(&document);
 
