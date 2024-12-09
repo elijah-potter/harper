@@ -9,7 +9,7 @@ repository = "https://github.com/elijah-potter/harper"
 [dependencies]
 anyhow = "1.0.93"
 ariadne = "0.4.1"
-clap = { version = "4.5.21", features = ["derive"] }
+clap = { version = "4.5.23", features = ["derive"] }
 harper-core = { path = "../harper-core", version = "0.12.0" }
 harper-comments = { path = "../harper-comments", version = "0.12.0" }
 serde_json = "1.0.133"
