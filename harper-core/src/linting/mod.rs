@@ -62,10 +62,10 @@ pub trait Linter: Send + Sync {
 #[cfg(test)]
 mod tests {
     use super::Linter;
-    use crate::Document;
+    use crate::{parsers::MarkdownOptions, Document};
 
     pub fn assert_lint_count(text: &str, mut linter: impl Linter, count: usize) {
-        let test = Document::new_markdown_curated(text);
+        let test = Document::new_markdown_curated(text, MarkdownOptions::default());
         let lints = linter.lint(&test);
         dbg!(&lints);
         assert_eq!(lints.len(), count);
@@ -74,7 +74,7 @@ mod tests {
     /// Runs a provided linter on text, applies the first suggestion from each
     /// lint and asserts that the result is equal to a given value.
     pub fn assert_suggestion_result(text: &str, mut linter: impl Linter, expected_result: &str) {
-        let test = Document::new_markdown_curated(text);
+        let test = Document::new_markdown_curated(text, MarkdownOptions::default());
         let lints = linter.lint(&test);
 
         let mut text: Vec<char> = text.chars().collect();
