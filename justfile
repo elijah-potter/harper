@@ -173,6 +173,10 @@ parse file:
 lint file:
   cargo run --bin harper-cli -- lint {{file}}
 
+# Show the spans of the parsed tokens overlapped on the file.
+spans file:
+  cargo run --bin harper-cli -- spans {{file}}
+
 # Add a noun to Harper's curated dictionary.
 addnoun noun:
   #! /bin/bash
