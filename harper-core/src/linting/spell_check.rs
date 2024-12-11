@@ -2,7 +2,7 @@ use hashbrown::HashMap;
 use smallvec::ToSmallVec;
 
 use super::lint::Suggestion;
-use super::{Lint, LintKind, Linter};
+use super::{Lint, LintKind, LintSeverity, Linter};
 use crate::document::Document;
 use crate::spell::suggest_correct_spelling;
 use crate::{CharString, Dictionary, TokenStringExt};
@@ -51,7 +51,7 @@ impl<T: Dictionary> SpellCheck<T> {
 }
 
 impl<T: Dictionary> Linter for SpellCheck<T> {
-    fn lint(&mut self, document: &Document) -> Vec<Lint> {
+    fn lint(&mut self, document: &Document, severity: Option<LintSeverity>) -> Vec<Lint> {
         let mut lints = Vec::new();
 
         for word in document.iter_words() {
@@ -88,6 +88,7 @@ impl<T: Dictionary> Linter for SpellCheck<T> {
                     document.get_span_content_str(word.span)
                 ),
                 priority: 63,
+                severity,
             })
         }
 

@@ -5,6 +5,8 @@ use serde::{Deserialize, Serialize};
 
 use crate::Span;
 
+use super::LintSeverity;
+
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Lint {
     pub span: Span,
@@ -14,6 +16,7 @@ pub struct Lint {
     /// A numerical value for the importance of a lint.
     /// Lower = more important.
     pub priority: u8,
+    pub severity: Option<LintSeverity>,
 }
 
 impl Default for Lint {
@@ -24,6 +27,7 @@ impl Default for Lint {
             suggestions: Default::default(),
             message: Default::default(),
             priority: 127,
+            severity: None,
         }
     }
 }

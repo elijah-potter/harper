@@ -1,4 +1,4 @@
-use super::{Lint, LintKind, Linter};
+use super::{Lint, LintKind, LintSeverity, Linter};
 use crate::document::Document;
 use crate::{Punctuation, Quote, TokenKind};
 
@@ -6,7 +6,7 @@ use crate::{Punctuation, Quote, TokenKind};
 pub struct UnclosedQuotes;
 
 impl Linter for UnclosedQuotes {
-    fn lint(&mut self, document: &Document) -> Vec<Lint> {
+    fn lint(&mut self, document: &Document, severity: Option<LintSeverity>) -> Vec<Lint> {
         let mut lints = Vec::new();
 
         // TODO: Try zipping quote positions
@@ -19,6 +19,7 @@ impl Linter for UnclosedQuotes {
                     suggestions: vec![],
                     message: "This quote has no termination.".to_string(),
                     priority: 255,
+                    severity,
                 })
             }
         }

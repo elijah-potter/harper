@@ -1,4 +1,4 @@
-use super::{Lint, Linter, Suggestion};
+use super::{Lint, LintSeverity, Linter, Suggestion};
 use crate::document::Document;
 use crate::{Token, TokenStringExt};
 
@@ -6,16 +6,23 @@ use crate::{Token, TokenStringExt};
 pub struct WrongQuotes;
 
 impl Linter for WrongQuotes {
-    fn lint(&mut self, document: &Document) -> Vec<Lint> {
+    fn lint(&mut self, document: &Document, severity: Option<LintSeverity>) -> Vec<Lint> {
         document
             .iter_quote_indices()
             .zip(document.iter_quotes())
-            .filter_map(|(quote_idx, quote_token)| lint_quote(document, quote_idx, quote_token))
+            .filter_map(|(quote_idx, quote_token)| {
+                lint_quote(document, quote_idx, quote_token, severity)
+            })
             .collect()
     }
 }
 
-fn lint_quote(document: &Document, quote_idx: usize, quote_token: Token) -> Option<Lint> {
+fn lint_quote(
+    document: &Document,
+    quote_idx: usize,
+    quote_token: Token,
+    severity: Option<LintSeverity>,
+) -> Option<Lint> {
     let quote = quote_token.kind.as_quote().unwrap();
 
     let twin_loc = quote.twin_loc?;
@@ -30,6 +37,7 @@ fn lint_quote(document: &Document, quote_idx: usize, quote_token: Token) -> Opti
             span: quote_token.span,
             suggestions: vec![Suggestion::ReplaceWith(vec![should_be])],
             message: "Use the better-formatted quote character.".to_string(),
+            severity,
             ..Default::default()
         })
     } else {

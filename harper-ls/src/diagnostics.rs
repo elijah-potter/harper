@@ -1,18 +1,18 @@
 use std::collections::HashMap;
 
-use harper_core::linting::{Lint, Suggestion};
+use harper_core::linting::{Lint, LintSeverity, Suggestion};
 use tower_lsp::lsp_types::{
     CodeAction, CodeActionKind, CodeActionOrCommand, Command, Diagnostic, TextEdit, Url,
     WorkspaceEdit,
 };
 
-use crate::config::{CodeActionConfig, DiagnosticSeverity};
+use crate::config::{severity_to_lsp, CodeActionConfig};
 use crate::pos_conv::span_to_range;
 
 pub fn lints_to_diagnostics(
     source: &[char],
     lints: &[Lint],
-    severity: DiagnosticSeverity,
+    severity: LintSeverity,
 ) -> Vec<Diagnostic> {
     lints
         .iter()
@@ -86,12 +86,12 @@ pub fn lint_to_code_actions<'a>(
     results
 }
 
-fn lint_to_diagnostic(lint: &Lint, source: &[char], severity: DiagnosticSeverity) -> Diagnostic {
+fn lint_to_diagnostic(lint: &Lint, source: &[char], severity: LintSeverity) -> Diagnostic {
     let range = span_to_range(source, lint.span);
 
     Diagnostic {
         range,
-        severity: Some(severity.to_lsp()),
+        severity: Some(severity_to_lsp(severity)),
         code: None,
         code_description: None,
         source: Some("Harper".to_string()),

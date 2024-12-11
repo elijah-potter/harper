@@ -242,7 +242,7 @@ impl Backend {
             return Ok(Vec::new());
         };
 
-        let mut lints = doc_state.linter.lint(&doc_state.document);
+        let mut lints = doc_state.linter.lint(&doc_state.document, None);
         lints.sort_by_key(|l| l.priority);
 
         let source_chars = doc_state.document.get_full_content();
@@ -280,7 +280,7 @@ impl Backend {
             return Vec::new();
         };
 
-        let lints = doc_state.linter.lint(&doc_state.document);
+        let lints = doc_state.linter.lint(&doc_state.document, None);
         let config = self.config.read().await;
 
         lints_to_diagnostics(
