@@ -130,7 +130,7 @@ create_lint_group_config!(
     EllipsisLength => true,
     DotInitialisms => true,
     BoringWords => false,
-    UseGenitive => true,
+    UseGenitive => false,
     ThatWhich => true
 );
 
