@@ -1,6 +1,8 @@
 use crate::linting::{Lint, LintKind, Linter, Suggestion};
 use crate::{CharString, Document, Punctuation, Span, Token, TokenKind, WordMetadata};
 
+use super::LintSeverity;
+
 #[derive(Debug, PartialEq, PartialOrd, Clone)]
 struct PatternToken {
     /// The general variant of the token.
@@ -320,7 +322,7 @@ impl Default for Matcher {
 }
 
 impl Linter for Matcher {
-    fn lint(&mut self, document: &Document) -> Vec<Lint> {
+    fn lint(&mut self, document: &Document, severity: Option<LintSeverity>) -> Vec<Lint> {
         let mut lints = Vec::new();
 
         let mut match_tokens = Vec::new();
@@ -358,6 +360,7 @@ impl Linter for Matcher {
                             trigger.replace_with.iter().collect::<String>()
                         ),
                         priority: 15,
+                        severity,
                     })
                 }
             }
@@ -376,7 +379,7 @@ mod tests {
     fn matches_therefore() {
         let document = Document::new_plain_english_curated("There fore.");
         let mut matcher = Matcher::new();
-        let lints = matcher.lint(&document);
+        let lints = matcher.lint(&document, None);
         assert_eq!(lints.len(), 1);
     }
 }

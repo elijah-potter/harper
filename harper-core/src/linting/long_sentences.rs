@@ -1,4 +1,4 @@
-use super::{Lint, LintKind, Linter};
+use super::{Lint, LintKind, LintSeverity, Linter};
 use crate::token::TokenStringExt;
 use crate::{Document, Span};
 
@@ -7,7 +7,7 @@ use crate::{Document, Span};
 pub struct LongSentences;
 
 impl Linter for LongSentences {
-    fn lint(&mut self, document: &Document) -> Vec<Lint> {
+    fn lint(&mut self, document: &Document, severity: Option<LintSeverity>) -> Vec<Lint> {
         let mut output = Vec::new();
 
         for sentence in document.iter_sentences() {
@@ -18,6 +18,7 @@ impl Linter for LongSentences {
                     span: Span::new(sentence[0].span.start, sentence.last().unwrap().span.end),
                     lint_kind: LintKind::Readability,
                     message: format!("This sentence is {} words long.", word_count),
+                    severity,
                     ..Default::default()
                 })
             }

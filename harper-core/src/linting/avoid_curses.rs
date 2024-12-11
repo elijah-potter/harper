@@ -1,11 +1,11 @@
-use super::{Lint, LintKind, Linter};
+use super::{Lint, LintKind, LintSeverity, Linter};
 use crate::{Document, TokenStringExt};
 
 #[derive(Debug, Default)]
 pub struct AvoidCurses;
 
 impl Linter for AvoidCurses {
-    fn lint(&mut self, document: &Document) -> Vec<Lint> {
+    fn lint(&mut self, document: &Document, severity: Option<LintSeverity>) -> Vec<Lint> {
         document
             .iter_words()
             .filter(|t| t.kind.is_swear())
@@ -15,6 +15,7 @@ impl Linter for AvoidCurses {
                 suggestions: vec![],
                 message: "Try to avoid offensive language.".to_string(),
                 priority: 63,
+                severity,
             })
             .collect()
     }

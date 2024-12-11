@@ -25,17 +25,40 @@ use super::wrong_quotes::WrongQuotes;
 use super::{Lint, Linter};
 use crate::{Dictionary, Document};
 
+#[derive(Debug, Serialize, Deserialize, Clone, Copy)]
+pub enum LintSeverity {
+    Error,
+    Warning,
+    Information,
+    Hint,
+}
+
+#[derive(Debug, Serialize, Deserialize, Clone, Copy)]
+pub struct LintConfig {
+    pub enabled: Option<bool>,
+    pub severity: Option<LintSeverity>,
+}
+
+impl Default for LintConfig {
+    fn default() -> Self {
+        Self {
+            enabled: Some(false),
+            severity: None,
+        }
+    }
+}
+
 macro_rules! create_lint_group_config {
-    ($($linter:ident => $default:expr),*) => {
+    ($($linter:ident => $default:expr $(, $default_severity:path)?);*) => {
         paste! {
             #[derive(Debug, Clone, Copy, Serialize, Deserialize, Default)]
             pub struct LintGroupConfig {
                 $(
                     #[doc = "Configures the use of the [`" $linter "`] linter.
                     If set to [`None`], the default configuration will be used."]
-                    pub [<$linter:snake>]: Option<bool>,
+                    pub [<$linter:snake>]: Option<LintConfig>,
                 )*
-                pub spell_check: Option<bool>
+                pub spell_check: Option<LintConfig>
             }
 
             impl LintGroupConfig {
@@ -43,22 +66,29 @@ macro_rules! create_lint_group_config {
                 pub fn none() -> Self{
                     Self {
                         $(
-                            [<$linter:snake>]: Some(false),
+                            [<$linter:snake>]: Some(LintConfig::default()),
                         )*
-                        spell_check: Some(false)
+                        spell_check: Some(LintConfig::default())
                     }
                 }
-
                 /// Fills the [`None`] values in the configuration with the default values.
                 pub fn fill_default_values(&mut self){
                     $(
                         if self.[<$linter:snake>].is_none() {
-                            self.[<$linter:snake>] = Some($default);
+                            self.[<$linter:snake>] = Some(LintConfig {
+                                enabled: Some($default),
+                                $(severity: Some($default_severity),)?
+                                ..LintConfig::default()
+                            }
+                        );
                         }
                     )*
 
                     if self.spell_check.is_none() {
-                        self.spell_check = Some(true);
+                        self.spell_check = Some(LintConfig {
+                            enabled: Some(true),
+                            ..LintConfig::default()
+                        });
                     }
                 }
             }
@@ -87,20 +117,20 @@ macro_rules! create_lint_group_config {
             }
 
             impl<T: Dictionary> Linter for LintGroup<T> {
-                fn lint(&mut self, document: &Document) -> Vec<Lint>{
+                fn lint(&mut self, document: &Document, severity: Option<LintSeverity>) -> Vec<Lint>{
                     let mut lints = Vec::new();
 
                     let mut config = self.config.clone();
                     config.fill_default_values();
 
                     $(
-                        if config.[<$linter:snake>].unwrap() {
-                            lints.append(&mut self.[<$linter:snake>].lint(document));
+                        if config.[<$linter:snake>].unwrap().enabled.unwrap() {
+                            lints.append(&mut self.[<$linter:snake>].lint(document, severity.or_else(|| config.[<$linter:snake>].map(|x| x.severity).flatten())));
                         }
                     )*
 
-                    if config.spell_check.unwrap() {
-                        lints.append(&mut self.spell_check.lint(document));
+                    if config.spell_check.unwrap().enabled.unwrap() {
+                        lints.append(&mut self.spell_check.lint(document, severity.or_else(|| config.spell_check.map(|x| x.severity).flatten())));
                     }
 
 
@@ -112,25 +142,25 @@ macro_rules! create_lint_group_config {
 }
 
 create_lint_group_config!(
-    SpelledNumbers => false,
-    AnA => true,
-    SentenceCapitalization => true,
-    UnclosedQuotes => true,
-    WrongQuotes => false,
-    LongSentences => true,
-    RepeatedWords => true,
-    Spaces => true,
-    Matcher => true,
-    CorrectNumberSuffix => true,
-    NumberSuffixCapitalization => true,
-    MultipleSequentialPronouns => true,
-    LinkingVerbs => false,
-    AvoidCurses => true,
-    TerminatingConjunctions => true,
-    EllipsisLength => true,
-    DotInitialisms => true,
-    BoringWords => false,
-    UseGenitive => false,
+    SpelledNumbers => false;
+    AnA => true;
+    SentenceCapitalization => true;
+    UnclosedQuotes => true;
+    WrongQuotes => false;
+    LongSentences => true;
+    RepeatedWords => true;
+    Spaces => true;
+    Matcher => true;
+    CorrectNumberSuffix => true;
+    NumberSuffixCapitalization => true;
+    MultipleSequentialPronouns => true;
+    LinkingVerbs => false;
+    AvoidCurses => true;
+    TerminatingConjunctions => true;
+    EllipsisLength => true;
+    DotInitialisms => true;
+    BoringWords => false;
+    UseGenitive => false;
     ThatWhich => true
 );
 

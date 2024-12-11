@@ -3,7 +3,7 @@ use crate::{
     Token, TokenStringExt,
 };
 
-use super::{Lint, LintKind, PatternLinter};
+use super::{Lint, LintKind, LintSeverity, PatternLinter};
 
 pub struct BoringWords {
     pattern: Box<dyn Pattern>,
@@ -27,7 +27,12 @@ impl PatternLinter for BoringWords {
         self.pattern.as_ref()
     }
 
-    fn match_to_lint(&self, matched_tokens: &[Token], source: &[char]) -> Lint {
+    fn match_to_lint(
+        &self,
+        matched_tokens: &[Token],
+        source: &[char],
+        severity: Option<LintSeverity>,
+    ) -> Lint {
         let matched_word = matched_tokens.span().unwrap().get_content_string(source);
 
         Lint {
@@ -39,6 +44,7 @@ impl PatternLinter for BoringWords {
                 matched_word
             ),
             priority: 127,
+            severity,
         }
     }
 }

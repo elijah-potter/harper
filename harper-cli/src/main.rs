@@ -38,7 +38,7 @@ fn main() -> anyhow::Result<()> {
             let (doc, source) = load_file(&file)?;
 
             let mut linter = LintGroup::new(LintGroupConfig::default(), FstDictionary::curated());
-            let mut lints = linter.lint(&doc);
+            let mut lints = linter.lint(&doc, None);
 
             if count {
                 println!("{}", lints.len());

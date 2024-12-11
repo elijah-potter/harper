@@ -1,4 +1,4 @@
-use super::{Lint, LintKind, Linter, Suggestion};
+use super::{Lint, LintKind, LintSeverity, Linter, Suggestion};
 use crate::token::{NumberSuffix, TokenStringExt};
 use crate::{Document, Span, TokenKind};
 
@@ -7,7 +7,7 @@ use crate::{Document, Span, TokenKind};
 pub struct CorrectNumberSuffix;
 
 impl Linter for CorrectNumberSuffix {
-    fn lint(&mut self, document: &Document) -> Vec<Lint> {
+    fn lint(&mut self, document: &Document, severity: Option<LintSeverity>) -> Vec<Lint> {
         let mut output = Vec::new();
 
         for number_tok in document.iter_numbers() {
@@ -22,6 +22,7 @@ impl Linter for CorrectNumberSuffix {
                             message: "This number needs a different suffix to sound right."
                                 .to_string(),
                             suggestions: vec![Suggestion::ReplaceWith(correct_suffix.to_chars())],
+                            severity,
                             ..Default::default()
                         })
                     }

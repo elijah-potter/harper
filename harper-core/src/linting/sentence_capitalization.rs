@@ -1,7 +1,7 @@
 use itertools::Itertools;
 
 use super::lint::Suggestion;
-use super::{Lint, LintKind, Linter};
+use super::{Lint, LintKind, LintSeverity, Linter};
 use crate::document::Document;
 use crate::{Token, TokenKind, TokenStringExt};
 
@@ -11,7 +11,7 @@ pub struct SentenceCapitalization;
 impl Linter for SentenceCapitalization {
     /// A linter that checks to make sure the first word of each sentence is
     /// capitalized.
-    fn lint(&mut self, document: &Document) -> Vec<Lint> {
+    fn lint(&mut self, document: &Document, severity: Option<LintSeverity>) -> Vec<Lint> {
         let mut lints = Vec::new();
 
         for paragraph in document.iter_paragraphs() {
@@ -51,6 +51,7 @@ impl Linter for SentenceCapitalization {
                                 priority: 31,
                                 message: "This sentence does not start with a capital letter"
                                     .to_string(),
+                                severity,
                             })
                         }
                     }

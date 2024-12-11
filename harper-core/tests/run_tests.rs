@@ -22,7 +22,7 @@ macro_rules! create_test {
                      LintGroupConfig::default(),
                      dict
                  );
-                 let lints = linter.lint(&document);
+                 let lints = linter.lint(&document, None);
 
                  dbg!(&lints);
                  assert_eq!(lints.len(), $correct_expected);

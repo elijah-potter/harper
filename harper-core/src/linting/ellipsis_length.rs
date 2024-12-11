@@ -1,6 +1,6 @@
 use itertools::Itertools;
 
-use super::{Lint, LintKind, Linter, Suggestion};
+use super::{Lint, LintKind, LintSeverity, Linter, Suggestion};
 use crate::TokenStringExt;
 
 /// A linter that checks that an ellipsis doesn't contain too many periods (or
@@ -9,7 +9,11 @@ use crate::TokenStringExt;
 pub struct EllipsisLength;
 
 impl Linter for EllipsisLength {
-    fn lint(&mut self, document: &crate::Document) -> Vec<super::Lint> {
+    fn lint(
+        &mut self,
+        document: &crate::Document,
+        severity: Option<LintSeverity>,
+    ) -> Vec<super::Lint> {
         let mut lints = Vec::new();
 
         for tok in document.iter_ellipsiss() {
@@ -29,6 +33,7 @@ impl Linter for EllipsisLength {
                     suggestions: vec![Suggestion::ReplaceWith(vec!['.', '.', '.'])],
                     message: "Horizontal ellipsis must have 3 dots.".to_string(),
                     priority: 31,
+                    severity,
                 })
             }
         }

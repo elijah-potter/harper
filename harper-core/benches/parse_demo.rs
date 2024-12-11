@@ -16,7 +16,7 @@ fn lint_demo(c: &mut Criterion) {
     let document = Document::new_markdown_curated(black_box(DEMO));
 
     c.bench_function("lint_demo", |b| {
-        b.iter(|| lint_set.lint(&document));
+        b.iter(|| lint_set.lint(&document, None));
     });
 }
 
@@ -26,7 +26,7 @@ fn lint_demo_uncached(c: &mut Criterion) {
             let dictionary = FstDictionary::curated();
             let mut lint_set = LintGroup::new(LintGroupConfig::default(), dictionary.clone());
             let document = Document::new_markdown(black_box(DEMO), &dictionary);
-            lint_set.lint(&document)
+            lint_set.lint(&document, None)
         })
     });
 }
