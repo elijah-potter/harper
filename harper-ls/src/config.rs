@@ -52,7 +52,7 @@ pub struct Config {
     pub user_dict_path: PathBuf,
     pub file_dict_path: PathBuf,
     pub lint_config: LintGroupConfig,
-    pub diagnostic_severity: LintSeverity,
+    pub default_diagnostic_severity: LintSeverity,
     pub code_action_config: CodeActionConfig,
     pub isolate_english: bool,
 }
@@ -87,12 +87,12 @@ impl Config {
             }
         }
 
-        if let Some(v) = value.get("linters") {
-            base.lint_config = serde_json::from_value(v.clone())?;
+        if let Some(v) = value.get("diagnosticSeverity") {
+            base.default_diagnostic_severity = serde_json::from_value(v.clone())?;
         }
 
-        if let Some(v) = value.get("diagnosticSeverity") {
-            base.diagnostic_severity = serde_json::from_value(v.clone())?;
+        if let Some(v) = value.get("linters") {
+            base.lint_config = serde_json::from_value(v.clone())?;
         }
 
         if let Some(v) = value.get("codeActions") {
@@ -121,7 +121,7 @@ impl Default for Config {
                 .unwrap()
                 .join("harper-ls/file_dictionaries/"),
             lint_config: LintGroupConfig::default(),
-            diagnostic_severity: LintSeverity::Hint,
+            default_diagnostic_severity: LintSeverity::Hint,
             code_action_config: CodeActionConfig::default(),
             isolate_english: false,
         }
