@@ -2,6 +2,8 @@ use crate::linting::{LintKind, PatternLinter, Suggestion};
 use crate::patterns::{EitherPattern, Pattern, SequencePattern, WordPatternGroup};
 use crate::{Lint, Lrc, Token};
 
+use super::LintSeverity;
+
 // Looks for places where the genitive case _isn't_ being used, and should be.
 pub struct UseGenitive {
     pattern: Box<dyn Pattern>,
@@ -48,13 +50,19 @@ impl PatternLinter for UseGenitive {
         self.pattern.as_ref()
     }
 
-    fn match_to_lint(&self, matched_tokens: &[Token], _source: &[char]) -> Lint {
+    fn match_to_lint(
+        &self,
+        matched_tokens: &[Token],
+        _source: &[char],
+        severity: Option<LintSeverity>,
+    ) -> Lint {
         Lint {
             span: matched_tokens[0].span,
             lint_kind: LintKind::Miscellaneous,
             suggestions: vec![Suggestion::ReplaceWith(vec!['t', 'h', 'e', 'i', 'r'])],
             message: "Use the genitive case.".to_string(),
             priority: 31,
+            severity,
         }
     }
 }

@@ -1,7 +1,7 @@
 use hashbrown::HashSet;
 
 use super::pattern_linter::PatternLinter;
-use super::Suggestion;
+use super::{LintSeverity, Suggestion};
 use crate::linting::LintKind;
 use crate::patterns::{Pattern, SequencePattern};
 use crate::{Lint, Lrc, Token, TokenStringExt};
@@ -41,7 +41,12 @@ impl PatternLinter for MultipleSequentialPronouns {
         self.pattern.as_ref()
     }
 
-    fn match_to_lint(&self, matched_tokens: &[Token], source: &[char]) -> Lint {
+    fn match_to_lint(
+        &self,
+        matched_tokens: &[Token],
+        source: &[char],
+        severity: Option<LintSeverity>,
+    ) -> Lint {
         let mut suggestions = Vec::new();
 
         if matched_tokens.len() == 3 {
@@ -59,6 +64,7 @@ impl PatternLinter for MultipleSequentialPronouns {
             message: "There are too many personal pronouns in sequence here.".to_owned(),
             priority: 63,
             suggestions,
+            severity,
         }
     }
 }

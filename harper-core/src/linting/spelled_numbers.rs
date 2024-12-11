@@ -1,13 +1,15 @@
 use crate::linting::{LintKind, Linter, Suggestion};
 use crate::{Document, Lint, TokenStringExt};
 
+use super::LintSeverity;
+
 /// Linter that checks to make sure small integers (< one hundred) are spelled
 /// out.
 #[derive(Default, Clone, Copy)]
 pub struct SpelledNumbers;
 
 impl Linter for SpelledNumbers {
-    fn lint(&mut self, document: &Document) -> Vec<crate::Lint> {
+    fn lint(&mut self, document: &Document, severity: Option<LintSeverity>) -> Vec<crate::Lint> {
         let mut lints = Vec::new();
 
         for number_tok in document.iter_numbers() {
@@ -23,6 +25,7 @@ impl Linter for SpelledNumbers {
                     )],
                     message: "Try to spell out numbers less than a hundred.".to_string(),
                     priority: 63,
+                    severity,
                 })
             }
         }

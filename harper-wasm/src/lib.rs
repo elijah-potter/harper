@@ -70,7 +70,7 @@ pub fn lint(text: String) -> Vec<Lint> {
     let document =
         Document::new_from_vec(source.clone(), &mut Markdown, &FullDictionary::curated());
 
-    let mut lints = LINTER.lock().unwrap().lint(&document);
+    let mut lints = LINTER.lock().unwrap().lint(&document, None);
 
     remove_overlaps(&mut lints);
 

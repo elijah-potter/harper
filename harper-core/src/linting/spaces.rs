@@ -1,4 +1,4 @@
-use super::{Lint, LintKind, Linter, Suggestion};
+use super::{Lint, LintKind, LintSeverity, Linter, Suggestion};
 use crate::token::TokenStringExt;
 use crate::{Document, Token, TokenKind};
 
@@ -6,7 +6,7 @@ use crate::{Document, Token, TokenKind};
 pub struct Spaces;
 
 impl Linter for Spaces {
-    fn lint(&mut self, document: &Document) -> Vec<Lint> {
+    fn lint(&mut self, document: &Document, severity: Option<LintSeverity>) -> Vec<Lint> {
         let mut output = Vec::new();
 
         for sentence in document.iter_sentences() {
@@ -25,6 +25,7 @@ impl Linter for Spaces {
                             count
                         ),
                         priority: 15,
+                        severity,
                     })
                 }
             }
@@ -55,6 +56,7 @@ impl Linter for Spaces {
                     suggestions: vec![Suggestion::Remove],
                     message: "Unnecessary space at the end of the sentence.".to_string(),
                     priority: 63,
+                    severity,
                 })
             }
         }

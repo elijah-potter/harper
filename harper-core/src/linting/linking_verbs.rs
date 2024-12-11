@@ -1,4 +1,4 @@
-use super::{Lint, LintKind, Linter};
+use super::{Lint, LintKind, LintSeverity, Linter};
 use crate::token::TokenStringExt;
 use crate::Document;
 
@@ -7,7 +7,7 @@ use crate::Document;
 pub struct LinkingVerbs;
 
 impl Linter for LinkingVerbs {
-    fn lint(&mut self, document: &Document) -> Vec<Lint> {
+    fn lint(&mut self, document: &Document, severity: Option<LintSeverity>) -> Vec<Lint> {
         let mut output = Vec::new();
 
         for chunk in document.iter_chunks() {
@@ -25,6 +25,7 @@ impl Linter for LinkingVerbs {
                                 "Linking verbs like “{}” must be preceded by a noun.",
                                 linking_verb_text
                             ),
+                            severity,
                             ..Default::default()
                         })
                     }

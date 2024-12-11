@@ -1,6 +1,6 @@
 use hashbrown::HashMap;
 
-use super::{Lint, LintKind, PatternLinter, Suggestion};
+use super::{Lint, LintKind, LintSeverity, PatternLinter, Suggestion};
 use crate::patterns::{Pattern, SequencePattern, WordPatternGroup};
 use crate::{Token, TokenStringExt};
 
@@ -37,7 +37,12 @@ impl PatternLinter for DotInitialisms {
         self.pattern.as_ref()
     }
 
-    fn match_to_lint(&self, matched_tokens: &[Token], source: &[char]) -> Lint {
+    fn match_to_lint(
+        &self,
+        matched_tokens: &[Token],
+        source: &[char],
+        severity: Option<LintSeverity>,
+    ) -> Lint {
         let found_word_tok = matched_tokens.first().unwrap();
         let found_word = found_word_tok.span.get_content_string(source);
 
@@ -49,6 +54,7 @@ impl PatternLinter for DotInitialisms {
             suggestions: vec![Suggestion::ReplaceWith(correction.chars().collect())],
             message: "Initialisms should have dot-separated letters.".to_owned(),
             priority: 63,
+            severity,
         }
     }
 }

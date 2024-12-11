@@ -1,4 +1,4 @@
-use super::{Lint, LintKind, Linter, Suggestion};
+use super::{Lint, LintKind, LintSeverity, Linter, Suggestion};
 use crate::token::TokenStringExt;
 use crate::{CharStringExt, Document, Span};
 
@@ -6,7 +6,7 @@ use crate::{CharStringExt, Document, Span};
 pub struct RepeatedWords;
 
 impl Linter for RepeatedWords {
-    fn lint(&mut self, document: &Document) -> Vec<Lint> {
+    fn lint(&mut self, document: &Document, severity: Option<LintSeverity>) -> Vec<Lint> {
         let mut lints = Vec::new();
 
         for chunk in document.iter_chunks() {
@@ -30,6 +30,7 @@ impl Linter for RepeatedWords {
                             document.get_span_content(tok_a.span).to_vec(),
                         )],
                         message: "Did you mean to repeat this word?".to_string(),
+                        severity,
                         ..Default::default()
                     })
                 }
