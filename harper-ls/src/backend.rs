@@ -286,7 +286,7 @@ impl Backend {
         lints_to_diagnostics(
             doc_state.document.get_full_content(),
             &lints,
-            config.diagnostic_severity,
+            config.default_diagnostic_severity,
         )
     }
 

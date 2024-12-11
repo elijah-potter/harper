@@ -12,11 +12,11 @@ use crate::pos_conv::span_to_range;
 pub fn lints_to_diagnostics(
     source: &[char],
     lints: &[Lint],
-    severity: LintSeverity,
+    default_severity: LintSeverity,
 ) -> Vec<Diagnostic> {
     lints
         .iter()
-        .map(|lint| lint_to_diagnostic(lint, source, severity))
+        .map(|lint| lint_to_diagnostic(lint, source, default_severity))
         .collect()
 }
 
@@ -86,12 +86,15 @@ pub fn lint_to_code_actions<'a>(
     results
 }
 
-fn lint_to_diagnostic(lint: &Lint, source: &[char], severity: LintSeverity) -> Diagnostic {
+fn lint_to_diagnostic(lint: &Lint, source: &[char], default_severity: LintSeverity) -> Diagnostic {
     let range = span_to_range(source, lint.span);
 
     Diagnostic {
         range,
-        severity: Some(severity_to_lsp(severity)),
+        severity: lint
+            .severity
+            .or_else(|| Some(default_severity))
+            .map(|s| severity_to_lsp(s)),
         code: None,
         code_description: None,
         source: Some("Harper".to_string()),
