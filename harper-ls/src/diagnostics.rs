@@ -93,8 +93,8 @@ fn lint_to_diagnostic(lint: &Lint, source: &[char], default_severity: LintSeveri
         range,
         severity: lint
             .severity
-            .or_else(|| Some(default_severity))
-            .map(|s| severity_to_lsp(s)),
+            .or(Some(default_severity))
+            .map(severity_to_lsp),
         code: None,
         code_description: None,
         source: Some("Harper".to_string()),
