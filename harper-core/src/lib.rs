@@ -65,7 +65,7 @@ pub fn remove_overlaps(lints: &mut Vec<Lint>) {
 #[cfg(test)]
 mod tests {
     use crate::{
-        linting::{LintGroup, LintGroupConfig, Linter},
+        linting::{LintConfig, LintGroup, LintGroupConfig, Linter},
         remove_overlaps, Document, FstDictionary,
     };
 
@@ -74,13 +74,19 @@ mod tests {
         let doc = Document::new_plain_english_curated("Ths  tet");
 
         let lint_config = LintGroupConfig {
-            spell_check: Some(true),
-            spaces: Some(true),
+            spell_check: Some(LintConfig {
+                enabled: Some(true),
+                ..LintConfig::default()
+            }),
+            spaces: Some(LintConfig {
+                enabled: Some(true),
+                ..LintConfig::default()
+            }),
             ..LintGroupConfig::none()
         };
         let mut linter = LintGroup::new(lint_config, FstDictionary::curated());
 
-        let mut lints = linter.lint(&doc);
+        let mut lints = linter.lint(&doc, None);
 
         dbg!(&lints);
         remove_overlaps(&mut lints);

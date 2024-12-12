@@ -1,4 +1,4 @@
-use super::{Lint, LintKind, PatternLinter};
+use super::{Lint, LintKind, LintSeverity, PatternLinter};
 use crate::patterns::{ConsumesRemainingPattern, Pattern, SequencePattern};
 use crate::Lrc;
 
@@ -53,7 +53,12 @@ impl PatternLinter for TerminatingConjunctions {
         self.pattern.as_ref()
     }
 
-    fn match_to_lint(&self, matched_tokens: &[crate::Token], source: &[char]) -> Lint {
+    fn match_to_lint(
+        &self,
+        matched_tokens: &[crate::Token],
+        source: &[char],
+        severity: Option<LintSeverity>,
+    ) -> Lint {
         let word_span = matched_tokens[0].span;
         let word = word_span.get_content_string(source);
 
@@ -66,6 +71,7 @@ impl PatternLinter for TerminatingConjunctions {
                  clause."
             ),
             priority: 63,
+            severity,
         }
     }
 }

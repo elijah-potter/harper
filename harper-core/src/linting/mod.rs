@@ -31,7 +31,7 @@ pub use dot_initialisms::DotInitialisms;
 pub use ellipsis_length::EllipsisLength;
 pub use linking_verbs::LinkingVerbs;
 pub use lint::{Lint, LintKind, Suggestion};
-pub use lint_group::{LintGroup, LintGroupConfig};
+pub use lint_group::{LintConfig, LintGroup, LintGroupConfig, LintSeverity};
 pub use long_sentences::LongSentences;
 pub use matcher::Matcher;
 pub use multiple_sequential_pronouns::MultipleSequentialPronouns;
@@ -52,11 +52,11 @@ use crate::Document;
 
 #[cfg(not(feature = "concurrent"))]
 pub trait Linter {
-    fn lint(&mut self, document: &Document) -> Vec<Lint>;
+    fn lint(&mut self, document: &Document, severity: Option<LintSeverity>) -> Vec<Lint>;
 }
 #[cfg(feature = "concurrent")]
 pub trait Linter: Send + Sync {
-    fn lint(&mut self, document: &Document) -> Vec<Lint>;
+    fn lint(&mut self, document: &Document, severity: Option<LintSeverity>) -> Vec<Lint>;
 }
 
 #[cfg(test)]
@@ -66,7 +66,7 @@ mod tests {
 
     pub fn assert_lint_count(text: &str, mut linter: impl Linter, count: usize) {
         let test = Document::new_markdown_curated(text);
-        let lints = linter.lint(&test);
+        let lints = linter.lint(&test, None);
         dbg!(&lints);
         assert_eq!(lints.len(), count);
     }
@@ -75,7 +75,7 @@ mod tests {
     /// lint and asserts that the result is equal to a given value.
     pub fn assert_suggestion_result(text: &str, mut linter: impl Linter, expected_result: &str) {
         let test = Document::new_markdown_curated(text);
-        let lints = linter.lint(&test);
+        let lints = linter.lint(&test, None);
 
         let mut text: Vec<char> = text.chars().collect();
 

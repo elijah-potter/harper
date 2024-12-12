@@ -5,11 +5,13 @@ use itertools::Itertools;
 use crate::linting::{Lint, LintKind, Linter, Suggestion};
 use crate::{Document, TokenStringExt};
 
+use super::LintSeverity;
+
 #[derive(Debug, Default)]
 pub struct AnA;
 
 impl Linter for AnA {
-    fn lint(&mut self, document: &Document) -> Vec<Lint> {
+    fn lint(&mut self, document: &Document, severity: Option<LintSeverity>) -> Vec<Lint> {
         let mut lints = Vec::new();
 
         for chunk in document.iter_chunks() {
@@ -55,6 +57,7 @@ impl Linter for AnA {
                         suggestions: vec![Suggestion::ReplaceWith(replacement)],
                         message: "Incorrect indefinite article.".to_string(),
                         priority: 31,
+                        severity,
                     })
                 }
             }

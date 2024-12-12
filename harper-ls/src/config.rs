@@ -1,31 +1,16 @@
 use std::path::PathBuf;
 
 use dirs::{config_dir, data_local_dir};
-use harper_core::linting::LintGroupConfig;
+use harper_core::linting::{LintGroupConfig, LintSeverity};
 use resolve_path::PathResolveExt;
-use serde::{Deserialize, Serialize};
 use serde_json::Value;
 
-#[derive(Debug, Serialize, Deserialize, Clone, Copy)]
-#[serde(rename_all = "camelCase")]
-pub enum DiagnosticSeverity {
-    Error,
-    Warning,
-    Information,
-    Hint,
-}
-
-impl DiagnosticSeverity {
-    /// Converts `self` to the equivalent LSP type.
-    pub fn to_lsp(self) -> tower_lsp::lsp_types::DiagnosticSeverity {
-        match self {
-            DiagnosticSeverity::Error => tower_lsp::lsp_types::DiagnosticSeverity::ERROR,
-            DiagnosticSeverity::Warning => tower_lsp::lsp_types::DiagnosticSeverity::WARNING,
-            DiagnosticSeverity::Information => {
-                tower_lsp::lsp_types::DiagnosticSeverity::INFORMATION
-            }
-            DiagnosticSeverity::Hint => tower_lsp::lsp_types::DiagnosticSeverity::HINT,
-        }
+pub fn severity_to_lsp(severity: LintSeverity) -> tower_lsp::lsp_types::DiagnosticSeverity {
+    match severity {
+        LintSeverity::Error => tower_lsp::lsp_types::DiagnosticSeverity::ERROR,
+        LintSeverity::Warning => tower_lsp::lsp_types::DiagnosticSeverity::WARNING,
+        LintSeverity::Information => tower_lsp::lsp_types::DiagnosticSeverity::INFORMATION,
+        LintSeverity::Hint => tower_lsp::lsp_types::DiagnosticSeverity::HINT,
     }
 }
 
@@ -67,7 +52,7 @@ pub struct Config {
     pub user_dict_path: PathBuf,
     pub file_dict_path: PathBuf,
     pub lint_config: LintGroupConfig,
-    pub diagnostic_severity: DiagnosticSeverity,
+    pub default_diagnostic_severity: LintSeverity,
     pub code_action_config: CodeActionConfig,
     pub isolate_english: bool,
 }
@@ -102,12 +87,12 @@ impl Config {
             }
         }
 
-        if let Some(v) = value.get("linters") {
-            base.lint_config = serde_json::from_value(v.clone())?;
+        if let Some(v) = value.get("diagnosticSeverity") {
+            base.default_diagnostic_severity = serde_json::from_value(v.clone())?;
         }
 
-        if let Some(v) = value.get("diagnosticSeverity") {
-            base.diagnostic_severity = serde_json::from_value(v.clone())?;
+        if let Some(v) = value.get("linters") {
+            base.lint_config = serde_json::from_value(v.clone())?;
         }
 
         if let Some(v) = value.get("codeActions") {
@@ -136,7 +121,7 @@ impl Default for Config {
                 .unwrap()
                 .join("harper-ls/file_dictionaries/"),
             lint_config: LintGroupConfig::default(),
-            diagnostic_severity: DiagnosticSeverity::Hint,
+            default_diagnostic_severity: LintSeverity::Hint,
             code_action_config: CodeActionConfig::default(),
             isolate_english: false,
         }
