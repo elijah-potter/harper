@@ -4,6 +4,7 @@ use serde::{Deserialize, Serialize};
 use super::an_a::AnA;
 use super::avoid_curses::AvoidCurses;
 use super::boring_words::BoringWords;
+use super::capitalize_personal_pronouns::CapitalizePersonalPronouns;
 use super::correct_number_suffix::CorrectNumberSuffix;
 use super::dot_initialisms::DotInitialisms;
 use super::ellipsis_length::EllipsisLength;
@@ -131,7 +132,8 @@ create_lint_group_config!(
     DotInitialisms => true,
     BoringWords => false,
     UseGenitive => false,
-    ThatWhich => true
+    ThatWhich => true,
+    CapitalizePersonalPronouns => true
 );
 
 impl<T: Dictionary + Default> Default for LintGroup<T> {
