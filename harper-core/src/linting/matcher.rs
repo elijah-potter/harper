@@ -145,7 +145,6 @@ impl Matcher {
             "north","america" => "North America",
             "fatal","outcome" => "death",
             "geiger","counter" => "Geiger counter",
-            "Geiger","Counter" => "Geiger counter",
             "veterans","day" => "Veterans Day",
             "presidents","day" => "Presidents' Day",
             "president's","day" => "Presidents' Day",
