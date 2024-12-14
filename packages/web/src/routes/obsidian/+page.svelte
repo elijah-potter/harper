@@ -12,7 +12,7 @@
 			class="flex flex-row items-center md:border-4 justify-evenly p-8 rounded-2xl hover:scale-105 transition-all"
 		>
 			<div class="w-1/3 md:w-64"><Logo /></div>
-			<div class="text-5xl md:m-8">+</div>
+			<div class="text-5xl md:m-8 dark:text-white">+</div>
 			<div class="w-1/3 md:w-64"><ObsidianLogo /></div>
 		</div>
 	</div>
