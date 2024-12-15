@@ -20,9 +20,11 @@
 </GutterCenter>
 
 <div class="w-full flex flex-row justify-center">
-	<h2 class="dark:text-white flex items-center">
-		An
-		<div class="inline-block"><AutomatticLogo height="32px" width="140px" /></div>
-		{displayName}
-	</h2>
+	<a href="https://automattic.com/">
+		<h2 class="dark:text-white flex items-center">
+			An
+			<div class="inline-block"><AutomatticLogo height="32px" width="140px" /></div>
+			{displayName}
+		</h2>
+	</a>
 </div>
