@@ -16,6 +16,16 @@ build-harperjs:
   yarn install -f
   yarn run build
 
+test-harperjs:
+  #!/bin/bash
+  set -eo pipefail
+  just build-harperjs
+  
+  cd "{{justfile_directory()}}/packages/harper.js"
+  yarn install -f
+  yarn playwright install
+  yarn test
+
 # Compile the website's dependencies and start a development server. Note that if you make changes to `harper-wasm`, you will have to re-run this command.
 dev-web:
   #! /bin/bash
@@ -155,7 +165,6 @@ precommit:
 
   just build-harperjs
   just build-obsidian
-  just test-vscode
   just build-web
 
 # Install `harper-cli` and `harper-ls` to your machine via `cargo`
@@ -177,6 +186,8 @@ dogfood:
 test:
   cargo test
   cargo test --release
+  just test-vscode
+  just test-harperjs
 
 # Use `harper-cli` to parse a provided file and print out the resulting tokens.
 parse file:

@@ -1,5 +1,6 @@
 #![doc = include_str!("../README.md")]
 
+use std::convert::Into;
 use std::sync::Mutex;
 
 use harper_core::language_detection::is_doc_likely_english;
@@ -7,6 +8,7 @@ use harper_core::linting::{LintGroup, LintGroupConfig, Linter};
 use harper_core::parsers::{IsolateEnglish, Markdown, PlainEnglish};
 use harper_core::{remove_overlaps, Document, FullDictionary, Lrc};
 use once_cell::sync::Lazy;
+use serde::{Deserialize, Serialize};
 use wasm_bindgen::prelude::wasm_bindgen;
 use wasm_bindgen::JsValue;
 
@@ -17,6 +19,25 @@ static LINTER: Lazy<Mutex<LintGroup<Lrc<FullDictionary>>>> = Lazy::new(|| {
     ))
 });
 
+macro_rules! make_serialize_fns_for {
+    ($name:ident) => {
+        #[wasm_bindgen]
+        impl $name {
+            pub fn to_json(&self) -> String {
+                serde_json::to_string(&self).unwrap()
+            }
+
+            pub fn from_json(json: String) -> Result<Self, String> {
+                serde_json::from_str(&json).map_err(|err| err.to_string())
+            }
+        }
+    };
+}
+
+make_serialize_fns_for!(Suggestion);
+make_serialize_fns_for!(Lint);
+make_serialize_fns_for!(Span);
+
 /// Setup the WebAssembly module's logging.
 ///
 /// Not strictly necessary for anything to function, but makes bug-hunting less
@@ -25,7 +46,8 @@ static LINTER: Lazy<Mutex<LintGroup<Lrc<FullDictionary>>>> = Lazy::new(|| {
 pub fn setup() {
     console_error_panic_hook::set_once();
 
-    tracing_wasm::set_as_global_default();
+    // If `setup` gets called more than once, we want to allow this error to fall through.
+    let _ = tracing_wasm::try_set_as_global_default();
 }
 
 /// Helper method to quickly check if a plain string is likely intended to be English
@@ -76,7 +98,7 @@ pub fn lint(text: String) -> Vec<Lint> {
 
     lints
         .into_iter()
-        .map(|l| Lint::new(l, source.clone()))
+        .map(|l| Lint::new(l, source.to_vec()))
         .collect()
 }
 
@@ -94,11 +116,13 @@ pub fn apply_suggestion(
     Ok(source.iter().collect())
 }
 
+#[derive(Debug, Serialize, Deserialize)]
 #[wasm_bindgen]
 pub struct Suggestion {
     inner: harper_core::linting::Suggestion,
 }
 
+#[derive(Debug, Serialize, Deserialize)]
 #[wasm_bindgen]
 pub enum SuggestionKind {
     Replace,
@@ -129,15 +153,16 @@ impl Suggestion {
     }
 }
 
+#[derive(Debug, Deserialize, Serialize)]
 #[wasm_bindgen]
 pub struct Lint {
     inner: harper_core::linting::Lint,
-    source: Lrc<Vec<char>>,
+    source: Vec<char>,
 }
 
 #[wasm_bindgen]
 impl Lint {
-    pub(crate) fn new(inner: harper_core::linting::Lint, source: Lrc<Vec<char>>) -> Self {
+    pub(crate) fn new(inner: harper_core::linting::Lint, source: Vec<char>) -> Self {
         Self { inner, source }
     }
 
@@ -172,6 +197,7 @@ impl Lint {
     }
 }
 
+#[derive(Debug, Clone, Copy, Serialize, Deserialize)]
 #[wasm_bindgen]
 pub struct Span {
     pub start: usize,
@@ -182,6 +208,14 @@ pub struct Span {
 impl Span {
     pub fn new(start: usize, end: usize) -> Self {
         Self { start, end }
+    }
+
+    pub fn is_empty(&self) -> bool {
+        self.len() == 0
+    }
+
+    pub fn len(&self) -> usize {
+        Into::<harper_core::Span>::into(*self).len()
     }
 }
 

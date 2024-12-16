@@ -1,4 +1,4 @@
-import { Lint, Span, Suggestion } from 'wasm';
+import type { Lint, Span, Suggestion } from 'wasm';
 import Linter from './Linter';
 
 /** A Linter that runs in the current JavaScript context (meaning it is allowed to block the event loop). */

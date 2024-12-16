@@ -13,5 +13,17 @@ export default defineConfig({
 			formats: ['es']
 		}
 	},
-	plugins: [wasm(), topLevelAwait(), dts({ rollupTypes: true, tsconfigPath: './tsconfig.json' })]
+	base: './',
+	plugins: [wasm(), topLevelAwait(), dts({ rollupTypes: true, tsconfigPath: './tsconfig.json' })],
+	worker: {
+		plugins: [wasm(), topLevelAwait()],
+		format: 'es'
+	},
+	test: {
+		browser: {
+			provider: 'playwright',
+			enabled: true,
+			name: 'chromium'
+		}
+	}
 });
