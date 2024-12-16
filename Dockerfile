@@ -21,6 +21,10 @@ COPY --from=wasm-build /usr/build/harper-wasm/pkg /usr/build/harper-wasm/pkg
 COPY packages packages
 COPY demo.md .
 
+WORKDIR /usr/build/packages/harper.js
+
+RUN yarn install && yarn build
+
 WORKDIR /usr/build/packages/web
 
 RUN yarn install && yarn build
