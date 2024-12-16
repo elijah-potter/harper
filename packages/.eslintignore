@@ -7,6 +7,7 @@ main.js
 .env
 .env.*
 !.env.example
+dist
 
 # Ignore files for PNPM, NPM and YARN
 pnpm-lock.yaml

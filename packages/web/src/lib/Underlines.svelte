@@ -4,7 +4,7 @@
 	// Someday, I'll return to it and spruce it up.
 	// For now, it works.
 
-	import { lintText } from '$lib/analysis';
+	import { LocalLinter } from 'harper.js';
 	import type { Lint } from 'wasm';
 
 	export let content: string;
@@ -13,12 +13,14 @@
 	let lints: [Lint, number][] = [];
 	let lintHighlights: HTMLSpanElement[] = [];
 
-	$: lintText(content).then(
-		(newLints) =>
-			(lints = newLints
-				.map<[Lint, number]>((lint, index) => [lint, index])
-				.toSorted(([a], [b]) => a.span().start - b.span().end))
-	);
+	$: new LocalLinter()
+		.lint(content)
+		.then(
+			(newLints) =>
+				(lints = newLints
+					.map<[Lint, number]>((lint, index) => [lint, index])
+					.toSorted(([a], [b]) => a.span().start - b.span().end))
+		);
 	$: if (focusLintIndex != null && lintHighlights[focusLintIndex] != null)
 		lintHighlights[focusLintIndex].scrollIntoView({
 			behavior: 'smooth',

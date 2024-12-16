@@ -3,7 +3,8 @@
 	"workspaces": [
 		"obsidian-plugin",
 		"web",
-		"vscode-plugin"
+		"vscode-plugin",
+		"harper.js"
 	],
 	"devDependencies": {
 		"eslint": "^8.28.0",

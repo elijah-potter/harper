@@ -34,6 +34,6 @@
 		"lodash-es": "^4.17.21",
 		"reveal.js": "^5.1.0",
 		"svelte-intersection-observer": "^1.0.0",
-		"wasm": "link:../../harper-wasm/pkg"
+		"harper.js": "link:../harper.js"
 	}
 }

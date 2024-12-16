@@ -7,12 +7,21 @@ format:
 build-wasm target:
   cd "{{justfile_directory()}}/harper-wasm" && wasm-pack build --target {{target}}
 
+build-harperjs:
+  #! /bin/bash
+  set -eo pipefail
+  just build-wasm bundler
+  
+  cd "{{justfile_directory()}}/packages/harper.js"
+  yarn install -f
+  yarn run build
+
 # Compile the website's dependencies and start a development server. Note that if you make changes to `harper-wasm`, you will have to re-run this command.
 dev-web:
   #! /bin/bash
   set -eo pipefail
 
-  just build-wasm bundler
+  just build-harperjs
 
   cd "{{justfile_directory()}}/packages/web"
   yarn install -f
@@ -22,7 +31,8 @@ dev-web:
 build-web:
   #! /bin/bash
   set -eo pipefail
-  just build-wasm bundler
+  
+  just build-harperjs
   
   cd "{{justfile_directory()}}/packages/web"
   yarn install -f
@@ -114,6 +124,7 @@ check:
   yarn prettier --check .
   yarn eslint .
 
+  # Needed because Svelte has special linters
   cd web
   just build-web
   yarn run check
@@ -124,6 +135,7 @@ setup:
   set -eo pipefail
 
   cargo build
+  just build-harperjs
   just build-obsidian
   just test-vscode
   just build-web
@@ -141,6 +153,7 @@ precommit:
   cargo build --release
   cargo bench
 
+  just build-harperjs
   just build-obsidian
   just test-vscode
   just build-web

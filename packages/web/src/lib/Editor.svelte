@@ -3,7 +3,7 @@
 	import demo from '../../../../demo.md?raw';
 	import Underlines from '$lib/Underlines.svelte';
 	import { Button } from 'flowbite-svelte';
-	import { lintText, applySuggestion } from '$lib/analysis';
+	import { LocalLinter } from 'harper.js';
 	import { Lint, SuggestionKind } from 'wasm';
 	import CheckMark from '$lib/CheckMark.svelte';
 	import { fly } from 'svelte/transition';
@@ -14,8 +14,11 @@
 	let lintCards: HTMLButtonElement[] = [];
 	let focused: number | undefined;
 	let editor: HTMLTextAreaElement | null;
+	let linter = new LocalLinter();
 
-	$: lintText(content).then((newLints) => (lints = newLints));
+	linter.setup();
+
+	$: linter.lint(content).then((newLints) => (lints = newLints));
 	$: boxHeight = calcHeight(content);
 	$: if (focused != null && lintCards[focused])
 		lintCards[focused].scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'nearest' });
@@ -89,9 +92,9 @@
 										class="w-full"
 										style="height: 40px; margin: 5px 0px;"
 										on:click={() =>
-											applySuggestion(content, suggestion, lint.span()).then(
-												(edited) => (content = edited)
-											)}
+											linter
+												.applySuggestion(content, suggestion, lint.span())
+												.then((edited) => (content = edited))}
 									>
 										{#if suggestion.kind() == SuggestionKind.Remove}
 											Remove "{lint.get_problem_text()}"
@@ -121,9 +124,9 @@
 							style="height: 40px; margin: 5px 0px;"
 							on:click={() =>
 								focused != null &&
-								applySuggestion(content, suggestion, lints[focused].span()).then(
-									(edited) => (content = edited)
-								)}
+								linter
+									.applySuggestion(content, suggestion, lints[focused].span())
+									.then((edited) => (content = edited))}
 						>
 							{#if suggestion.kind() == SuggestionKind.Remove}
 								Remove
