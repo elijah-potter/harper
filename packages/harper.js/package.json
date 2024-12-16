@@ -5,7 +5,8 @@
 	"type": "module",
 	"scripts": {
 		"dev": "vite",
-		"build": "tsc && vite build"
+		"build": "tsc && vite build",
+		"test": "vitest"
 	},
 	"dependencies": {
 		"wasm": "link:../../harper-wasm/pkg"
@@ -15,7 +16,8 @@
 		"vite": "^5.1.8",
 		"vite-plugin-dts": "^4.3.0",
 		"vite-plugin-top-level-await": "^1.4.4",
-		"vite-plugin-wasm": "^3.3.0"
+		"vite-plugin-wasm": "^3.3.0",
+		"vitest": "^2.1.8"
 	},
 	"main": "dist/harper.js",
 	"types": "dist/harper.d.ts"
