@@ -3,8 +3,6 @@ import { deserialize, serializeArg } from './communication';
 
 const linter = new LocalLinter();
 
-console.log('Linter created');
-
 self.onmessage = function (e) {
 	const { procName, args } = deserialize(e.data);
 

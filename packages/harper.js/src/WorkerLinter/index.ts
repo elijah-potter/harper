@@ -23,8 +23,7 @@ export default class WorkerLinter implements Linter {
 		this.worker = new Worker();
 		this.requestQueue = [];
 
-		this.worker.onmessage = (e) => {
-			console.log(e);
+		this.worker.onmessage = () => {
 			this.setupMainEventListeners();
 			this.working = false;
 			this.submitRemainingRequests();
@@ -83,7 +82,6 @@ export default class WorkerLinter implements Linter {
 	}
 
 	private submitRemainingRequests() {
-		console.log(this.working, this.requestQueue.length);
 		if (this.working) {
 			return;
 		}
@@ -93,7 +91,6 @@ export default class WorkerLinter implements Linter {
 		if (this.requestQueue.length > 0) {
 			const { request } = this.requestQueue[0];
 
-			console.log('post', serialize(request));
 			this.worker.postMessage(serialize(request));
 		} else {
 			this.working = false;

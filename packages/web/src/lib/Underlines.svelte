@@ -4,7 +4,7 @@
 	// Someday, I'll return to it and spruce it up.
 	// For now, it works.
 
-	import { LocalLinter } from 'harper.js';
+	import { WorkerLinter } from 'harper.js';
 	import type { Lint } from 'wasm';
 
 	export let content: string;
@@ -12,8 +12,10 @@
 
 	let lints: [Lint, number][] = [];
 	let lintHighlights: HTMLSpanElement[] = [];
+	let linter = new WorkerLinter();
+	linter.setup();
 
-	$: new LocalLinter()
+	$: linter
 		.lint(content)
 		.then(
 			(newLints) =>

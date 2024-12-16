@@ -3,7 +3,7 @@
 	import demo from '../../../../demo.md?raw';
 	import Underlines from '$lib/Underlines.svelte';
 	import { Button } from 'flowbite-svelte';
-	import { LocalLinter } from 'harper.js';
+	import { WorkerLinter } from 'harper.js';
 	import { Lint, SuggestionKind } from 'wasm';
 	import CheckMark from '$lib/CheckMark.svelte';
 	import { fly } from 'svelte/transition';
@@ -14,7 +14,7 @@
 	let lintCards: HTMLButtonElement[] = [];
 	let focused: number | undefined;
 	let editor: HTMLTextAreaElement | null;
-	let linter = new LocalLinter();
+	let linter = new WorkerLinter();
 
 	linter.setup();
 

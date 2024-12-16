@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { LocalLinter } from 'harper.js';
+	import { WorkerLinter } from 'harper.js';
 	import { Textarea, Select } from 'flowbite-svelte';
 	import demoText from '../../../../../demo.md?raw';
 
@@ -7,8 +7,11 @@
 	let text = '';
 	let strippedText = '';
 
-	$: new LocalLinter().isLikelyEnglish(text).then((v) => (isEnglish = v));
-	$: new LocalLinter().isolateEnglish(text).then((t) => (strippedText = t));
+	let linter = new WorkerLinter();
+	linter.setup();
+
+	$: linter.isLikelyEnglish(text).then((v) => (isEnglish = v));
+	$: linter.isolateEnglish(text).then((t) => (strippedText = t));
 
 	$: color = isEnglish == null ? '' : isEnglish ? 'bg-green-100' : 'bg-red-100';
 
