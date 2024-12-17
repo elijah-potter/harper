@@ -9,13 +9,24 @@ export default defineConfig({
 			fileName: `harper`,
 			name: 'harper',
 			formats: ['es']
+		},
+		rollupOptions: {
+			output: {
+				inlineDynamicImports: true
+			}
 		}
 	},
 	base: './',
 	plugins: [dts({ rollupTypes: true, tsconfigPath: './tsconfig.json' })],
 	worker: {
 		plugins: [],
-		format: 'es'
+		format: 'es',
+
+		rollupOptions: {
+			output: {
+				inlineDynamicImports: true
+			}
+		}
 	},
 	server: {
 		fs: {
@@ -28,5 +39,6 @@ export default defineConfig({
 			enabled: true,
 			name: 'chromium'
 		}
-	}
+	},
+	assetsInclude: ['**/*.wasm']
 });
