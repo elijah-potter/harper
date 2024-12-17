@@ -1,24 +1,24 @@
 {
-  "name": "harper.js",
-  "private": true,
-  "version": "0.0.0",
-  "type": "module",
-  "scripts": {
-    "dev": "vite",
-    "build": "tsc && vite build",
-    "test": "vitest run"
-  },
-  "dependencies": {
-    "wasm": "link:../../harper-wasm/pkg"
-  },
-  "devDependencies": {
-    "@vitest/browser": "^2.1.8",
-    "playwright": "^1.49.1",
-    "typescript": "~5.6.2",
-    "vite": "^5.1.8",
-    "vite-plugin-dts": "^4.3.0",
-    "vitest": "^2.1.8"
-  },
-  "main": "dist/harper.js",
-  "types": "dist/harper.d.ts"
+	"name": "harper.js",
+	"private": true,
+	"version": "0.0.0",
+	"type": "module",
+	"scripts": {
+		"dev": "vite",
+		"build": "tsc && vite build",
+		"test": "vitest run"
+	},
+	"dependencies": {
+		"wasm": "link:../../harper-wasm/pkg"
+	},
+	"devDependencies": {
+		"@vitest/browser": "^2.1.8",
+		"playwright": "^1.49.1",
+		"typescript": "~5.6.2",
+		"vite": "^5.1.8",
+		"vite-plugin-dts": "^4.3.0",
+		"vitest": "^2.1.8"
+	},
+	"main": "dist/harper.js",
+	"types": "dist/harper.d.ts"
 }
