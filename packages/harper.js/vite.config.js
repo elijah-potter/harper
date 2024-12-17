@@ -1,6 +1,7 @@
 import { resolve } from 'path';
 import dts from 'vite-plugin-dts';
 import { defineConfig } from 'vite';
+import virtual from 'vite-plugin-virtual';
 
 export default defineConfig({
 	build: {
@@ -17,11 +18,19 @@ export default defineConfig({
 		}
 	},
 	base: './',
-	plugins: [dts({ rollupTypes: true, tsconfigPath: './tsconfig.json' })],
+	plugins: [
+		dts({ rollupTypes: true, tsconfigPath: './tsconfig.json' }),
+		virtual({
+			'virtual:wasm': `import wasmUri from 'wasm/harper_wasm_bg.wasm?inline'; export default wasmUri`
+		})
+	],
 	worker: {
-		plugins: [],
+		plugins: [
+			virtual({
+				'virtual:wasm': `export default ''`
+			})
+		],
 		format: 'es',
-
 		rollupOptions: {
 			output: {
 				inlineDynamicImports: true

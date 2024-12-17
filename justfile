@@ -11,6 +11,8 @@ build-harperjs:
   #! /bin/bash
   set -eo pipefail
   just build-wasm web
+
+  sed -i 's/new URL(.*)/new URL()/g' "{{justfile_directory()}}/harper-wasm/pkg/harper_wasm.js"
   
   cd "{{justfile_directory()}}/packages/harper.js"
   yarn install -f

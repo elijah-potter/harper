@@ -1,3 +1,4 @@
+import { setWasmUri } from '../loadWasm';
 import LocalLinter from '../LocalLinter';
 import { deserialize, serializeArg } from './communication';
 
@@ -12,7 +13,11 @@ async function processRequest(v) {
 }
 
 self.onmessage = function (e) {
-	processRequest(e.data);
+	setWasmUri(e.data);
+
+	self.onmessage = function (e) {
+		processRequest(e.data);
+	};
 };
 
 // Notify the main thread that we are ready

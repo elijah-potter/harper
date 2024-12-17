@@ -17,6 +17,7 @@
 		"typescript": "~5.6.2",
 		"vite": "^5.1.8",
 		"vite-plugin-dts": "^4.3.0",
+		"vite-plugin-virtual": "^0.3.0",
 		"vitest": "^2.1.8"
 	},
 	"main": "dist/harper.js",

@@ -1,7 +1,8 @@
 import { DeserializedRequest, deserializeArg, serialize } from './communication';
 import type { Lint, Suggestion, Span } from 'wasm';
 import Linter from '../Linter';
-import Worker from './worker.js?worker';
+import Worker from './worker.js?worker&inline';
+import { getWasmUri } from '../loadWasm';
 
 /** The data necessary to complete a request once the worker has responded. */
 type RequestItem = {
@@ -24,8 +25,12 @@ export default class WorkerLinter implements Linter {
 		this.worker = new Worker();
 		this.requestQueue = [];
 
+		// Fires when the worker sends 'ready'.
 		this.worker.onmessage = () => {
 			this.setupMainEventListeners();
+
+			this.worker.postMessage(getWasmUri());
+
 			this.working = false;
 			this.submitRemainingRequests();
 		};
