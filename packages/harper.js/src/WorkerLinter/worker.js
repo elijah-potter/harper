@@ -3,10 +3,16 @@ import { deserialize, serializeArg } from './communication';
 
 const linter = new LocalLinter();
 
-self.onmessage = function (e) {
-	const { procName, args } = deserialize(e.data);
+/** @param {SerializedRequest} v  */
+async function processRequest(v) {
+	const { procName, args } = await deserialize(v);
 
-	linter[procName](...args).then((res) => postMessage(serializeArg(res)));
+	let res = await linter[procName](...args);
+	postMessage(await serializeArg(res));
+}
+
+self.onmessage = function (e) {
+	processRequest(e.data);
 };
 
 // Notify the main thread that we are ready

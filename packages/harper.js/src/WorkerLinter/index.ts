@@ -1,5 +1,5 @@
 import { DeserializedRequest, deserializeArg, serialize } from './communication';
-import { Lint, Suggestion, Span } from 'wasm';
+import type { Lint, Suggestion, Span } from 'wasm';
 import Linter from '../Linter';
 import Worker from './worker.js?worker';
 
@@ -13,7 +13,8 @@ type RequestItem = {
 /** A Linter that spins up a dedicated web worker to do processing on a separate thread.
  * Main benefit: this Linter will not block the event loop for large documents.
  *
- * NOTE: This class will not work properly in Node. In that case, just use `LocalLinter`. */
+ * NOTE: This class will not work properly in Node. In that case, just use `LocalLinter`.
+ * Also requires top-level await to work. */
 export default class WorkerLinter implements Linter {
 	private worker;
 	private requestQueue: RequestItem[];
@@ -33,10 +34,13 @@ export default class WorkerLinter implements Linter {
 	private setupMainEventListeners() {
 		this.worker.onmessage = (e: MessageEvent) => {
 			const { resolve } = this.requestQueue.shift()!;
-			resolve(deserializeArg(e.data));
-			this.working = false;
+			deserializeArg(e.data).then((v) => {
+				resolve(v);
 
-			this.submitRemainingRequests();
+				this.working = false;
+
+				this.submitRemainingRequests();
+			});
 		};
 
 		this.worker.onmessageerror = (e: MessageEvent) => {
@@ -81,7 +85,7 @@ export default class WorkerLinter implements Linter {
 		return promise;
 	}
 
-	private submitRemainingRequests() {
+	private async submitRemainingRequests() {
 		if (this.working) {
 			return;
 		}
@@ -91,7 +95,7 @@ export default class WorkerLinter implements Linter {
 		if (this.requestQueue.length > 0) {
 			const { request } = this.requestQueue[0];
 
-			this.worker.postMessage(serialize(request));
+			this.worker.postMessage(await serialize(request));
 		} else {
 			this.working = false;
 		}

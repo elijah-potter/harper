@@ -1,7 +1,7 @@
 /** This module aims to define the communication protocol between the main thread and the worker.
  * Note that most of the complication here comes from the fact that we can't serialize function calls or referenced WebAssembly memory.*/
 
-import { Lint, Span, Suggestion } from 'wasm';
+import loadWasm from '../loadWasm';
 
 export type Type =
 	| 'string'
@@ -19,16 +19,18 @@ export type RequestArg = {
 	type: Type;
 };
 
-export function serialize(req: DeserializedRequest): SerializedRequest {
+export async function serialize(req: DeserializedRequest): Promise<SerializedRequest> {
 	return {
 		procName: req.procName,
-		args: req.args.map(serializeArg)
+		args: await Promise.all(req.args.map(serializeArg))
 	};
 }
 
-export function serializeArg(arg: any): RequestArg {
+export async function serializeArg(arg: any): Promise<RequestArg> {
+	const { Lint, Span, Suggestion } = await loadWasm();
+
 	if (Array.isArray(arg)) {
-		return { json: JSON.stringify(arg.map(serializeArg)), type: 'Array' };
+		return { json: JSON.stringify(await Promise.all(arg.map(serializeArg))), type: 'Array' };
 	}
 
 	switch (typeof arg) {
@@ -62,7 +64,9 @@ export function serializeArg(arg: any): RequestArg {
 	throw new Error('Unhandled case');
 }
 
-export function deserializeArg(requestArg: RequestArg): any {
+export async function deserializeArg(requestArg: RequestArg): Promise<any> {
+	const { Lint, Span, Suggestion } = await loadWasm();
+
 	switch (requestArg.type) {
 		case 'undefined':
 			return undefined;
@@ -77,7 +81,7 @@ export function deserializeArg(requestArg: RequestArg): any {
 		case 'Span':
 			return Span.from_json(requestArg.json);
 		case 'Array':
-			return JSON.parse(requestArg.json).map(deserializeArg);
+			return await Promise.all(JSON.parse(requestArg.json).map(deserializeArg));
 		default:
 			throw new Error(`Unhandled case: ${requestArg.type}`);
 	}
@@ -99,9 +103,9 @@ export type DeserializedRequest = {
 	args: any[];
 };
 
-export function deserialize(request: SerializedRequest): DeserializedRequest {
+export async function deserialize(request: SerializedRequest): Promise<DeserializedRequest> {
 	return {
 		procName: request.procName,
-		args: request.args.map(deserializeArg)
+		args: await Promise.all(request.args.map(deserializeArg))
 	};
 }

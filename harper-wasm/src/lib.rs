@@ -125,8 +125,8 @@ pub struct Suggestion {
 #[derive(Debug, Serialize, Deserialize)]
 #[wasm_bindgen]
 pub enum SuggestionKind {
-    Replace,
-    Remove,
+    Replace = 0,
+    Remove = 1,
 }
 
 #[wasm_bindgen]

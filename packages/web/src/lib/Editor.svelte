@@ -3,8 +3,8 @@
 	import demo from '../../../../demo.md?raw';
 	import Underlines from '$lib/Underlines.svelte';
 	import { Button } from 'flowbite-svelte';
-	import { WorkerLinter } from 'harper.js';
-	import { Lint, SuggestionKind } from 'wasm';
+	import { WorkerLinter, SuggestionKind } from 'harper.js';
+	import type { Lint } from 'harper.js';
 	import CheckMark from '$lib/CheckMark.svelte';
 	import { fly } from 'svelte/transition';
 

@@ -10,7 +10,7 @@ build-wasm target:
 build-harperjs:
   #! /bin/bash
   set -eo pipefail
-  just build-wasm bundler
+  just build-wasm web
   
   cd "{{justfile_directory()}}/packages/harper.js"
   yarn install -f

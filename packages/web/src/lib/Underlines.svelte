@@ -4,8 +4,8 @@
 	// Someday, I'll return to it and spruce it up.
 	// For now, it works.
 
+	import type { Lint } from 'harper.js';
 	import { WorkerLinter } from 'harper.js';
-	import type { Lint } from 'wasm';
 
 	export let content: string;
 	export let focusLintIndex: number | undefined;

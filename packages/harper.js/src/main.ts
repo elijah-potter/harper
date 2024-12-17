@@ -3,5 +3,10 @@ import Linter from './Linter';
 import LocalLinter from './LocalLinter';
 import WorkerLinter from './WorkerLinter';
 
-export { Lint, Span, Suggestion, LocalLinter, WorkerLinter };
-export type { Linter };
+export { LocalLinter, WorkerLinter };
+export type { Linter, Lint, Span, Suggestion };
+
+export enum SuggestionKind {
+	Replace = 0,
+	Remove = 1
+}
