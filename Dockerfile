@@ -32,6 +32,7 @@ RUN yarn install && yarn build
 FROM node:slim
 
 COPY --from=node-build /usr/build/packages/web/build /usr/build/packages/web/build
+COPY --from=node-build /usr/build/packages/web/package.json /usr/build/packages/web/package.json
 
 WORKDIR /usr/build/packages/web
 
