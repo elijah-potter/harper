@@ -1,9 +1,10 @@
-// @ts-ignore
+// @ts-expect-error because this virtual module hasn't been added to a `d.ts` file.
 import wasmUri from 'virtual:wasm';
 
 let curWasmUri = wasmUri;
 
-/** Get the currently set data URI for the WebAssembly module. */
+/** Get the currently set data URI for the WebAssembly module.
+ * I'm not a huge of the singleton, but we're swapping out same data, just from a different source, so the state doesn't meaningfully change. */
 export function getWasmUri(): string {
 	return curWasmUri;
 }
@@ -18,6 +19,7 @@ export function setWasmUri(uri: string) {
  * */
 export default async function loadWasm() {
 	const wasm = await import('wasm');
+	// @ts-ignore
 	await wasm.default(getWasmUri());
 
 	return wasm;

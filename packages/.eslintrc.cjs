@@ -9,7 +9,8 @@ module.exports = {
 	rules: {
 		'prettier/prettier': 'error',
 		// Just annoying
-		'@typescript-eslint/no-explicit-any': ['off']
+		'@typescript-eslint/no-explicit-any': ['off'],
+		'@typescript-eslint/ban-ts-comment': ['off']
 	},
 	parser: '@typescript-eslint/parser',
 	plugins: ['@typescript-eslint', 'prettier'],
