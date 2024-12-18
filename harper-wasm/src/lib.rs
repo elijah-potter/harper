@@ -1,23 +1,27 @@
 #![doc = include_str!("../README.md")]
 
 use std::convert::Into;
-use std::sync::Mutex;
+use std::sync::Arc;
 
 use harper_core::language_detection::is_doc_likely_english;
-use harper_core::linting::{LintGroup, LintGroupConfig, Linter};
+use harper_core::linting::{LintGroup, LintGroupConfig, Linter as _};
 use harper_core::parsers::{IsolateEnglish, Markdown, PlainEnglish};
-use harper_core::{remove_overlaps, Document, FullDictionary, Lrc};
-use once_cell::sync::Lazy;
+use harper_core::{remove_overlaps, Document, FstDictionary, FullDictionary, Lrc};
 use serde::{Deserialize, Serialize};
 use wasm_bindgen::prelude::wasm_bindgen;
 use wasm_bindgen::JsValue;
 
-static LINTER: Lazy<Mutex<LintGroup<Lrc<FullDictionary>>>> = Lazy::new(|| {
-    Mutex::new(LintGroup::new(
-        LintGroupConfig::default(),
-        FullDictionary::curated(),
-    ))
-});
+/// Setup the WebAssembly module's logging.
+///
+///
+/// painful.
+#[wasm_bindgen(start)]
+pub fn setup() {
+    console_error_panic_hook::set_once();
+
+    // If `setup` gets called more than once, we want to allow this error to fall through.
+    let _ = tracing_wasm::try_set_as_global_default();
+}
 
 macro_rules! make_serialize_fns_for {
     ($name:ident) => {
@@ -38,68 +42,85 @@ make_serialize_fns_for!(Suggestion);
 make_serialize_fns_for!(Lint);
 make_serialize_fns_for!(Span);
 
-/// Setup the WebAssembly module's logging.
-///
-/// Not strictly necessary for anything to function, but makes bug-hunting less
-/// painful.
-#[wasm_bindgen(start)]
-pub fn setup() {
-    console_error_panic_hook::set_once();
-
-    // If `setup` gets called more than once, we want to allow this error to fall through.
-    let _ = tracing_wasm::try_set_as_global_default();
-}
-
-/// Helper method to quickly check if a plain string is likely intended to be English
 #[wasm_bindgen]
-pub fn is_likely_english(text: String) -> bool {
-    let document = Document::new_plain_english_curated(&text);
-    is_doc_likely_english(&document, &FullDictionary::curated())
-}
-
-/// Helper method to remove non-English text from a plain English document.
-#[wasm_bindgen]
-pub fn isolate_english(text: String) -> String {
-    let dict = FullDictionary::curated();
-
-    let document = Document::new_curated(
-        &text,
-        &mut IsolateEnglish::new(Box::new(PlainEnglish), dict.clone()),
-    );
-
-    document.to_string()
+pub struct Linter {
+    lint_group: LintGroup<Arc<FstDictionary>>,
+    dictionary: Arc<FstDictionary>,
 }
 
 #[wasm_bindgen]
-pub fn get_lint_config_as_object() -> JsValue {
-    let linter = LINTER.lock().unwrap();
-    serde_wasm_bindgen::to_value(&linter.config).unwrap()
+impl Linter {
+    /// Construct a new `Linter`.
+    /// Note that this can mean constructing the curated dictionary, which is the most expensive operation
+    /// in Harper.
+    pub fn new() -> Self {
+        let dictionary = FstDictionary::curated();
+
+        Self {
+            lint_group: LintGroup::new(LintGroupConfig::default(), dictionary.clone()),
+            dictionary,
+        }
+    }
+
+    /// Helper method to quickly check if a plain string is likely intended to be English
+    pub fn is_likely_english(&self, text: String) -> bool {
+        let document = Document::new_plain_english(&text, &self.dictionary);
+        is_doc_likely_english(&document, &self.dictionary)
+    }
+
+    /// Helper method to remove non-English text from a plain English document.
+    pub fn isolate_english(&self, text: String) -> String {
+        let document = Document::new(
+            &text,
+            &mut IsolateEnglish::new(Box::new(PlainEnglish), self.dictionary.clone()),
+            &self.dictionary,
+        );
+
+        document.to_string()
+    }
+
+    pub fn get_lint_config_as_json(&self) -> String {
+        serde_json::to_string(&self.lint_group.config).unwrap()
+    }
+
+    pub fn set_lint_config_from_json(&mut self, json: String) -> Result<(), String> {
+        self.lint_group.config = serde_json::from_str(&json).map_err(|v| v.to_string())?;
+        Ok(())
+    }
+
+    pub fn get_lint_config_as_object(&self) -> JsValue {
+        serde_wasm_bindgen::to_value(&self.lint_group.config).unwrap()
+    }
+
+    pub fn set_lint_config_from_object(&mut self, object: JsValue) -> Result<(), String> {
+        self.lint_group.config =
+            serde_wasm_bindgen::from_value(object).map_err(|v| v.to_string())?;
+        Ok(())
+    }
+
+    /// Perform the configured linting on the provided text.
+    pub fn lint(&mut self, text: String) -> Vec<Lint> {
+        let source: Vec<_> = text.chars().collect();
+        let source = Lrc::new(source);
+
+        let document =
+            Document::new_from_vec(source.clone(), &mut Markdown, &FullDictionary::curated());
+
+        let mut lints = self.lint_group.lint(&document);
+
+        remove_overlaps(&mut lints);
+
+        lints
+            .into_iter()
+            .map(|l| Lint::new(l, source.to_vec()))
+            .collect()
+    }
 }
 
-#[wasm_bindgen]
-pub fn set_lint_config_from_object(object: JsValue) -> Result<(), String> {
-    let mut linter = LINTER.lock().unwrap();
-    linter.config = serde_wasm_bindgen::from_value(object).map_err(|v| v.to_string())?;
-    Ok(())
-}
-
-/// Perform the configured linting on the provided text.
-#[wasm_bindgen]
-pub fn lint(text: String) -> Vec<Lint> {
-    let source: Vec<_> = text.chars().collect();
-    let source = Lrc::new(source);
-
-    let document =
-        Document::new_from_vec(source.clone(), &mut Markdown, &FullDictionary::curated());
-
-    let mut lints = LINTER.lock().unwrap().lint(&document);
-
-    remove_overlaps(&mut lints);
-
-    lints
-        .into_iter()
-        .map(|l| Lint::new(l, source.to_vec()))
-        .collect()
+impl Default for Linter {
+    fn default() -> Self {
+        Self::new()
+    }
 }
 
 #[wasm_bindgen]
