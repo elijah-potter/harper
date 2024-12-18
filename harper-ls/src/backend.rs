@@ -17,12 +17,14 @@ use tower_lsp::jsonrpc::Result;
 use tower_lsp::lsp_types::notification::PublishDiagnostics;
 use tower_lsp::lsp_types::{
     CodeActionOrCommand, CodeActionParams, CodeActionProviderCapability, CodeActionResponse,
-    Command, ConfigurationItem, Diagnostic, DidChangeConfigurationParams,
+    Command, ConfigurationItem, DeleteFilesParams, Diagnostic, DidChangeConfigurationParams,
     DidChangeTextDocumentParams, DidCloseTextDocumentParams, DidOpenTextDocumentParams,
-    DidSaveTextDocumentParams, ExecuteCommandOptions, ExecuteCommandParams, InitializeParams,
-    InitializeResult, InitializedParams, MessageType, PublishDiagnosticsParams, Range,
-    ServerCapabilities, TextDocumentSyncCapability, TextDocumentSyncKind, TextDocumentSyncOptions,
-    TextDocumentSyncSaveOptions, Url,
+    DidSaveTextDocumentParams, ExecuteCommandOptions, ExecuteCommandParams, FileOperationFilter,
+    FileOperationPattern, FileOperationPatternKind, FileOperationRegistrationOptions,
+    InitializeParams, InitializeResult, InitializedParams, MessageType, PublishDiagnosticsParams,
+    Range, ServerCapabilities, TextDocumentSyncCapability, TextDocumentSyncKind,
+    TextDocumentSyncOptions, TextDocumentSyncSaveOptions, Url,
+    WorkspaceFileOperationsServerCapabilities, WorkspaceServerCapabilities,
 };
 use tower_lsp::{Client, LanguageServer};
 use tracing::{error, info};
@@ -361,6 +363,32 @@ impl LanguageServer for Backend {
                         save: Some(TextDocumentSyncSaveOptions::Supported(true)),
                     },
                 )),
+                workspace: Some(WorkspaceServerCapabilities {
+                    workspace_folders: None,
+                    file_operations: Some(WorkspaceFileOperationsServerCapabilities {
+                        did_delete: Some(FileOperationRegistrationOptions {
+                            filters: vec![
+                                FileOperationFilter {
+                                    scheme: Some("file".to_owned()),
+                                    pattern: FileOperationPattern {
+                                        glob: "**/*".to_owned(),
+                                        matches: Some(FileOperationPatternKind::File),
+                                        options: None,
+                                    },
+                                },
+                                FileOperationFilter {
+                                    scheme: Some("file".to_owned()),
+                                    pattern: FileOperationPattern {
+                                        glob: "**/*".to_owned(),
+                                        matches: Some(FileOperationPatternKind::Folder),
+                                        options: None,
+                                    },
+                                },
+                            ],
+                        }),
+                        ..Default::default()
+                    }),
+                }),
                 ..Default::default()
             },
         })
@@ -406,6 +434,34 @@ impl LanguageServer for Backend {
     }
 
     async fn did_close(&self, _params: DidCloseTextDocumentParams) {}
+
+    async fn did_delete_files(&self, params: DeleteFilesParams) {
+        let mut doc_lock = self.doc_state.lock().await;
+        let mut urls_to_clear = Vec::new();
+
+        for file in params.files {
+            doc_lock.retain(|url, _| {
+                // `file.uri` could be a directory so use `starts_with` rather than `==`
+                let to_remove = url.to_string().starts_with(&file.uri);
+
+                if to_remove {
+                    urls_to_clear.push(url.clone());
+                }
+
+                !to_remove
+            });
+        }
+
+        for url in &urls_to_clear {
+            self.client
+                .send_notification::<PublishDiagnostics>(PublishDiagnosticsParams {
+                    uri: url.clone(),
+                    diagnostics: vec![],
+                    version: None,
+                })
+                .await;
+        }
+    }
 
     async fn execute_command(&self, params: ExecuteCommandParams) -> Result<Option<Value>> {
         let mut string_args = params
