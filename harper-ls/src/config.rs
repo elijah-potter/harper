@@ -1,7 +1,7 @@
 use std::path::PathBuf;
 
 use dirs::{config_dir, data_local_dir};
-use harper_core::linting::LintGroupConfig;
+use harper_core::{linting::LintGroupConfig, parsers::MarkdownOptions};
 use resolve_path::PathResolveExt;
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
@@ -70,6 +70,7 @@ pub struct Config {
     pub diagnostic_severity: DiagnosticSeverity,
     pub code_action_config: CodeActionConfig,
     pub isolate_english: bool,
+    pub markdown_options: MarkdownOptions,
 }
 
 impl Config {
@@ -124,6 +125,10 @@ impl Config {
             }
         }
 
+        if let Some(v) = value.get("markdown") {
+            base.markdown_options = serde_json::from_value(v.clone())?;
+        }
+
         Ok(base)
     }
 }
@@ -139,6 +144,7 @@ impl Default for Config {
             diagnostic_severity: DiagnosticSeverity::Hint,
             code_action_config: CodeActionConfig::default(),
             isolate_english: false,
+            markdown_options: MarkdownOptions::default(),
         }
     }
 }

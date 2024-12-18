@@ -7,7 +7,7 @@ mod plain_english;
 use blanket::blanket;
 pub use collapse_identifiers::CollapseIdentifiers;
 pub use isolate_english::IsolateEnglish;
-pub use markdown::Markdown;
+pub use markdown::{Markdown, MarkdownOptions};
 pub use mask::Mask;
 pub use plain_english::PlainEnglish;
 
@@ -63,7 +63,7 @@ mod tests {
     }
 
     fn assert_tokens_eq_md(test_str: impl AsRef<str>, expected: &[TokenKind]) {
-        let mut parser = Markdown;
+        let mut parser = Markdown::default();
 
         assert_tokens_eq(test_str, expected, &mut parser)
     }

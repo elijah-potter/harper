@@ -44,8 +44,8 @@ impl Backend {
     pub fn new(client: Client, config: Config) -> Self {
         Self {
             client,
-            doc_state: Mutex::new(HashMap::new()),
             config: RwLock::new(config),
+            doc_state: Mutex::new(HashMap::new()),
         }
     }
 
@@ -180,41 +180,48 @@ impl Backend {
             return Ok(());
         };
 
-        let parser: Option<Box<dyn Parser>> =
-            if let Some(ts_parser) = CommentParser::new_from_language_id(language_id) {
-                let source: Vec<char> = text.chars().collect();
-                let source = Arc::new(source);
+        let parser: Option<Box<dyn Parser>> = if let Some(ts_parser) =
+            CommentParser::new_from_language_id(
+                language_id,
+                Markdown::new(self.config.read().await.markdown_options),
+            ) {
+            let source: Vec<char> = text.chars().collect();
+            let source = Arc::new(source);
 
-                if let Some(new_dict) = ts_parser.create_ident_dict(source.as_slice()) {
-                    let new_dict = Arc::new(new_dict);
+            if let Some(new_dict) = ts_parser.create_ident_dict(source.as_slice()) {
+                let new_dict = Arc::new(new_dict);
 
-                    if doc_state.ident_dict != new_dict {
-                        doc_state.ident_dict = new_dict.clone();
-                        let mut merged = self.generate_file_dictionary(url).await?;
-                        merged.add_dictionary(new_dict);
-                        let merged = Arc::new(merged);
+                if doc_state.ident_dict != new_dict {
+                    doc_state.ident_dict = new_dict.clone();
+                    let mut merged = self.generate_file_dictionary(url).await?;
+                    merged.add_dictionary(new_dict);
+                    let merged = Arc::new(merged);
 
-                        doc_state.linter = LintGroup::new(config_lock.lint_config, merged.clone());
-                        doc_state.dict = merged.clone();
-                    }
-                    Some(Box::new(CollapseIdentifiers::new(
-                        Box::new(ts_parser),
-                        Box::new(doc_state.dict.clone()),
-                    )))
-                } else {
-                    Some(Box::new(ts_parser))
+                    doc_state.linter = LintGroup::new(config_lock.lint_config, merged.clone());
+                    doc_state.dict = merged.clone();
                 }
-            } else if language_id == "markdown" {
-                Some(Box::new(Markdown))
-            } else if language_id == "git-commit" {
-                Some(Box::new(GitCommitParser))
-            } else if language_id == "html" {
-                Some(Box::new(HtmlParser::default()))
-            } else if language_id == "mail" || language_id == "plaintext" {
-                Some(Box::new(PlainEnglish))
+                Some(Box::new(CollapseIdentifiers::new(
+                    Box::new(ts_parser),
+                    Box::new(doc_state.dict.clone()),
+                )))
             } else {
-                None
-            };
+                Some(Box::new(ts_parser))
+            }
+        } else if language_id == "markdown" {
+            Some(Box::new(Markdown::new(
+                self.config.read().await.markdown_options,
+            )))
+        } else if language_id == "git-commit" {
+            Some(Box::new(GitCommitParser::new(Markdown::new(
+                self.config.read().await.markdown_options,
+            ))))
+        } else if language_id == "html" {
+            Some(Box::new(HtmlParser::default()))
+        } else if language_id == "mail" || language_id == "plaintext" {
+            Some(Box::new(PlainEnglish))
+        } else {
+            None
+        };
 
         match parser {
             None => {

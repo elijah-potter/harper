@@ -1,7 +1,16 @@
 use harper_core::parsers::{Markdown, Parser};
 
 /// A Harper parser for Git commit files
-pub struct GitCommitParser;
+#[derive(Clone)]
+pub struct GitCommitParser {
+    markdown_parser: Markdown,
+}
+
+impl GitCommitParser {
+    pub fn new(markdown_parser: Markdown) -> Self {
+        Self { markdown_parser }
+    }
+}
 
 impl Parser for GitCommitParser {
     /// Admittedly a somewhat naive implementation.
@@ -13,8 +22,6 @@ impl Parser for GitCommitParser {
             .position(|c| *c == '#')
             .unwrap_or(source.len());
 
-        let mut md_parser = Markdown;
-
-        md_parser.parse(&source[0..end])
+        self.markdown_parser.parse(&source[0..end])
     }
 }
