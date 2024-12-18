@@ -42,4 +42,4 @@ When Harper is used through Neovim, Visual Studio Code, Helix or Emacs, `harper-
 ## `harper-wasm`
 
 `harper-wasm` is a small library that wraps `harper-core` and compiles to WebAssembly with [`wasm-bindgen`](https://github.com/rustwasm/wasm-bindgen).
-This allows web applications (like the [Harper](https://writewithharper.com) and the [Obsidian Plugin](https://github.com/elijah-potter/harper-obsidian-plugin) to run Harper without downloading any additional executables. It all runs inside the JavaScript engine.
+This allows web applications (like the [Harper](https://writewithharper.com) and the [Obsidian Plugin](https://github.com/automattic/harper-obsidian-plugin) to run Harper without downloading any additional executables. It all runs inside the JavaScript engine.

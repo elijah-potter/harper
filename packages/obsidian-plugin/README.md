@@ -2,7 +2,7 @@
 
 This directory contains the source code for the [Obsidian](https://obsidian.md/) plugin.
 
-The full documentation can be found [here](https://github.com/elijah-potter/harper-obsidian-plugin).
+The full documentation can be found [here](https://github.com/automattic/harper-obsidian-plugin).
 
 ## Building
 

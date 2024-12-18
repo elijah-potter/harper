@@ -30,7 +30,7 @@ impl DiagnosticSeverity {
 }
 
 /// Configuration for how code actions are displayed.
-/// Originally motivated by [#89](https://github.com/elijah-potter/harper/issues/89).
+/// Originally motivated by [#89](https://github.com/automattic/harper/issues/89).
 #[derive(Debug, Clone, Default)]
 pub struct CodeActionConfig {
     /// Instructs `harper-ls` to place unstable code actions last.

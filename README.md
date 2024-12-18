@@ -3,9 +3,9 @@
     <h1>Harper</h1>
 </div>
 
-[![Harper Binaries](https://github.com/elijah-potter/harper/actions/workflows/build_harper_binaries.yml/badge.svg)](https://github.com/elijah-potter/harper/actions/workflows/build_harper_binaries.yml)
-[![Web](https://github.com/elijah-potter/harper/actions/workflows/build_web.yml/badge.svg)](https://github.com/elijah-potter/harper/actions/workflows/build_web.yml)
-[![Precommit](https://github.com/elijah-potter/harper/actions/workflows/precommit.yml/badge.svg)](https://github.com/elijah-potter/harper/actions/workflows/precommit.yml)
+[![Harper Binaries](https://github.com/automattic/harper/actions/workflows/build_harper_binaries.yml/badge.svg)](https://github.com/automattic/harper/actions/workflows/build_harper_binaries.yml)
+[![Web](https://github.com/automattic/harper/actions/workflows/build_web.yml/badge.svg)](https://github.com/automattic/harper/actions/workflows/build_web.yml)
+[![Precommit](https://github.com/automattic/harper/actions/workflows/precommit.yml/badge.svg)](https://github.com/automattic/harper/actions/workflows/precommit.yml)
 [![Crates.io](https://img.shields.io/crates/v/harper-ls)](https://crates.io/crates/harper-ls)
 
 Harper is an English grammar checker designed to be _just right._
@@ -43,7 +43,7 @@ If you want to use Harper on your machine, you have three choices.
 
 ### Harper Obsidian Integration
 
-If you use [Obsidian](https://obsidian.md/), you may install the [Harper Obsidian Plugin](https://github.com/elijah-potter/harper-obsidian-plugin) by searching for "Harper" in the community plugin store.
+If you use [Obsidian](https://obsidian.md/), you may install the [Harper Obsidian Plugin](https://github.com/automattic/harper-obsidian-plugin) by searching for "Harper" in the community plugin store.
 
 ### Zed Plugin
 
@@ -56,7 +56,7 @@ We consider long lint times bugs.
 If you encounter any significant performance issues, please create an issue on the topic.
 
 If you find a fix to any performance issue, we are open the contribution.
-Just make sure to read [our contribution guidelines first.](https://github.com/elijah-potter/harper/blob/master/CONTRIBUTING.md)
+Just make sure to read [our contribution guidelines first.](https://github.com/automattic/harper/blob/master/CONTRIBUTING.md)
 
 ## FAQs
 
@@ -68,6 +68,6 @@ See [this blog post](https://elijahpotter.dev/articles/naming_harper).
 
 This project would not be possible without the hard work from those who [contribute](/CONTRIBUTING.md).
 
-<a href="https://github.com/elijah-potter/harper/graphs/contributors">
-  <img src="https://contrib.rocks/image?repo=elijah-potter/harper" />
+<a href="https://github.com/automattic/harper/graphs/contributors">
+  <img src="https://contrib.rocks/image?repo=automattic/harper" />
 </a>

@@ -1,6 +1,6 @@
 # Harper for VS Code
 
-Harper is the grammar checker for developers. It checks for spelling and grammar errors in your Markdown files and code comments. You can find out more by checking it out on [GitHub](https://github.com/elijah-potter/harper) or by visiting the [website](https://writewithharper.com).
+Harper is the grammar checker for developers. It checks for spelling and grammar errors in your Markdown files and code comments. You can find out more by checking it out on [GitHub](https://github.com/automattic/harper) or by visiting the [website](https://writewithharper.com).
 
 ## Installation
 
@@ -10,7 +10,7 @@ It just depends on which editor and marketplace you're using.
 If you use the official Microsoft Visual Studio Code release, go ahead and go to the marketplace and search for "Harper" and click "Install".
 You can also visit our [official page](https://marketplace.visualstudio.com/items?itemName=elijah-potter.harper&ssr=false#overview).
 
-If you use OpenVSX, for instance if you use VSCodium, you'll want to install from [here](https://open-vsx.org/extension/elijah-potter/harper).
+If you use OpenVSX, for instance if you use VSCodium, you'll want to install from [here](https://open-vsx.org/extension/automattic/harper).
 
 ### Commands
 

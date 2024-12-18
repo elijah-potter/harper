@@ -127,7 +127,7 @@ lspconfig.harper_ls.setup {
 }
 ```
 
-This was added in response to [issue #89](https://github.com/elijah-potter/harper/issues/89).
+This was added in response to [issue #89](https://github.com/automattic/harper/issues/89).
 
 ### File-Local Dictionary
 

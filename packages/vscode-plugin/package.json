@@ -14,10 +14,10 @@
 	},
 	"repository": {
 		"type": "git",
-		"url": "https://github.com/elijah-potter/harper"
+		"url": "https://github.com/automattic/harper"
 	},
 	"bugs": {
-		"url": "https://github.com/elijah-potter/harper/issues"
+		"url": "https://github.com/automattic/harper/issues"
 	},
 	"engines": {
 		"vscode": "^1.89.0"

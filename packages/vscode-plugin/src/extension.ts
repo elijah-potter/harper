@@ -93,7 +93,7 @@ function showError(message: string, error: Error | unknown): void {
 			clientOptions.outputChannel?.appendLine(message);
 			clientOptions.outputChannel?.appendLine(info);
 			clientOptions.outputChannel?.appendLine(
-				'If the issue persists, please report at https://github.com/elijah-potter/harper/issues'
+				'If the issue persists, please report at https://github.com/automattic/harper/issues'
 			);
 			clientOptions.outputChannel?.appendLine('---');
 			clientOptions.outputChannel?.show();

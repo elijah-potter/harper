@@ -30,7 +30,7 @@
 	class="md:flex md:flex-row grid grid-cols-2 items-center justify-evenly mt-5 transition-all place-items-center"
 >
 	<a
-		href="https://github.com/elijah-potter/harper"
+		href="https://github.com/automattic/harper"
 		class="flex flex-row items-center [&>*]:m-2 dark:text-white hover:scale-105"
 		><GitHubLogo width="40px" height="40px" />GitHub</a
 	>
@@ -85,7 +85,7 @@
 	<span slot="subtitle"
 		>Harper is both available as a <a
 			class="underline"
-			href="https://github.com/elijah-potter/harper/tree/master/harper-ls">language server</a
+			href="https://github.com/automattic/harper/tree/master/harper-ls">language server</a
 		>, and through WebAssembly, so you can get fantastic grammar checking anywhere you work.
 		<br /><br /> That said, we take extra care to make sure the
 		<a

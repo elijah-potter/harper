@@ -2,7 +2,7 @@
 
 Harper is completely open to outside contributors of any kind.
 
-If you have a feature request or bug to report, please [create an issue](https://github.com/elijah-potter/harper/issues).
+If you have a feature request or bug to report, please [create an issue](https://github.com/automattic/harper/issues).
 
 ## Setup Your Environment
 
