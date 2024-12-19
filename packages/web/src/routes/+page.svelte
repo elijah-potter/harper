@@ -23,23 +23,21 @@
 <div class="w-full flex flex-col items-center">
 	<Logo width="200px" />
 </div>
-<h1 class="text-5xl font-bold text-center dark:text-white">Hi. I’m Harper.</h1>
-<h2 class="text-3xl text-center dark:text-white">The Grammar Checker for Developers</h2>
+<h1 class="font-bold text-center">Hi. I’m Harper.</h1>
+<h2 class="text-center">The Grammar Checker for Developers</h2>
 
 <div
 	class="md:flex md:flex-row grid grid-cols-2 items-center justify-evenly mt-5 transition-all place-items-center"
 >
 	<a
 		href="https://github.com/automattic/harper"
-		class="flex flex-row items-center [&>*]:m-2 dark:text-white hover:scale-105"
+		class="flex flex-row items-center [&>*]:m-2 hover:scale-105"
 		><GitHubLogo width="40px" height="40px" />GitHub</a
 	>
-	<a href="/obsidian" class="flex flex-row items-center [&>*]:m-2 dark:text-white hover:scale-105"
+	<a href="/obsidian" class="flex flex-row items-center [&>*]:m-2 hover:scale-105"
 		><ObsidianLogo width="40px" height="40px" />Obsidian Plugin</a
 	>
-	<a
-		href="https://elijahpotter.dev"
-		class="flex flex-row items-center [&>*]:m-2 dark:text-white hover:scale-105"
+	<a href="https://elijahpotter.dev" class="flex flex-row items-center [&>*]:m-2 hover:scale-105"
 		><img
 			width="40"
 			height="40"
@@ -50,7 +48,7 @@
 	>
 	<a
 		href="https://marketplace.visualstudio.com/items?itemName=elijah-potter.harper"
-		class="flex flex-row items-center [&>*]:m-2 dark:text-white hover:scale-105"
+		class="flex flex-row items-center [&>*]:m-2 hover:scale-105"
 		><CodeLogo width="40px" height="40px" />Code Plugin</a
 	>
 </div>

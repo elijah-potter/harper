@@ -85,7 +85,7 @@
 							class="transition-all overflow-hidden flex flex-col justify-evenly"
 							style={`height: ${focused === i ? `calc(55px * ${lint.suggestion_count() + 1})` : '0px'}`}
 						>
-							<p style="height: 50px" class="text-left">{lint.message()}</p>
+							<p style="height: 50px" class="text-left text-sm">{lint.message()}</p>
 							{#each lint.suggestions() as suggestion}
 								<div class="w-full p-[4px]">
 									<Button

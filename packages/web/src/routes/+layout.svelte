@@ -21,10 +21,10 @@
 
 <div class="w-full flex flex-row justify-center">
 	<a href="https://automattic.com/">
-		<h2 class="dark:text-white flex items-center">
+		<div class="flex items-center">
 			An
 			<div class="inline-block"><AutomatticLogo height="32px" width="140px" /></div>
 			{displayName}
-		</h2>
+		</div>
 	</a>
 </div>

@@ -13,10 +13,10 @@
 	{/if}
 
 	<div class={`justify-center space-y-2`}>
-		<h2 class="text-2xl font-bold sm:text-3xl lg:text-4xl">
+		<h2 class="font-bold">
 			<slot name="title" />
 		</h2>
-		<p class="text-gray-500 md:text-xl lg:text-base xl:text-xl dark:text-gray-400">
+		<p class="text-gray-500 dark:text-gray-400">
 			<slot name="subtitle" />
 		</p>
 	</div>

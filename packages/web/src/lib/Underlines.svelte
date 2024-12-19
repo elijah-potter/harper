@@ -99,16 +99,16 @@
 </script>
 
 <div class="grid">
-	<div class="p-0 m-0 text-nowrap indent-0 text-transparent" style="grid-row: 1; grid-column: 1">
+	<div class="p-0 m-0 text-nowrap indent-0" style="grid-row: 1; grid-column: 1">
 		{#each modified as chunk}
 			{#if chunk == null}
 				<br />
 			{:else if typeof chunk == 'string'}
-				<span class="whitespace-pre">{chunk}</span>
+				<span class="whitespace-pre text-transparent">{chunk}</span>
 			{:else}
-				<span class="pointer-events-auto" style={`margin-right: -4px;`}>
+				<span class="pointer-events-auto" style={`margin-right: -5px;`}>
 					<button
-						class={`underlinespecial transition-all rounded-sm ${chunk.focused ? 'animate-after-bigbounce text-white' : ''}`}
+						class={`underlinespecial transition-all rounded-sm ${chunk.focused ? 'animate-after-bigbounce text-white' : 'text-transparent'}`}
 						bind:this={lintHighlights[chunk.index]}
 						on:click={() =>
 							chunk != null && typeof chunk == 'object' && (focusLintIndex = chunk.index)}
