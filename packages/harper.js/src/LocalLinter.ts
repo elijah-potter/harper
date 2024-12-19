@@ -1,10 +1,18 @@
 import type { Lint, Span, Suggestion, Linter as WasmLinter } from 'wasm';
 import Linter from './Linter';
 import loadWasm from './loadWasm';
+import { LintConfig } from './main';
 
 /** A Linter that runs in the current JavaScript context (meaning it is allowed to block the event loop). */
 export default class LocalLinter implements Linter {
 	private inner: WasmLinter | undefined;
+
+	/** Initialize the WebAssembly and construct the inner Linter. */
+	private async initialize(): Promise<void> {
+		const wasm = await loadWasm();
+		wasm.setup();
+		this.inner = wasm.Linter.new();
+	}
 
 	async setup(): Promise<void> {
 		await this.initialize();
@@ -36,10 +44,27 @@ export default class LocalLinter implements Linter {
 		return this.inner!.isolate_english(text);
 	}
 
-	/// Initialize the WebAssembly and construct the inner Linter.
-	private async initialize(): Promise<void> {
-		const wasm = await loadWasm();
-		wasm.setup();
-		this.inner = wasm.Linter.new();
+	async getLintConfig(): Promise<LintConfig> {
+		await this.initialize();
+
+		return this.inner!.get_lint_config_as_object();
+	}
+
+	async setLintConfig(config: LintConfig): Promise<void> {
+		await this.initialize();
+
+		this.inner!.set_lint_config_from_object(config);
+	}
+
+	async getLintConfigAsJSON(): Promise<string> {
+		await this.initialize();
+
+		return this.inner!.get_lint_config_as_json();
+	}
+
+	async setLintConfigWithJSON(config: string): Promise<void> {
+		await this.initialize();
+
+		this.inner!.set_lint_config_from_json(config);
 	}
 }

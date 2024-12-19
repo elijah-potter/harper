@@ -89,7 +89,10 @@ impl Linter {
     }
 
     pub fn get_lint_config_as_object(&self) -> JsValue {
-        serde_wasm_bindgen::to_value(&self.lint_group.config).unwrap()
+        // Important for downstream JSON serialization
+        let serializer = serde_wasm_bindgen::Serializer::json_compatible();
+
+        self.lint_group.config.serialize(&serializer).unwrap()
     }
 
     pub fn set_lint_config_from_object(&mut self, object: JsValue) -> Result<(), String> {

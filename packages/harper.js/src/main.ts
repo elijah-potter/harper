@@ -10,3 +10,5 @@ export enum SuggestionKind {
 	Replace = 0,
 	Remove = 1
 }
+
+export type LintConfig = Record<string, boolean | undefined>;

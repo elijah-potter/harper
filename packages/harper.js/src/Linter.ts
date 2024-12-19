@@ -1,4 +1,5 @@
 import type { Lint, Span, Suggestion } from 'wasm';
+import { LintConfig } from './main';
 
 /** A interface for an object that can perform linting actions. */
 export default interface Linter {
@@ -16,4 +17,16 @@ export default interface Linter {
 	/** Determine which parts of a given string are intended to be English, returning those bits.
 	 * The algorithm can be described as "proof of concept" and as such does not work terribly well.*/
 	isolateEnglish(text: string): Promise<string>;
+
+	/** Get the linter's current configuration. */
+	getLintConfig(): Promise<LintConfig>;
+
+	/** Set the linter's current configuration. */
+	setLintConfig(config: LintConfig): Promise<void>;
+
+	/** Get the linter's current configuration as JSON. */
+	getLintConfigAsJSON(): Promise<string>;
+
+	/** Set the linter's current configuration from JSON. */
+	setLintConfigWithJSON(config: string): Promise<void>;
 }

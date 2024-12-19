@@ -3,6 +3,7 @@ import type { Lint, Suggestion, Span } from 'wasm';
 import Linter from '../Linter';
 import Worker from './worker.js?worker&inline';
 import { getWasmUri } from '../loadWasm';
+import { LintConfig } from '../main';
 
 /** The data necessary to complete a request once the worker has responded. */
 type RequestItem = {
@@ -73,6 +74,22 @@ export default class WorkerLinter implements Linter {
 
 	async isolateEnglish(text: string): Promise<string> {
 		return await this.rpc('isolateEnglish', [text]);
+	}
+
+	async getLintConfig(): Promise<LintConfig> {
+		return JSON.parse(await this.getLintConfigAsJSON());
+	}
+
+	async setLintConfig(config: LintConfig): Promise<void> {
+		return await this.setLintConfigWithJSON(JSON.stringify(config));
+	}
+
+	async getLintConfigAsJSON(): Promise<string> {
+		return await this.rpc('getLintConfigAsJSON', []);
+	}
+
+	async setLintConfigWithJSON(config: string): Promise<void> {
+		return await this.rpc('setLintConfigWithJSON', [config]);
 	}
 
 	/** Run a procedure on the remote worker. */
