@@ -58,7 +58,7 @@ function valueToString(value) {
 			return 'enable';
 		case false:
 			return 'disable';
-		case undefined:
+		case null:
 			return 'default';
 	}
 
@@ -74,7 +74,7 @@ function stringToValue(str) {
 		case 'disable':
 			return false;
 		case 'default':
-			return undefined;
+			return null;
 	}
 
 	throw 'Fell through case';

@@ -1,8 +1,7 @@
 import logoSvg from '../logo.svg';
 import { linter } from './lint';
 import { Plugin, addIcon, Menu } from 'obsidian';
-import wasm from 'wasm/harper_wasm_bg.wasm';
-import init, { lint, get_lint_config_as_object, set_lint_config_from_object } from 'wasm';
+import { WorkerLinter } from 'harper.js';
 import { HarperSettingTab } from './HarperSettingTab';
 
 function suggestionToLabel(sug) {
@@ -13,6 +12,9 @@ function suggestionToLabel(sug) {
 	}
 }
 
+let harper = new WorkerLinter();
+harper.setup();
+
 const harperLinter = (plugin) =>
 	linter(
 		async (view) => {
@@ -22,9 +24,7 @@ const harperLinter = (plugin) =>
 
 			const text = view.state.doc.sliceString(-1);
 
-			await init(await wasm());
-
-			const lints = lint(text);
+			const lints = await harper.lint(text);
 
 			return lints.map((lint) => {
 				let span = lint.span();
@@ -81,10 +81,9 @@ export default class HarperPlugin extends Plugin {
 	/** @public
 	 * @returns {Promise<Record<string, any>>} */
 	async getSettings() {
-		await init(await wasm());
 		this.lintSettingChanged();
 
-		let lintSettings = await get_lint_config_as_object();
+		let lintSettings = await harper.getLintConfig();
 
 		return { lintSettings };
 	}
@@ -93,8 +92,6 @@ export default class HarperPlugin extends Plugin {
 	 * @param {Record<string, any>} settings
 	 * @returns {Promise<void>} */
 	async setSettings(settings) {
-		await init(await wasm());
-
 		if (settings == null) {
 			settings = {};
 		}
@@ -107,7 +104,7 @@ export default class HarperPlugin extends Plugin {
 			settings.lintSettings.spell_check = false;
 		}
 
-		set_lint_config_from_object(settings.lintSettings);
+		await harper.setLintConfig(settings.lintSettings);
 		this.lintSettingChanged();
 		this.saveData(settings);
 	}

@@ -7,6 +7,7 @@ format:
 build-wasm target:
   cd "{{justfile_directory()}}/harper-wasm" && wasm-pack build --target {{target}}
 
+# Build `harper.js` with all size optimizations available.
 build-harperjs:
   #! /bin/bash
   set -eo pipefail
