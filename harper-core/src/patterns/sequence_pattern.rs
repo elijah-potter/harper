@@ -43,6 +43,7 @@ impl SequencePattern {
     gen_then_from_is!(case_separator);
     gen_then_from_is!(adverb);
     gen_then_from_is!(adjective);
+    gen_then_from_is!(apostrophe);
 
     pub fn then_exact_word(mut self, word: &'static str) -> Self {
         self.token_patterns

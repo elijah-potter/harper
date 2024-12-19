@@ -5,7 +5,9 @@ use std::sync::Arc;
 use anyhow::anyhow;
 use harper_comments::CommentParser;
 use harper_core::linting::{LintGroup, Linter};
-use harper_core::parsers::{CollapseIdentifiers, IsolateEnglish, Markdown, Parser, PlainEnglish};
+use harper_core::parsers::{
+    CollapseIdentifiers, IsolateEnglish, Markdown, Parser, PlainEnglish, Typst,
+};
 use harper_core::{
     Dictionary, Document, FstDictionary, FullDictionary, MergedDictionary, Token, TokenKind,
     WordMetadata,
@@ -206,6 +208,8 @@ impl Backend {
                 }
             } else if language_id == "markdown" {
                 Some(Box::new(Markdown))
+            } else if language_id == "typst" {
+                Some(Box::new(Typst))
             } else if language_id == "git-commit" {
                 Some(Box::new(GitCommitParser))
             } else if language_id == "html" {
