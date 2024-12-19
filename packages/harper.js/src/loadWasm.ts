@@ -20,7 +20,7 @@ export function setWasmUri(uri: string) {
 export default async function loadWasm() {
 	const wasm = await import('wasm');
 	// @ts-ignore
-	await wasm.default(getWasmUri());
+	await wasm.default({ module_or_path: getWasmUri() });
 
 	return wasm;
 }

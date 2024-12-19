@@ -9,9 +9,11 @@ export default class LocalLinter implements Linter {
 
 	/** Initialize the WebAssembly and construct the inner Linter. */
 	private async initialize(): Promise<void> {
-		const wasm = await loadWasm();
-		wasm.setup();
-		this.inner = wasm.Linter.new();
+		if (!this.inner) {
+			const wasm = await loadWasm();
+			wasm.setup();
+			this.inner = wasm.Linter.new();
+		}
 	}
 
 	async setup(): Promise<void> {

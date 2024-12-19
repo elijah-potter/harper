@@ -77,6 +77,23 @@ for (const [linterName, Linter] of Object.entries(linters)) {
 		const lintConfig = await linter.getLintConfig();
 		expect(lintConfig).toHaveProperty('repeated_words');
 	});
+
+	test(`${linterName} can both get and set its configuration`, async () => {
+		const linter = new Linter();
+
+		let lintConfig = await linter.getLintConfig();
+
+		for (const key of Object.keys(lintConfig)) {
+			lintConfig[key] = true;
+		}
+
+		await linter.setLintConfig(lintConfig);
+		lintConfig = await linter.getLintConfig();
+
+		for (const key of Object.keys(lintConfig)) {
+			expect(lintConfig[key]).toBe(true);
+		}
+	});
 }
 
 test('Linters have the same config format', async () => {
